@@ -1,12 +1,15 @@
 """Main API client for Valentina."""
 
 from types import TracebackType
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 import httpx
 
 from vclient.api.config import APIConfig
 from vclient.api.constants import API_KEY, API_KEY_HEADER, DEFAULT_BASE_URL
+
+if TYPE_CHECKING:
+    from vclient.api.services.companies import CompaniesService
 
 
 class VClient:
@@ -49,6 +52,7 @@ class VClient:
             )
 
         self._http: httpx.AsyncClient = self._create_http_client()
+        self._companies: CompaniesService | None = None
 
     def _create_http_client(self) -> httpx.AsyncClient:
         """Create and configure the HTTP client."""
@@ -88,3 +92,16 @@ class VClient:
     def is_closed(self) -> bool:
         """Check if the client has been closed."""
         return self._http.is_closed
+
+    @property
+    def companies(self) -> "CompaniesService":
+        """Access the Companies service for managing companies.
+
+        Returns:
+            The CompaniesService instance for company operations.
+        """
+        if self._companies is None:
+            from vclient.api.services.companies import CompaniesService
+
+            self._companies = CompaniesService(self)
+        return self._companies

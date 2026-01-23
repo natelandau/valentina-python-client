@@ -1,0 +1,378 @@
+"""Tests for vclient.api.models.companies."""
+
+import pytest
+from pydantic import ValidationError as PydanticValidationError
+
+from vclient.api.models.companies import (
+    Company,
+    CompanyPermission,
+    CompanyPermissions,
+    CompanySettings,
+    CreateCompanyRequest,
+    GrantAccessRequest,
+    PermissionManageCampaign,
+    PermissionsFreeTraitChanges,
+    PermissionsGrantXP,
+    UpdateCompanyRequest,
+)
+
+
+class TestCompanyPermissionEnum:
+    """Tests for CompanyPermission enum."""
+
+    def test_permission_values(self):
+        """Verify all permission values are correct."""
+        # Then: All expected values exist
+        assert CompanyPermission.USER == "USER"
+        assert CompanyPermission.ADMIN == "ADMIN"
+        assert CompanyPermission.OWNER == "OWNER"
+        assert CompanyPermission.REVOKE == "REVOKE"
+
+    def test_permission_is_str_enum(self):
+        """Verify permissions can be used as strings."""
+        # When: Using permission as string
+        permission = CompanyPermission.USER
+
+        # Then: It works as a string
+        assert f"Permission: {permission}" == "Permission: USER"
+
+
+class TestPermissionEnums:
+    """Tests for permission-related enums."""
+
+    def test_permission_manage_campaign_values(self):
+        """Verify PermissionManageCampaign enum values."""
+        assert PermissionManageCampaign.UNRESTRICTED == "UNRESTRICTED"
+        assert PermissionManageCampaign.STORYTELLER == "STORYTELLER"
+
+    def test_permissions_grant_xp_values(self):
+        """Verify PermissionsGrantXP enum values."""
+        assert PermissionsGrantXP.UNRESTRICTED == "UNRESTRICTED"
+        assert PermissionsGrantXP.PLAYER == "PLAYER"
+        assert PermissionsGrantXP.STORYTELLER == "STORYTELLER"
+
+    def test_permissions_free_trait_changes_values(self):
+        """Verify PermissionsFreeTraitChanges enum values."""
+        assert PermissionsFreeTraitChanges.UNRESTRICTED == "UNRESTRICTED"
+        assert PermissionsFreeTraitChanges.WITHIN_24_HOURS == "WITHIN_24_HOURS"
+        assert PermissionsFreeTraitChanges.STORYTELLER == "STORYTELLER"
+
+
+class TestCompanySettings:
+    """Tests for CompanySettings model."""
+
+    def test_default_values(self):
+        """Verify default values are set correctly."""
+        # When: Creating settings with no arguments
+        settings = CompanySettings()
+
+        # Then: Default values are applied
+        assert settings.character_autogen_xp_cost == 10
+        assert settings.character_autogen_num_choices == 3
+        assert settings.permission_manage_campaign == PermissionManageCampaign.UNRESTRICTED
+        assert settings.permission_grant_xp == PermissionsGrantXP.UNRESTRICTED
+        assert settings.permission_free_trait_changes == PermissionsFreeTraitChanges.UNRESTRICTED
+
+    def test_custom_values(self):
+        """Verify custom values are set correctly."""
+        # When: Creating settings with custom values
+        settings = CompanySettings(
+            character_autogen_xp_cost=20,
+            character_autogen_num_choices=5,
+            permission_manage_campaign=PermissionManageCampaign.STORYTELLER,
+            permission_grant_xp=PermissionsGrantXP.PLAYER,
+            permission_free_trait_changes=PermissionsFreeTraitChanges.WITHIN_24_HOURS,
+        )
+
+        # Then: Custom values are applied
+        assert settings.character_autogen_xp_cost == 20
+        assert settings.character_autogen_num_choices == 5
+        assert settings.permission_manage_campaign == PermissionManageCampaign.STORYTELLER
+        assert settings.permission_grant_xp == PermissionsGrantXP.PLAYER
+        assert settings.permission_free_trait_changes == PermissionsFreeTraitChanges.WITHIN_24_HOURS
+
+    def test_model_dump_excludes_none(self):
+        """Verify model_dump with exclude_none works correctly."""
+        # Given: Settings with only some values
+        settings = CompanySettings(
+            character_autogen_xp_cost=15,
+            permission_manage_campaign=PermissionManageCampaign.STORYTELLER,
+        )
+
+        # When: Dumping with exclude_none
+        data = settings.model_dump(exclude_none=True)
+
+        # Then: All non-None values are included (defaults are not None)
+        assert data["character_autogen_xp_cost"] == 15
+        assert data["permission_manage_campaign"] == PermissionManageCampaign.STORYTELLER
+
+
+class TestCompany:
+    """Tests for Company model."""
+
+    def test_minimal_company(self):
+        """Verify creating company with minimal required fields."""
+        # When: Creating company with required fields only
+        company = Company(name="Test", email="test@example.com")
+
+        # Then: Company is created with defaults
+        assert company.name == "Test"
+        assert company.email == "test@example.com"
+        assert company.id is None
+        assert company.description is None
+        assert company.user_ids == []
+        assert company.settings is None
+
+    def test_full_company(self):
+        """Verify creating company with all fields."""
+        # When: Creating company with all fields
+        settings = CompanySettings(character_autogen_xp_cost=15)
+        company = Company(
+            id="507f1f77bcf86cd799439011",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Full Company",
+            description="A complete company",
+            email="full@example.com",
+            user_ids=["user1", "user2"],
+            settings=settings,
+        )
+
+        # Then: All fields are set correctly
+        assert company.id == "507f1f77bcf86cd799439011"
+        assert company.date_created is not None
+        assert company.date_modified is not None
+        assert company.name == "Full Company"
+        assert company.description == "A complete company"
+        assert company.email == "full@example.com"
+        assert company.user_ids == ["user1", "user2"]
+        assert company.settings is not None
+        assert company.settings.character_autogen_xp_cost == 15
+
+    def test_company_from_api_response(self):
+        """Verify creating company from API response dict."""
+        # Given: API response data
+        data = {
+            "id": "507f1f77bcf86cd799439011",
+            "date_created": "2024-01-15T10:30:00Z",
+            "date_modified": "2024-01-15T10:30:00Z",
+            "name": "API Company",
+            "description": "From API",
+            "email": "api@example.com",
+            "user_ids": ["u1"],
+            "settings": {
+                "character_autogen_xp_cost": 10,
+                "character_autogen_num_choices": 3,
+                "permission_manage_campaign": "UNRESTRICTED",
+                "permission_grant_xp": "PLAYER",
+                "permission_free_trait_changes": "WITHIN_24_HOURS",
+            },
+        }
+
+        # When: Creating company from dict
+        company = Company.model_validate(data)
+
+        # Then: Company is created correctly
+        assert company.id == "507f1f77bcf86cd799439011"
+        assert company.name == "API Company"
+        assert company.settings is not None
+        assert company.settings.permission_grant_xp == PermissionsGrantXP.PLAYER
+
+    def test_name_min_length_validation(self):
+        """Verify name minimum length is enforced."""
+        # When/Then: Creating company with short name raises error
+        with pytest.raises(PydanticValidationError) as exc_info:
+            Company(name="AB", email="test@example.com")
+
+        assert "String should have at least 3 characters" in str(exc_info.value)
+
+    def test_name_max_length_validation(self):
+        """Verify name maximum length is enforced."""
+        # When/Then: Creating company with long name raises error
+        with pytest.raises(PydanticValidationError) as exc_info:
+            Company(name="A" * 51, email="test@example.com")
+
+        assert "String should have at most 50 characters" in str(exc_info.value)
+
+
+class TestCompanyPermissions:
+    """Tests for CompanyPermissions model."""
+
+    def test_minimal_permissions(self):
+        """Verify creating permissions with minimal fields."""
+        # When: Creating permissions with required fields
+        perms = CompanyPermissions(
+            company_id="company123",
+            permission=CompanyPermission.USER,
+        )
+
+        # Then: Permissions are created correctly
+        assert perms.company_id == "company123"
+        assert perms.permission == CompanyPermission.USER
+        assert perms.name is None
+
+    def test_full_permissions(self):
+        """Verify creating permissions with all fields."""
+        # When: Creating permissions with all fields
+        perms = CompanyPermissions(
+            company_id="company123",
+            name="Test Company",
+            permission=CompanyPermission.ADMIN,
+        )
+
+        # Then: All fields are set correctly
+        assert perms.company_id == "company123"
+        assert perms.name == "Test Company"
+        assert perms.permission == CompanyPermission.ADMIN
+
+    def test_permissions_from_api_response(self):
+        """Verify creating permissions from API response dict."""
+        # Given: API response data
+        data = {
+            "company_id": "507f1f77bcf86cd799439011",
+            "name": "API Company",
+            "permission": "OWNER",
+        }
+
+        # When: Creating permissions from dict
+        perms = CompanyPermissions.model_validate(data)
+
+        # Then: Permissions are created correctly
+        assert perms.company_id == "507f1f77bcf86cd799439011"
+        assert perms.name == "API Company"
+        assert perms.permission == CompanyPermission.OWNER
+
+
+class TestCreateCompanyRequest:
+    """Tests for CreateCompanyRequest model."""
+
+    def test_minimal_request(self):
+        """Verify creating request with minimal fields."""
+        # When: Creating request with required fields only
+        request = CreateCompanyRequest(name="Test", email="test@example.com")
+
+        # Then: Request is created with correct values
+        assert request.name == "Test"
+        assert request.email == "test@example.com"
+        assert request.description is None
+        assert request.settings is None
+
+    def test_full_request(self):
+        """Verify creating request with all fields."""
+        # When: Creating request with all fields
+        settings = CompanySettings(character_autogen_xp_cost=20)
+        request = CreateCompanyRequest(
+            name="Full Company",
+            email="full@example.com",
+            description="A complete company",
+            settings=settings,
+        )
+
+        # Then: All fields are set correctly
+        assert request.name == "Full Company"
+        assert request.email == "full@example.com"
+        assert request.description == "A complete company"
+        assert request.settings is not None
+        assert request.settings.character_autogen_xp_cost == 20
+
+    def test_model_dump_excludes_unset(self):
+        """Verify model_dump with exclude_unset excludes unset fields."""
+        # Given: Request with only required fields
+        request = CreateCompanyRequest(name="Test", email="test@example.com")
+
+        # When: Dumping with exclude_none and exclude_unset
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: Only set fields are included
+        assert data == {"name": "Test", "email": "test@example.com"}
+
+    def test_model_dump_with_settings(self):
+        """Verify model_dump includes settings correctly."""
+        # Given: Request with settings
+        settings = CompanySettings(
+            character_autogen_xp_cost=15,
+            permission_manage_campaign=PermissionManageCampaign.STORYTELLER,
+        )
+        request = CreateCompanyRequest(
+            name="Test",
+            email="test@example.com",
+            settings=settings,
+        )
+
+        # When: Dumping with exclude_none and exclude_unset
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: Settings are included with correct values
+        assert data["settings"]["character_autogen_xp_cost"] == 15
+        assert data["settings"]["permission_manage_campaign"] == "STORYTELLER"
+
+    def test_name_validation(self):
+        """Verify name validation is enforced."""
+        # When/Then: Creating request with invalid name raises error
+        with pytest.raises(PydanticValidationError):
+            CreateCompanyRequest(name="AB", email="test@example.com")
+
+
+class TestUpdateCompanyRequest:
+    """Tests for UpdateCompanyRequest model."""
+
+    def test_empty_request(self):
+        """Verify creating empty update request."""
+        # When: Creating request with no fields
+        request = UpdateCompanyRequest()
+
+        # Then: All fields are None
+        assert request.name is None
+        assert request.email is None
+        assert request.description is None
+        assert request.settings is None
+
+    def test_partial_update(self):
+        """Verify creating request with only some fields."""
+        # When: Creating request with only name
+        request = UpdateCompanyRequest(name="Updated Name")
+
+        # Then: Only name is set
+        assert request.name == "Updated Name"
+        assert request.email is None
+
+    def test_model_dump_excludes_unset(self):
+        """Verify model_dump with exclude_unset only includes set fields."""
+        # Given: Request with only name set
+        request = UpdateCompanyRequest(name="Updated Name")
+
+        # When: Dumping with exclude_none and exclude_unset
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: Only name is in the output
+        assert data == {"name": "Updated Name"}
+
+
+class TestGrantAccessRequest:
+    """Tests for GrantAccessRequest model."""
+
+    def test_create_request(self):
+        """Verify creating grant access request."""
+        # When: Creating request
+        request = GrantAccessRequest(
+            developer_id="dev123",
+            permission=CompanyPermission.ADMIN,
+        )
+
+        # Then: Fields are set correctly
+        assert request.developer_id == "dev123"
+        assert request.permission == CompanyPermission.ADMIN
+
+    def test_model_dump_serializes_enum(self):
+        """Verify model_dump serializes enum to string."""
+        # Given: Request with enum permission
+        request = GrantAccessRequest(
+            developer_id="dev123",
+            permission=CompanyPermission.OWNER,
+        )
+
+        # When: Dumping with mode="json"
+        data = request.model_dump(mode="json")
+
+        # Then: Permission is serialized as string
+        assert data["permission"] == "OWNER"
