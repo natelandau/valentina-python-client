@@ -71,16 +71,15 @@ class TestBaseServiceErrorHandling:
     @pytest.mark.parametrize(
         ("status_code", "expected_exception"),
         [
+            (400, ValidationError),
             (401, AuthenticationError),
             (403, AuthorizationError),
             (404, NotFoundError),
             (409, ConflictError),
-            (422, ValidationError),
             (429, RateLimitError),
             (500, ServerError),
             (502, ServerError),
             (503, ServerError),
-            (400, APIError),
             (418, APIError),
         ],
     )
@@ -110,6 +109,93 @@ class TestBaseServiceErrorHandling:
             await base_service._get("/error")
 
         assert "Internal Server Error" in exc_info.value.message
+
+    @respx.mock
+    async def test_validation_error_includes_invalid_parameters(self, base_service, base_url):
+        """Verify ValidationError includes invalid_parameters from response."""
+        # Given: A mocked endpoint returning a validation error with invalid_parameters
+        respx.post(f"{base_url}/users").respond(
+            400,
+            json={
+                "status": 400,
+                "title": "Bad Request",
+                "detail": "Validation failed for one or more fields.",
+                "instance": "/api/v1/companies/abc123/users",
+                "invalid_parameters": [
+                    {"field": "name", "message": "Field required"},
+                    {
+                        "field": "role",
+                        "message": "Input should be 'ADMIN', 'STORYTELLER' or 'PLAYER'",
+                    },
+                ],
+            },
+        )
+
+        # When/Then: Making a request raises ValidationError with invalid_parameters
+        with pytest.raises(ValidationError) as exc_info:
+            await base_service._post("/users", json={"email": "test@example.com"})
+
+        assert exc_info.value.status_code == 400
+        assert len(exc_info.value.invalid_parameters) == 2
+        assert exc_info.value.invalid_parameters[0]["field"] == "name"
+        assert exc_info.value.title == "Bad Request"
+        assert exc_info.value.instance == "/api/v1/companies/abc123/users"
+
+    @respx.mock
+    async def test_rate_limit_error_includes_retry_after(self, base_service, base_url):
+        """Verify RateLimitError includes retry_after from Retry-After header."""
+        # Given: A mocked endpoint returning 429 with Retry-After header
+        respx.get(f"{base_url}/limited").respond(
+            429,
+            json={
+                "status": 429,
+                "title": "Too Many Requests",
+                "detail": "You are being rate limited.",
+                "instance": "/api/v1/companies",
+            },
+            headers={"Retry-After": "60"},
+        )
+
+        # When/Then: Making a request raises RateLimitError with retry_after
+        with pytest.raises(RateLimitError) as exc_info:
+            await base_service._get("/limited")
+
+        assert exc_info.value.status_code == 429
+        assert exc_info.value.retry_after == 60
+        assert exc_info.value.title == "Too Many Requests"
+
+    @respx.mock
+    async def test_rate_limit_error_without_retry_after_header(self, base_service, base_url):
+        """Verify RateLimitError works without Retry-After header."""
+        # Given: A mocked endpoint returning 429 without Retry-After header
+        respx.get(f"{base_url}/limited").respond(
+            429,
+            json={"detail": "Rate limit exceeded"},
+        )
+
+        # When/Then: Making a request raises RateLimitError with retry_after=None
+        with pytest.raises(RateLimitError) as exc_info:
+            await base_service._get("/limited")
+
+        assert exc_info.value.status_code == 429
+        assert exc_info.value.retry_after is None
+
+    @respx.mock
+    async def test_rate_limit_error_with_invalid_retry_after_header(self, base_service, base_url):
+        """Verify RateLimitError handles invalid Retry-After header gracefully."""
+        # Given: A mocked endpoint returning 429 with non-numeric Retry-After
+        respx.get(f"{base_url}/limited").respond(
+            429,
+            json={"detail": "Rate limit exceeded"},
+            headers={"Retry-After": "invalid"},
+        )
+
+        # When/Then: Making a request raises RateLimitError with retry_after=None
+        with pytest.raises(RateLimitError) as exc_info:
+            await base_service._get("/limited")
+
+        assert exc_info.value.status_code == 429
+        assert exc_info.value.retry_after is None
 
 
 class TestBaseServiceHTTPMethods:

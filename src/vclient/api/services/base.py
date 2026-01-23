@@ -105,7 +105,8 @@ class BaseService:
             AuthenticationError: For 401 responses.
             AuthorizationError: For 403 responses.
             NotFoundError: For 404 responses.
-            ValidationError: For 422 responses.
+            ValidationError: For 400 responses.
+            ConflictError: For 409 responses.
             RateLimitError: For 429 responses.
             ServerError: For 5xx responses.
             APIError: For other error responses.
@@ -122,13 +123,17 @@ class BaseService:
             message = response.text or f"HTTP {status_code}"
 
         error_map: dict[int, type[APIError]] = {
+            400: ValidationError,
             401: AuthenticationError,
             403: AuthorizationError,
             404: NotFoundError,
             409: ConflictError,
-            422: ValidationError,
             429: RateLimitError,
         }
+
+        if status_code == 429:  # noqa: PLR2004
+            retry_after = self._parse_retry_after(response)
+            raise RateLimitError(message, status_code, response_data, retry_after=retry_after)
 
         if status_code in error_map:
             raise error_map[status_code](message, status_code, response_data)
@@ -137,6 +142,25 @@ class BaseService:
             raise ServerError(message, status_code, response_data)
 
         raise APIError(message, status_code, response_data)
+
+    @staticmethod
+    def _parse_retry_after(response: httpx.Response) -> int | None:
+        """Parse the Retry-After header from a response.
+
+        Args:
+            response: The HTTP response containing the Retry-After header.
+
+        Returns:
+            Number of seconds to wait, or None if header is missing or invalid.
+        """
+        retry_after = response.headers.get("Retry-After")
+        if retry_after is None:
+            return None
+
+        try:
+            return int(retry_after)
+        except ValueError:
+            return None
 
     async def _get(
         self,
