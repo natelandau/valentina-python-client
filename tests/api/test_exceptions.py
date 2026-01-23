@@ -18,38 +18,54 @@ class TestAPIError:
     """Tests for APIError base class."""
 
     def test_init_with_message_only(self):
-        """Test creating an error with just a message."""
+        """Verify creating an error with just a message."""
+        # When: Creating an error with message only
         error = APIError("Something went wrong")
+
+        # Then: Message is set and defaults are applied
         assert error.message == "Something went wrong"
         assert error.status_code is None
         assert error.response_data == {}
 
     def test_init_with_all_params(self):
-        """Test creating an error with all parameters."""
+        """Verify creating an error with all parameters."""
+        # When: Creating an error with all parameters
         error = APIError(
             message="Not found",
             status_code=404,
             response_data={"detail": "Resource not found"},
         )
+
+        # Then: All values are stored
         assert error.message == "Not found"
         assert error.status_code == 404
         assert error.response_data == {"detail": "Resource not found"}
 
     def test_str_with_status_code(self):
-        """Test string representation includes status code."""
+        """Verify string representation includes status code."""
+        # Given: An error with status code
         error = APIError("Bad request", status_code=400)
+
+        # When/Then: String representation includes status code
         assert str(error) == "[400] Bad request"
 
     def test_str_without_status_code(self):
-        """Test string representation without status code."""
+        """Verify string representation without status code."""
+        # Given: An error without status code
         error = APIError("Unknown error")
+
+        # When/Then: String representation is just the message
         assert str(error) == "Unknown error"
 
     def test_is_exception(self):
-        """Test that APIError is a proper exception."""
+        """Verify APIError is a proper exception."""
+        # Given: An error message
         msg = "Test error"
+
+        # When/Then: Error can be raised and caught
         with pytest.raises(APIError) as exc_info:
             raise APIError(msg, status_code=500)
+
         assert exc_info.value.status_code == 500
 
 
@@ -69,7 +85,8 @@ class TestSpecificErrors:
         ],
     )
     def test_inheritance(self, error_class, expected_parent):
-        """Test that all error classes inherit from APIError."""
+        """Verify all error classes inherit from APIError."""
+        # When/Then: Error class is a subclass of expected parent
         assert issubclass(error_class, expected_parent)
 
     @pytest.mark.parametrize(
@@ -85,13 +102,18 @@ class TestSpecificErrors:
         ],
     )
     def test_can_raise_and_catch(self, error_class, message):
-        """Test that specific errors can be raised and caught."""
+        """Verify specific errors can be raised and caught."""
+        # When/Then: Specific error can be raised and caught
         with pytest.raises(error_class) as exc_info:
             raise error_class(message, status_code=400)
+
         assert message in str(exc_info.value)
 
     def test_catch_specific_error_as_api_error(self):
-        """Test that specific errors can be caught as APIError."""
+        """Verify specific errors can be caught as APIError."""
+        # Given: A specific error type
         msg = "Not found"
+
+        # When/Then: Specific error can be caught as base APIError
         with pytest.raises(APIError):
             raise NotFoundError(msg, status_code=404)

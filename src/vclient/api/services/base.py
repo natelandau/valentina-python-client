@@ -144,7 +144,15 @@ class BaseService:
         *,
         params: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        """Make a GET request."""
+        """Make a GET request.
+
+        Args:
+            path: API endpoint path.
+            params: Query parameters.
+
+        Returns:
+            The HTTP response.
+        """
         return await self._request("GET", path, params=params)
 
     def _build_idempotency_headers(
@@ -259,7 +267,15 @@ class BaseService:
         *,
         params: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        """Make a DELETE request."""
+        """Make a DELETE request.
+
+        Args:
+            path: API endpoint path.
+            params: Query parameters.
+
+        Returns:
+            The HTTP response.
+        """
         return await self._request("DELETE", path, params=params)
 
     # -------------------------------------------------------------------------

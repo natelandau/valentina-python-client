@@ -3,7 +3,6 @@
 import pytest
 import respx
 
-from vclient.api import APIConfig, VClient
 from vclient.api.constants import IDEMPOTENCY_KEY_HEADER
 from vclient.api.exceptions import (
     APIError,
@@ -20,61 +19,48 @@ from vclient.api.services.base import BaseService
 
 pytestmark = pytest.mark.anyio
 
-BASE_URL = "https://test.api.com"
-
-
-class ConcreteService(BaseService):
-    """Concrete implementation of BaseService for testing."""
-
-
-@pytest.fixture
-async def client() -> VClient:
-    """Create a VClient for testing."""
-    config = APIConfig(base_url=BASE_URL, api_key="test-key")
-    client = VClient(config=config)
-    yield client
-    await client.close()
-
-
-@pytest.fixture
-def service(client) -> ConcreteService:
-    """Create a ConcreteService for testing."""
-    return ConcreteService(client)
-
 
 class TestBaseServiceRequest:
     """Tests for BaseService._request method."""
 
     @respx.mock
-    async def test_successful_get_request(self, service):
-        """Test that successful GET requests return response."""
-        route = respx.get(f"{BASE_URL}/test-path").respond(200, json={"success": True})
+    async def test_successful_get_request(self, base_service, base_url):
+        """Verify successful GET requests return response."""
+        # Given: A mocked API endpoint that returns success
+        route = respx.get(f"{base_url}/test-path").respond(200, json={"success": True})
 
-        response = await service._get("/test-path")
+        # When: Making a GET request
+        response = await base_service._get("/test-path")
 
+        # Then: Response contains expected data
         assert route.called
         assert response.status_code == 200
         assert response.json() == {"success": True}
 
     @respx.mock
-    async def test_request_with_params(self, service):
-        """Test that query parameters are passed correctly."""
-        route = respx.get(f"{BASE_URL}/test", params={"key": "value"}).respond(200, json={})
+    async def test_request_with_params(self, base_service, base_url):
+        """Verify query parameters are passed correctly."""
+        # Given: A mocked endpoint expecting specific params
+        route = respx.get(f"{base_url}/test", params={"key": "value"}).respond(200, json={})
 
-        await service._get("/test", params={"key": "value"})
+        # When: Making a GET request with params
+        await base_service._get("/test", params={"key": "value"})
 
+        # Then: Request was made with correct params
         assert route.called
 
     @respx.mock
-    async def test_post_with_json_body(self, service):
-        """Test POST request with JSON body."""
-        route = respx.post(f"{BASE_URL}/items").respond(201, json={"id": 1})
+    async def test_post_with_json_body(self, base_service, base_url):
+        """Verify POST request sends JSON body correctly."""
+        # Given: A mocked POST endpoint
+        route = respx.post(f"{base_url}/items").respond(201, json={"id": 1})
 
-        response = await service._post("/items", json={"name": "test"})
+        # When: Making a POST request with JSON body
+        response = await base_service._post("/items", json={"name": "test"})
 
+        # Then: Request was made with correct body
         assert route.called
         assert response.status_code == 201
-        # Verify the request body
         request = route.calls.last.request
         assert b'"name"' in request.content
 
@@ -100,24 +86,28 @@ class TestBaseServiceErrorHandling:
     )
     @respx.mock
     async def test_error_status_codes_raise_correct_exception(
-        self, service, status_code, expected_exception
+        self, base_service, base_url, status_code, expected_exception
     ):
-        """Test that error status codes raise appropriate exceptions."""
-        respx.get(f"{BASE_URL}/error").respond(status_code, json={"detail": "Error message"})
+        """Verify error status codes raise appropriate exceptions."""
+        # Given: A mocked endpoint returning an error status
+        respx.get(f"{base_url}/error").respond(status_code, json={"detail": "Error message"})
 
+        # When/Then: Making a request raises the expected exception
         with pytest.raises(expected_exception) as exc_info:
-            await service._get("/error")
+            await base_service._get("/error")
 
         assert exc_info.value.status_code == status_code
         assert "Error message" in exc_info.value.message
 
     @respx.mock
-    async def test_error_with_non_json_response(self, service):
-        """Test error handling when response is not JSON."""
-        respx.get(f"{BASE_URL}/error").respond(500, text="Internal Server Error")
+    async def test_error_with_non_json_response(self, base_service, base_url):
+        """Verify error handling when response is not JSON."""
+        # Given: A mocked endpoint returning plain text error
+        respx.get(f"{base_url}/error").respond(500, text="Internal Server Error")
 
+        # When/Then: Making a request raises ServerError with text message
         with pytest.raises(ServerError) as exc_info:
-            await service._get("/error")
+            await base_service._get("/error")
 
         assert "Internal Server Error" in exc_info.value.message
 
@@ -126,52 +116,67 @@ class TestBaseServiceHTTPMethods:
     """Tests for BaseService HTTP method helpers."""
 
     @respx.mock
-    async def test_get_method(self, service):
-        """Test _get method."""
-        route = respx.get(f"{BASE_URL}/path").respond(200, json={})
+    async def test_get_method(self, base_service, base_url):
+        """Verify _get method makes GET request."""
+        # Given: A mocked GET endpoint
+        route = respx.get(f"{base_url}/path").respond(200, json={})
 
-        await service._get("/path")
+        # When: Calling _get method
+        await base_service._get("/path")
 
+        # Then: GET request was made
         assert route.called
         assert route.calls.last.request.method == "GET"
 
     @respx.mock
-    async def test_post_method(self, service):
-        """Test _post method."""
-        route = respx.post(f"{BASE_URL}/path").respond(201, json={})
+    async def test_post_method(self, base_service, base_url):
+        """Verify _post method makes POST request."""
+        # Given: A mocked POST endpoint
+        route = respx.post(f"{base_url}/path").respond(201, json={})
 
-        await service._post("/path", json={"data": "value"})
+        # When: Calling _post method
+        await base_service._post("/path", json={"data": "value"})
 
+        # Then: POST request was made
         assert route.called
         assert route.calls.last.request.method == "POST"
 
     @respx.mock
-    async def test_put_method(self, service):
-        """Test _put method."""
-        route = respx.put(f"{BASE_URL}/path").respond(200, json={})
+    async def test_put_method(self, base_service, base_url):
+        """Verify _put method makes PUT request."""
+        # Given: A mocked PUT endpoint
+        route = respx.put(f"{base_url}/path").respond(200, json={})
 
-        await service._put("/path", json={"data": "value"})
+        # When: Calling _put method
+        await base_service._put("/path", json={"data": "value"})
 
+        # Then: PUT request was made
         assert route.called
         assert route.calls.last.request.method == "PUT"
 
     @respx.mock
-    async def test_patch_method(self, service):
-        """Test _patch method."""
-        route = respx.patch(f"{BASE_URL}/path").respond(200, json={})
+    async def test_patch_method(self, base_service, base_url):
+        """Verify _patch method makes PATCH request."""
+        # Given: A mocked PATCH endpoint
+        route = respx.patch(f"{base_url}/path").respond(200, json={})
 
-        await service._patch("/path", json={"data": "value"})
+        # When: Calling _patch method
+        await base_service._patch("/path", json={"data": "value"})
 
+        # Then: PATCH request was made
         assert route.called
         assert route.calls.last.request.method == "PATCH"
 
     @respx.mock
-    async def test_delete_method(self, service):
-        """Test _delete method."""
-        route = respx.delete(f"{BASE_URL}/path").respond(204)
+    async def test_delete_method(self, base_service, base_url):
+        """Verify _delete method makes DELETE request."""
+        # Given: A mocked DELETE endpoint
+        route = respx.delete(f"{base_url}/path").respond(204)
 
-        await service._delete("/path")
+        # When: Calling _delete method
+        await base_service._delete("/path")
 
+        # Then: DELETE request was made
         assert route.called
         assert route.calls.last.request.method == "DELETE"
 
@@ -180,59 +185,76 @@ class TestBaseServiceIdempotency:
     """Tests for BaseService idempotency key support."""
 
     @respx.mock
-    async def test_post_with_idempotency_key(self, service):
-        """Test POST request includes idempotency key header."""
-        route = respx.post(f"{BASE_URL}/items").respond(201, json={})
+    async def test_post_with_idempotency_key(self, base_service, base_url):
+        """Verify POST request includes idempotency key header."""
+        # Given: A mocked POST endpoint
+        route = respx.post(f"{base_url}/items").respond(201, json={})
 
-        await service._post("/items", json={}, idempotency_key="my-key-123")
+        # When: Making a POST request with idempotency key
+        await base_service._post("/items", json={}, idempotency_key="my-key-123")
 
+        # Then: Request includes the idempotency key header
         assert route.called
         request = route.calls.last.request
         assert request.headers.get(IDEMPOTENCY_KEY_HEADER) == "my-key-123"
 
     @respx.mock
-    async def test_put_with_idempotency_key(self, service):
-        """Test PUT request includes idempotency key header."""
-        route = respx.put(f"{BASE_URL}/items/1").respond(200, json={})
+    async def test_put_with_idempotency_key(self, base_service, base_url):
+        """Verify PUT request includes idempotency key header."""
+        # Given: A mocked PUT endpoint
+        route = respx.put(f"{base_url}/items/1").respond(200, json={})
 
-        await service._put("/items/1", json={}, idempotency_key="put-key")
+        # When: Making a PUT request with idempotency key
+        await base_service._put("/items/1", json={}, idempotency_key="put-key")
 
+        # Then: Request includes the idempotency key header
         assert route.called
         request = route.calls.last.request
         assert request.headers.get(IDEMPOTENCY_KEY_HEADER) == "put-key"
 
     @respx.mock
-    async def test_patch_with_idempotency_key(self, service):
-        """Test PATCH request includes idempotency key header."""
-        route = respx.patch(f"{BASE_URL}/items/1").respond(200, json={})
+    async def test_patch_with_idempotency_key(self, base_service, base_url):
+        """Verify PATCH request includes idempotency key header."""
+        # Given: A mocked PATCH endpoint
+        route = respx.patch(f"{base_url}/items/1").respond(200, json={})
 
-        await service._patch("/items/1", json={}, idempotency_key="patch-key")
+        # When: Making a PATCH request with idempotency key
+        await base_service._patch("/items/1", json={}, idempotency_key="patch-key")
 
+        # Then: Request includes the idempotency key header
         assert route.called
         request = route.calls.last.request
         assert request.headers.get(IDEMPOTENCY_KEY_HEADER) == "patch-key"
 
     @respx.mock
-    async def test_post_without_idempotency_key(self, service):
-        """Test POST request without idempotency key has no header."""
-        route = respx.post(f"{BASE_URL}/items").respond(201, json={})
+    async def test_post_without_idempotency_key(self, base_service, base_url):
+        """Verify POST request without idempotency key has no header."""
+        # Given: A mocked POST endpoint
+        route = respx.post(f"{base_url}/items").respond(201, json={})
 
-        await service._post("/items", json={})
+        # When: Making a POST request without idempotency key
+        await base_service._post("/items", json={})
 
+        # Then: Request does not include idempotency key header
         assert route.called
         request = route.calls.last.request
         assert IDEMPOTENCY_KEY_HEADER not in request.headers
 
     def test_generate_idempotency_key_format(self):
-        """Test that generated idempotency keys are valid UUIDs."""
+        """Verify generated idempotency keys are valid UUIDs."""
+        # When: Generating an idempotency key
         key = BaseService._generate_idempotency_key()
-        # UUID format: 8-4-4-4-12 hex chars
+
+        # Then: Key is a valid UUID format (8-4-4-4-12 hex chars)
         assert len(key) == 36
         assert key.count("-") == 4
 
     def test_generate_idempotency_key_unique(self):
-        """Test that generated keys are unique."""
+        """Verify generated keys are unique."""
+        # When: Generating 100 idempotency keys
         keys = {BaseService._generate_idempotency_key() for _ in range(100)}
+
+        # Then: All keys are unique
         assert len(keys) == 100
 
 
@@ -240,9 +262,10 @@ class TestBaseServicePagination:
     """Tests for BaseService pagination methods."""
 
     @respx.mock
-    async def test_get_paginated(self, service):
-        """Test _get_paginated returns PaginatedResponse."""
-        route = respx.get(f"{BASE_URL}/items", params={"limit": "10", "offset": "0"}).respond(
+    async def test_get_paginated(self, base_service, base_url):
+        """Verify _get_paginated returns PaginatedResponse."""
+        # Given: A mocked paginated endpoint
+        route = respx.get(f"{base_url}/items", params={"limit": "10", "offset": "0"}).respond(
             200,
             json={
                 "items": [{"id": 1}, {"id": 2}],
@@ -252,43 +275,50 @@ class TestBaseServicePagination:
             },
         )
 
-        result = await service._get_paginated("/items")
+        # When: Calling _get_paginated
+        result = await base_service._get_paginated("/items")
 
+        # Then: Returns a PaginatedResponse with correct data
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 2
         assert result.total == 2
 
     @respx.mock
-    async def test_get_paginated_with_custom_limit_offset(self, service):
-        """Test _get_paginated with custom limit and offset."""
-        route = respx.get(f"{BASE_URL}/items", params={"limit": "25", "offset": "50"}).respond(
+    async def test_get_paginated_with_custom_limit_offset(self, base_service, base_url):
+        """Verify _get_paginated accepts custom limit and offset."""
+        # Given: A mocked paginated endpoint expecting custom params
+        route = respx.get(f"{base_url}/items", params={"limit": "25", "offset": "50"}).respond(
             200,
             json={"items": [], "limit": 25, "offset": 50, "total": 100},
         )
 
-        await service._get_paginated("/items", limit=25, offset=50)
+        # When: Calling _get_paginated with custom limit and offset
+        await base_service._get_paginated("/items", limit=25, offset=50)
 
+        # Then: Request was made with correct params
         assert route.called
 
     @respx.mock
-    async def test_get_paginated_clamps_limit(self, service):
-        """Test that limit is clamped to valid range."""
-        # Should be clamped to 100 (max)
-        route = respx.get(f"{BASE_URL}/items", params={"limit": "100", "offset": "0"}).respond(
+    async def test_get_paginated_clamps_limit(self, base_service, base_url):
+        """Verify limit is clamped to valid range."""
+        # Given: A mocked endpoint expecting max limit (100)
+        route = respx.get(f"{base_url}/items", params={"limit": "100", "offset": "0"}).respond(
             200,
             json={"items": [], "limit": 100, "offset": 0, "total": 0},
         )
 
-        await service._get_paginated("/items", limit=999)
+        # When: Calling _get_paginated with excessive limit
+        await base_service._get_paginated("/items", limit=999)
 
+        # Then: Request was made with clamped limit
         assert route.called
 
     @respx.mock
-    async def test_iter_all_pages(self, service):
-        """Test _iter_all_pages iterates through all pages."""
-        # Set up routes for 3 pages
-        respx.get(f"{BASE_URL}/items", params={"limit": "2", "offset": "0"}).respond(
+    async def test_iter_all_pages(self, base_service, base_url):
+        """Verify _iter_all_pages iterates through all pages."""
+        # Given: Mocked endpoints for 3 pages of data
+        respx.get(f"{base_url}/items", params={"limit": "2", "offset": "0"}).respond(
             200,
             json={
                 "items": [{"id": 1}, {"id": 2}],
@@ -297,7 +327,7 @@ class TestBaseServicePagination:
                 "total": 5,
             },
         )
-        respx.get(f"{BASE_URL}/items", params={"limit": "2", "offset": "2"}).respond(
+        respx.get(f"{base_url}/items", params={"limit": "2", "offset": "2"}).respond(
             200,
             json={
                 "items": [{"id": 3}, {"id": 4}],
@@ -306,7 +336,7 @@ class TestBaseServicePagination:
                 "total": 5,
             },
         )
-        respx.get(f"{BASE_URL}/items", params={"limit": "2", "offset": "4"}).respond(
+        respx.get(f"{base_url}/items", params={"limit": "2", "offset": "4"}).respond(
             200,
             json={
                 "items": [{"id": 5}],
@@ -316,15 +346,18 @@ class TestBaseServicePagination:
             },
         )
 
-        items = [item async for item in service._iter_all_pages("/items", limit=2)]
+        # When: Iterating through all pages
+        items = [item async for item in base_service._iter_all_pages("/items", limit=2)]
 
+        # Then: All items from all pages are returned
         assert len(items) == 5
         assert [item["id"] for item in items] == [1, 2, 3, 4, 5]
 
     @respx.mock
-    async def test_get_all(self, service):
-        """Test _get_all returns all items as a list."""
-        respx.get(f"{BASE_URL}/items").respond(
+    async def test_get_all(self, base_service, base_url):
+        """Verify _get_all returns all items as a list."""
+        # Given: A mocked paginated endpoint with all items in one page
+        respx.get(f"{base_url}/items").respond(
             200,
             json={
                 "items": [{"id": 1}, {"id": 2}, {"id": 3}],
@@ -334,7 +367,9 @@ class TestBaseServicePagination:
             },
         )
 
-        items = await service._get_all("/items")
+        # When: Calling _get_all
+        items = await base_service._get_all("/items")
 
+        # Then: All items are returned as a list
         assert len(items) == 3
         assert isinstance(items, list)

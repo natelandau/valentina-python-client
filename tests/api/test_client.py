@@ -12,37 +12,53 @@ class TestVClientInit:
     """Tests for VClient initialization."""
 
     def test_init_with_defaults(self):
-        """Test client initialization with default values."""
+        """Verify client initialization with default values."""
+        # When: Creating a client with no arguments
         client = VClient()
+
+        # Then: Default values are applied
         assert client._config.base_url == DEFAULT_BASE_URL
         assert client._config.api_key is None
 
     def test_init_with_base_url_and_api_key(self):
-        """Test client initialization with custom base_url and api_key."""
+        """Verify client initialization with custom base_url and api_key."""
+        # When: Creating a client with custom values
         client = VClient(base_url="https://custom.api.com", api_key="my-key")
+
+        # Then: Custom values are stored
         assert client._config.base_url == "https://custom.api.com"
         assert client._config.api_key == "my-key"
 
     def test_init_with_config(self):
-        """Test client initialization with APIConfig."""
+        """Verify client initialization with APIConfig."""
+        # Given: A custom API configuration
         config = APIConfig(
             base_url="https://config.api.com",
             api_key="config-key",
             timeout=60.0,
         )
+
+        # When: Creating a client with the config
         client = VClient(config=config)
+
+        # Then: Config values are used
         assert client._config.base_url == "https://config.api.com"
         assert client._config.api_key == "config-key"
         assert client._config.timeout == 60.0
 
     def test_config_overrides_other_params(self):
-        """Test that config parameter takes precedence."""
+        """Verify config parameter takes precedence over other parameters."""
+        # Given: A custom API configuration
         config = APIConfig(base_url="https://config.api.com", api_key="config-key")
+
+        # When: Creating a client with both config and explicit params
         client = VClient(
             base_url="https://ignored.com",
             api_key="ignored-key",
             config=config,
         )
+
+        # Then: Config values take precedence
         assert client._config.base_url == "https://config.api.com"
         assert client._config.api_key == "config-key"
 
@@ -51,24 +67,36 @@ class TestVClientHTTPClient:
     """Tests for VClient HTTP client configuration."""
 
     def test_http_client_has_correct_base_url(self):
-        """Test that HTTP client is configured with correct base URL."""
+        """Verify HTTP client is configured with correct base URL."""
+        # When: Creating a client with a specific base URL
         client = VClient(base_url="https://test.api.com")
+
+        # Then: HTTP client has the correct base URL
         assert str(client._http.base_url) == "https://test.api.com"
 
     def test_http_client_has_api_key_header(self):
-        """Test that HTTP client includes API key header."""
+        """Verify HTTP client includes API key header."""
+        # When: Creating a client with an API key
         client = VClient(base_url="https://test.api.com", api_key="my-key")
+
+        # Then: HTTP client headers include the API key
         assert client._http.headers.get(API_KEY_HEADER) == "my-key"
 
     def test_http_client_has_json_headers(self):
-        """Test that HTTP client has JSON content type headers."""
+        """Verify HTTP client has JSON content type headers."""
+        # When: Creating a client
         client = VClient()
+
+        # Then: HTTP client has JSON headers
         assert client._http.headers.get("Accept") == "application/json"
         assert client._http.headers.get("Content-Type") == "application/json"
 
     def test_http_client_no_api_key_header_when_none(self):
-        """Test that no API key header is set when api_key is None."""
+        """Verify no API key header is set when api_key is None."""
+        # When: Creating a client without an API key
         client = VClient(base_url="https://test.api.com", api_key=None)
+
+        # Then: No API key header is present
         assert API_KEY_HEADER not in client._http.headers
 
 
@@ -76,27 +104,44 @@ class TestVClientContextManager:
     """Tests for VClient async context manager."""
 
     async def test_context_manager_enter(self):
-        """Test entering the context manager returns the client."""
+        """Verify entering the context manager returns the client."""
+        # When: Using client as async context manager
         async with VClient() as client:
+            # Then: Client is returned and is open
             assert isinstance(client, VClient)
             assert not client.is_closed
 
     async def test_context_manager_exit_closes_client(self):
-        """Test exiting the context manager closes the client."""
+        """Verify exiting the context manager closes the client."""
+        # When: Exiting the context manager
         async with VClient() as client:
             pass
+
+        # Then: Client is closed
         assert client.is_closed
 
     async def test_close_method(self):
-        """Test the close method properly closes the client."""
+        """Verify close method properly closes the client."""
+        # Given: An open client
         client = VClient()
         assert not client.is_closed
+
+        # When: Calling close
         await client.close()
+
+        # Then: Client is closed
         assert client.is_closed
 
     async def test_is_closed_property(self):
-        """Test the is_closed property reflects client state."""
+        """Verify is_closed property reflects client state."""
+        # Given: An open client
         client = VClient()
+
+        # Then: is_closed is False when open
         assert client.is_closed is False
+
+        # When: Closing the client
         await client.close()
+
+        # Then: is_closed is True when closed
         assert client.is_closed is True

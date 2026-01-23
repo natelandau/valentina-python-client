@@ -13,8 +13,11 @@ class TestAPIConfig:
     """Tests for APIConfig dataclass."""
 
     def test_default_values(self):
-        """Test that default values are applied."""
+        """Verify default values are applied."""
+        # When: Creating a config with no arguments
         config = APIConfig()
+
+        # Then: Default values are used
         assert config.base_url == DEFAULT_BASE_URL
         assert config.api_key is None
         assert config.timeout == DEFAULT_TIMEOUT
@@ -23,7 +26,8 @@ class TestAPIConfig:
         assert config.headers == {}
 
     def test_custom_values(self):
-        """Test that custom values are stored."""
+        """Verify custom values are stored."""
+        # When: Creating a config with custom values
         config = APIConfig(
             base_url="https://custom.api.com",
             api_key="my-key",
@@ -32,6 +36,8 @@ class TestAPIConfig:
             retry_delay=2.0,
             headers={"X-Custom": "value"},
         )
+
+        # Then: Custom values are stored
         assert config.base_url == "https://custom.api.com"
         assert config.api_key == "my-key"
         assert config.timeout == 60.0
@@ -40,16 +46,25 @@ class TestAPIConfig:
         assert config.headers == {"X-Custom": "value"}
 
     def test_trailing_slash_removed(self):
-        """Test that trailing slashes are removed from base_url."""
+        """Verify trailing slashes are removed from base_url."""
+        # When: Creating a config with trailing slash
         config = APIConfig(base_url="https://api.example.com/")
+
+        # Then: Trailing slash is removed
         assert config.base_url == "https://api.example.com"
 
     def test_multiple_trailing_slashes_removed(self):
-        """Test that multiple trailing slashes are removed."""
+        """Verify multiple trailing slashes are removed."""
+        # When: Creating a config with multiple trailing slashes
         config = APIConfig(base_url="https://api.example.com///")
+
+        # Then: All trailing slashes are removed
         assert config.base_url == "https://api.example.com"
 
     def test_no_slash_unchanged(self):
-        """Test that URLs without trailing slash are unchanged."""
+        """Verify URLs without trailing slash are unchanged."""
+        # When: Creating a config without trailing slash
         config = APIConfig(base_url="https://api.example.com")
+
+        # Then: URL is unchanged
         assert config.base_url == "https://api.example.com"
