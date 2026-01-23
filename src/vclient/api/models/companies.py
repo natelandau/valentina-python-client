@@ -1,41 +1,22 @@
 """Pydantic models for Company API responses."""
 
 from datetime import datetime
-from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
+# Type aliases for permission levels (replaces StrEnum classes)
+PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
+"""Permission levels for company access."""
 
-class CompanyPermission(StrEnum):
-    """Permission levels for company access."""
+ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
+"""Permissions for managing a campaign."""
 
-    USER = "USER"
-    ADMIN = "ADMIN"
-    OWNER = "OWNER"
-    REVOKE = "REVOKE"
+GrantXPPermission = Literal["UNRESTRICTED", "PLAYER", "STORYTELLER"]
+"""Permissions for adding XP to a character."""
 
-
-class PermissionManageCampaign(StrEnum):
-    """Permissions for managing a campaign."""
-
-    UNRESTRICTED = "UNRESTRICTED"
-    STORYTELLER = "STORYTELLER"
-
-
-class PermissionsGrantXP(StrEnum):
-    """Permissions for adding XP to a character."""
-
-    UNRESTRICTED = "UNRESTRICTED"
-    PLAYER = "PLAYER"
-    STORYTELLER = "STORYTELLER"
-
-
-class PermissionsFreeTraitChanges(StrEnum):
-    """Permissions for updating character trait values."""
-
-    UNRESTRICTED = "UNRESTRICTED"
-    WITHIN_24_HOURS = "WITHIN_24_HOURS"
-    STORYTELLER = "STORYTELLER"
+FreeTraitChangesPermission = Literal["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"]
+"""Permissions for updating character trait values."""
 
 
 class CompanySettings(BaseModel):
@@ -56,16 +37,16 @@ class CompanySettings(BaseModel):
         le=10,
         description="The number of characters generated for a user to select from.",
     )
-    permission_manage_campaign: PermissionManageCampaign | None = Field(
-        default=PermissionManageCampaign.UNRESTRICTED,
+    permission_manage_campaign: ManageCampaignPermission | None = Field(
+        default="UNRESTRICTED",
         description="Permission level required to manage campaigns.",
     )
-    permission_grant_xp: PermissionsGrantXP | None = Field(
-        default=PermissionsGrantXP.UNRESTRICTED,
+    permission_grant_xp: GrantXPPermission | None = Field(
+        default="UNRESTRICTED",
         description="Permission level required to grant XP.",
     )
-    permission_free_trait_changes: PermissionsFreeTraitChanges | None = Field(
-        default=PermissionsFreeTraitChanges.UNRESTRICTED,
+    permission_free_trait_changes: FreeTraitChangesPermission | None = Field(
+        default="UNRESTRICTED",
         description="Permission level required for free trait changes.",
     )
 
@@ -110,7 +91,7 @@ class CompanyPermissions(BaseModel):
 
     company_id: str = Field(..., description="The company ID.")
     name: str | None = Field(default=None, description="The company name.")
-    permission: CompanyPermission = Field(..., description="The permission level granted.")
+    permission: PermissionLevel = Field(..., description="The permission level granted.")
 
 
 # -----------------------------------------------------------------------------
@@ -146,4 +127,4 @@ class GrantAccessRequest(BaseModel):
     """Request body for granting developer access to a company."""
 
     developer_id: str = Field(..., description="The developer ID to grant access to.")
-    permission: CompanyPermission = Field(..., description="The permission level to grant.")
+    permission: PermissionLevel = Field(..., description="The permission level to grant.")

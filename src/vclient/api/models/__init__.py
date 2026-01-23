@@ -2,14 +2,14 @@
 
 from vclient.api.models.companies import (
     Company,
-    CompanyPermission,
     CompanyPermissions,
     CompanySettings,
     CreateCompanyRequest,
+    FreeTraitChangesPermission,
     GrantAccessRequest,
-    PermissionManageCampaign,
-    PermissionsFreeTraitChanges,
-    PermissionsGrantXP,
+    GrantXPPermission,
+    ManageCampaignPermission,
+    PermissionLevel,
     UpdateCompanyRequest,
 )
 from vclient.api.models.global_admin import (
@@ -24,7 +24,6 @@ from vclient.api.models.system import ServiceStatus, SystemHealth
 
 __all__ = [
     "Company",
-    "CompanyPermission",
     "CompanyPermissions",
     "CompanySettings",
     "CreateCompanyRequest",
@@ -32,11 +31,12 @@ __all__ = [
     "Developer",
     "DeveloperCompanyPermission",
     "DeveloperWithApiKey",
+    "FreeTraitChangesPermission",
     "GrantAccessRequest",
+    "GrantXPPermission",
+    "ManageCampaignPermission",
     "PaginatedResponse",
-    "PermissionManageCampaign",
-    "PermissionsFreeTraitChanges",
-    "PermissionsGrantXP",
+    "PermissionLevel",
     "ServiceStatus",
     "SystemHealth",
     "UpdateCompanyRequest",

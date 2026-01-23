@@ -1,11 +1,10 @@
 """Tests for vclient.api.models.global_admin."""
 
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
 
-from vclient.api.models.companies import CompanyPermission
 from vclient.api.models.global_admin import (
     CreateDeveloperRequest,
     Developer,
@@ -20,36 +19,45 @@ class TestDeveloperCompanyPermission:
 
     def test_create_with_required_fields(self):
         """Verify creating permission with required fields only."""
-        # When: Creating with required fields
+        # When: Creating with required fields using string value
         permission = DeveloperCompanyPermission(
             company_id="507f1f77bcf86cd799439011",
-            permission=CompanyPermission.USER,
+            permission="USER",
         )
 
         # Then: Fields are set correctly
         assert permission.company_id == "507f1f77bcf86cd799439011"
-        assert permission.permission == CompanyPermission.USER
+        assert permission.permission == "USER"
         assert permission.name is None
 
     def test_create_with_all_fields(self):
         """Verify creating permission with all fields."""
-        # When: Creating with all fields
+        # When: Creating with all fields using string value
         permission = DeveloperCompanyPermission(
             company_id="507f1f77bcf86cd799439011",
             name="Test Company",
-            permission=CompanyPermission.ADMIN,
+            permission="ADMIN",
         )
 
         # Then: All fields are set correctly
         assert permission.company_id == "507f1f77bcf86cd799439011"
         assert permission.name == "Test Company"
-        assert permission.permission == CompanyPermission.ADMIN
+        assert permission.permission == "ADMIN"
 
     def test_missing_required_fields_raises_error(self):
         """Verify missing required fields raises ValidationError."""
         # When/Then: Missing fields raises error
         with pytest.raises(ValidationError):
             DeveloperCompanyPermission()
+
+    def test_invalid_permission_rejected(self):
+        """Verify invalid permission values are rejected by Pydantic."""
+        # When/Then: Creating with invalid permission raises error
+        with pytest.raises(ValidationError):
+            DeveloperCompanyPermission(
+                company_id="507f1f77bcf86cd799439011",
+                permission="INVALID",
+            )
 
 
 class TestDeveloper:
@@ -75,12 +83,12 @@ class TestDeveloper:
 
     def test_create_with_all_fields(self):
         """Verify creating developer with all fields."""
-        # Given: Timestamps and company permissions
+        # Given: Timestamps and company permissions using string value
         now = datetime.now(tz=UTC)
         company_permission = DeveloperCompanyPermission(
             company_id="company123",
             name="Test Company",
-            permission=CompanyPermission.OWNER,
+            permission="OWNER",
         )
 
         # When: Creating with all fields
@@ -144,7 +152,7 @@ class TestDeveloper:
         assert developer.username == "testuser"
         assert developer.is_global_admin is True
         assert len(developer.companies) == 1
-        assert developer.companies[0].permission == CompanyPermission.ADMIN
+        assert developer.companies[0].permission == "ADMIN"
 
 
 class TestDeveloperWithApiKey:

@@ -5,11 +5,11 @@ from collections.abc import AsyncIterator
 from vclient.api.endpoints import Endpoints
 from vclient.api.models.companies import (
     Company,
-    CompanyPermission,
     CompanyPermissions,
     CompanySettings,
     CreateCompanyRequest,
     GrantAccessRequest,
+    PermissionLevel,
     UpdateCompanyRequest,
 )
 from vclient.api.models.pagination import PaginatedResponse
@@ -203,7 +203,7 @@ class CompaniesService(BaseService):
         self,
         company_id: str,
         developer_id: str,
-        permission: CompanyPermission,
+        permission: PermissionLevel,
     ) -> CompanyPermissions:
         """Add, update, or revoke a developer's permission level for a company.
 

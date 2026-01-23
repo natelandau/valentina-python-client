@@ -5,57 +5,12 @@ from pydantic import ValidationError as PydanticValidationError
 
 from vclient.api.models.companies import (
     Company,
-    CompanyPermission,
     CompanyPermissions,
     CompanySettings,
     CreateCompanyRequest,
     GrantAccessRequest,
-    PermissionManageCampaign,
-    PermissionsFreeTraitChanges,
-    PermissionsGrantXP,
     UpdateCompanyRequest,
 )
-
-
-class TestCompanyPermissionEnum:
-    """Tests for CompanyPermission enum."""
-
-    def test_permission_values(self):
-        """Verify all permission values are correct."""
-        # Then: All expected values exist
-        assert CompanyPermission.USER == "USER"
-        assert CompanyPermission.ADMIN == "ADMIN"
-        assert CompanyPermission.OWNER == "OWNER"
-        assert CompanyPermission.REVOKE == "REVOKE"
-
-    def test_permission_is_str_enum(self):
-        """Verify permissions can be used as strings."""
-        # When: Using permission as string
-        permission = CompanyPermission.USER
-
-        # Then: It works as a string
-        assert f"Permission: {permission}" == "Permission: USER"
-
-
-class TestPermissionEnums:
-    """Tests for permission-related enums."""
-
-    def test_permission_manage_campaign_values(self):
-        """Verify PermissionManageCampaign enum values."""
-        assert PermissionManageCampaign.UNRESTRICTED == "UNRESTRICTED"
-        assert PermissionManageCampaign.STORYTELLER == "STORYTELLER"
-
-    def test_permissions_grant_xp_values(self):
-        """Verify PermissionsGrantXP enum values."""
-        assert PermissionsGrantXP.UNRESTRICTED == "UNRESTRICTED"
-        assert PermissionsGrantXP.PLAYER == "PLAYER"
-        assert PermissionsGrantXP.STORYTELLER == "STORYTELLER"
-
-    def test_permissions_free_trait_changes_values(self):
-        """Verify PermissionsFreeTraitChanges enum values."""
-        assert PermissionsFreeTraitChanges.UNRESTRICTED == "UNRESTRICTED"
-        assert PermissionsFreeTraitChanges.WITHIN_24_HOURS == "WITHIN_24_HOURS"
-        assert PermissionsFreeTraitChanges.STORYTELLER == "STORYTELLER"
 
 
 class TestCompanySettings:
@@ -69,9 +24,9 @@ class TestCompanySettings:
         # Then: Default values are applied
         assert settings.character_autogen_xp_cost == 10
         assert settings.character_autogen_num_choices == 3
-        assert settings.permission_manage_campaign == PermissionManageCampaign.UNRESTRICTED
-        assert settings.permission_grant_xp == PermissionsGrantXP.UNRESTRICTED
-        assert settings.permission_free_trait_changes == PermissionsFreeTraitChanges.UNRESTRICTED
+        assert settings.permission_manage_campaign == "UNRESTRICTED"
+        assert settings.permission_grant_xp == "UNRESTRICTED"
+        assert settings.permission_free_trait_changes == "UNRESTRICTED"
 
     def test_custom_values(self):
         """Verify custom values are set correctly."""
@@ -79,24 +34,24 @@ class TestCompanySettings:
         settings = CompanySettings(
             character_autogen_xp_cost=20,
             character_autogen_num_choices=5,
-            permission_manage_campaign=PermissionManageCampaign.STORYTELLER,
-            permission_grant_xp=PermissionsGrantXP.PLAYER,
-            permission_free_trait_changes=PermissionsFreeTraitChanges.WITHIN_24_HOURS,
+            permission_manage_campaign="STORYTELLER",
+            permission_grant_xp="PLAYER",
+            permission_free_trait_changes="WITHIN_24_HOURS",
         )
 
         # Then: Custom values are applied
         assert settings.character_autogen_xp_cost == 20
         assert settings.character_autogen_num_choices == 5
-        assert settings.permission_manage_campaign == PermissionManageCampaign.STORYTELLER
-        assert settings.permission_grant_xp == PermissionsGrantXP.PLAYER
-        assert settings.permission_free_trait_changes == PermissionsFreeTraitChanges.WITHIN_24_HOURS
+        assert settings.permission_manage_campaign == "STORYTELLER"
+        assert settings.permission_grant_xp == "PLAYER"
+        assert settings.permission_free_trait_changes == "WITHIN_24_HOURS"
 
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""
         # Given: Settings with only some values
         settings = CompanySettings(
             character_autogen_xp_cost=15,
-            permission_manage_campaign=PermissionManageCampaign.STORYTELLER,
+            permission_manage_campaign="STORYTELLER",
         )
 
         # When: Dumping with exclude_none
@@ -104,7 +59,13 @@ class TestCompanySettings:
 
         # Then: All non-None values are included (defaults are not None)
         assert data["character_autogen_xp_cost"] == 15
-        assert data["permission_manage_campaign"] == PermissionManageCampaign.STORYTELLER
+        assert data["permission_manage_campaign"] == "STORYTELLER"
+
+    def test_invalid_permission_value_rejected(self):
+        """Verify invalid permission values are rejected by Pydantic."""
+        # When/Then: Creating settings with invalid permission raises error
+        with pytest.raises(PydanticValidationError):
+            CompanySettings(permission_manage_campaign="INVALID_VALUE")
 
 
 class TestCompany:
@@ -176,7 +137,7 @@ class TestCompany:
         assert company.id == "507f1f77bcf86cd799439011"
         assert company.name == "API Company"
         assert company.settings is not None
-        assert company.settings.permission_grant_xp == PermissionsGrantXP.PLAYER
+        assert company.settings.permission_grant_xp == "PLAYER"
 
     def test_name_min_length_validation(self):
         """Verify name minimum length is enforced."""
@@ -203,12 +164,12 @@ class TestCompanyPermissions:
         # When: Creating permissions with required fields
         perms = CompanyPermissions(
             company_id="company123",
-            permission=CompanyPermission.USER,
+            permission="USER",
         )
 
         # Then: Permissions are created correctly
         assert perms.company_id == "company123"
-        assert perms.permission == CompanyPermission.USER
+        assert perms.permission == "USER"
         assert perms.name is None
 
     def test_full_permissions(self):
@@ -217,13 +178,13 @@ class TestCompanyPermissions:
         perms = CompanyPermissions(
             company_id="company123",
             name="Test Company",
-            permission=CompanyPermission.ADMIN,
+            permission="ADMIN",
         )
 
         # Then: All fields are set correctly
         assert perms.company_id == "company123"
         assert perms.name == "Test Company"
-        assert perms.permission == CompanyPermission.ADMIN
+        assert perms.permission == "ADMIN"
 
     def test_permissions_from_api_response(self):
         """Verify creating permissions from API response dict."""
@@ -240,7 +201,13 @@ class TestCompanyPermissions:
         # Then: Permissions are created correctly
         assert perms.company_id == "507f1f77bcf86cd799439011"
         assert perms.name == "API Company"
-        assert perms.permission == CompanyPermission.OWNER
+        assert perms.permission == "OWNER"
+
+    def test_invalid_permission_rejected(self):
+        """Verify invalid permission values are rejected by Pydantic."""
+        # When/Then: Creating permissions with invalid permission raises error
+        with pytest.raises(PydanticValidationError):
+            CompanyPermissions(company_id="company123", permission="INVALID")
 
 
 class TestCreateCompanyRequest:
@@ -291,7 +258,7 @@ class TestCreateCompanyRequest:
         # Given: Request with settings
         settings = CompanySettings(
             character_autogen_xp_cost=15,
-            permission_manage_campaign=PermissionManageCampaign.STORYTELLER,
+            permission_manage_campaign="STORYTELLER",
         )
         request = CreateCompanyRequest(
             name="Test",
@@ -356,19 +323,19 @@ class TestGrantAccessRequest:
         # When: Creating request
         request = GrantAccessRequest(
             developer_id="dev123",
-            permission=CompanyPermission.ADMIN,
+            permission="ADMIN",
         )
 
         # Then: Fields are set correctly
         assert request.developer_id == "dev123"
-        assert request.permission == CompanyPermission.ADMIN
+        assert request.permission == "ADMIN"
 
-    def test_model_dump_serializes_enum(self):
-        """Verify model_dump serializes enum to string."""
-        # Given: Request with enum permission
+    def test_model_dump_serializes_correctly(self):
+        """Verify model_dump serializes permission to string."""
+        # Given: Request with permission
         request = GrantAccessRequest(
             developer_id="dev123",
-            permission=CompanyPermission.OWNER,
+            permission="OWNER",
         )
 
         # When: Dumping with mode="json"
@@ -376,3 +343,9 @@ class TestGrantAccessRequest:
 
         # Then: Permission is serialized as string
         assert data["permission"] == "OWNER"
+
+    def test_invalid_permission_rejected(self):
+        """Verify invalid permission values are rejected by Pydantic."""
+        # When/Then: Creating request with invalid permission raises error
+        with pytest.raises(PydanticValidationError):
+            GrantAccessRequest(developer_id="dev123", permission="INVALID")

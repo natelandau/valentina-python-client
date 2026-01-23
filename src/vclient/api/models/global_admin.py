@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from vclient.api.models.companies import CompanyPermission
+from vclient.api.models.companies import PermissionLevel
 
 
 class DeveloperCompanyPermission(BaseModel):
@@ -15,7 +15,7 @@ class DeveloperCompanyPermission(BaseModel):
 
     company_id: str = Field(..., description="The company ID.")
     name: str | None = Field(default=None, description="The company name.")
-    permission: CompanyPermission = Field(..., description="The permission level.")
+    permission: PermissionLevel = Field(..., description="The permission level.")
 
 
 class Developer(BaseModel):

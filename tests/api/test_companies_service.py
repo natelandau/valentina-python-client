@@ -8,12 +8,8 @@ from vclient.api.endpoints import Endpoints
 from vclient.api.exceptions import AuthorizationError, NotFoundError
 from vclient.api.models.companies import (
     Company,
-    CompanyPermission,
     CompanyPermissions,
     CompanySettings,
-    PermissionManageCampaign,
-    PermissionsFreeTraitChanges,
-    PermissionsGrantXP,
 )
 from vclient.api.models.pagination import PaginatedResponse
 
@@ -248,13 +244,13 @@ class TestCompaniesServiceCreate:
             201, json=company_response_data
         )
 
-        # When: Creating a company with all options
+        # When: Creating a company with all options using string values
         settings = CompanySettings(
             character_autogen_xp_cost=15,
             character_autogen_num_choices=5,
-            permission_manage_campaign=PermissionManageCampaign.STORYTELLER,
-            permission_grant_xp=PermissionsGrantXP.PLAYER,
-            permission_free_trait_changes=PermissionsFreeTraitChanges.WITHIN_24_HOURS,
+            permission_manage_campaign="STORYTELLER",
+            permission_grant_xp="PLAYER",
+            permission_free_trait_changes="WITHIN_24_HOURS",
         )
         result = await vclient.companies.create(
             name="Test Company",
@@ -327,10 +323,10 @@ class TestCompaniesServiceUpdate:
             200, json=company_response_data
         )
 
-        # When: Updating with settings object
+        # When: Updating with settings object using string values
         settings = CompanySettings(
             character_autogen_xp_cost=20,
-            permission_manage_campaign=PermissionManageCampaign.STORYTELLER,
+            permission_manage_campaign="STORYTELLER",
         )
         result = await vclient.companies.update(company_id, settings=settings)
 
@@ -439,16 +435,14 @@ class TestCompaniesServiceGrantAccess:
             },
         )
 
-        # When: Granting user access
-        result = await vclient.companies.grant_access(
-            company_id, developer_id, CompanyPermission.USER
-        )
+        # When: Granting user access using string value
+        result = await vclient.companies.grant_access(company_id, developer_id, "USER")
 
         # Then: Returns CompanyPermissions object
         assert route.called
         assert isinstance(result, CompanyPermissions)
         assert result.company_id == company_id
-        assert result.permission == CompanyPermission.USER
+        assert result.permission == "USER"
 
         # Verify request body
         request = route.calls.last.request
@@ -475,14 +469,12 @@ class TestCompaniesServiceGrantAccess:
             },
         )
 
-        # When: Granting admin access
-        result = await vclient.companies.grant_access(
-            company_id, developer_id, CompanyPermission.ADMIN
-        )
+        # When: Granting admin access using string value
+        result = await vclient.companies.grant_access(company_id, developer_id, "ADMIN")
 
         # Then: Returns CompanyPermissions with ADMIN permission
         assert route.called
-        assert result.permission == CompanyPermission.ADMIN
+        assert result.permission == "ADMIN"
 
     @respx.mock
     async def test_revoke_access(self, vclient, base_url):
@@ -501,14 +493,12 @@ class TestCompaniesServiceGrantAccess:
             },
         )
 
-        # When: Revoking access
-        result = await vclient.companies.grant_access(
-            company_id, developer_id, CompanyPermission.REVOKE
-        )
+        # When: Revoking access using string value
+        result = await vclient.companies.grant_access(company_id, developer_id, "REVOKE")
 
         # Then: Returns CompanyPermissions with REVOKE permission
         assert route.called
-        assert result.permission == CompanyPermission.REVOKE
+        assert result.permission == "REVOKE"
 
     @respx.mock
     async def test_grant_access_unauthorized(self, vclient, base_url):
@@ -521,7 +511,7 @@ class TestCompaniesServiceGrantAccess:
 
         # When/Then: Granting access raises AuthorizationError
         with pytest.raises(AuthorizationError):
-            await vclient.companies.grant_access(company_id, "developer123", CompanyPermission.USER)
+            await vclient.companies.grant_access(company_id, "developer123", "USER")
 
 
 class TestCompaniesServiceClientIntegration:

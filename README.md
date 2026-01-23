@@ -65,8 +65,6 @@ asyncio.run(main())
 | `companies_service()` | `CompaniesService` | Get a service for company operations |
 | `global_admin_service()` | `GlobalAdminService` | Get a service for admin operations |
 | `system_service()` | `SystemService` | Get a service for system operations |
-| `default_client()` | `VClient` | Get the configured default client |
-| `configure_default_client(client)` | `None` | Manually set the default client (rarely needed) |
 
 > **Note**: Calling factory functions before creating a `VClient` raises a `RuntimeError`.
 
