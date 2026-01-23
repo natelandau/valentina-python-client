@@ -205,6 +205,32 @@ class TestRateLimitError:
         # Then: retry_after is None
         assert error.retry_after is None
 
+    def test_remaining_property(self):
+        """Verify remaining property returns the value passed to constructor."""
+        # Given: A rate limit error with remaining tokens
+        error = RateLimitError(
+            message="Too many requests",
+            status_code=429,
+            response_data={"detail": "You are being rate limited."},
+            retry_after=5,
+            remaining=0,
+        )
+
+        # Then: remaining property returns the correct value
+        assert error.remaining == 0
+
+    def test_remaining_is_none_when_not_provided(self):
+        """Verify remaining is None when not provided."""
+        # Given: A rate limit error without remaining
+        error = RateLimitError(
+            message="Too many requests",
+            status_code=429,
+            response_data={"detail": "You are being rate limited."},
+        )
+
+        # Then: remaining is None
+        assert error.remaining is None
+
     def test_inherits_rfc9457_properties(self):
         """Verify RateLimitError inherits RFC 9457 properties from APIError."""
         # Given: A rate limit error with full RFC 9457 response
@@ -218,6 +244,7 @@ class TestRateLimitError:
                 "instance": "/api/v1/companies",
             },
             retry_after=30,
+            remaining=0,
         )
 
         # Then: All properties are accessible
@@ -225,6 +252,7 @@ class TestRateLimitError:
         assert error.detail == "You are being rate limited."
         assert error.instance == "/api/v1/companies"
         assert error.retry_after == 30
+        assert error.remaining == 0
 
 
 class TestSpecificErrors:

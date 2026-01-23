@@ -7,14 +7,11 @@
         "loguru>=0.7.3",
         "pydantic[email]>=2.12.5",
     ]
-    description = "Add your description here"
+    description = "Async Python client library for the Valentina API"
     name = "vclient"
     readme = "README.md"
     requires-python = ">=3.14"
     version = "0.1.0"
-
-    [project.scripts]
-        vclient = "vclient:main"
 
 [build-system]
     build-backend = "uv_build"
@@ -43,7 +40,7 @@
         "shellcheck-py>=0.11.0.1",
         "typos>=1.42.1",
         "yamllint>=1.38.0",
-]
+    ]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"

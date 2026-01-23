@@ -19,14 +19,21 @@ from vclient.api.models import (
     CompanyPermissions,
     CompanySettings,
     CreateCompanyRequest,
+    CreateDeveloperRequest,
+    Developer,
+    DeveloperCompanyPermission,
+    DeveloperWithApiKey,
     GrantAccessRequest,
     PaginatedResponse,
     PermissionManageCampaign,
     PermissionsFreeTraitChanges,
     PermissionsGrantXP,
+    ServiceStatus,
+    SystemHealth,
     UpdateCompanyRequest,
+    UpdateDeveloperRequest,
 )
-from vclient.api.services import CompaniesService
+from vclient.api.services import CompaniesService, GlobalAdminService, SystemService
 
 __all__ = [
     "APIConfig",
@@ -40,7 +47,12 @@ __all__ = [
     "CompanySettings",
     "ConflictError",
     "CreateCompanyRequest",
+    "CreateDeveloperRequest",
+    "Developer",
+    "DeveloperCompanyPermission",
+    "DeveloperWithApiKey",
     "Endpoints",
+    "GlobalAdminService",
     "GrantAccessRequest",
     "NotFoundError",
     "PaginatedResponse",
@@ -49,7 +61,11 @@ __all__ = [
     "PermissionsGrantXP",
     "RateLimitError",
     "ServerError",
+    "ServiceStatus",
+    "SystemHealth",
+    "SystemService",
     "UpdateCompanyRequest",
+    "UpdateDeveloperRequest",
     "VClient",
     "ValidationError",
 ]

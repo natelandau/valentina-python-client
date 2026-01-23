@@ -23,3 +23,7 @@ HTTP_600_UPPER_BOUND = 600
 
 # Idempotency
 IDEMPOTENCY_KEY_HEADER = "Idempotency-Key"
+
+# Rate Limiting Headers
+RATE_LIMIT_HEADER = "RateLimit"
+RATE_LIMIT_POLICY_HEADER = "RateLimit-Policy"

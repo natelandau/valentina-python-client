@@ -23,6 +23,7 @@ class TestAPIConfig:
         assert config.timeout == DEFAULT_TIMEOUT
         assert config.max_retries == DEFAULT_MAX_RETRIES
         assert config.retry_delay == DEFAULT_RETRY_DELAY
+        assert config.auto_retry_rate_limit is True
         assert config.headers == {}
 
     def test_custom_values(self):
@@ -34,6 +35,7 @@ class TestAPIConfig:
             timeout=60.0,
             max_retries=5,
             retry_delay=2.0,
+            auto_retry_rate_limit=False,
             headers={"X-Custom": "value"},
         )
 
@@ -43,6 +45,7 @@ class TestAPIConfig:
         assert config.timeout == 60.0
         assert config.max_retries == 5
         assert config.retry_delay == 2.0
+        assert config.auto_retry_rate_limit is False
         assert config.headers == {"X-Custom": "value"}
 
     def test_trailing_slash_removed(self):

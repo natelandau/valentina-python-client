@@ -102,7 +102,7 @@ class CompaniesService(BaseService):
             NotFoundError: If the company does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = await self._get(Endpoints.company(company_id))
+        response = await self._get(Endpoints.COMPANY.format(company_id=company_id))
         return Company.model_validate(response.json())
 
     async def create(
@@ -180,7 +180,7 @@ class CompaniesService(BaseService):
         )
 
         response = await self._patch(
-            Endpoints.company(company_id),
+            Endpoints.COMPANY.format(company_id=company_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return Company.model_validate(response.json())
@@ -197,7 +197,7 @@ class CompaniesService(BaseService):
             NotFoundError: If the company does not exist.
             AuthorizationError: If you don't have owner-level access.
         """
-        await self._delete(Endpoints.company(company_id))
+        await self._delete(Endpoints.COMPANY.format(company_id=company_id))
 
     async def grant_access(
         self,
@@ -226,7 +226,7 @@ class CompaniesService(BaseService):
         body = GrantAccessRequest(developer_id=developer_id, permission=permission)
 
         response = await self._post(
-            Endpoints.company_access(company_id),
+            Endpoints.COMPANY_ACCESS.format(company_id=company_id),
             json=body.model_dump(mode="json"),
         )
         return CompanyPermissions.model_validate(response.json())

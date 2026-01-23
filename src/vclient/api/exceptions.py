@@ -103,6 +103,7 @@ class RateLimitError(APIError):
     """Raised when rate limit is exceeded (429 Too Many Requests).
 
     Check the `retry_after` property for the number of seconds to wait before retrying.
+    The `remaining` property shows how many tokens were left when the limit was hit.
     """
 
     def __init__(
@@ -112,6 +113,7 @@ class RateLimitError(APIError):
         response_data: dict[str, Any] | None = None,
         *,
         retry_after: int | None = None,
+        remaining: int | None = None,
     ) -> None:
         """Initialize the rate limit error.
 
@@ -119,19 +121,32 @@ class RateLimitError(APIError):
             message: Human-readable error message.
             status_code: HTTP status code from the response.
             response_data: Raw response data from the API (RFC 9457 Problem Details).
-            retry_after: Number of seconds to wait before retrying (from Retry-After header).
+            retry_after: Number of seconds to wait before retrying (from RateLimit or Retry-After header).
+            remaining: Number of tokens remaining in the bucket (from RateLimit header "r" parameter).
         """
         super().__init__(message, status_code, response_data)
         self._retry_after = retry_after
+        self._remaining = remaining
 
     @property
     def retry_after(self) -> int | None:
         """Get the number of seconds to wait before retrying.
 
         Returns:
-            Number of seconds from the Retry-After header, or None if not provided.
+            Number of seconds from the RateLimit header "t" parameter or Retry-After header,
+            or None if not provided.
         """
         return self._retry_after
+
+    @property
+    def remaining(self) -> int | None:
+        """Get the number of tokens remaining in the rate limit bucket.
+
+        Returns:
+            Number of remaining tokens from the RateLimit header "r" parameter,
+            or None if not provided.
+        """
+        return self._remaining
 
 
 class ServerError(APIError):

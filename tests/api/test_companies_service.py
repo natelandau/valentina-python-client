@@ -181,7 +181,7 @@ class TestCompaniesServiceGet:
         """Verify getting a company returns Company object."""
         # Given: A mocked company endpoint
         company_id = "507f1f77bcf86cd799439011"
-        route = respx.get(f"{base_url}{Endpoints.company(company_id)}").respond(
+        route = respx.get(f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}").respond(
             200, json=company_response_data
         )
 
@@ -200,7 +200,7 @@ class TestCompaniesServiceGet:
         """Verify getting non-existent company raises NotFoundError."""
         # Given: A mocked endpoint returning 404
         company_id = "nonexistent"
-        respx.get(f"{base_url}{Endpoints.company(company_id)}").respond(
+        respx.get(f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}").respond(
             404, json={"detail": "Company not found"}
         )
 
@@ -299,7 +299,7 @@ class TestCompaniesServiceUpdate:
         # Given: A mocked update endpoint
         company_id = "507f1f77bcf86cd799439011"
         updated_data = {**company_response_data, "name": "Updated Name"}
-        route = respx.patch(f"{base_url}{Endpoints.company(company_id)}").respond(
+        route = respx.patch(f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}").respond(
             200, json=updated_data
         )
 
@@ -323,7 +323,7 @@ class TestCompaniesServiceUpdate:
         """Verify updating company with settings object."""
         # Given: A mocked update endpoint
         company_id = "507f1f77bcf86cd799439011"
-        route = respx.patch(f"{base_url}{Endpoints.company(company_id)}").respond(
+        route = respx.patch(f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}").respond(
             200, json=company_response_data
         )
 
@@ -351,7 +351,7 @@ class TestCompaniesServiceUpdate:
         """Verify updating non-existent company raises NotFoundError."""
         # Given: A mocked endpoint returning 404
         company_id = "nonexistent"
-        respx.patch(f"{base_url}{Endpoints.company(company_id)}").respond(
+        respx.patch(f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}").respond(
             404, json={"detail": "Company not found"}
         )
 
@@ -364,7 +364,7 @@ class TestCompaniesServiceUpdate:
         """Verify updating without permission raises AuthorizationError."""
         # Given: A mocked endpoint returning 403
         company_id = "507f1f77bcf86cd799439011"
-        respx.patch(f"{base_url}{Endpoints.company(company_id)}").respond(
+        respx.patch(f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}").respond(
             403, json={"detail": "Admin access required"}
         )
 
@@ -381,7 +381,9 @@ class TestCompaniesServiceDelete:
         """Verify deleting a company."""
         # Given: A mocked delete endpoint
         company_id = "507f1f77bcf86cd799439011"
-        route = respx.delete(f"{base_url}{Endpoints.company(company_id)}").respond(204)
+        route = respx.delete(
+            f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}"
+        ).respond(204)
 
         # When: Deleting the company
         result = await vclient.companies.delete(company_id)
@@ -395,7 +397,7 @@ class TestCompaniesServiceDelete:
         """Verify deleting non-existent company raises NotFoundError."""
         # Given: A mocked endpoint returning 404
         company_id = "nonexistent"
-        respx.delete(f"{base_url}{Endpoints.company(company_id)}").respond(
+        respx.delete(f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}").respond(
             404, json={"detail": "Company not found"}
         )
 
@@ -408,7 +410,7 @@ class TestCompaniesServiceDelete:
         """Verify deleting without permission raises AuthorizationError."""
         # Given: A mocked endpoint returning 403
         company_id = "507f1f77bcf86cd799439011"
-        respx.delete(f"{base_url}{Endpoints.company(company_id)}").respond(
+        respx.delete(f"{base_url}{Endpoints.COMPANY.format(company_id=company_id)}").respond(
             403, json={"detail": "Owner access required"}
         )
 
@@ -426,7 +428,9 @@ class TestCompaniesServiceGrantAccess:
         # Given: A mocked grant access endpoint
         company_id = "507f1f77bcf86cd799439011"
         developer_id = "developer123"
-        route = respx.post(f"{base_url}{Endpoints.company_access(company_id)}").respond(
+        route = respx.post(
+            f"{base_url}{Endpoints.COMPANY_ACCESS.format(company_id=company_id)}"
+        ).respond(
             201,
             json={
                 "company_id": company_id,
@@ -460,7 +464,9 @@ class TestCompaniesServiceGrantAccess:
         # Given: A mocked grant access endpoint
         company_id = "507f1f77bcf86cd799439011"
         developer_id = "developer123"
-        route = respx.post(f"{base_url}{Endpoints.company_access(company_id)}").respond(
+        route = respx.post(
+            f"{base_url}{Endpoints.COMPANY_ACCESS.format(company_id=company_id)}"
+        ).respond(
             201,
             json={
                 "company_id": company_id,
@@ -484,7 +490,9 @@ class TestCompaniesServiceGrantAccess:
         # Given: A mocked grant access endpoint
         company_id = "507f1f77bcf86cd799439011"
         developer_id = "developer123"
-        route = respx.post(f"{base_url}{Endpoints.company_access(company_id)}").respond(
+        route = respx.post(
+            f"{base_url}{Endpoints.COMPANY_ACCESS.format(company_id=company_id)}"
+        ).respond(
             201,
             json={
                 "company_id": company_id,
@@ -507,7 +515,7 @@ class TestCompaniesServiceGrantAccess:
         """Verify granting access without permission raises AuthorizationError."""
         # Given: A mocked endpoint returning 403
         company_id = "507f1f77bcf86cd799439011"
-        respx.post(f"{base_url}{Endpoints.company_access(company_id)}").respond(
+        respx.post(f"{base_url}{Endpoints.COMPANY_ACCESS.format(company_id=company_id)}").respond(
             403, json={"detail": "Owner access required"}
         )
 

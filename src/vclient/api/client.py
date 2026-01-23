@@ -10,6 +10,8 @@ from vclient.api.constants import API_KEY, API_KEY_HEADER, DEFAULT_BASE_URL
 
 if TYPE_CHECKING:
     from vclient.api.services.companies import CompaniesService
+    from vclient.api.services.global_admin import GlobalAdminService
+    from vclient.api.services.system import SystemService
 
 
 class VClient:
@@ -53,6 +55,8 @@ class VClient:
 
         self._http: httpx.AsyncClient = self._create_http_client()
         self._companies: CompaniesService | None = None
+        self._global_admin: GlobalAdminService | None = None
+        self._system: SystemService | None = None
 
     def _create_http_client(self) -> httpx.AsyncClient:
         """Create and configure the HTTP client."""
@@ -105,3 +109,32 @@ class VClient:
 
             self._companies = CompaniesService(self)
         return self._companies
+
+    @property
+    def global_admin(self) -> "GlobalAdminService":
+        """Access the Global Admin service for managing developers.
+
+        Requires global admin privileges. Operations will fail with AuthorizationError
+        if the authenticated developer does not have global admin status.
+
+        Returns:
+            The GlobalAdminService instance for developer management operations.
+        """
+        if self._global_admin is None:
+            from vclient.api.services.global_admin import GlobalAdminService
+
+            self._global_admin = GlobalAdminService(self)
+        return self._global_admin
+
+    @property
+    def system(self) -> "SystemService":
+        """Access the System service for system-level operations.
+
+        Returns:
+            The SystemService instance for system operations like health checks.
+        """
+        if self._system is None:
+            from vclient.api.services.system import SystemService
+
+            self._system = SystemService(self)
+        return self._system
