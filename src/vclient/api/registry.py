@@ -1,0 +1,137 @@
+"""Default client registry and service factory functions.
+
+This module provides a way to access services from any module without passing
+the client explicitly. VClient automatically registers itself as the default
+when instantiated (unless `set_as_default=False` is passed).
+
+Example:
+    ```python
+    from vclient import VClient, companies_service
+
+    # Client auto-registers as default
+    client = VClient(api_key="...")
+
+    # Use services anywhere
+    async def some_function():
+        companies = companies_service()
+        return await companies.list_all()
+    ```
+"""
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from vclient.api.client import VClient
+    from vclient.api.services.companies import CompaniesService
+    from vclient.api.services.global_admin import GlobalAdminService
+    from vclient.api.services.system import SystemService
+
+_default_client: "VClient | None" = None
+
+
+def configure_default_client(client: "VClient") -> None:
+    """Configure the default client for service factory functions.
+
+    Note: This is called automatically when VClient is instantiated (unless
+    `set_as_default=False` is passed). You typically don't need to call this
+    directly unless you're switching between multiple clients.
+
+    Args:
+        client (VClient): The configured VClient instance to use as the default.
+
+    Example:
+        ```python
+        # Switch to a different client
+        client2 = VClient(api_key="other-key", set_as_default=False)
+        configure_default_client(client2)
+        ```
+    """
+    global _default_client  # noqa: PLW0603
+    _default_client = client
+
+
+def default_client() -> "VClient":
+    """Retrieve the configured default client.
+
+    Use this when you need direct access to the VClient instance that was
+    configured via `configure_default_client()`.
+
+    Returns:
+        VClient: The configured default client instance.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+    """
+    if _default_client is None:
+        msg = "No default client configured. Call configure_default_client() first."
+        raise RuntimeError(msg)
+    return _default_client
+
+
+def companies_service() -> "CompaniesService":
+    """Create a CompaniesService using the default client.
+
+    Provides access to company management operations (list, get, create, update, delete)
+    without needing to pass a client instance.
+
+    Returns:
+        CompaniesService: A service instance for company operations.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        companies = companies_service()
+        all_companies = await companies.list_all()
+        ```
+    """
+    from vclient.api.services.companies import CompaniesService
+
+    return CompaniesService(default_client())
+
+
+def global_admin_service() -> "GlobalAdminService":
+    """Create a GlobalAdminService using the default client.
+
+    Provides access to global admin operations (developer management, API keys)
+    without needing to pass a client instance. Requires global admin privileges.
+
+    Returns:
+        GlobalAdminService: A service instance for global admin operations.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        admins = global_admin_service()
+        developers = await admins.list_all()
+        ```
+    """
+    from vclient.api.services.global_admin import GlobalAdminService
+
+    return GlobalAdminService(default_client())
+
+
+def system_service() -> "SystemService":
+    """Create a SystemService using the default client.
+
+    Provides access to system-level operations (health checks, status)
+    without needing to pass a client instance.
+
+    Returns:
+        SystemService: A service instance for system operations.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        system = system_service()
+        health = await system.health()
+        ```
+    """
+    from vclient.api.services.system import SystemService
+
+    return SystemService(default_client())

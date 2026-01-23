@@ -33,6 +33,13 @@ from vclient.api.models import (
     UpdateCompanyRequest,
     UpdateDeveloperRequest,
 )
+from vclient.api.registry import (
+    companies_service,
+    configure_default_client,
+    default_client,
+    global_admin_service,
+    system_service,
+)
 from vclient.api.services import CompaniesService, GlobalAdminService, SystemService
 
 __all__ = [
@@ -68,4 +75,9 @@ __all__ = [
     "UpdateDeveloperRequest",
     "VClient",
     "ValidationError",
+    "companies_service",
+    "configure_default_client",
+    "default_client",
+    "global_admin_service",
+    "system_service",
 ]

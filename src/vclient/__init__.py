@@ -11,6 +11,11 @@ from vclient.api import (
     ServerError,
     ValidationError,
     VClient,
+    companies_service,
+    configure_default_client,
+    default_client,
+    global_admin_service,
+    system_service,
 )
 
 __all__ = [
@@ -24,4 +29,9 @@ __all__ = [
     "ServerError",
     "VClient",
     "ValidationError",
+    "companies_service",
+    "configure_default_client",
+    "default_client",
+    "global_admin_service",
+    "system_service",
 ]

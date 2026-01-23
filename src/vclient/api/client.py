@@ -20,11 +20,19 @@ class VClient:
     This is the main entry point for interacting with the API. It manages
     the HTTP session and provides access to domain-specific services.
 
+    By default, the client automatically registers itself as the default client
+    for use with factory functions like `companies_service()`.
+
     Example:
         ```python
-        async with VClient(base_url="https://api.example.com", api_key="...") as client:
-            # Use services here
-            pass
+        from vclient import VClient, companies_service
+
+        # Client auto-registers as default
+        client = VClient(api_key="...")
+
+        # Use factory functions from any module
+        companies = companies_service()
+        all_companies = await companies.list_all()
         ```
     """
 
@@ -35,6 +43,7 @@ class VClient:
         *,
         timeout: float = 30.0,
         config: APIConfig | None = None,
+        set_as_default: bool = True,
     ) -> None:
         """Initialize the API client.
 
@@ -43,6 +52,9 @@ class VClient:
             api_key: API key for authentication. Falls back to API_KEY constant.
             timeout: Request timeout in seconds.
             config: Optional APIConfig instance (overrides other parameters).
+            set_as_default: If True, register this client as the default for factory
+                functions. Set to False when creating multiple clients or when using
+                the context manager pattern exclusively.
         """
         if config is not None:
             self._config = config
@@ -57,6 +69,11 @@ class VClient:
         self._companies: CompaniesService | None = None
         self._global_admin: GlobalAdminService | None = None
         self._system: SystemService | None = None
+
+        if set_as_default:
+            from vclient.api.registry import configure_default_client
+
+            configure_default_client(self)
 
     def _create_http_client(self) -> httpx.AsyncClient:
         """Create and configure the HTTP client."""
