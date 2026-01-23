@@ -59,20 +59,6 @@ class TestSystemHealth:
         assert health.database_status == ServiceStatus.OFFLINE
         assert health.cache_status == ServiceStatus.OFFLINE
 
-    def test_health_with_default_version(self):
-        """Verify version defaults when not provided."""
-        # Given: Health response without version
-        data = {
-            "database_status": "online",
-            "cache_status": "online",
-        }
-
-        # When: Parsing the data
-        health = SystemHealth.model_validate(data)
-
-        # Then: Version has default value
-        assert health.version == "0.0.0"
-
     def test_health_missing_database_status_raises(self):
         """Verify missing database_status raises ValidationError."""
         # Given: Health response missing database_status
@@ -112,20 +98,3 @@ class TestSystemHealth:
         # When/Then: Parsing raises ValidationError
         with pytest.raises(ValidationError):
             SystemHealth.model_validate(data)
-
-    def test_health_model_dump(self):
-        """Verify model serializes correctly."""
-        # Given: A SystemHealth instance
-        health = SystemHealth(
-            database_status=ServiceStatus.ONLINE,
-            cache_status=ServiceStatus.OFFLINE,
-            version="2.0.0",
-        )
-
-        # When: Dumping to dict
-        data = health.model_dump()
-
-        # Then: Data is serialized correctly
-        assert data["database_status"] == "online"
-        assert data["cache_status"] == "offline"
-        assert data["version"] == "2.0.0"

@@ -34,7 +34,7 @@ async def main():
     async with VClient(api_key="your-api-key") as client:
         # Check system health
         health = await client.system.health()
-        print(f"API Version: {health.api_version}")
+        print(f"API Version: {health.version}")
         print(f"Database: {health.database_status}")
 
         # List companies you have access to

@@ -19,15 +19,12 @@ class SystemHealth(BaseModel):
     database and cache connectivity.
     """
 
-    database_status: ServiceStatus = Field(
-        ...,
+    database_status: str = Field(
         description="Current status of the database connection.",
     )
-    cache_status: ServiceStatus = Field(
-        ...,
+    cache_status: str = Field(
         description="Current status of the cache connection.",
     )
     version: str = Field(
-        default="0.0.0",
         description="Current API version.",
     )
