@@ -1,0 +1,35 @@
+"""Configuration for the API client."""
+
+from dataclasses import dataclass, field
+
+from vclient.api.constants import (
+    DEFAULT_BASE_URL,
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_RETRY_DELAY,
+    DEFAULT_TIMEOUT,
+)
+
+
+@dataclass
+class APIConfig:
+    """Configuration settings for the API client.
+
+    Attributes:
+        base_url: Base URL for the API.
+        api_key: API key for authentication.
+        timeout: Request timeout in seconds.
+        max_retries: Maximum number of retry attempts for failed requests.
+        retry_delay: Base delay between retries in seconds.
+    """
+
+    base_url: str = DEFAULT_BASE_URL
+    api_key: str | None = None
+    timeout: float = DEFAULT_TIMEOUT
+    max_retries: int = DEFAULT_MAX_RETRIES
+    retry_delay: float = DEFAULT_RETRY_DELAY
+    headers: dict[str, str] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Validate and normalize configuration."""
+        # Remove trailing slash from base_url
+        self.base_url = self.base_url.rstrip("/")

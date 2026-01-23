@@ -1,0 +1,25 @@
+"""Constants for the API client."""
+
+# Authentication
+API_KEY_HEADER = "X-API-KEY"
+API_KEY: str | None = None  # Set this to your API key or configure via APIConfig
+
+# API Base URL
+DEFAULT_BASE_URL = "https://api.valentina-noir.com"
+DEFAULT_API_VERSION = "v1"
+
+# Request defaults
+DEFAULT_TIMEOUT = 30.0
+DEFAULT_MAX_RETRIES = 3
+DEFAULT_RETRY_DELAY = 1.0
+
+# Pagination defaults
+DEFAULT_PAGE_LIMIT = 10
+MAX_PAGE_LIMIT = 100
+
+# HTTP Status Code Ranges (5xx Server Errors)
+HTTP_500_INTERNAL_SERVER_ERROR = 500
+HTTP_600_UPPER_BOUND = 600
+
+# Idempotency
+IDEMPOTENCY_KEY_HEADER = "Idempotency-Key"
