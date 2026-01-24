@@ -12,6 +12,12 @@ from vclient.api.models.companies import (
     PermissionLevel,
     UpdateCompanyRequest,
 )
+from vclient.api.models.developers import (
+    MeDeveloper,
+    MeDeveloperCompanyPermission,
+    MeDeveloperWithApiKey,
+    UpdateMeDeveloperRequest,
+)
 from vclient.api.models.global_admin import (
     CreateDeveloperRequest,
     Developer,
@@ -35,10 +41,14 @@ __all__ = [
     "GrantAccessRequest",
     "GrantXPPermission",
     "ManageCampaignPermission",
+    "MeDeveloper",
+    "MeDeveloperCompanyPermission",
+    "MeDeveloperWithApiKey",
     "PaginatedResponse",
     "PermissionLevel",
     "ServiceStatus",
     "SystemHealth",
     "UpdateCompanyRequest",
     "UpdateDeveloperRequest",
+    "UpdateMeDeveloperRequest",
 ]

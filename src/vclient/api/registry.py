@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from vclient.api.client import VClient
     from vclient.api.services.companies import CompaniesService
+    from vclient.api.services.developers import DeveloperService
     from vclient.api.services.global_admin import GlobalAdminService
     from vclient.api.services.system import SystemService
 
@@ -89,6 +90,29 @@ def companies_service() -> "CompaniesService":
     from vclient.api.services.companies import CompaniesService
 
     return CompaniesService(default_client())
+
+
+def developer_service() -> "DeveloperService":
+    """Create a DeveloperService using the default client.
+
+    Provides access to self-service developer operations (view profile, update profile,
+    regenerate API key) without needing to pass a client instance.
+
+    Returns:
+        DeveloperService: A service instance for developer self-service operations.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        developer = developer_service()
+        me = await developer.get_me()
+        ```
+    """
+    from vclient.api.services.developers import DeveloperService
+
+    return DeveloperService(default_client())
 
 
 def global_admin_service() -> "GlobalAdminService":

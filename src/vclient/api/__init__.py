@@ -27,21 +27,31 @@ from vclient.api.models import (
     GrantAccessRequest,
     GrantXPPermission,
     ManageCampaignPermission,
+    MeDeveloper,
+    MeDeveloperCompanyPermission,
+    MeDeveloperWithApiKey,
     PaginatedResponse,
     PermissionLevel,
     ServiceStatus,
     SystemHealth,
     UpdateCompanyRequest,
     UpdateDeveloperRequest,
+    UpdateMeDeveloperRequest,
 )
 from vclient.api.registry import (
     companies_service,
     configure_default_client,
     default_client,
+    developer_service,
     global_admin_service,
     system_service,
 )
-from vclient.api.services import CompaniesService, GlobalAdminService, SystemService
+from vclient.api.services import (
+    CompaniesService,
+    DeveloperService,
+    GlobalAdminService,
+    SystemService,
+)
 
 __all__ = [
     "APIConfig",
@@ -57,6 +67,7 @@ __all__ = [
     "CreateDeveloperRequest",
     "Developer",
     "DeveloperCompanyPermission",
+    "DeveloperService",
     "DeveloperWithApiKey",
     "Endpoints",
     "FreeTraitChangesPermission",
@@ -64,6 +75,9 @@ __all__ = [
     "GrantAccessRequest",
     "GrantXPPermission",
     "ManageCampaignPermission",
+    "MeDeveloper",
+    "MeDeveloperCompanyPermission",
+    "MeDeveloperWithApiKey",
     "NotFoundError",
     "PaginatedResponse",
     "PermissionLevel",
@@ -75,11 +89,13 @@ __all__ = [
     "SystemService",
     "UpdateCompanyRequest",
     "UpdateDeveloperRequest",
+    "UpdateMeDeveloperRequest",
     "VClient",
     "ValidationError",
     "companies_service",
     "configure_default_client",
     "default_client",
+    "developer_service",
     "global_admin_service",
     "system_service",
 ]

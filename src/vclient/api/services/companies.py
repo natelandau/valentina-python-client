@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 
 from pydantic import ValidationError as PydanticValidationError
 
+from vclient.api.constants import DEFAULT_PAGE_LIMIT
 from vclient.api.endpoints import Endpoints
 from vclient.api.exceptions import RequestValidationError
 from vclient.api.models.companies import (
@@ -34,7 +35,7 @@ class CompaniesService(BaseService):
     async def get_page(
         self,
         *,
-        limit: int = 10,
+        limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
     ) -> PaginatedResponse[Company]:
         """Retrieve a paginated page of companies you have access to.

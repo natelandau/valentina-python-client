@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING, Self
 import httpx
 
 from vclient.api.config import APIConfig
-from vclient.api.constants import API_KEY, API_KEY_HEADER, DEFAULT_BASE_URL
+from vclient.api.constants import API_KEY_HEADER
 
 if TYPE_CHECKING:
     from vclient.api.services.companies import CompaniesService
+    from vclient.api.services.developers import DeveloperService
     from vclient.api.services.global_admin import GlobalAdminService
     from vclient.api.services.system import SystemService
 
@@ -48,8 +49,8 @@ class VClient:
         """Initialize the API client.
 
         Args:
-            base_url: Base URL for the API. Defaults to DEFAULT_BASE_URL.
-            api_key: API key for authentication. Falls back to API_KEY constant.
+            base_url: Base URL for the API.
+            api_key: API key for authentication.
             timeout: Request timeout in seconds.
             config: Optional APIConfig instance (overrides other parameters).
             set_as_default: If True, register this client as the default for factory
@@ -59,14 +60,22 @@ class VClient:
         if config is not None:
             self._config = config
         else:
+            if base_url is None:
+                msg = "base_url is required"
+                raise ValueError(msg)
+            if api_key is None:
+                msg = "api_key is required"
+                raise ValueError(msg)
+
             self._config = APIConfig(
-                base_url=base_url or DEFAULT_BASE_URL,
-                api_key=api_key or API_KEY,
+                base_url=base_url,
+                api_key=api_key,
                 timeout=timeout,
             )
 
         self._http: httpx.AsyncClient = self._create_http_client()
         self._companies: CompaniesService | None = None
+        self._developer: DeveloperService | None = None
         self._global_admin: GlobalAdminService | None = None
         self._system: SystemService | None = None
 
@@ -126,6 +135,22 @@ class VClient:
 
             self._companies = CompaniesService(self)
         return self._companies
+
+    @property
+    def developer(self) -> "DeveloperService":
+        """Access the Developer service for managing your own profile.
+
+        Provides methods to view and update your developer account,
+        as well as regenerate your API key.
+
+        Returns:
+            The DeveloperService instance for self-service operations.
+        """
+        if self._developer is None:
+            from vclient.api.services.developers import DeveloperService
+
+            self._developer = DeveloperService(self)
+        return self._developer
 
     @property
     def global_admin(self) -> "GlobalAdminService":

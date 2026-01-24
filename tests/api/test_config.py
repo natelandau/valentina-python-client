@@ -1,30 +1,10 @@
 """Tests for vclient.api.config."""
 
 from vclient.api.config import APIConfig
-from vclient.api.constants import (
-    DEFAULT_BASE_URL,
-    DEFAULT_MAX_RETRIES,
-    DEFAULT_RETRY_DELAY,
-    DEFAULT_TIMEOUT,
-)
 
 
 class TestAPIConfig:
     """Tests for APIConfig dataclass."""
-
-    def test_default_values(self):
-        """Verify default values are applied."""
-        # When: Creating a config with no arguments
-        config = APIConfig()
-
-        # Then: Default values are used
-        assert config.base_url == DEFAULT_BASE_URL
-        assert config.api_key is None
-        assert config.timeout == DEFAULT_TIMEOUT
-        assert config.max_retries == DEFAULT_MAX_RETRIES
-        assert config.retry_delay == DEFAULT_RETRY_DELAY
-        assert config.auto_retry_rate_limit is True
-        assert config.headers == {}
 
     def test_custom_values(self):
         """Verify custom values are stored."""
@@ -51,7 +31,7 @@ class TestAPIConfig:
     def test_trailing_slash_removed(self):
         """Verify trailing slashes are removed from base_url."""
         # When: Creating a config with trailing slash
-        config = APIConfig(base_url="https://api.example.com/")
+        config = APIConfig(base_url="https://api.example.com/", api_key="my-key")
 
         # Then: Trailing slash is removed
         assert config.base_url == "https://api.example.com"
@@ -59,7 +39,7 @@ class TestAPIConfig:
     def test_multiple_trailing_slashes_removed(self):
         """Verify multiple trailing slashes are removed."""
         # When: Creating a config with multiple trailing slashes
-        config = APIConfig(base_url="https://api.example.com///")
+        config = APIConfig(base_url="https://api.example.com///", api_key="my-key")
 
         # Then: All trailing slashes are removed
         assert config.base_url == "https://api.example.com"
@@ -67,7 +47,7 @@ class TestAPIConfig:
     def test_no_slash_unchanged(self):
         """Verify URLs without trailing slash are unchanged."""
         # When: Creating a config without trailing slash
-        config = APIConfig(base_url="https://api.example.com")
+        config = APIConfig(base_url="https://api.example.com", api_key="my-key")
 
         # Then: URL is unchanged
         assert config.base_url == "https://api.example.com"

@@ -2,11 +2,7 @@
 
 # Authentication
 API_KEY_HEADER = "X-API-KEY"
-API_KEY: str | None = None  # Set this to your API key or configure via APIConfig
 
-# API Base URL
-DEFAULT_BASE_URL = "https://api.valentina-noir.com"
-DEFAULT_API_VERSION = "v1"
 
 # Request defaults
 DEFAULT_TIMEOUT = 30.0

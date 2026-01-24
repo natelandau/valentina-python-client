@@ -3,7 +3,6 @@
 from dataclasses import dataclass, field
 
 from vclient.api.constants import (
-    DEFAULT_BASE_URL,
     DEFAULT_MAX_RETRIES,
     DEFAULT_RETRY_DELAY,
     DEFAULT_TIMEOUT,
@@ -23,8 +22,8 @@ class APIConfig:
         auto_retry_rate_limit: Automatically retry requests that hit rate limits (429).
     """
 
-    base_url: str = DEFAULT_BASE_URL
-    api_key: str | None = None
+    base_url: str
+    api_key: str
     timeout: float = DEFAULT_TIMEOUT
     max_retries: int = DEFAULT_MAX_RETRIES
     retry_delay: float = DEFAULT_RETRY_DELAY

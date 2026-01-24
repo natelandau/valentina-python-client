@@ -7,16 +7,15 @@ from pydantic import BaseModel, Field
 
 # Type aliases for permission levels (replaces StrEnum classes)
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
-"""Permission levels for company access."""
+
 
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
-"""Permissions for managing a campaign."""
+
 
 GrantXPPermission = Literal["UNRESTRICTED", "PLAYER", "STORYTELLER"]
-"""Permissions for adding XP to a character."""
+
 
 FreeTraitChangesPermission = Literal["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"]
-"""Permissions for updating character trait values."""
 
 
 class CompanySettings(BaseModel):

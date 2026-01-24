@@ -97,6 +97,7 @@ client = VClient(config=config)
 |---------|------------------|-------------|
 | [System Service](docs/system-service.md) | `system_service()` | Health checks and system status |
 | [Companies Service](docs/companies-service.md) | `companies_service()` | Manage companies and permissions |
+| [Developers Service](docs/developers-service.md) | `developer_service()` | Manage your own developer profile |
 | [Global Admin Service](docs/global-admin-service.md) | `global_admin_service()` | Manage developer accounts (requires admin) |
 
 ## Error Handling

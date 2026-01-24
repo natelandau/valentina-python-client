@@ -1,8 +1,8 @@
 """Tests for vclient.api.exceptions."""
 
 import pytest
-
-from pydantic import BaseModel, Field, ValidationError as PydanticValidationError
+from pydantic import BaseModel, Field
+from pydantic import ValidationError as PydanticValidationError
 
 from vclient.api.exceptions import (
     APIError,
@@ -366,12 +366,16 @@ class TestRequestValidationError:
         class TestModel(BaseModel):
             name: str = Field(min_length=3)
 
-        # When/Then: RequestValidationError can be raised and caught
+        # When: Creating a RequestValidationError from Pydantic error
+        pydantic_error = None
+        try:
+            TestModel(name="ab")
+        except PydanticValidationError as e:
+            pydantic_error = e
+
+        # Then: RequestValidationError can be raised and caught
         with pytest.raises(RequestValidationError) as exc_info:
-            try:
-                TestModel(name="ab")
-            except PydanticValidationError as e:
-                raise RequestValidationError(e) from e
+            raise RequestValidationError(pydantic_error)  # ty:ignore[invalid-argument-type]
 
         assert "Request validation failed" in str(exc_info.value)
 
@@ -382,12 +386,16 @@ class TestRequestValidationError:
         class TestModel(BaseModel):
             name: str = Field(min_length=3)
 
-        # When/Then: RequestValidationError can be caught as APIError
+        # When: Creating a RequestValidationError from Pydantic error
+        pydantic_error = None
+        try:
+            TestModel(name="ab")
+        except PydanticValidationError as e:
+            pydantic_error = e
+
+        # Then: RequestValidationError can be caught as APIError
         with pytest.raises(APIError):
-            try:
-                TestModel(name="ab")
-            except PydanticValidationError as e:
-                raise RequestValidationError(e) from e
+            raise RequestValidationError(pydantic_error)  # ty:ignore[invalid-argument-type]
 
 
 class TestRateLimitError:
@@ -544,11 +552,14 @@ class TestSpecificErrors:
 
     def test_can_raise_and_catch_rate_limit_error(self):
         """Verify RateLimitError can be raised and caught with retry_after."""
+        # Given: Error message and parameters
+        msg = "Too many requests"
+
         # When/Then: RateLimitError can be raised with retry_after
         with pytest.raises(RateLimitError) as exc_info:
-            raise RateLimitError("Too many requests", status_code=429, retry_after=60)
+            raise RateLimitError(msg, status_code=429, retry_after=60)
 
-        assert "Too many requests" in str(exc_info.value)
+        assert msg in str(exc_info.value)
         assert exc_info.value.retry_after == 60
 
     def test_catch_specific_error_as_api_error(self):

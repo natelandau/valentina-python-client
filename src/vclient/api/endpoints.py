@@ -32,3 +32,7 @@ class Endpoints:
     ADMIN_DEVELOPERS = f"{_BASE}/admin/developers"
     ADMIN_DEVELOPER = f"{_BASE}/admin/developers/{{developer_id}}"
     ADMIN_DEVELOPER_NEW_KEY = f"{_BASE}/admin/developers/{{developer_id}}/new-key"
+
+    # Developer endpoints (self-service)
+    DEVELOPER_ME = f"{_BASE}/developers/me"
+    DEVELOPER_ME_NEW_KEY = f"{_BASE}/developers/me/new-key"

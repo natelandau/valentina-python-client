@@ -155,6 +155,7 @@
             "PLC0415", # Imports should be at top of file
             "PLR0913",
             "PLR2004",
+            "PT011",   # set the `match` parameter or use a more specific exception
             "S101",
             "SLF001",  # Calling private method
             "W292",    # No blank line at end of file - included b/c cursor struggles to add a trailing newline and burns through requests trying to fix this linting error.

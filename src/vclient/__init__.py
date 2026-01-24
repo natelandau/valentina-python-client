@@ -14,6 +14,7 @@ from vclient.api import (
     companies_service,
     configure_default_client,
     default_client,
+    developer_service,
     global_admin_service,
     system_service,
 )
@@ -32,6 +33,7 @@ __all__ = [
     "companies_service",
     "configure_default_client",
     "default_client",
+    "developer_service",
     "global_admin_service",
     "system_service",
 ]

@@ -134,7 +134,7 @@ class BaseService:
 
             try:
                 self._raise_for_status(response)
-                return response
+                return response  # noqa: TRY300
             except RateLimitError as e:
                 last_error = e
 

@@ -6,6 +6,8 @@ See: https://docs.valentina-noir.com/technical/errors/
 
 from typing import TYPE_CHECKING, Any
 
+from pydantic_core import ErrorDetails
+
 if TYPE_CHECKING:
     from pydantic import ValidationError as PydanticValidationError
 
@@ -60,7 +62,7 @@ class APIError(Exception):
             parts.append(self.message)
 
         # Add detail if different from title/message
-        if self.detail and self.detail != self.message and self.detail != self.title:
+        if self.detail and self.detail not in (self.message, self.title):
             parts.append(f"Detail: {self.detail}")
 
         # Add instance URI for debugging
@@ -165,7 +167,7 @@ class RequestValidationError(APIError):
         self._pydantic_error = pydantic_error
 
     @property
-    def errors(self) -> list[dict[str, Any]]:
+    def errors(self) -> list[ErrorDetails]:
         """Get structured validation errors from Pydantic.
 
         Returns:

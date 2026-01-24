@@ -4,7 +4,6 @@ import pytest
 
 from vclient.api import VClient
 from vclient.api.registry import (
-    _default_client,
     companies_service,
     configure_default_client,
     default_client,
@@ -20,7 +19,7 @@ from vclient.api.services.system import SystemService
 def reset_default_client():
     """Reset the default client before and after each test."""
     # Given: Clear any existing default client
-    import vclient.api.registry as registry
+    from vclient.api import registry
 
     registry._default_client = None
     yield
@@ -40,7 +39,7 @@ class TestConfigureDefaultClient:
         configure_default_client(client)
 
         # Then: The client is stored
-        import vclient.api.registry as registry
+        from vclient.api import registry
 
         assert registry._default_client is client
 
@@ -55,7 +54,7 @@ class TestConfigureDefaultClient:
         configure_default_client(client2)
 
         # Then: The second client is stored
-        import vclient.api.registry as registry
+        from vclient.api import registry
 
         assert registry._default_client is client2
 
