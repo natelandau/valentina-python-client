@@ -6,8 +6,10 @@ from vclient.api.constants import DEFAULT_PAGE_LIMIT
 from vclient.api.endpoints import Endpoints
 from vclient.api.models.pagination import PaginatedResponse
 from vclient.api.models.users import (
+    CampaignExperience,
     CreateUserRequest,
     DiscordProfile,
+    ExperienceAddRemoveRequest,
     RollStatistics,
     S3Asset,
     UpdateUserRequest,
@@ -364,3 +366,150 @@ class UsersService(BaseService):
         await self._delete(
             Endpoints.USER_ASSET.format(company_id=company_id, user_id=user_id, asset_id=asset_id)
         )
+
+    # -------------------------------------------------------------------------
+    # Experience Methods
+    # -------------------------------------------------------------------------
+
+    async def get_experience(
+        self,
+        company_id: str,
+        user_id: str,
+        campaign_id: str,
+    ) -> CampaignExperience:
+        """Retrieve a user's experience points and cool points for a specific campaign.
+
+        Creates the experience record automatically if it doesn't exist for the campaign.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user to get experience for.
+            campaign_id: The ID of the campaign to get experience for.
+
+        Returns:
+            CampaignExperience object with xp_current, xp_total, and cool_points.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        response = await self._get(
+            Endpoints.USER_EXPERIENCE_CAMPAIGN.format(
+                company_id=company_id, user_id=user_id, campaign_id=campaign_id
+            )
+        )
+        return CampaignExperience.model_validate(response.json())
+
+    async def add_xp(
+        self,
+        company_id: str,
+        user_id: str,
+        campaign_id: str,
+        amount: int,
+    ) -> CampaignExperience:
+        """Award experience points to a user for a specific campaign.
+
+        The XP is added to both the current XP pool (available for spending) and
+        the total XP tracker (lifetime earned).
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user to award XP to.
+            campaign_id: The ID of the campaign to add XP for.
+            amount: The amount of XP to add.
+
+        Returns:
+            Updated CampaignExperience object.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+            RequestValidationError: If the input parameters fail client-side validation.
+        """
+        body = self._validate_request(
+            ExperienceAddRemoveRequest,
+            amount=amount,
+            user_id=user_id,
+            campaign_id=campaign_id,
+        )
+        response = await self._post(
+            Endpoints.USER_EXPERIENCE_XP_ADD.format(company_id=company_id, user_id=user_id),
+            json=body.model_dump(mode="json"),
+        )
+        return CampaignExperience.model_validate(response.json())
+
+    async def remove_xp(
+        self,
+        company_id: str,
+        user_id: str,
+        campaign_id: str,
+        amount: int,
+    ) -> CampaignExperience:
+        """Deduct experience points from a user's current XP pool.
+
+        Returns an error if the user has insufficient XP to complete the deduction.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user to remove XP from.
+            campaign_id: The ID of the campaign to remove XP for.
+            amount: The amount of XP to remove.
+
+        Returns:
+            Updated CampaignExperience object.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the user has insufficient XP.
+        """
+        body = self._validate_request(
+            ExperienceAddRemoveRequest,
+            amount=amount,
+            user_id=user_id,
+            campaign_id=campaign_id,
+        )
+        response = await self._post(
+            Endpoints.USER_EXPERIENCE_XP_REMOVE.format(company_id=company_id, user_id=user_id),
+            json=body.model_dump(mode="json"),
+        )
+        return CampaignExperience.model_validate(response.json())
+
+    async def add_cool_points(
+        self,
+        company_id: str,
+        user_id: str,
+        campaign_id: str,
+        amount: int,
+    ) -> CampaignExperience:
+        """Award cool points to a user for a specific campaign.
+
+        Cool points are converted to XP automatically based on the company's
+        configured exchange rate.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user to award cool points to.
+            campaign_id: The ID of the campaign to add cool points for.
+            amount: The amount of cool points to add.
+
+        Returns:
+            Updated CampaignExperience object.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+            RequestValidationError: If the input parameters fail client-side validation.
+        """
+        body = self._validate_request(
+            ExperienceAddRemoveRequest,
+            amount=amount,
+            user_id=user_id,
+            campaign_id=campaign_id,
+        )
+        response = await self._post(
+            Endpoints.USER_EXPERIENCE_CP_ADD.format(company_id=company_id, user_id=user_id),
+            json=body.model_dump(mode="json"),
+        )
+        return CampaignExperience.model_validate(response.json())

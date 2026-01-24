@@ -7,6 +7,7 @@ from vclient.api.endpoints import Endpoints
 from vclient.api.exceptions import AuthorizationError, NotFoundError, RequestValidationError
 from vclient.api.models.pagination import PaginatedResponse
 from vclient.api.models.users import (
+    CampaignExperience,
     DiscordProfile,
     RollStatistics,
     S3Asset,
@@ -80,6 +81,17 @@ def asset_response_data() -> dict:
         "public_url": "https://example.com/avatar.png",
         "uploaded_by": "user123",
         "parent_type": "user",
+    }
+
+
+@pytest.fixture
+def experience_response_data() -> dict:
+    """Return sample experience response data."""
+    return {
+        "campaign_id": "campaign123",
+        "xp_current": 50,
+        "xp_total": 100,
+        "cool_points": 5,
     }
 
 
@@ -590,6 +602,192 @@ class TestUsersServiceDeleteAsset:
         # When/Then: Deleting raises AuthorizationError
         with pytest.raises(AuthorizationError):
             await vclient.users.delete_asset(company_id, user_id, asset_id)
+
+
+class TestUsersServiceGetExperience:
+    """Tests for UsersService.get_experience method."""
+
+    @respx.mock
+    async def test_get_experience(self, vclient, base_url, experience_response_data):
+        """Verify getting user experience for a campaign."""
+        # Given: A mocked experience endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USER_EXPERIENCE_CAMPAIGN.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id)}"
+        ).respond(200, json=experience_response_data)
+
+        # When: Getting experience
+        result = await vclient.users.get_experience(company_id, user_id, campaign_id)
+
+        # Then: Returns CampaignExperience object
+        assert route.called
+        assert isinstance(result, CampaignExperience)
+        assert result.campaign_id == "campaign123"
+        assert result.xp_current == 50
+        assert result.xp_total == 100
+        assert result.cool_points == 5
+
+    @respx.mock
+    async def test_get_experience_not_found(self, vclient, base_url):
+        """Verify getting experience for non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        campaign_id = "campaign123"
+        respx.get(
+            f"{base_url}{Endpoints.USER_EXPERIENCE_CAMPAIGN.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Getting experience raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.get_experience(company_id, user_id, campaign_id)
+
+
+class TestUsersServiceAddXp:
+    """Tests for UsersService.add_xp method."""
+
+    @respx.mock
+    async def test_add_xp(self, vclient, base_url, experience_response_data):
+        """Verify adding XP to a user."""
+        # Given: A mocked add XP endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        updated_data = {**experience_response_data, "xp_current": 150, "xp_total": 200}
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_EXPERIENCE_XP_ADD.format(company_id=company_id, user_id=user_id)}"
+        ).respond(201, json=updated_data)
+
+        # When: Adding XP
+        result = await vclient.users.add_xp(company_id, user_id, campaign_id, amount=100)
+
+        # Then: Returns updated CampaignExperience object
+        assert route.called
+        assert isinstance(result, CampaignExperience)
+        assert result.xp_current == 150
+        assert result.xp_total == 200
+
+        # Verify request body
+        request = route.calls.last.request
+        import json
+
+        body = json.loads(request.content)
+        assert body["amount"] == 100
+        assert body["user_id"] == user_id
+        assert body["campaign_id"] == campaign_id
+
+    @respx.mock
+    async def test_add_xp_not_found(self, vclient, base_url):
+        """Verify adding XP to non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        campaign_id = "campaign123"
+        respx.post(
+            f"{base_url}{Endpoints.USER_EXPERIENCE_XP_ADD.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Adding XP raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.add_xp(company_id, user_id, campaign_id, amount=100)
+
+
+class TestUsersServiceRemoveXp:
+    """Tests for UsersService.remove_xp method."""
+
+    @respx.mock
+    async def test_remove_xp(self, vclient, base_url, experience_response_data):
+        """Verify removing XP from a user."""
+        # Given: A mocked remove XP endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        updated_data = {**experience_response_data, "xp_current": 25}
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_EXPERIENCE_XP_REMOVE.format(company_id=company_id, user_id=user_id)}"
+        ).respond(201, json=updated_data)
+
+        # When: Removing XP
+        result = await vclient.users.remove_xp(company_id, user_id, campaign_id, amount=25)
+
+        # Then: Returns updated CampaignExperience object
+        assert route.called
+        assert isinstance(result, CampaignExperience)
+        assert result.xp_current == 25
+
+        # Verify request body
+        request = route.calls.last.request
+        import json
+
+        body = json.loads(request.content)
+        assert body["amount"] == 25
+        assert body["user_id"] == user_id
+        assert body["campaign_id"] == campaign_id
+
+    @respx.mock
+    async def test_remove_xp_not_found(self, vclient, base_url):
+        """Verify removing XP from non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        campaign_id = "campaign123"
+        respx.post(
+            f"{base_url}{Endpoints.USER_EXPERIENCE_XP_REMOVE.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Removing XP raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.remove_xp(company_id, user_id, campaign_id, amount=25)
+
+
+class TestUsersServiceAddCoolPoints:
+    """Tests for UsersService.add_cool_points method."""
+
+    @respx.mock
+    async def test_add_cool_points(self, vclient, base_url, experience_response_data):
+        """Verify adding cool points to a user."""
+        # Given: A mocked add CP endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        updated_data = {**experience_response_data, "cool_points": 10}
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_EXPERIENCE_CP_ADD.format(company_id=company_id, user_id=user_id)}"
+        ).respond(201, json=updated_data)
+
+        # When: Adding cool points
+        result = await vclient.users.add_cool_points(company_id, user_id, campaign_id, amount=5)
+
+        # Then: Returns updated CampaignExperience object
+        assert route.called
+        assert isinstance(result, CampaignExperience)
+        assert result.cool_points == 10
+
+        # Verify request body
+        request = route.calls.last.request
+        import json
+
+        body = json.loads(request.content)
+        assert body["amount"] == 5
+        assert body["user_id"] == user_id
+        assert body["campaign_id"] == campaign_id
+
+    @respx.mock
+    async def test_add_cool_points_not_found(self, vclient, base_url):
+        """Verify adding cool points to non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        campaign_id = "campaign123"
+        respx.post(
+            f"{base_url}{Endpoints.USER_EXPERIENCE_CP_ADD.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Adding cool points raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.add_cool_points(company_id, user_id, campaign_id, amount=5)
 
 
 class TestUsersServiceClientIntegration:
