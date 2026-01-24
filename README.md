@@ -1,4 +1,4 @@
-# vclient
+# Valentina Python Client
 
 Async Python client library for accessing the Valentina Noir API. Documentation can be found at [https://docs.valentina-noir.com](https://docs.valentina-noir.com) and full API reference can be found at [https://api.valentina-noir.com/docs](https://api.valentina-noir.com/docs).
 
@@ -8,10 +8,10 @@ Async Python client library for accessing the Valentina Noir API. Documentation 
 
 ```bash
 # Using uv
-uv add git+https://github.com/username/valentina-api-client.git
+uv add git+https://github.com/natelandau/valentina-python-client.git
 
 # Using pip
-pip install git+https://github.com/username/valentina-api-client.git
+pip install git+https://github.com/natelandau/valentina-python-client.git
 ```
 
 ## Quick Start

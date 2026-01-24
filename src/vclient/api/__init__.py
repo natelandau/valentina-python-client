@@ -10,6 +10,7 @@ from vclient.api.exceptions import (
     ConflictError,
     NotFoundError,
     RateLimitError,
+    RequestValidationError,
     ServerError,
     ValidationError,
 )
@@ -67,6 +68,7 @@ __all__ = [
     "PaginatedResponse",
     "PermissionLevel",
     "RateLimitError",
+    "RequestValidationError",
     "ServerError",
     "ServiceStatus",
     "SystemHealth",

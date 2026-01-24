@@ -4,7 +4,10 @@ Exceptions follow RFC 9457 Problem Details format for HTTP APIs.
 See: https://docs.valentina-noir.com/technical/errors/
 """
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from pydantic import ValidationError as PydanticValidationError
 
 
 class APIError(Exception):
@@ -97,6 +100,39 @@ class ValidationError(APIError):
             List of dicts with 'field' and 'message' keys describing validation failures.
         """
         return self.response_data.get("invalid_parameters", [])
+
+
+class RequestValidationError(APIError):
+    """Raised when request data fails client-side validation.
+
+    This occurs before the API request is made, when input parameters
+    don't meet the expected format or constraints. Unlike `ValidationError`,
+    which is raised for server-side validation failures (HTTP 400), this
+    exception is raised locally before any network request.
+    """
+
+    def __init__(self, pydantic_error: "PydanticValidationError") -> None:
+        """Initialize the request validation error.
+
+        Args:
+            pydantic_error: The Pydantic ValidationError that triggered this exception.
+        """
+        errors = pydantic_error.errors()
+        error_details = "; ".join(
+            f"{'.'.join(str(loc) for loc in err['loc'])}: {err['msg']}" for err in errors
+        )
+        message = f"Request validation failed: {error_details}"
+        super().__init__(message, status_code=None, response_data=None)
+        self._pydantic_error = pydantic_error
+
+    @property
+    def errors(self) -> list[dict[str, Any]]:
+        """Get structured validation errors from Pydantic.
+
+        Returns:
+            List of error dictionaries with 'type', 'loc', 'msg', and 'input' keys.
+        """
+        return self._pydantic_error.errors()
 
 
 class RateLimitError(APIError):

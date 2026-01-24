@@ -2,7 +2,10 @@
 
 from collections.abc import AsyncIterator
 
+from pydantic import ValidationError as PydanticValidationError
+
 from vclient.api.endpoints import Endpoints
+from vclient.api.exceptions import RequestValidationError
 from vclient.api.models.global_admin import (
     CreateDeveloperRequest,
     Developer,
@@ -145,14 +148,18 @@ class GlobalAdminService(BaseService):
             The newly created Developer object.
 
         Raises:
+            RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
             AuthorizationError: If you don't have global admin privileges.
         """
-        body = CreateDeveloperRequest(
-            username=username,
-            email=email,
-            is_global_admin=is_global_admin,
-        )
+        try:
+            body = CreateDeveloperRequest(
+                username=username,
+                email=email,
+                is_global_admin=is_global_admin,
+            )
+        except PydanticValidationError as e:
+            raise RequestValidationError(e) from e
 
         response = await self._post(
             Endpoints.ADMIN_DEVELOPERS,
@@ -184,13 +191,17 @@ class GlobalAdminService(BaseService):
         Raises:
             NotFoundError: If the developer does not exist.
             AuthorizationError: If you don't have global admin privileges.
+            RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = UpdateDeveloperRequest(
-            username=username,
-            email=email,
-            is_global_admin=is_global_admin,
-        )
+        try:
+            body = UpdateDeveloperRequest(
+                username=username,
+                email=email,
+                is_global_admin=is_global_admin,
+            )
+        except PydanticValidationError as e:
+            raise RequestValidationError(e) from e
 
         response = await self._patch(
             Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id),

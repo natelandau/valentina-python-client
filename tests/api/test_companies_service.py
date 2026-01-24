@@ -2,10 +2,9 @@
 
 import pytest
 import respx
-from pydantic import ValidationError as PydanticValidationError
 
 from vclient.api.endpoints import Endpoints
-from vclient.api.exceptions import AuthorizationError, NotFoundError
+from vclient.api.exceptions import AuthorizationError, NotFoundError, RequestValidationError
 from vclient.api.models.companies import (
     Company,
     CompanyPermissions,
@@ -278,12 +277,14 @@ class TestCompaniesServiceCreate:
         assert body["settings"]["permission_free_trait_changes"] == "WITHIN_24_HOURS"
 
     async def test_create_company_validation_error(self, vclient):
-        """Verify validation error on invalid data raises PydanticValidationError."""
-        # When/Then: Creating with invalid data raises PydanticValidationError (client-side validation)
-        with pytest.raises(PydanticValidationError) as exc_info:
+        """Verify validation error on invalid data raises RequestValidationError."""
+        # When/Then: Creating with invalid data raises RequestValidationError (client-side validation)
+        with pytest.raises(RequestValidationError) as exc_info:
             await vclient.companies.create(name="AB", email="test@example.com")
 
-        assert "String should have at least 3 characters" in str(exc_info.value)
+        # Verify error details are accessible
+        assert len(exc_info.value.errors) == 1
+        assert exc_info.value.errors[0]["loc"] == ("name",)
 
 
 class TestCompaniesServiceUpdate:

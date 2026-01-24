@@ -2,7 +2,10 @@
 
 from collections.abc import AsyncIterator
 
+from pydantic import ValidationError as PydanticValidationError
+
 from vclient.api.endpoints import Endpoints
+from vclient.api.exceptions import RequestValidationError
 from vclient.api.models.companies import (
     Company,
     CompanyPermissions,
@@ -129,14 +132,18 @@ class CompaniesService(BaseService):
             The newly created Company object.
 
         Raises:
+            RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = CreateCompanyRequest(
-            name=name,
-            email=email,
-            description=description,
-            settings=settings,
-        )
+        try:
+            body = CreateCompanyRequest(
+                name=name,
+                email=email,
+                description=description,
+                settings=settings,
+            )
+        except PydanticValidationError as e:
+            raise RequestValidationError(e) from e
 
         response = await self._post(
             Endpoints.COMPANIES,
@@ -170,14 +177,18 @@ class CompaniesService(BaseService):
         Raises:
             NotFoundError: If the company does not exist.
             AuthorizationError: If you don't have admin-level access.
+            RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = UpdateCompanyRequest(
-            name=name,
-            email=email,
-            description=description,
-            settings=settings,
-        )
+        try:
+            body = UpdateCompanyRequest(
+                name=name,
+                email=email,
+                description=description,
+                settings=settings,
+            )
+        except PydanticValidationError as e:
+            raise RequestValidationError(e) from e
 
         response = await self._patch(
             Endpoints.COMPANY.format(company_id=company_id),
@@ -221,9 +232,13 @@ class CompaniesService(BaseService):
         Raises:
             NotFoundError: If the company or developer does not exist.
             AuthorizationError: If you don't have owner-level access.
+            RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If trying to remove the last owner.
         """
-        body = GrantAccessRequest(developer_id=developer_id, permission=permission)
+        try:
+            body = GrantAccessRequest(developer_id=developer_id, permission=permission)
+        except PydanticValidationError as e:
+            raise RequestValidationError(e) from e
 
         response = await self._post(
             Endpoints.COMPANY_ACCESS.format(company_id=company_id),

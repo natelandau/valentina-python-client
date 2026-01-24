@@ -2,6 +2,8 @@
 
 import pytest
 
+from pydantic import BaseModel, Field, ValidationError as PydanticValidationError
+
 from vclient.api.exceptions import (
     APIError,
     AuthenticationError,
@@ -9,6 +11,7 @@ from vclient.api.exceptions import (
     ConflictError,
     NotFoundError,
     RateLimitError,
+    RequestValidationError,
     ServerError,
     ValidationError,
 )
@@ -177,6 +180,119 @@ class TestValidationError:
         assert error.invalid_parameters == []
 
 
+class TestRequestValidationError:
+    """Tests for RequestValidationError class."""
+
+    def test_wraps_pydantic_error(self):
+        """Verify RequestValidationError wraps Pydantic ValidationError."""
+
+        # Given: A Pydantic model with validation constraints
+        class TestModel(BaseModel):
+            name: str = Field(min_length=3)
+
+        # When: Validation fails and we wrap the error
+        try:
+            TestModel(name="ab")
+        except PydanticValidationError as e:
+            error = RequestValidationError(e)
+
+        # Then: The error is properly wrapped
+        assert isinstance(error, RequestValidationError)
+        assert isinstance(error, APIError)
+
+    def test_errors_property_returns_pydantic_errors(self):
+        """Verify errors property returns structured error list from Pydantic."""
+
+        # Given: A Pydantic model with multiple validation constraints
+        class TestModel(BaseModel):
+            name: str = Field(min_length=3)
+            age: int = Field(gt=0)
+
+        # When: Multiple validation errors occur
+        try:
+            TestModel(name="ab", age=-1)
+        except PydanticValidationError as e:
+            error = RequestValidationError(e)
+
+        # Then: The errors property returns all Pydantic errors
+        errors = error.errors
+        assert len(errors) == 2
+        assert any(err["loc"] == ("name",) for err in errors)
+        assert any(err["loc"] == ("age",) for err in errors)
+
+    def test_message_includes_field_details(self):
+        """Verify message includes field names and error descriptions."""
+
+        # Given: A Pydantic model with validation constraints
+        class TestModel(BaseModel):
+            name: str = Field(min_length=3)
+            email: str = Field(min_length=5)
+
+        # When: Multiple validation errors occur
+        try:
+            TestModel(name="ab", email="a")
+        except PydanticValidationError as e:
+            error = RequestValidationError(e)
+
+        # Then: The message includes field names and error details
+        assert "Request validation failed" in error.message
+        assert "name:" in error.message
+        assert "email:" in error.message
+        assert "at least 3 characters" in error.message
+        assert "at least 5 characters" in error.message
+
+    def test_inherits_from_api_error(self):
+        """Verify RequestValidationError inherits from APIError."""
+        # When/Then: RequestValidationError is a subclass of APIError
+        assert issubclass(RequestValidationError, APIError)
+
+    def test_no_status_code(self):
+        """Verify status_code is None for client-side validation."""
+
+        # Given: A Pydantic model with validation constraints
+        class TestModel(BaseModel):
+            name: str = Field(min_length=3)
+
+        # When: Validation fails
+        try:
+            TestModel(name="ab")
+        except PydanticValidationError as e:
+            error = RequestValidationError(e)
+
+        # Then: status_code is None (client-side, not HTTP response)
+        assert error.status_code is None
+
+    def test_can_be_raised_and_caught(self):
+        """Verify RequestValidationError can be raised and caught."""
+
+        # Given: A Pydantic model with validation constraints
+        class TestModel(BaseModel):
+            name: str = Field(min_length=3)
+
+        # When/Then: RequestValidationError can be raised and caught
+        with pytest.raises(RequestValidationError) as exc_info:
+            try:
+                TestModel(name="ab")
+            except PydanticValidationError as e:
+                raise RequestValidationError(e) from e
+
+        assert "Request validation failed" in str(exc_info.value)
+
+    def test_can_be_caught_as_api_error(self):
+        """Verify RequestValidationError can be caught as APIError."""
+
+        # Given: A Pydantic model with validation constraints
+        class TestModel(BaseModel):
+            name: str = Field(min_length=3)
+
+        # When/Then: RequestValidationError can be caught as APIError
+        with pytest.raises(APIError):
+            try:
+                TestModel(name="ab")
+            except PydanticValidationError as e:
+                raise RequestValidationError(e) from e
+
+
 class TestRateLimitError:
     """Tests for RateLimitError class."""
 
@@ -266,6 +382,7 @@ class TestSpecificErrors:
             (NotFoundError, APIError),
             (ConflictError, APIError),
             (ValidationError, APIError),
+            (RequestValidationError, APIError),
             (RateLimitError, APIError),
             (ServerError, APIError),
         ],
