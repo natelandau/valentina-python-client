@@ -441,6 +441,59 @@ class BaseService:
         """
         return await self._request("DELETE", path, params=params)
 
+    async def _post_file(
+        self,
+        path: str,
+        *,
+        file: tuple[str, bytes, str],
+        idempotency_key: str | None = None,
+    ) -> httpx.Response:
+        """Make a POST request with a file upload (multipart/form-data).
+
+        Args:
+            path: API endpoint path.
+            file: Tuple of (filename, content, content_type) for the file to upload.
+            idempotency_key: Optional idempotency key for safe retries.
+
+        Returns:
+            The HTTP response.
+
+        Raises:
+            RateLimitError: When rate limit is exceeded and max retries are exhausted.
+            APIError: For other API error responses.
+        """
+        config = self._client._config  # noqa: SLF001
+        max_attempts = config.max_retries + 1 if config.auto_retry_rate_limit else 1
+
+        last_error: RateLimitError | None = None
+        headers = self._build_idempotency_headers(idempotency_key)
+        filename, content, content_type = file
+
+        for attempt in range(max_attempts):
+            response = await self._http.post(
+                url=path,
+                files={"file": (filename, content, content_type)},
+                headers=headers,
+            )
+
+            try:
+                self._raise_for_status(response)
+                return response  # noqa: TRY300
+            except RateLimitError as e:
+                last_error = e
+
+                if attempt >= max_attempts - 1:
+                    break
+
+                delay = self._calculate_backoff_delay(attempt, e.retry_after)
+                await asyncio.sleep(delay)
+
+        if last_error is not None:
+            raise last_error
+
+        msg = "Unexpected state: no response or error"
+        raise RuntimeError(msg)
+
     # -------------------------------------------------------------------------
     # Pagination Methods
     # -------------------------------------------------------------------------

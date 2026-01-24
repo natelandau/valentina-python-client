@@ -604,6 +604,76 @@ class TestUsersServiceDeleteAsset:
             await vclient.users.delete_asset(company_id, user_id, asset_id)
 
 
+class TestUsersServiceUploadAsset:
+    """Tests for UsersService.upload_asset method."""
+
+    @respx.mock
+    async def test_upload_asset(self, vclient, base_url, asset_response_data):
+        """Verify uploading an asset returns S3Asset."""
+        # Given: A mocked upload endpoint
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_ASSET_UPLOAD.format(company_id=company_id, user_id=user_id)}"
+        ).respond(201, json=asset_response_data)
+
+        # When: Uploading an asset
+        result = await vclient.users.upload_asset(
+            company_id,
+            user_id,
+            filename="test.png",
+            content=b"fake image content",
+            content_type="image/png",
+        )
+
+        # Then: Returns S3Asset object
+        assert route.called
+        assert isinstance(result, S3Asset)
+        assert result.id == "asset123"
+        assert result.original_filename == "avatar.png"
+
+    @respx.mock
+    async def test_upload_asset_default_content_type(self, vclient, base_url, asset_response_data):
+        """Verify uploading an asset with default content type."""
+        # Given: A mocked upload endpoint
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_ASSET_UPLOAD.format(company_id=company_id, user_id=user_id)}"
+        ).respond(201, json=asset_response_data)
+
+        # When: Uploading an asset without specifying content type
+        result = await vclient.users.upload_asset(
+            company_id,
+            user_id,
+            filename="document.bin",
+            content=b"binary content",
+        )
+
+        # Then: Returns S3Asset object
+        assert route.called
+        assert isinstance(result, S3Asset)
+
+    @respx.mock
+    async def test_upload_asset_not_found(self, vclient, base_url):
+        """Verify uploading asset for non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        respx.post(
+            f"{base_url}{Endpoints.USER_ASSET_UPLOAD.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Uploading raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.upload_asset(
+                company_id,
+                user_id,
+                filename="test.png",
+                content=b"content",
+            )
+
+
 class TestUsersServiceGetExperience:
     """Tests for UsersService.get_experience method."""
 

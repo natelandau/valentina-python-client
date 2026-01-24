@@ -89,6 +89,39 @@ Delete an asset from a user. This action cannot be undone.
 
 **Returns:** `None`
 
+### `upload_asset()`
+
+Upload a new asset for a user. The file is stored in S3 and associated with the user.
+
+**Parameters:**
+
+| Parameter      | Type    | Description                                              |
+| -------------- | ------- | -------------------------------------------------------- |
+| `company_id`   | `str`   | The ID of the company containing the user                |
+| `user_id`      | `str`   | The ID of the user to upload the asset for               |
+| `filename`     | `str`   | The original filename of the asset                       |
+| `content`      | `bytes` | The raw bytes of the file to upload                      |
+| `content_type` | `str`   | The MIME type of the file (default: application/octet-stream) |
+
+**Returns:** `S3Asset`
+
+**Example:**
+
+```python
+# Upload an image
+with open("avatar.png", "rb") as f:
+    content = f.read()
+
+asset = await client.users.upload_asset(
+    company_id="company_id",
+    user_id="user_id",
+    filename="avatar.png",
+    content=content,
+    content_type="image/png",
+)
+print(f"Uploaded: {asset.public_url}")
+```
+
 ### `get_experience()`
 
 Retrieve a user's experience points and cool points for a specific campaign. Creates the experience record automatically if it doesn't exist.

@@ -367,6 +367,39 @@ class UsersService(BaseService):
             Endpoints.USER_ASSET.format(company_id=company_id, user_id=user_id, asset_id=asset_id)
         )
 
+    async def upload_asset(
+        self,
+        company_id: str,
+        user_id: str,
+        filename: str,
+        content: bytes,
+        content_type: str = "application/octet-stream",
+    ) -> S3Asset:
+        """Upload a new asset for a user.
+
+        Uploads a file to S3 storage and associates it with the user.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user to upload the asset for.
+            filename: The original filename of the asset.
+            content: The raw bytes of the file to upload.
+            content_type: The MIME type of the file (default: application/octet-stream).
+
+        Returns:
+            The created S3Asset object with the public URL and metadata.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+            ValidationError: If the file is invalid or exceeds size limits.
+        """
+        response = await self._post_file(
+            Endpoints.USER_ASSET_UPLOAD.format(company_id=company_id, user_id=user_id),
+            file=(filename, content, content_type),
+        )
+        return S3Asset.model_validate(response.json())
+
     # -------------------------------------------------------------------------
     # Experience Methods
     # -------------------------------------------------------------------------
