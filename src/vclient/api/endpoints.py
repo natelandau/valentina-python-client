@@ -36,3 +36,33 @@ class Endpoints:
     # Developer endpoints (self-service)
     DEVELOPER_ME = f"{_BASE}/developers/me"
     DEVELOPER_ME_NEW_KEY = f"{_BASE}/developers/me/new-key"
+
+    # User endpoints
+    USERS = f"{_BASE}/companies/{{company_id}}/users"
+    USER = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}"
+    USER_STATISTICS = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/statistics"
+
+    # User asset endpoints
+    USER_ASSETS = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/assets"
+    USER_ASSET = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/assets/{{asset_id}}"
+    USER_ASSET_UPLOAD = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/assets/upload"
+
+    # User experience endpoints
+    USER_EXPERIENCE_CAMPAIGN = (
+        f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/experience/{{campaign_id}}"
+    )
+    USER_EXPERIENCE_XP_ADD = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/experience/xp/add"
+    USER_EXPERIENCE_XP_REMOVE = (
+        f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/experience/xp/remove"
+    )
+    USER_EXPERIENCE_CP_ADD = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/experience/cp/add"
+
+    # User notes endpoints
+    USER_NOTES = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/notes"
+    USER_NOTE = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/notes/{{note_id}}"
+
+    # User quickroll endpoints
+    USER_QUICKROLLS = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/quickrolls"
+    USER_QUICKROLL = (
+        f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/quickrolls/{{quickroll_id}}"
+    )

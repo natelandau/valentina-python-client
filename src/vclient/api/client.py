@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from vclient.api.services.developers import DeveloperService
     from vclient.api.services.global_admin import GlobalAdminService
     from vclient.api.services.system import SystemService
+    from vclient.api.services.users import UsersService
 
 
 class VClient:
@@ -78,6 +79,7 @@ class VClient:
         self._developer: DeveloperService | None = None
         self._global_admin: GlobalAdminService | None = None
         self._system: SystemService | None = None
+        self._users: UsersService | None = None
 
         if set_as_default:
             from vclient.api.registry import configure_default_client
@@ -180,3 +182,19 @@ class VClient:
 
             self._system = SystemService(self)
         return self._system
+
+    @property
+    def users(self) -> "UsersService":
+        """Access the Users service for managing users within companies.
+
+        Provides methods to create, retrieve, update, and delete users,
+        as well as access user statistics and assets.
+
+        Returns:
+            The UsersService instance for user management operations.
+        """
+        if self._users is None:
+            from vclient.api.services.users import UsersService
+
+            self._users = UsersService(self)
+        return self._users
