@@ -16,39 +16,36 @@ from vclient.api.models.companies import (
 class TestCompanySettings:
     """Tests for CompanySettings model."""
 
-    def test_default_values(self):
-        """Verify default values are set correctly."""
+    def test_all_fields_default_to_none(self):
+        """Verify all fields default to None for partial updates."""
         # When: Creating settings with no arguments
         settings = CompanySettings()
 
-        # Then: Default values are applied
-        assert settings.character_autogen_xp_cost == 10
-        assert settings.character_autogen_num_choices == 3
-        assert settings.permission_manage_campaign == "UNRESTRICTED"
-        assert settings.permission_grant_xp == "UNRESTRICTED"
-        assert settings.permission_free_trait_changes == "UNRESTRICTED"
+        # Then: All values are None
+        assert settings.character_autogen_xp_cost is None
+        assert settings.character_autogen_num_choices is None
+        assert settings.permission_manage_campaign is None
+        assert settings.permission_grant_xp is None
+        assert settings.permission_free_trait_changes is None
 
-    def test_custom_values(self):
-        """Verify custom values are set correctly."""
-        # When: Creating settings with custom values
+    def test_partial_settings(self):
+        """Verify partial settings for updates."""
+        # When: Creating settings with only some values
         settings = CompanySettings(
             character_autogen_xp_cost=20,
-            character_autogen_num_choices=5,
             permission_manage_campaign="STORYTELLER",
-            permission_grant_xp="PLAYER",
-            permission_free_trait_changes="WITHIN_24_HOURS",
         )
 
-        # Then: Custom values are applied
+        # Then: Specified values are set, others are None
         assert settings.character_autogen_xp_cost == 20
-        assert settings.character_autogen_num_choices == 5
+        assert settings.character_autogen_num_choices is None
         assert settings.permission_manage_campaign == "STORYTELLER"
-        assert settings.permission_grant_xp == "PLAYER"
-        assert settings.permission_free_trait_changes == "WITHIN_24_HOURS"
+        assert settings.permission_grant_xp is None
+        assert settings.permission_free_trait_changes is None
 
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""
-        # Given: Settings with only some values
+        # Given: Settings with some values set
         settings = CompanySettings(
             character_autogen_xp_cost=15,
             permission_manage_campaign="STORYTELLER",
@@ -57,9 +54,11 @@ class TestCompanySettings:
         # When: Dumping with exclude_none
         data = settings.model_dump(exclude_none=True)
 
-        # Then: All non-None values are included (defaults are not None)
-        assert data["character_autogen_xp_cost"] == 15
-        assert data["permission_manage_campaign"] == "STORYTELLER"
+        # Then: Only non-None values are included
+        assert data == {
+            "character_autogen_xp_cost": 15,
+            "permission_manage_campaign": "STORYTELLER",
+        }
 
     def test_invalid_permission_value_rejected(self):
         """Verify invalid permission values are rejected by Pydantic."""
@@ -71,23 +70,36 @@ class TestCompanySettings:
 class TestCompany:
     """Tests for Company model."""
 
-    def test_minimal_company(self):
-        """Verify creating company with minimal required fields."""
-        # When: Creating company with required fields only
-        company = Company(name="Test", email="test@example.com")
+    def test_all_fields_required(self):
+        """Verify all fields are required for response DTO."""
+        # When: Creating company with all fields
+        company = Company(
+            id="507f1f77bcf86cd799439011",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test",
+            description=None,
+            email="test@example.com",
+            user_ids=[],
+            settings=None,
+        )
 
-        # Then: Company is created with defaults
+        # Then: Company is created correctly
+        assert company.id == "507f1f77bcf86cd799439011"
+        assert company.date_created is not None
+        assert company.date_modified is not None
         assert company.name == "Test"
         assert company.email == "test@example.com"
-        assert company.id is None
         assert company.description is None
         assert company.user_ids == []
         assert company.settings is None
 
     def test_full_company(self):
-        """Verify creating company with all fields."""
-        # When: Creating company with all fields
+        """Verify creating company with all fields populated."""
+        # Given: Settings with some values
         settings = CompanySettings(character_autogen_xp_cost=15)
+
+        # When: Creating company with all fields
         company = Company(
             id="507f1f77bcf86cd799439011",
             date_created="2024-01-15T10:30:00Z",
@@ -139,31 +151,29 @@ class TestCompany:
         assert company.settings is not None
         assert company.settings.permission_grant_xp == "PLAYER"
 
-    def test_name_min_length_validation(self):
-        """Verify name minimum length is enforced."""
-        # When/Then: Creating company with short name raises error
-        with pytest.raises(PydanticValidationError) as exc_info:
-            Company(name="AB", email="test@example.com")
-
-        assert "String should have at least 3 characters" in str(exc_info.value)
-
-    def test_name_max_length_validation(self):
-        """Verify name maximum length is enforced."""
-        # When/Then: Creating company with long name raises error
-        with pytest.raises(PydanticValidationError) as exc_info:
-            Company(name="A" * 51, email="test@example.com")
-
-        assert "String should have at most 50 characters" in str(exc_info.value)
+    def test_missing_required_field_raises_error(self):
+        """Verify missing required fields raises ValidationError."""
+        # When/Then: Missing required field raises error
+        with pytest.raises(PydanticValidationError):
+            Company(
+                id="507f1f77bcf86cd799439011",
+                date_created="2024-01-15T10:30:00Z",
+                date_modified="2024-01-15T10:30:00Z",
+                name="Test",
+                email="test@example.com",
+                # Missing: description, user_ids, settings
+            )
 
 
 class TestCompanyPermissions:
     """Tests for CompanyPermissions model."""
 
-    def test_minimal_permissions(self):
-        """Verify creating permissions with minimal fields."""
-        # When: Creating permissions with required fields
+    def test_all_fields_required(self):
+        """Verify all fields are required for response DTO."""
+        # When: Creating permissions with all fields
         perms = CompanyPermissions(
             company_id="company123",
+            name=None,
             permission="USER",
         )
 
@@ -226,8 +236,10 @@ class TestCreateCompanyRequest:
 
     def test_full_request(self):
         """Verify creating request with all fields."""
-        # When: Creating request with all fields
+        # Given: Settings with some values
         settings = CompanySettings(character_autogen_xp_cost=20)
+
+        # When: Creating request with all fields
         request = CreateCompanyRequest(
             name="Full Company",
             email="full@example.com",
@@ -255,7 +267,7 @@ class TestCreateCompanyRequest:
 
     def test_model_dump_with_settings(self):
         """Verify model_dump includes settings correctly."""
-        # Given: Request with settings
+        # Given: Request with partial settings
         settings = CompanySettings(
             character_autogen_xp_cost=15,
             permission_manage_campaign="STORYTELLER",

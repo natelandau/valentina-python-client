@@ -2,7 +2,7 @@
 
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ServiceStatus(StrEnum):
@@ -19,12 +19,6 @@ class SystemHealth(BaseModel):
     database and cache connectivity.
     """
 
-    database_status: str = Field(
-        description="Current status of the database connection.",
-    )
-    cache_status: str = Field(
-        description="Current status of the cache connection.",
-    )
-    version: str = Field(
-        description="Current API version.",
-    )
+    database_status: str
+    cache_status: str
+    version: str

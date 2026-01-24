@@ -17,11 +17,12 @@ from vclient.api.models.global_admin import (
 class TestDeveloperCompanyPermission:
     """Tests for DeveloperCompanyPermission model."""
 
-    def test_create_with_required_fields(self):
-        """Verify creating permission with required fields only."""
-        # When: Creating with required fields using string value
+    def test_all_fields_required(self):
+        """Verify all fields are required for response DTO."""
+        # When: Creating with all fields
         permission = DeveloperCompanyPermission(
             company_id="507f1f77bcf86cd799439011",
+            name=None,
             permission="USER",
         )
 
@@ -63,20 +64,29 @@ class TestDeveloperCompanyPermission:
 class TestDeveloper:
     """Tests for Developer model."""
 
-    def test_create_with_required_fields(self):
-        """Verify creating developer with required fields only."""
-        # When: Creating with required fields
+    def test_all_fields_required(self):
+        """Verify all fields are required for response DTO."""
+        # Given: Timestamps
+        now = datetime.now(tz=UTC)
+
+        # When: Creating with all fields
         developer = Developer(
+            id="507f1f77bcf86cd799439011",
+            date_created=now,
+            date_modified=now,
             username="testuser",
             email="test@example.com",
+            key_generated=None,
+            is_global_admin=False,
+            companies=[],
         )
 
-        # Then: Required fields are set, optionals have defaults
+        # Then: All fields are set correctly
+        assert developer.id == "507f1f77bcf86cd799439011"
+        assert developer.date_created == now
+        assert developer.date_modified == now
         assert developer.username == "testuser"
         assert developer.email == "test@example.com"
-        assert developer.id is None
-        assert developer.date_created is None
-        assert developer.date_modified is None
         assert developer.key_generated is None
         assert developer.is_global_admin is False
         assert developer.companies == []
@@ -160,12 +170,19 @@ class TestDeveloperWithApiKey:
 
     def test_inherits_from_developer(self):
         """Verify DeveloperWithApiKey inherits Developer fields."""
+        # Given: Timestamps
+        now = datetime.now(tz=UTC)
+
         # When: Creating with all fields
         developer = DeveloperWithApiKey(
             id="507f1f77bcf86cd799439011",
+            date_created=now,
+            date_modified=now,
             username="testuser",
             email="test@example.com",
+            key_generated=None,
             is_global_admin=True,
+            companies=[],
             api_key="vapi_abc123xyz",
         )
 
@@ -176,12 +193,22 @@ class TestDeveloperWithApiKey:
         assert developer.is_global_admin is True
         assert developer.api_key == "vapi_abc123xyz"
 
-    def test_api_key_defaults_to_none(self):
-        """Verify api_key defaults to None."""
-        # When: Creating without api_key
+    def test_api_key_can_be_none(self):
+        """Verify api_key can be None."""
+        # Given: Timestamps
+        now = datetime.now(tz=UTC)
+
+        # When: Creating with api_key as None
         developer = DeveloperWithApiKey(
+            id="507f1f77bcf86cd799439011",
+            date_created=now,
+            date_modified=now,
             username="testuser",
             email="test@example.com",
+            key_generated=None,
+            is_global_admin=False,
+            companies=[],
+            api_key=None,
         )
 
         # Then: api_key is None
