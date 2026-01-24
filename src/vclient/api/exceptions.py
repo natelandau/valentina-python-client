@@ -39,10 +39,35 @@ class APIError(Exception):
         self.response_data = response_data or {}
 
     def __str__(self) -> str:
-        """Return string representation of the error."""
+        """Return string representation of the error with full API context.
+
+        Includes RFC 9457 Problem Details fields when available:
+        - status code and title
+        - detail message
+        - instance URI
+        """
+        parts: list[str] = []
+
+        # Build header: [status_code] title or message
         if self.status_code:
-            return f"[{self.status_code}] {self.message}"
-        return self.message
+            header = f"[{self.status_code}]"
+            if self.title:
+                header = f"{header} {self.title}"
+            elif self.message:
+                header = f"{header} {self.message}"
+            parts.append(header)
+        elif self.message:
+            parts.append(self.message)
+
+        # Add detail if different from title/message
+        if self.detail and self.detail != self.message and self.detail != self.title:
+            parts.append(f"Detail: {self.detail}")
+
+        # Add instance URI for debugging
+        if self.instance:
+            parts.append(f"Instance: {self.instance}")
+
+        return " | ".join(parts) if parts else "Unknown API error"
 
     @property
     def title(self) -> str | None:
@@ -100,6 +125,20 @@ class ValidationError(APIError):
             List of dicts with 'field' and 'message' keys describing validation failures.
         """
         return self.response_data.get("invalid_parameters", [])
+
+    def __str__(self) -> str:
+        """Return string representation including validation field errors."""
+        base = super().__str__()
+
+        if not self.invalid_parameters:
+            return base
+
+        # Format validation errors as "field: message"
+        field_errors = [
+            f"{param.get('field', 'unknown')}: {param.get('message', 'invalid')}"
+            for param in self.invalid_parameters
+        ]
+        return f"{base} | Fields: {'; '.join(field_errors)}"
 
 
 class RequestValidationError(APIError):
@@ -183,6 +222,20 @@ class RateLimitError(APIError):
             or None if not provided.
         """
         return self._remaining
+
+    def __str__(self) -> str:
+        """Return string representation including retry timing information."""
+        base = super().__str__()
+        extras: list[str] = []
+
+        if self._retry_after is not None:
+            extras.append(f"retry_after={self._retry_after}s")
+        if self._remaining is not None:
+            extras.append(f"remaining={self._remaining}")
+
+        if extras:
+            return f"{base} | {', '.join(extras)}"
+        return base
 
 
 class ServerError(APIError):

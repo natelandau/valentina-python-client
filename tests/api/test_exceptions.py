@@ -71,6 +71,66 @@ class TestAPIError:
 
         assert exc_info.value.status_code == 500
 
+    def test_str_with_rfc9457_full_context(self):
+        """Verify string representation includes full RFC 9457 context."""
+        # Given: An error with full RFC 9457 response data
+        error = APIError(
+            message="Company 'abc123' not found",
+            status_code=404,
+            response_data={
+                "status": 404,
+                "title": "Not Found",
+                "detail": "Company 'abc123' not found",
+                "instance": "/api/v1/companies/abc123",
+            },
+        )
+
+        # When/Then: String representation includes title and instance
+        result = str(error)
+        assert "[404] Not Found" in result
+        assert "Instance: /api/v1/companies/abc123" in result
+
+    def test_str_includes_detail_when_different_from_title(self):
+        """Verify string includes detail when it differs from title."""
+        # Given: An error where detail differs from title
+        error = APIError(
+            message="Resource not found",
+            status_code=404,
+            response_data={
+                "title": "Not Found",
+                "detail": "The company with ID 'xyz789' does not exist",
+                "instance": "/api/v1/companies/xyz789",
+            },
+        )
+
+        # When/Then: String includes the distinct detail
+        result = str(error)
+        assert "Detail: The company with ID 'xyz789' does not exist" in result
+
+    def test_str_omits_detail_when_same_as_message(self):
+        """Verify string omits detail when identical to message."""
+        # Given: An error where detail equals message
+        error = APIError(
+            message="Resource not found",
+            status_code=404,
+            response_data={
+                "title": "Not Found",
+                "detail": "Resource not found",
+            },
+        )
+
+        # When/Then: String does not repeat the detail
+        result = str(error)
+        assert "Detail:" not in result
+
+    def test_str_handles_empty_response_data(self):
+        """Verify string handles empty response_data gracefully."""
+        # Given: An error with empty response_data
+        error = APIError(message="Error occurred", status_code=500, response_data={})
+
+        # When/Then: String uses message as fallback
+        assert str(error) == "[500] Error occurred"
+
 
 class TestRFC9457Properties:
     """Tests for RFC 9457 Problem Details properties on APIError."""
@@ -178,6 +238,43 @@ class TestValidationError:
 
         # Then: invalid_parameters returns empty list
         assert error.invalid_parameters == []
+
+    def test_str_includes_field_errors(self):
+        """Verify string representation includes validation field errors."""
+        # Given: A validation error with invalid_parameters
+        error = ValidationError(
+            message="Validation failed",
+            status_code=400,
+            response_data={
+                "status": 400,
+                "title": "Bad Request",
+                "detail": "Validation failed for one or more fields.",
+                "invalid_parameters": [
+                    {"field": "name", "message": "Field required"},
+                    {"field": "role", "message": "Invalid value"},
+                ],
+            },
+        )
+
+        # When/Then: String includes field errors
+        result = str(error)
+        assert "[400] Bad Request" in result
+        assert "Fields:" in result
+        assert "name: Field required" in result
+        assert "role: Invalid value" in result
+
+    def test_str_without_invalid_parameters(self):
+        """Verify string representation works without invalid_parameters."""
+        # Given: A validation error without invalid_parameters
+        error = ValidationError(
+            message="Validation failed",
+            status_code=400,
+            response_data={"title": "Bad Request"},
+        )
+
+        # When/Then: String does not include Fields section
+        result = str(error)
+        assert "Fields:" not in result
 
 
 class TestRequestValidationError:
@@ -369,6 +466,40 @@ class TestRateLimitError:
         assert error.instance == "/api/v1/companies"
         assert error.retry_after == 30
         assert error.remaining == 0
+
+    def test_str_includes_retry_timing(self):
+        """Verify string representation includes retry timing information."""
+        # Given: A rate limit error with retry_after and remaining
+        error = RateLimitError(
+            message="Too many requests",
+            status_code=429,
+            response_data={
+                "title": "Too Many Requests",
+                "detail": "You are being rate limited.",
+            },
+            retry_after=60,
+            remaining=0,
+        )
+
+        # When/Then: String includes retry timing
+        result = str(error)
+        assert "[429] Too Many Requests" in result
+        assert "retry_after=60s" in result
+        assert "remaining=0" in result
+
+    def test_str_without_retry_info(self):
+        """Verify string representation works without retry info."""
+        # Given: A rate limit error without retry_after/remaining
+        error = RateLimitError(
+            message="Too many requests",
+            status_code=429,
+            response_data={"title": "Too Many Requests"},
+        )
+
+        # When/Then: String does not include retry timing section
+        result = str(error)
+        assert "retry_after=" not in result
+        assert "remaining=" not in result
 
 
 class TestSpecificErrors:
