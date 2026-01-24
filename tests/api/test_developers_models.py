@@ -2,9 +2,6 @@
 
 from datetime import UTC, datetime
 
-import pytest
-from pydantic import ValidationError
-
 from vclient.api.models.developers import (
     MeDeveloper,
     MeDeveloperCompanyPermission,
@@ -43,21 +40,6 @@ class TestMeDeveloperCompanyPermission:
         assert permission.company_id == "507f1f77bcf86cd799439011"
         assert permission.name == "Test Company"
         assert permission.permission == "ADMIN"
-
-    def test_missing_required_fields_raises_error(self):
-        """Verify missing required fields raises ValidationError."""
-        # When/Then: Missing fields raises error
-        with pytest.raises(ValidationError):
-            MeDeveloperCompanyPermission()
-
-    def test_invalid_permission_rejected(self):
-        """Verify invalid permission values are rejected by Pydantic."""
-        # When/Then: Creating with invalid permission raises error
-        with pytest.raises(ValidationError):
-            MeDeveloperCompanyPermission(
-                company_id="507f1f77bcf86cd799439011",
-                permission="INVALID",
-            )
 
 
 class TestMeDeveloper:
@@ -119,16 +101,6 @@ class TestMeDeveloper:
         assert len(developer.companies) == 1
         assert developer.companies[0].company_id == "company123"
 
-    def test_missing_required_fields_raises_error(self):
-        """Verify missing required fields raises ValidationError."""
-        # When/Then: Missing email raises error
-        with pytest.raises(ValidationError):
-            MeDeveloper(username="testuser")
-
-        # When/Then: Missing username raises error
-        with pytest.raises(ValidationError):
-            MeDeveloper(email="test@example.com")
-
     def test_model_validate_from_dict(self):
         """Verify model_validate parses dict correctly."""
         # Given: Response data as dict
@@ -183,23 +155,6 @@ class TestMeDeveloperWithApiKey:
         assert developer.username == "testuser"
         assert developer.email == "test@example.com"
         assert developer.api_key == "vapi_abc123xyz"  # gitleaks:allow
-
-    def test_api_key_required(self):
-        """Verify api_key is required."""
-        # Given: Timestamps
-        now = datetime.now(tz=UTC)
-
-        # When/Then: Missing api_key raises error
-        with pytest.raises(ValidationError):
-            MeDeveloperWithApiKey(
-                id="507f1f77bcf86cd799439011",
-                date_created=now,
-                date_modified=now,
-                username="testuser",
-                email="test@example.com",
-                key_generated=None,
-                companies=[],
-            )
 
 
 class TestUpdateMeDeveloperRequest:

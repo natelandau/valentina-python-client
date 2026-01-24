@@ -4,9 +4,11 @@ import asyncio
 import random
 import uuid
 from collections.abc import AsyncIterator
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import httpx
+from pydantic import BaseModel
+from pydantic import ValidationError as PydanticValidationError
 
 from vclient.api.constants import (
     DEFAULT_PAGE_LIMIT,
@@ -23,10 +25,13 @@ from vclient.api.exceptions import (
     ConflictError,
     NotFoundError,
     RateLimitError,
+    RequestValidationError,
     ServerError,
     ValidationError,
 )
 from vclient.api.models.pagination import PaginatedResponse
+
+T = TypeVar("T", bound=BaseModel)
 
 if TYPE_CHECKING:
     from vclient.api.client import VClient
@@ -59,6 +64,24 @@ class BaseService:
             A unique idempotency key string.
         """
         return str(uuid.uuid4())
+
+    def _validate_request(self, request_class: type[T], **kwargs: Any) -> T:
+        """Validate and create a request model, converting Pydantic errors.
+
+        Args:
+            request_class: The Pydantic model class to instantiate.
+            **kwargs: Fields to pass to the model constructor.
+
+        Returns:
+            The validated request model instance.
+
+        Raises:
+            RequestValidationError: If validation fails.
+        """
+        try:
+            return request_class(**kwargs)
+        except PydanticValidationError as e:
+            raise RequestValidationError(e) from e
 
     def _calculate_backoff_delay(self, attempt: int, retry_after: int | None) -> float:
         """Calculate the delay before the next retry attempt.
@@ -449,6 +472,35 @@ class BaseService:
 
         response = await self._get(path, params=request_params)
         return PaginatedResponse.from_dict(response.json())
+
+    async def _get_paginated_as(
+        self,
+        path: str,
+        model_class: type[T],
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        params: dict[str, Any] | None = None,
+    ) -> PaginatedResponse[T]:
+        """Make a paginated GET request and parse items into the given model class.
+
+        Args:
+            path: API endpoint path.
+            model_class: Pydantic model class to validate each item into.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+            params: Additional query parameters.
+
+        Returns:
+            A PaginatedResponse containing validated model instances.
+        """
+        response = await self._get_paginated(path, limit=limit, offset=offset, params=params)
+        return PaginatedResponse(
+            items=[model_class.model_validate(item) for item in response.items],
+            limit=response.limit,
+            offset=response.offset,
+            total=response.total,
+        )
 
     async def _iter_all_pages(
         self,

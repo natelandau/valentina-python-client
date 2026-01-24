@@ -2,11 +2,8 @@
 
 from collections.abc import AsyncIterator
 
-from pydantic import ValidationError as PydanticValidationError
-
 from vclient.api.constants import DEFAULT_PAGE_LIMIT
 from vclient.api.endpoints import Endpoints
-from vclient.api.exceptions import RequestValidationError
 from vclient.api.models.companies import (
     Company,
     CompanyPermissions,
@@ -49,16 +46,11 @@ class CompaniesService(BaseService):
         Returns:
             A PaginatedResponse containing Company objects and pagination metadata.
         """
-        response = await self._get_paginated(
+        return await self._get_paginated_as(
             Endpoints.COMPANIES,
+            Company,
             limit=limit,
             offset=offset,
-        )
-        return PaginatedResponse(
-            items=[Company.model_validate(item) for item in response.items],
-            limit=response.limit,
-            offset=response.offset,
-            total=response.total,
         )
 
     async def list_all(self) -> list[Company]:
@@ -136,16 +128,13 @@ class CompaniesService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        try:
-            body = CreateCompanyRequest(
-                name=name,
-                email=email,
-                description=description,
-                settings=settings,
-            )
-        except PydanticValidationError as e:
-            raise RequestValidationError(e) from e
-
+        body = self._validate_request(
+            CreateCompanyRequest,
+            name=name,
+            email=email,
+            description=description,
+            settings=settings,
+        )
         response = await self._post(
             Endpoints.COMPANIES,
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -181,16 +170,13 @@ class CompaniesService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        try:
-            body = UpdateCompanyRequest(
-                name=name,
-                email=email,
-                description=description,
-                settings=settings,
-            )
-        except PydanticValidationError as e:
-            raise RequestValidationError(e) from e
-
+        body = self._validate_request(
+            UpdateCompanyRequest,
+            name=name,
+            email=email,
+            description=description,
+            settings=settings,
+        )
         response = await self._patch(
             Endpoints.COMPANY.format(company_id=company_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -236,11 +222,11 @@ class CompaniesService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If trying to remove the last owner.
         """
-        try:
-            body = GrantAccessRequest(developer_id=developer_id, permission=permission)
-        except PydanticValidationError as e:
-            raise RequestValidationError(e) from e
-
+        body = self._validate_request(
+            GrantAccessRequest,
+            developer_id=developer_id,
+            permission=permission,
+        )
         response = await self._post(
             Endpoints.COMPANY_ACCESS.format(company_id=company_id),
             json=body.model_dump(mode="json"),

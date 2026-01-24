@@ -2,11 +2,8 @@
 
 from collections.abc import AsyncIterator
 
-from pydantic import ValidationError as PydanticValidationError
-
 from vclient.api.constants import DEFAULT_PAGE_LIMIT
 from vclient.api.endpoints import Endpoints
-from vclient.api.exceptions import RequestValidationError
 from vclient.api.models.global_admin import (
     CreateDeveloperRequest,
     Developer,
@@ -48,21 +45,13 @@ class GlobalAdminService(BaseService):
         Returns:
             A PaginatedResponse containing Developer objects and pagination metadata.
         """
-        params = {}
-        if is_global_admin is not None:
-            params["is_global_admin"] = is_global_admin
-
-        response = await self._get_paginated(
+        params = {"is_global_admin": is_global_admin} if is_global_admin is not None else None
+        return await self._get_paginated_as(
             Endpoints.ADMIN_DEVELOPERS,
+            Developer,
             limit=limit,
             offset=offset,
-            params=params if params else None,
-        )
-        return PaginatedResponse(
-            items=[Developer.model_validate(item) for item in response.items],
-            limit=response.limit,
-            offset=response.offset,
-            total=response.total,
+            params=params,
         )
 
     async def list_all(self, *, is_global_admin: bool | None = None) -> list[Developer]:
@@ -153,15 +142,12 @@ class GlobalAdminService(BaseService):
             ValidationError: If the request data is invalid.
             AuthorizationError: If you don't have global admin privileges.
         """
-        try:
-            body = CreateDeveloperRequest(
-                username=username,
-                email=email,
-                is_global_admin=is_global_admin,
-            )
-        except PydanticValidationError as e:
-            raise RequestValidationError(e) from e
-
+        body = self._validate_request(
+            CreateDeveloperRequest,
+            username=username,
+            email=email,
+            is_global_admin=is_global_admin,
+        )
         response = await self._post(
             Endpoints.ADMIN_DEVELOPERS,
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -195,15 +181,12 @@ class GlobalAdminService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        try:
-            body = UpdateDeveloperRequest(
-                username=username,
-                email=email,
-                is_global_admin=is_global_admin,
-            )
-        except PydanticValidationError as e:
-            raise RequestValidationError(e) from e
-
+        body = self._validate_request(
+            UpdateDeveloperRequest,
+            username=username,
+            email=email,
+            is_global_admin=is_global_admin,
+        )
         response = await self._patch(
             Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),

@@ -33,17 +33,8 @@ print(f"API Version: {health.version}")
 
 Represents the health status of the API and its dependencies.
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Field             | Type  | Description                               |
+| ----------------- | ----- | ----------------------------------------- |
 | `database_status` | `str` | Current status of the database connection |
-| `cache_status` | `str` | Current status of the cache connection |
-| `version` | `str` | Current API version |
-
-### `ServiceStatus`
-
-Enum for service status values.
-
-| Value | Description |
-|-------|-------------|
-| `ONLINE` | Service is operational |
-| `OFFLINE` | Service is unavailable |
+| `cache_status`    | `str` | Current status of the cache connection    |
+| `version`         | `str` | Current API version                       |

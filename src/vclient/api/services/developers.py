@@ -1,9 +1,6 @@
 """Service for interacting with the Developer API."""
 
-from pydantic import ValidationError as PydanticValidationError
-
 from vclient.api.endpoints import Endpoints
-from vclient.api.exceptions import RequestValidationError
 from vclient.api.models.developers import (
     MeDeveloper,
     MeDeveloperWithApiKey,
@@ -60,14 +57,11 @@ class DeveloperService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        try:
-            body = UpdateMeDeveloperRequest(
-                username=username,
-                email=email,
-            )
-        except PydanticValidationError as e:
-            raise RequestValidationError(e) from e
-
+        body = self._validate_request(
+            UpdateMeDeveloperRequest,
+            username=username,
+            email=email,
+        )
         response = await self._patch(
             Endpoints.DEVELOPER_ME,
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
