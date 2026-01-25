@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from vclient.client import VClient
+    from vclient.services.campaign_books import CampaignBooksService
     from vclient.services.campaigns import CampaignsService
     from vclient.services.companies import CompaniesService
     from vclient.services.developers import DeveloperService
@@ -216,3 +217,34 @@ def campaigns_service(company_id: str, user_id: str) -> "CampaignsService":
     from vclient.services.campaigns import CampaignsService
 
     return CampaignsService(default_client(), company_id, user_id)
+
+
+def campaign_books_service(
+    company_id: str, user_id: str, campaign_id: str
+) -> "CampaignBooksService":
+    """Create a CampaignBooksService scoped to a specific company, user, and campaign.
+
+    Provides access to campaign book management operations (list, get, create, update, delete)
+    within a specific company, user, and campaign context without needing to pass a client instance.
+
+    Args:
+        company_id: The ID of the company to operate within.
+        user_id: The ID of the user to operate as.
+        campaign_id: The ID of the campaign to operate within.
+
+    Returns:
+        CampaignBooksService: A service instance scoped to the specified context.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        books = campaign_books_service("company_id", "user_id", "campaign_id")
+        all_books = await books.list_all()
+        book = await books.get("book_id")
+        ```
+    """
+    from vclient.services.campaign_books import CampaignBooksService
+
+    return CampaignBooksService(default_client(), company_id, user_id, campaign_id)

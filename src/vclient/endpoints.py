@@ -80,3 +80,17 @@ class Endpoints:
     # Campaign note endpoints
     CAMPAIGN_NOTES = f"{CAMPAIGN}/notes"
     CAMPAIGN_NOTE = f"{CAMPAIGN_NOTES}/{{note_id}}"
+
+    # Campaign book endpoints
+    CAMPAIGN_BOOKS = f"{CAMPAIGN}/books"
+    CAMPAIGN_BOOK = f"{CAMPAIGN_BOOKS}/{{book_id}}"
+    CAMPAIGN_BOOK_NUMBER = f"{CAMPAIGN_BOOK}/number"
+
+    # Book note endpoints
+    BOOK_NOTES = f"{CAMPAIGN_BOOK}/notes"
+    BOOK_NOTE = f"{BOOK_NOTES}/{{note_id}}"
+
+    # Book asset endpoints
+    BOOK_ASSETS = f"{CAMPAIGN_BOOK}/assets"
+    BOOK_ASSET_UPLOAD = f"{BOOK_ASSETS}/upload"
+    BOOK_ASSET = f"{BOOK_ASSETS}/{{asset_id}}"

@@ -1,5 +1,11 @@
 """Data models for API responses."""
 
+from .books import (
+    CampaignBook,
+    CreateBookRequest,
+    RenumberBookRequest,
+    UpdateBookRequest,
+)
 from .campaigns import (
     Campaign,
     CreateCampaignRequest,
@@ -56,10 +62,12 @@ from .users import (
 
 __all__ = [
     "Campaign",
+    "CampaignBook",
     "CampaignExperience",
     "Company",
     "CompanyPermissions",
     "CompanySettings",
+    "CreateBookRequest",
     "CreateCampaignRequest",
     "CreateCompanyRequest",
     "CreateDeveloperRequest",
@@ -82,12 +90,14 @@ __all__ = [
     "PaginatedResponse",
     "PermissionLevel",
     "Quickroll",
+    "RenumberBookRequest",
     "RollStatistics",
     "S3Asset",
     "S3AssetParentType",
     "S3AssetType",
     "ServiceStatus",
     "SystemHealth",
+    "UpdateBookRequest",
     "UpdateCampaignRequest",
     "UpdateCompanyRequest",
     "UpdateDeveloperRequest",

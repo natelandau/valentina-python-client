@@ -39,6 +39,7 @@
         "shellcheck-py>=0.11.0.1",
         "ty>=0.0.13",
         "typos>=1.42.1",
+        "vulture>=2.14",
         "yamllint>=1.38.0",
 ]
 
@@ -182,3 +183,13 @@
         line-ending               = "auto"
         quote-style               = "double"
         skip-magic-trailing-comma = false
+
+[tool.vulture]
+    exclude           = ["duties.py", "scripts/", "tests/", "tmp/"]
+    ignore_decorators = []
+    ignore_names      = []
+    make_whitelist    = false
+    min_confidence    = 100
+    paths             = ["src/"]
+    sort_by_size      = true
+    verbose           = false

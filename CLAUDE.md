@@ -2,6 +2,11 @@
 
 This document contains coding standards and guidelines for the valentina-api-client project.
 
+## Project Configuration
+
+- Cursor configuration exists in `.cursor/` - do not modify (Cursor IDE continues to be used)
+- Claude Code configuration is in `.claude/` and this file
+
 ## Tooling
 
 ### Python Package Management

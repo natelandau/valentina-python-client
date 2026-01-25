@@ -9,6 +9,7 @@ from vclient.config import APIConfig
 from vclient.constants import API_KEY_HEADER
 
 if TYPE_CHECKING:
+    from vclient.services.campaign_books import CampaignBooksService
     from vclient.services.campaigns import CampaignsService
     from vclient.services.companies import CompaniesService
     from vclient.services.developers import DeveloperService
@@ -236,3 +237,28 @@ class VClient:
         from vclient.services.campaigns import CampaignsService
 
         return CampaignsService(self, company_id, user_id)
+
+    def campaign_books(
+        self, company_id: str, user_id: str, campaign_id: str
+    ) -> "CampaignBooksService":
+        """Get a CampaignBooksService scoped to a specific company, user, and campaign.
+
+        Provides methods to create, retrieve, update, and delete campaign books,
+        as well as access book notes and assets.
+
+        Args:
+            company_id: The ID of the company to operate within.
+            user_id: The ID of the user to operate as.
+            campaign_id: The ID of the campaign to operate within.
+
+        Returns:
+            A CampaignBooksService instance scoped to the specified context.
+
+        Example:
+            >>> books = client.campaign_books("company_id", "user_id", "campaign_id")
+            >>> all_books = await books.list_all()
+            >>> book = await books.get("book_id")
+        """
+        from vclient.services.campaign_books import CampaignBooksService
+
+        return CampaignBooksService(self, company_id, user_id, campaign_id)
