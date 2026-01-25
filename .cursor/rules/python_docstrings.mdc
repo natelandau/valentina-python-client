@@ -1,0 +1,42 @@
+---
+description: Python docstring standards
+globs: **/*.py
+alwaysApply: false
+---
+## Python docstring standards
+
+Always follow these rules when writing Python docstrings
+
+- MUST include docstrings for all public functions, classes, and methods
+- MUST document function parameters, return values, and exceptions raised
+- Keep comments up-to-date with code changes
+- Include examples in docstrings for complex functions
+- Read and understand the entire function or class before writing the docstring
+- Always use Google format docstrings
+- Do not document return when nothing is returned
+- Only write in imperative voice. No Exceptions!
+- Never say "This function ..." Only use imperative voice.
+- Docstrings should always be descriptive and explain why a developer would use the function, not just what it does
+- Do not use line wraps and newlines within paragraphs.
+- Do not included raised exceptions unless they are explicitly raised in the code
+
+### Examples of good python docstrings
+
+```python
+def read_config(path: Path = "config.toml", globs:list[str] | None = None) -> list[Path]:
+    """Read and validate the TOML configuration file that maps repository names to paths.
+
+    Search the given `path` for files matching any of the glob patterns provided in `globs`. If no globs are provided, returns all files in the directory.
+
+    Args:
+        path (Path): The root directory where the search will be conducted.
+        globs (list[str] | None, optional): A list of glob patterns to match files (e.g., "*.txt", "*.py"). If None, returns all files. Defaults to None.
+
+    Returns:
+        list[Path]: A list of Path objects representing the files that match the glob patterns.
+
+    Raises:
+        cappa.Exit: If the config file doesn't exist, contains invalid TOML, or has invalid repository paths
+    """
+    ...
+```

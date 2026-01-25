@@ -1,0 +1,14 @@
+---
+description: Python class style
+globs: **/*.py
+alwaysApply: false
+---
+## Python class style
+
+- MUST keep classes focused on a single responsibility
+- MUST keep __init__ simple; avoid complex logic
+- Use dataclasses for simple data containers
+- Prefer composition over inheritance
+- Avoid creating additional class functions if they are not necessary
+- Use @property for computed attributes
+

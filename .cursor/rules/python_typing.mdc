@@ -1,0 +1,20 @@
+---
+description: Python typing standards
+globs: **/*.py
+alwaysApply: false
+---
+## Python typing standards
+
+Follow these guidelines for all Python files to ensure consistent typing
+
+-   MUST use type hints for all function signatures (parameters and return values)
+-   NEVER use Any type unless absolutely necessary. Use unions or TypeVars instead
+-   MUST run mypy and resolve all type errors
+-   Use Optional[T] or T | None for nullable types
+-   Use Python with strict types for each variable
+-   Annotate types of function results like `-> …`
+-   When you mention a variable for the first time, try to write down the type. For example, `scopes: list[str] = […]` (`: list[str]` added)
+-   Use lowercase for type names. For example, `list[str]` instead of `List[str]`
+-   Use `|` for union types. For example, `str | None` instead of `Union[str, None]`
+-   Use `TypeVar` for generic types. For example, `T = TypeVar('T')`
+-   Use `Literal` for literal types. For example, `Literal['foo', 'bar']` instead of `Union[str, Literal['foo', 'bar']]`

@@ -1,0 +1,14 @@
+---
+description: Python naming conventions
+globs: **/*.py
+alwaysApply: false
+---
+## Python naming conventions
+
+Always follow these standards for Python naming convention.
+
+- Python files: `snake_case.py` (e.g., `user_handlers.py`, `database_utils.py`)
+- Class names: `CamelCase` (e.g., `UserHandler`, `DatabaseConnection`).
+- Function names: `snake_case` (e.g., `get_user`, `create_product`).
+- Variables: `snake_case` (e.g., `user_id`, `product_name`).
+- Constants: `UPPER_SNAKE_CASE` (e.g., `DEFAULT_PORT`, `MAX_CONNECTIONS`).

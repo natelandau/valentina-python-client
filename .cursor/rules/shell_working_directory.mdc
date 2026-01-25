@@ -1,0 +1,24 @@
+---
+description: Use working_directory parameter instead of cd when running shell commands
+alwaysApply: true
+---
+
+# Shell Command Working Directory
+
+When running shell commands, use the `working_directory` parameter instead of chaining with `cd path &&`.
+
+## Why
+
+Using `cd path && command` can trigger shell hooks (direnv, mise, pyenv, etc.) that hang in non-interactive contexts. The `working_directory` parameter spawns the shell directly in the target directory, bypassing these hooks.
+
+## Examples
+
+```python
+# ❌ BAD - can hang due to shell hooks
+Shell(command="cd /path/to/project && uv run pytest")
+
+# ✅ GOOD - use working_directory parameter
+Shell(command="uv run pytest", working_directory="/path/to/project")
+```
+
+When already in the project root directory, simply run the command directly without any directory change.

@@ -1,0 +1,13 @@
+---
+description: Python best practices
+globs: **/*.py
+alwaysApply: false
+---
+## Python best practices
+
+- NEVER use mutable default arguments
+- MUST use context managers (with statement) for file/resource management
+- MUST use `is` for comparing with None, True, False
+- MUST use f-strings for string formatting
+- Use list comprehensions and generator expressions
+- Use enumerate() instead of manual counter variables

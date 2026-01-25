@@ -1,0 +1,22 @@
+{
+    "respectGitignore": true,
+    "mcpServers": {
+        "context7": {
+            "command": "npx",
+            "args": ["-y", "@upstash/context7-mcp@latest"]
+        }
+    },
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run duty lint"
+                    }
+                ]
+            }
+        ]
+    }
+}

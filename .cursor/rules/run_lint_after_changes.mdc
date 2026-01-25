@@ -1,0 +1,21 @@
+---
+description: Run linting after Python file changes
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Run Linting After Python Changes
+
+After making changes to Python files, always run the lint command to verify the changes pass all checks:
+
+```bash
+uv run duty lint
+```
+
+This command runs the full linting suite including:
+- Pre-commit hooks
+- Ruff check and format
+- Type checking (ty)
+- Other code quality checks
+
+Wait for the command to complete and fix any errors before considering the task done.

@@ -1,0 +1,117 @@
+---
+description: Pydantic models for API request/response DTOs
+globs: src/vclient/api/**/*.py
+alwaysApply: false
+---
+
+## Pydantic models for API request/response DTOs
+
+Follow these patterns when creating Pydantic models for API services.
+
+### Response Models
+
+- Use Pydantic `BaseModel` for all API response DTOs
+- Response models represent data returned from the API
+- Use `model_validate()` to parse API responses into typed objects
+- Include all fields from the API response with appropriate types
+
+```python
+class Company(BaseModel):
+    """Response model for a company."""
+    id: str | None = Field(default=None, description="MongoDB document ObjectID.")
+    name: str = Field(..., min_length=3, max_length=50)
+    email: str = Field(...)
+    settings: CompanySettings | None = Field(default=None)
+```
+
+### Request Models
+
+- Create separate request models for create/update operations
+- Request models should NOT include server-generated fields (id, date_created, etc.)
+- Use `exclude_none=True, exclude_unset=True` when serializing to avoid sending null values
+
+```python
+class CreateCompanyRequest(BaseModel):
+    """Request body for creating a new company."""
+    name: str = Field(..., min_length=3, max_length=50)
+    email: str = Field(...)
+    description: str | None = Field(default=None)
+    settings: CompanySettings | None = Field(default=None)
+
+class UpdateCompanyRequest(BaseModel):
+    """Request body for updating a company. All fields optional for partial updates."""
+    name: str | None = Field(default=None, min_length=3, max_length=50)
+    email: str | None = Field(default=None)
+    description: str | None = Field(default=None)
+    settings: CompanySettings | None = Field(default=None)
+```
+
+### Service Method Pattern
+
+- Service methods accept typed function parameters (not request models directly)
+- Build request models internally from parameters
+- Serialize with `model_dump(exclude_none=True, exclude_unset=True, mode="json")`
+
+```python
+async def create(
+    self,
+    name: str,
+    email: str,
+    *,
+    description: str | None = None,
+    settings: CompanySettings | None = None,
+) -> Company:
+    body = CreateCompanyRequest(
+        name=name,
+        email=email,
+        description=description,
+        settings=settings,
+    )
+    response = await self._post(
+        Endpoints.COMPANIES,
+        json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+    )
+    return Company.model_validate(response.json())
+```
+
+### Literal Type Aliases (Preferred over Enums)
+
+Use `Literal` type aliases instead of `StrEnum` classes for constrained string fields. This provides a better SDK experience where users can pass plain strings without importing enums, while still getting full type checking and Pydantic validation.
+
+```python
+from typing import Literal
+
+# Define type aliases for constrained values
+PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
+ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
+
+
+# Use in Pydantic models
+class CompanyPermissions(BaseModel):
+    company_id: str = Field(...)
+    permission: PermissionLevel = Field(..., description="The permission level granted.")
+
+# Use in service method signatures
+async def grant_access(
+    self,
+    company_id: str,
+    developer_id: str,
+    permission: PermissionLevel,
+) -> CompanyPermissions:
+    ...
+```
+
+Benefits of Literal types over Enums:
+
+- Users can pass string values directly (`"ADMIN"`) without importing anything
+- String comparison works naturally (`if result.permission == "ADMIN"`)
+- IDE autocomplete shows valid string options
+- Pydantic validates that only allowed values are accepted
+
+### Naming Conventions
+
+- Response models: Use the entity name (e.g., `Company`, `Developer`)
+- Create request models: `Create{Entity}Request` (e.g., `CreateCompanyRequest`)
+- Update request models: `Update{Entity}Request` (e.g., `UpdateCompanyRequest`)
+- Settings/nested models: `{Entity}Settings` (e.g., `CompanySettings`)
+- Type aliases for constrained strings: Descriptive names ending with the concept (e.g., `PermissionLevel`, `ManageCampaignPermission`)
