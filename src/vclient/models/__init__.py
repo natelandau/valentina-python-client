@@ -1,5 +1,10 @@
 """Data models for API responses."""
 
+from .campaigns import (
+    Campaign,
+    CreateCampaignRequest,
+    UpdateCampaignRequest,
+)
 from .companies import (
     Company,
     CompanyPermissions,
@@ -26,17 +31,46 @@ from .global_admin import (
     UpdateDeveloperRequest,
 )
 from .pagination import PaginatedResponse
+from .shared import (
+    CreateNoteRequest,
+    Note,
+    RollStatistics,
+    S3Asset,
+    S3AssetParentType,
+    S3AssetType,
+    UpdateNoteRequest,
+)
 from .system import ServiceStatus, SystemHealth
+from .users import (
+    CampaignExperience,
+    CreateQuickrollRequest,
+    CreateUserRequest,
+    DiscordProfile,
+    ExperienceAddRemoveRequest,
+    Quickroll,
+    UpdateQuickrollRequest,
+    UpdateUserRequest,
+    User,
+    UserRole,
+)
 
 __all__ = [
+    "Campaign",
+    "CampaignExperience",
     "Company",
     "CompanyPermissions",
     "CompanySettings",
+    "CreateCampaignRequest",
     "CreateCompanyRequest",
     "CreateDeveloperRequest",
+    "CreateNoteRequest",
+    "CreateQuickrollRequest",
+    "CreateUserRequest",
     "Developer",
     "DeveloperCompanyPermission",
     "DeveloperWithApiKey",
+    "DiscordProfile",
+    "ExperienceAddRemoveRequest",
     "FreeTraitChangesPermission",
     "GrantAccessRequest",
     "GrantXPPermission",
@@ -44,11 +78,23 @@ __all__ = [
     "MeDeveloper",
     "MeDeveloperCompanyPermission",
     "MeDeveloperWithApiKey",
+    "Note",
     "PaginatedResponse",
     "PermissionLevel",
+    "Quickroll",
+    "RollStatistics",
+    "S3Asset",
+    "S3AssetParentType",
+    "S3AssetType",
     "ServiceStatus",
     "SystemHealth",
+    "UpdateCampaignRequest",
     "UpdateCompanyRequest",
     "UpdateDeveloperRequest",
     "UpdateMeDeveloperRequest",
+    "UpdateNoteRequest",
+    "UpdateQuickrollRequest",
+    "UpdateUserRequest",
+    "User",
+    "UserRole",
 ]

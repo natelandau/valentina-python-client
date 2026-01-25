@@ -1,15 +1,43 @@
 """Pydantic models for User API responses and requests."""
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
+# Re-export shared models for backwards compatibility
+from vclient.models.shared import (
+    CreateNoteRequest,
+    Note,
+    RollStatistics,
+    S3Asset,
+    S3AssetParentType,
+    S3AssetType,
+    UpdateNoteRequest,
+)
+
 # Type aliases for user-related constrained values
 UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER"]
-S3AssetType = Literal["image", "text", "audio", "video", "document", "archive", "other"]
-S3AssetParentType = Literal[
-    "character", "campaign", "campaignbook", "campaignchapter", "user", "company", "unknown"
+
+# Re-export for module-level access
+__all__ = [
+    "CampaignExperience",
+    "CreateNoteRequest",
+    "CreateQuickrollRequest",
+    "CreateUserRequest",
+    "DiscordProfile",
+    "ExperienceAddRemoveRequest",
+    "Note",
+    "Quickroll",
+    "RollStatistics",
+    "S3Asset",
+    "S3AssetParentType",
+    "S3AssetType",
+    "UpdateNoteRequest",
+    "UpdateQuickrollRequest",
+    "UpdateUserRequest",
+    "User",
+    "UserRole",
 ]
 
 
@@ -101,91 +129,6 @@ class UpdateUserRequest(BaseModel):
     role: UserRole | None = None
     discord_profile: DiscordProfile | None = None
     requesting_user_id: str
-
-
-# -----------------------------------------------------------------------------
-# Statistics Models
-# -----------------------------------------------------------------------------
-
-
-class RollStatistics(BaseModel):
-    """Aggregated dice roll statistics for a user or campaign.
-
-    Contains success rates, critical frequencies, and most-used traits
-    for analyzing gameplay patterns.
-    """
-
-    botches: int
-    successes: int
-    failures: int
-    criticals: int
-    total_rolls: int
-    average_difficulty: float | None = None
-    average_pool: float | None = None
-    top_traits: list[dict[str, Any]] = Field(default_factory=list)
-    criticals_percentage: float
-    success_percentage: float
-    failure_percentage: float
-    botch_percentage: float
-
-
-# -----------------------------------------------------------------------------
-# Asset Models
-# -----------------------------------------------------------------------------
-
-
-class S3Asset(BaseModel):
-    """Response model for an S3 asset.
-
-    Represents a file asset stored in S3, including its URL and metadata.
-    """
-
-    id: str
-    date_created: datetime
-    date_modified: datetime
-    file_type: S3AssetType
-    original_filename: str
-    public_url: str
-    uploaded_by: str
-    parent_type: S3AssetParentType | None = None
-
-
-# -----------------------------------------------------------------------------
-# Note Models
-# -----------------------------------------------------------------------------
-
-
-class Note(BaseModel):
-    """Response model for a note.
-
-    Represents a note attached to a user or other entity.
-    """
-
-    id: str
-    date_created: datetime
-    date_modified: datetime
-    title: str
-    content: str
-
-
-class CreateNoteRequest(BaseModel):
-    """Request body for creating a new note.
-
-    Used to construct the JSON payload for note creation.
-    """
-
-    title: str = Field(min_length=3, max_length=50)
-    content: str = Field(min_length=3)
-
-
-class UpdateNoteRequest(BaseModel):
-    """Request body for updating a note.
-
-    Only include fields that need to be changed; omitted fields remain unchanged.
-    """
-
-    title: str | None = Field(default=None, min_length=3, max_length=50)
-    content: str | None = Field(default=None, min_length=3)
 
 
 # -----------------------------------------------------------------------------

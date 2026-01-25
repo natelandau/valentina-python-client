@@ -22,10 +22,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from vclient.client import VClient
+    from vclient.services.campaigns import CampaignsService
     from vclient.services.companies import CompaniesService
     from vclient.services.developers import DeveloperService
     from vclient.services.global_admin import GlobalAdminService
     from vclient.services.system import SystemService
+    from vclient.services.users import UsersService
 
 _default_client: "VClient | None" = None
 
@@ -159,3 +161,58 @@ def system_service() -> "SystemService":
     from vclient.services.system import SystemService
 
     return SystemService(default_client())
+
+
+def users_service(company_id: str) -> "UsersService":
+    """Create a UsersService scoped to a specific company using the default client.
+
+    Provides access to user management operations (list, get, create, update, delete)
+    within a specific company without needing to pass a client instance.
+
+    Args:
+        company_id: The ID of the company to operate within.
+
+    Returns:
+        UsersService: A service instance scoped to the specified company.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        users = users_service("company_id")
+        all_users = await users.list_all()
+        user = await users.get("user_id")
+        ```
+    """
+    from vclient.services.users import UsersService
+
+    return UsersService(default_client(), company_id)
+
+
+def campaigns_service(company_id: str, user_id: str) -> "CampaignsService":
+    """Create a CampaignsService scoped to a specific company and user.
+
+    Provides access to campaign management operations (list, get, create, update, delete)
+    within a specific company and user context without needing to pass a client instance.
+
+    Args:
+        company_id: The ID of the company to operate within.
+        user_id: The ID of the user to operate as.
+
+    Returns:
+        CampaignsService: A service instance scoped to the specified company and user.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        campaigns = campaigns_service("company_id", "user_id")
+        all_campaigns = await campaigns.list_all()
+        campaign = await campaigns.get("campaign_id")
+        ```
+    """
+    from vclient.services.campaigns import CampaignsService
+
+    return CampaignsService(default_client(), company_id, user_id)

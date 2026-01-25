@@ -9,6 +9,7 @@ from vclient.config import APIConfig
 from vclient.constants import API_KEY_HEADER
 
 if TYPE_CHECKING:
+    from vclient.services.campaigns import CampaignsService
     from vclient.services.companies import CompaniesService
     from vclient.services.developers import DeveloperService
     from vclient.services.global_admin import GlobalAdminService
@@ -35,6 +36,13 @@ class VClient:
         # Use factory functions from any module
         companies = companies_service()
         all_companies = await companies.list_all()
+
+        # Use scoped services
+        users = client.users("company_id")
+        all_users = await users.list_all()
+
+        campaigns = client.campaigns("company_id", "user_id")
+        all_campaigns = await campaigns.list_all()
         ```
     """
 
@@ -83,7 +91,6 @@ class VClient:
         self._developer: DeveloperService | None = None
         self._global_admin: GlobalAdminService | None = None
         self._system: SystemService | None = None
-        self._users: UsersService | None = None
 
         if set_as_default:
             from vclient.registry import configure_default_client
@@ -187,18 +194,45 @@ class VClient:
             self._system = SystemService(self)
         return self._system
 
-    @property
-    def users(self) -> "UsersService":
-        """Access the Users service for managing users within companies.
+    def users(self, company_id: str) -> "UsersService":
+        """Get a UsersService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete users,
         as well as access user statistics and assets.
 
-        Returns:
-            The UsersService instance for user management operations.
-        """
-        if self._users is None:
-            from vclient.services.users import UsersService
+        Args:
+            company_id: The ID of the company to operate within.
 
-            self._users = UsersService(self)
-        return self._users
+        Returns:
+            A UsersService instance scoped to the specified company.
+
+        Example:
+            >>> users = client.users("company_id")
+            >>> all_users = await users.list_all()
+            >>> user = await users.get("user_id")
+        """
+        from vclient.services.users import UsersService
+
+        return UsersService(self, company_id)
+
+    def campaigns(self, company_id: str, user_id: str) -> "CampaignsService":
+        """Get a CampaignsService scoped to a specific company and user.
+
+        Provides methods to create, retrieve, update, and delete campaigns,
+        as well as access campaign statistics, assets, and notes.
+
+        Args:
+            company_id: The ID of the company to operate within.
+            user_id: The ID of the user to operate as.
+
+        Returns:
+            A CampaignsService instance scoped to the specified company and user.
+
+        Example:
+            >>> campaigns = client.campaigns("company_id", "user_id")
+            >>> all_campaigns = await campaigns.list_all()
+            >>> campaign = await campaigns.get("campaign_id")
+        """
+        from vclient.services.campaigns import CampaignsService
+
+        return CampaignsService(self, company_id, user_id)

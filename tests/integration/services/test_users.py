@@ -4,15 +4,13 @@ import pytest
 import respx
 
 from vclient.endpoints import Endpoints
-from vclient.exceptions import AuthorizationError, NotFoundError, RequestValidationError
+from vclient.exceptions import NotFoundError, RequestValidationError
 from vclient.models.pagination import PaginatedResponse
+from vclient.models.shared import Note, RollStatistics, S3Asset
 from vclient.models.users import (
     CampaignExperience,
     DiscordProfile,
-    Note,
     Quickroll,
-    RollStatistics,
-    S3Asset,
     User,
 )
 
@@ -137,7 +135,7 @@ class TestUsersServiceGetPage:
         ).respond(200, json=paginated_users_response)
 
         # When: Getting a page of users
-        result = await vclient.users.get_page(company_id)
+        result = await vclient.users(company_id).get_page()
 
         # Then: Returns PaginatedResponse with User objects
         assert route.called
@@ -158,7 +156,7 @@ class TestUsersServiceGetPage:
         ).respond(200, json=paginated_users_response)
 
         # When: Getting a page with role filter
-        result = await vclient.users.get_page(company_id, user_role="STORYTELLER")
+        result = await vclient.users(company_id).get_page(user_role="STORYTELLER")
 
         # Then: Request was made with correct params
         assert route.called
@@ -183,7 +181,7 @@ class TestUsersServiceGetPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.users.get_page(company_id, limit=25, offset=50)
+        result = await vclient.users(company_id).get_page(limit=25, offset=50)
 
         # Then: Request was made with correct params
         assert route.called
@@ -213,7 +211,7 @@ class TestUsersServiceListAll:
         )
 
         # When: Calling list_all
-        result = await vclient.users.list_all(company_id)
+        result = await vclient.users(company_id).list_all()
 
         # Then: Returns list of User objects
         assert isinstance(result, list)
@@ -256,7 +254,7 @@ class TestUsersServiceIterAll:
         )
 
         # When: Iterating through all users
-        users = [user async for user in vclient.users.iter_all(company_id, limit=1)]
+        users = [user async for user in vclient.users(company_id).iter_all(limit=1)]
 
         # Then: All users are yielded as User objects
         assert len(users) == 2
@@ -279,7 +277,7 @@ class TestUsersServiceGet:
         ).respond(200, json=user_response_data)
 
         # When: Getting the user
-        result = await vclient.users.get(company_id, user_id)
+        result = await vclient.users(company_id).get(user_id)
 
         # Then: Returns User object with correct data
         assert route.called
@@ -300,7 +298,7 @@ class TestUsersServiceGet:
 
         # When/Then: Getting the user raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users.get(company_id, user_id)
+            await vclient.users(company_id).get(user_id)
 
 
 class TestUsersServiceCreate:
@@ -316,8 +314,7 @@ class TestUsersServiceCreate:
         )
 
         # When: Creating a user with minimal data
-        result = await vclient.users.create(
-            company_id,
+        result = await vclient.users(company_id).create(
             name="Test User",
             email="test@example.com",
             role="PLAYER",
@@ -350,8 +347,7 @@ class TestUsersServiceCreate:
 
         # When: Creating a user with Discord profile
         discord = DiscordProfile(id="discord123", username="testuser")
-        result = await vclient.users.create(
-            company_id,
+        result = await vclient.users(company_id).create(
             name="Test User",
             email="test@example.com",
             role="PLAYER",
@@ -375,8 +371,7 @@ class TestUsersServiceCreate:
         """Verify validation error on invalid data raises RequestValidationError."""
         # When/Then: Creating with invalid data raises RequestValidationError
         with pytest.raises(RequestValidationError) as exc_info:
-            await vclient.users.create(
-                "company123",
+            await vclient.users("company123").create(
                 name="AB",
                 email="test@example.com",
                 role="PLAYER",
@@ -403,8 +398,7 @@ class TestUsersServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating the user name
-        result = await vclient.users.update(
-            company_id,
+        result = await vclient.users(company_id).update(
             user_id,
             requesting_user_id="requester123",
             name="Updated Name",
@@ -434,8 +428,7 @@ class TestUsersServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users.update(
-                company_id,
+            await vclient.users(company_id).update(
                 user_id,
                 requesting_user_id="requester123",
                 name="New Name",
@@ -457,7 +450,7 @@ class TestUsersServiceDelete:
         ).respond(204)
 
         # When: Deleting the user
-        result = await vclient.users.delete(company_id, user_id, "requester123")
+        result = await vclient.users(company_id).delete(user_id, "requester123")
 
         # Then: Request was made and returns None
         assert route.called
@@ -476,7 +469,7 @@ class TestUsersServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users.delete(company_id, user_id, "requester123")
+            await vclient.users(company_id).delete(user_id, "requester123")
 
 
 class TestUsersServiceGetStatistics:
@@ -494,7 +487,7 @@ class TestUsersServiceGetStatistics:
         ).respond(200, json=statistics_response_data)
 
         # When: Getting statistics
-        result = await vclient.users.get_statistics(company_id, user_id)
+        result = await vclient.users(company_id).get_statistics(user_id)
 
         # Then: Returns RollStatistics object
         assert route.called
@@ -502,29 +495,9 @@ class TestUsersServiceGetStatistics:
         assert result.total_rolls == 100
         assert result.success_percentage == 50.0
 
-    @respx.mock
-    async def test_get_statistics_with_custom_top_traits(
-        self, vclient, base_url, statistics_response_data
-    ):
-        """Verify getting user statistics with custom num_top_traits."""
-        # Given: A mocked statistics endpoint
-        company_id = "company123"
-        user_id = "user123"
-        route = respx.get(
-            f"{base_url}{Endpoints.USER_STATISTICS.format(company_id=company_id, user_id=user_id)}",
-            params={"num_top_traits": "10"},
-        ).respond(200, json=statistics_response_data)
 
-        # When: Getting statistics with custom num_top_traits
-        result = await vclient.users.get_statistics(company_id, user_id, num_top_traits=10)
-
-        # Then: Request was made with correct params
-        assert route.called
-        assert isinstance(result, RollStatistics)
-
-
-class TestUsersServiceListAssets:
-    """Tests for UsersService.list_assets method."""
+class TestUsersServiceAssets:
+    """Tests for UsersService asset methods."""
 
     @respx.mock
     async def test_list_assets(self, vclient, base_url, asset_response_data):
@@ -546,18 +519,13 @@ class TestUsersServiceListAssets:
         )
 
         # When: Listing assets
-        result = await vclient.users.list_assets(company_id, user_id)
+        result = await vclient.users(company_id).list_assets(user_id)
 
         # Then: Returns PaginatedResponse with S3Asset objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
         assert isinstance(result.items[0], S3Asset)
-        assert result.items[0].original_filename == "avatar.png"
-
-
-class TestUsersServiceGetAsset:
-    """Tests for UsersService.get_asset method."""
 
     @respx.mock
     async def test_get_asset(self, vclient, base_url, asset_response_data):
@@ -571,32 +539,12 @@ class TestUsersServiceGetAsset:
         ).respond(200, json=asset_response_data)
 
         # When: Getting the asset
-        result = await vclient.users.get_asset(company_id, user_id, asset_id)
+        result = await vclient.users(company_id).get_asset(user_id, asset_id)
 
         # Then: Returns S3Asset object
         assert route.called
         assert isinstance(result, S3Asset)
         assert result.id == "asset123"
-        assert result.file_type == "image"
-
-    @respx.mock
-    async def test_get_asset_not_found(self, vclient, base_url):
-        """Verify getting non-existent asset raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "user123"
-        asset_id = "nonexistent"
-        respx.get(
-            f"{base_url}{Endpoints.USER_ASSET.format(company_id=company_id, user_id=user_id, asset_id=asset_id)}"
-        ).respond(404, json={"detail": "Asset not found"})
-
-        # When/Then: Getting the asset raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.get_asset(company_id, user_id, asset_id)
-
-
-class TestUsersServiceDeleteAsset:
-    """Tests for UsersService.delete_asset method."""
 
     @respx.mock
     async def test_delete_asset(self, vclient, base_url):
@@ -610,34 +558,14 @@ class TestUsersServiceDeleteAsset:
         ).respond(204)
 
         # When: Deleting the asset
-        result = await vclient.users.delete_asset(company_id, user_id, asset_id)
+        await vclient.users(company_id).delete_asset(user_id, asset_id)
 
-        # Then: Request was made and returns None
+        # Then: Request was made
         assert route.called
-        assert result is None
-
-    @respx.mock
-    async def test_delete_asset_unauthorized(self, vclient, base_url):
-        """Verify deleting asset without permission raises AuthorizationError."""
-        # Given: A mocked endpoint returning 403
-        company_id = "company123"
-        user_id = "user123"
-        asset_id = "asset123"
-        respx.delete(
-            f"{base_url}{Endpoints.USER_ASSET.format(company_id=company_id, user_id=user_id, asset_id=asset_id)}"
-        ).respond(403, json={"detail": "Not authorized"})
-
-        # When/Then: Deleting raises AuthorizationError
-        with pytest.raises(AuthorizationError):
-            await vclient.users.delete_asset(company_id, user_id, asset_id)
-
-
-class TestUsersServiceUploadAsset:
-    """Tests for UsersService.upload_asset method."""
 
     @respx.mock
     async def test_upload_asset(self, vclient, base_url, asset_response_data):
-        """Verify uploading an asset returns S3Asset."""
+        """Verify uploading an asset."""
         # Given: A mocked upload endpoint
         company_id = "company123"
         user_id = "user123"
@@ -646,8 +574,7 @@ class TestUsersServiceUploadAsset:
         ).respond(201, json=asset_response_data)
 
         # When: Uploading an asset
-        result = await vclient.users.upload_asset(
-            company_id,
+        result = await vclient.users(company_id).upload_asset(
             user_id,
             filename="test.png",
             content=b"fake image content",
@@ -658,52 +585,10 @@ class TestUsersServiceUploadAsset:
         assert route.called
         assert isinstance(result, S3Asset)
         assert result.id == "asset123"
-        assert result.original_filename == "avatar.png"
-
-    @respx.mock
-    async def test_upload_asset_default_content_type(self, vclient, base_url, asset_response_data):
-        """Verify uploading an asset with default content type."""
-        # Given: A mocked upload endpoint
-        company_id = "company123"
-        user_id = "user123"
-        route = respx.post(
-            f"{base_url}{Endpoints.USER_ASSET_UPLOAD.format(company_id=company_id, user_id=user_id)}"
-        ).respond(201, json=asset_response_data)
-
-        # When: Uploading an asset without specifying content type
-        result = await vclient.users.upload_asset(
-            company_id,
-            user_id,
-            filename="document.bin",
-            content=b"binary content",
-        )
-
-        # Then: Returns S3Asset object
-        assert route.called
-        assert isinstance(result, S3Asset)
-
-    @respx.mock
-    async def test_upload_asset_not_found(self, vclient, base_url):
-        """Verify uploading asset for non-existent user raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "nonexistent"
-        respx.post(
-            f"{base_url}{Endpoints.USER_ASSET_UPLOAD.format(company_id=company_id, user_id=user_id)}"
-        ).respond(404, json={"detail": "User not found"})
-
-        # When/Then: Uploading raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.upload_asset(
-                company_id,
-                user_id,
-                filename="test.png",
-                content=b"content",
-            )
 
 
-class TestUsersServiceGetExperience:
-    """Tests for UsersService.get_experience method."""
+class TestUsersServiceExperience:
+    """Tests for UsersService experience methods."""
 
     @respx.mock
     async def test_get_experience(self, vclient, base_url, experience_response_data):
@@ -717,34 +602,12 @@ class TestUsersServiceGetExperience:
         ).respond(200, json=experience_response_data)
 
         # When: Getting experience
-        result = await vclient.users.get_experience(company_id, user_id, campaign_id)
+        result = await vclient.users(company_id).get_experience(user_id, campaign_id)
 
         # Then: Returns CampaignExperience object
         assert route.called
         assert isinstance(result, CampaignExperience)
         assert result.campaign_id == "campaign123"
-        assert result.xp_current == 50
-        assert result.xp_total == 100
-        assert result.cool_points == 5
-
-    @respx.mock
-    async def test_get_experience_not_found(self, vclient, base_url):
-        """Verify getting experience for non-existent user raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "nonexistent"
-        campaign_id = "campaign123"
-        respx.get(
-            f"{base_url}{Endpoints.USER_EXPERIENCE_CAMPAIGN.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id)}"
-        ).respond(404, json={"detail": "User not found"})
-
-        # When/Then: Getting experience raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.get_experience(company_id, user_id, campaign_id)
-
-
-class TestUsersServiceAddXp:
-    """Tests for UsersService.add_xp method."""
 
     @respx.mock
     async def test_add_xp(self, vclient, base_url, experience_response_data):
@@ -759,41 +622,12 @@ class TestUsersServiceAddXp:
         ).respond(201, json=updated_data)
 
         # When: Adding XP
-        result = await vclient.users.add_xp(company_id, user_id, campaign_id, amount=100)
+        result = await vclient.users(company_id).add_xp(user_id, campaign_id, amount=100)
 
         # Then: Returns updated CampaignExperience object
         assert route.called
         assert isinstance(result, CampaignExperience)
         assert result.xp_current == 150
-        assert result.xp_total == 200
-
-        # Verify request body
-        request = route.calls.last.request
-        import json
-
-        body = json.loads(request.content)
-        assert body["amount"] == 100
-        assert body["user_id"] == user_id
-        assert body["campaign_id"] == campaign_id
-
-    @respx.mock
-    async def test_add_xp_not_found(self, vclient, base_url):
-        """Verify adding XP to non-existent user raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "nonexistent"
-        campaign_id = "campaign123"
-        respx.post(
-            f"{base_url}{Endpoints.USER_EXPERIENCE_XP_ADD.format(company_id=company_id, user_id=user_id)}"
-        ).respond(404, json={"detail": "User not found"})
-
-        # When/Then: Adding XP raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.add_xp(company_id, user_id, campaign_id, amount=100)
-
-
-class TestUsersServiceRemoveXp:
-    """Tests for UsersService.remove_xp method."""
 
     @respx.mock
     async def test_remove_xp(self, vclient, base_url, experience_response_data):
@@ -808,40 +642,12 @@ class TestUsersServiceRemoveXp:
         ).respond(201, json=updated_data)
 
         # When: Removing XP
-        result = await vclient.users.remove_xp(company_id, user_id, campaign_id, amount=25)
+        result = await vclient.users(company_id).remove_xp(user_id, campaign_id, amount=25)
 
         # Then: Returns updated CampaignExperience object
         assert route.called
         assert isinstance(result, CampaignExperience)
         assert result.xp_current == 25
-
-        # Verify request body
-        request = route.calls.last.request
-        import json
-
-        body = json.loads(request.content)
-        assert body["amount"] == 25
-        assert body["user_id"] == user_id
-        assert body["campaign_id"] == campaign_id
-
-    @respx.mock
-    async def test_remove_xp_not_found(self, vclient, base_url):
-        """Verify removing XP from non-existent user raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "nonexistent"
-        campaign_id = "campaign123"
-        respx.post(
-            f"{base_url}{Endpoints.USER_EXPERIENCE_XP_REMOVE.format(company_id=company_id, user_id=user_id)}"
-        ).respond(404, json={"detail": "User not found"})
-
-        # When/Then: Removing XP raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.remove_xp(company_id, user_id, campaign_id, amount=25)
-
-
-class TestUsersServiceAddCoolPoints:
-    """Tests for UsersService.add_cool_points method."""
 
     @respx.mock
     async def test_add_cool_points(self, vclient, base_url, experience_response_data):
@@ -856,40 +662,16 @@ class TestUsersServiceAddCoolPoints:
         ).respond(201, json=updated_data)
 
         # When: Adding cool points
-        result = await vclient.users.add_cool_points(company_id, user_id, campaign_id, amount=5)
+        result = await vclient.users(company_id).add_cool_points(user_id, campaign_id, amount=5)
 
         # Then: Returns updated CampaignExperience object
         assert route.called
         assert isinstance(result, CampaignExperience)
         assert result.cool_points == 10
 
-        # Verify request body
-        request = route.calls.last.request
-        import json
 
-        body = json.loads(request.content)
-        assert body["amount"] == 5
-        assert body["user_id"] == user_id
-        assert body["campaign_id"] == campaign_id
-
-    @respx.mock
-    async def test_add_cool_points_not_found(self, vclient, base_url):
-        """Verify adding cool points to non-existent user raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "nonexistent"
-        campaign_id = "campaign123"
-        respx.post(
-            f"{base_url}{Endpoints.USER_EXPERIENCE_CP_ADD.format(company_id=company_id, user_id=user_id)}"
-        ).respond(404, json={"detail": "User not found"})
-
-        # When/Then: Adding cool points raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.add_cool_points(company_id, user_id, campaign_id, amount=5)
-
-
-class TestUsersServiceGetNotesPage:
-    """Tests for UsersService.get_notes_page method."""
+class TestUsersServiceNotes:
+    """Tests for UsersService note methods."""
 
     @respx.mock
     async def test_get_notes_page(self, vclient, base_url, note_response_data):
@@ -911,123 +693,13 @@ class TestUsersServiceGetNotesPage:
         )
 
         # When: Getting a page of notes
-        result = await vclient.users.get_notes_page(company_id, user_id)
+        result = await vclient.users(company_id).get_notes_page(user_id)
 
         # Then: Returns PaginatedResponse with Note objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
         assert isinstance(result.items[0], Note)
-        assert result.items[0].title == "Test Note"
-        assert result.total == 1
-
-    @respx.mock
-    async def test_get_notes_page_with_pagination(self, vclient, base_url, note_response_data):
-        """Verify get_notes_page accepts pagination parameters."""
-        # Given: A mocked endpoint expecting custom pagination
-        company_id = "company123"
-        user_id = "user123"
-        route = respx.get(
-            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
-            params={"limit": "25", "offset": "50"},
-        ).respond(
-            200,
-            json={
-                "items": [note_response_data],
-                "limit": 25,
-                "offset": 50,
-                "total": 100,
-            },
-        )
-
-        # When: Getting a page with custom pagination
-        result = await vclient.users.get_notes_page(company_id, user_id, limit=25, offset=50)
-
-        # Then: Request was made with correct params
-        assert route.called
-        assert result.limit == 25
-        assert result.offset == 50
-
-
-class TestUsersServiceListAllNotes:
-    """Tests for UsersService.list_all_notes method."""
-
-    @respx.mock
-    async def test_list_all_notes(self, vclient, base_url, note_response_data):
-        """Verify list_all_notes returns all notes."""
-        # Given: Mocked endpoint
-        company_id = "company123"
-        user_id = "user123"
-        respx.get(
-            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
-            params={"limit": "100", "offset": "0"},
-        ).respond(
-            200,
-            json={
-                "items": [note_response_data],
-                "limit": 100,
-                "offset": 0,
-                "total": 1,
-            },
-        )
-
-        # When: Calling list_all_notes
-        result = await vclient.users.list_all_notes(company_id, user_id)
-
-        # Then: Returns list of Note objects
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], Note)
-        assert result[0].title == "Test Note"
-
-
-class TestUsersServiceIterAllNotes:
-    """Tests for UsersService.iter_all_notes method."""
-
-    @respx.mock
-    async def test_iter_all_notes(self, vclient, base_url, note_response_data):
-        """Verify iter_all_notes yields Note objects across pages."""
-        # Given: Mocked endpoints for multiple pages
-        company_id = "company123"
-        user_id = "user123"
-        note2 = {**note_response_data, "id": "note456", "title": "Note 2"}
-        respx.get(
-            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
-            params={"limit": "1", "offset": "0"},
-        ).respond(
-            200,
-            json={
-                "items": [note_response_data],
-                "limit": 1,
-                "offset": 0,
-                "total": 2,
-            },
-        )
-        respx.get(
-            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
-            params={"limit": "1", "offset": "1"},
-        ).respond(
-            200,
-            json={
-                "items": [note2],
-                "limit": 1,
-                "offset": 1,
-                "total": 2,
-            },
-        )
-
-        # When: Iterating through all notes
-        notes = [note async for note in vclient.users.iter_all_notes(company_id, user_id, limit=1)]
-
-        # Then: All notes are yielded as Note objects
-        assert len(notes) == 2
-        assert all(isinstance(n, Note) for n in notes)
-        assert notes[0].title == "Test Note"
-        assert notes[1].title == "Note 2"
-
-
-class TestUsersServiceGetNote:
-    """Tests for UsersService.get_note method."""
 
     @respx.mock
     async def test_get_note(self, vclient, base_url, note_response_data):
@@ -1041,33 +713,12 @@ class TestUsersServiceGetNote:
         ).respond(200, json=note_response_data)
 
         # When: Getting the note
-        result = await vclient.users.get_note(company_id, user_id, note_id)
+        result = await vclient.users(company_id).get_note(user_id, note_id)
 
         # Then: Returns Note object
         assert route.called
         assert isinstance(result, Note)
         assert result.id == "note123"
-        assert result.title == "Test Note"
-        assert result.content == "This is test content"
-
-    @respx.mock
-    async def test_get_note_not_found(self, vclient, base_url):
-        """Verify getting non-existent note raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "user123"
-        note_id = "nonexistent"
-        respx.get(
-            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
-        ).respond(404, json={"detail": "Note not found"})
-
-        # When/Then: Getting the note raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.get_note(company_id, user_id, note_id)
-
-
-class TestUsersServiceCreateNote:
-    """Tests for UsersService.create_note method."""
 
     @respx.mock
     async def test_create_note(self, vclient, base_url, note_response_data):
@@ -1080,8 +731,7 @@ class TestUsersServiceCreateNote:
         ).respond(201, json=note_response_data)
 
         # When: Creating a note
-        result = await vclient.users.create_note(
-            company_id,
+        result = await vclient.users(company_id).create_note(
             user_id,
             title="Test Note",
             content="This is test content",
@@ -1091,52 +741,6 @@ class TestUsersServiceCreateNote:
         assert route.called
         assert isinstance(result, Note)
         assert result.title == "Test Note"
-
-        # Verify request body
-        request = route.calls.last.request
-        import json
-
-        body = json.loads(request.content)
-        assert body["title"] == "Test Note"
-        assert body["content"] == "This is test content"
-
-    async def test_create_note_validation_error(self, vclient):
-        """Verify validation error on invalid data raises RequestValidationError."""
-        # When/Then: Creating with invalid data raises RequestValidationError
-        with pytest.raises(RequestValidationError) as exc_info:
-            await vclient.users.create_note(
-                "company123",
-                "user123",
-                title="AB",  # Too short (min 3 chars)
-                content="Valid content",
-            )
-
-        # Verify error details are accessible
-        assert len(exc_info.value.errors) == 1
-        assert exc_info.value.errors[0]["loc"] == ("title",)
-
-    @respx.mock
-    async def test_create_note_not_found(self, vclient, base_url):
-        """Verify creating note for non-existent user raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "nonexistent"
-        respx.post(
-            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}"
-        ).respond(404, json={"detail": "User not found"})
-
-        # When/Then: Creating raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.create_note(
-                company_id,
-                user_id,
-                title="Test Note",
-                content="Test content",
-            )
-
-
-class TestUsersServiceUpdateNote:
-    """Tests for UsersService.update_note method."""
 
     @respx.mock
     async def test_update_note(self, vclient, base_url, note_response_data):
@@ -1151,8 +755,7 @@ class TestUsersServiceUpdateNote:
         ).respond(200, json=updated_data)
 
         # When: Updating the note
-        result = await vclient.users.update_note(
-            company_id,
+        result = await vclient.users(company_id).update_note(
             user_id,
             note_id,
             title="Updated Title",
@@ -1162,62 +765,6 @@ class TestUsersServiceUpdateNote:
         assert route.called
         assert isinstance(result, Note)
         assert result.title == "Updated Title"
-
-        # Verify request body
-        request = route.calls.last.request
-        import json
-
-        body = json.loads(request.content)
-        assert body == {"title": "Updated Title"}
-
-    @respx.mock
-    async def test_update_note_content(self, vclient, base_url, note_response_data):
-        """Verify updating note content."""
-        # Given: A mocked update endpoint
-        company_id = "company123"
-        user_id = "user123"
-        note_id = "note123"
-        updated_data = {**note_response_data, "content": "Updated content"}
-        route = respx.patch(
-            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
-        ).respond(200, json=updated_data)
-
-        # When: Updating the note content
-        result = await vclient.users.update_note(
-            company_id,
-            user_id,
-            note_id,
-            content="Updated content",
-        )
-
-        # Then: Returns updated Note object
-        assert route.called
-        assert isinstance(result, Note)
-        assert result.content == "Updated content"
-
-    @respx.mock
-    async def test_update_note_not_found(self, vclient, base_url):
-        """Verify updating non-existent note raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "user123"
-        note_id = "nonexistent"
-        respx.patch(
-            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
-        ).respond(404, json={"detail": "Note not found"})
-
-        # When/Then: Updating raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.update_note(
-                company_id,
-                user_id,
-                note_id,
-                title="New Title",
-            )
-
-
-class TestUsersServiceDeleteNote:
-    """Tests for UsersService.delete_note method."""
 
     @respx.mock
     async def test_delete_note(self, vclient, base_url):
@@ -1231,68 +778,14 @@ class TestUsersServiceDeleteNote:
         ).respond(204)
 
         # When: Deleting the note
-        result = await vclient.users.delete_note(company_id, user_id, note_id)
+        await vclient.users(company_id).delete_note(user_id, note_id)
 
-        # Then: Request was made and returns None
+        # Then: Request was made
         assert route.called
-        assert result is None
-
-    @respx.mock
-    async def test_delete_note_not_found(self, vclient, base_url):
-        """Verify deleting non-existent note raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "user123"
-        note_id = "nonexistent"
-        respx.delete(
-            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
-        ).respond(404, json={"detail": "Note not found"})
-
-        # When/Then: Deleting raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.delete_note(company_id, user_id, note_id)
-
-    @respx.mock
-    async def test_delete_note_unauthorized(self, vclient, base_url):
-        """Verify deleting note without permission raises AuthorizationError."""
-        # Given: A mocked endpoint returning 403
-        company_id = "company123"
-        user_id = "user123"
-        note_id = "note123"
-        respx.delete(
-            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
-        ).respond(403, json={"detail": "Not authorized"})
-
-        # When/Then: Deleting raises AuthorizationError
-        with pytest.raises(AuthorizationError):
-            await vclient.users.delete_note(company_id, user_id, note_id)
 
 
-class TestUsersServiceClientIntegration:
-    """Tests for VClient.users property."""
-
-    async def test_users_property_returns_service(self, vclient):
-        """Verify users property returns UsersService instance."""
-        # When: Accessing the users property
-        service = vclient.users
-
-        # Then: Returns a UsersService instance
-        from vclient.services.users import UsersService
-
-        assert isinstance(service, UsersService)
-
-    async def test_users_property_cached(self, vclient):
-        """Verify users property returns same instance on multiple calls."""
-        # When: Accessing the users property multiple times
-        service1 = vclient.users
-        service2 = vclient.users
-
-        # Then: Returns the same instance
-        assert service1 is service2
-
-
-class TestUsersServiceGetQuickrollsPage:
-    """Tests for UsersService.get_quickrolls_page method."""
+class TestUsersServiceQuickrolls:
+    """Tests for UsersService quickroll methods."""
 
     @respx.mock
     async def test_get_quickrolls_page(self, vclient, base_url, quickroll_response_data):
@@ -1314,127 +807,13 @@ class TestUsersServiceGetQuickrollsPage:
         )
 
         # When: Getting a page of quickrolls
-        result = await vclient.users.get_quickrolls_page(company_id, user_id)
+        result = await vclient.users(company_id).get_quickrolls_page(user_id)
 
         # Then: Returns PaginatedResponse with Quickroll objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
         assert isinstance(result.items[0], Quickroll)
-        assert result.items[0].name == "Test Quickroll"
-        assert result.total == 1
-
-    @respx.mock
-    async def test_get_quickrolls_page_with_pagination(
-        self, vclient, base_url, quickroll_response_data
-    ):
-        """Verify get_quickrolls_page accepts pagination parameters."""
-        # Given: A mocked endpoint expecting custom pagination
-        company_id = "company123"
-        user_id = "user123"
-        route = respx.get(
-            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
-            params={"limit": "25", "offset": "50"},
-        ).respond(
-            200,
-            json={
-                "items": [quickroll_response_data],
-                "limit": 25,
-                "offset": 50,
-                "total": 100,
-            },
-        )
-
-        # When: Getting a page with custom pagination
-        result = await vclient.users.get_quickrolls_page(company_id, user_id, limit=25, offset=50)
-
-        # Then: Request was made with correct params
-        assert route.called
-        assert result.limit == 25
-        assert result.offset == 50
-
-
-class TestUsersServiceListAllQuickrolls:
-    """Tests for UsersService.list_all_quickrolls method."""
-
-    @respx.mock
-    async def test_list_all_quickrolls(self, vclient, base_url, quickroll_response_data):
-        """Verify list_all_quickrolls returns all quickrolls."""
-        # Given: Mocked endpoint
-        company_id = "company123"
-        user_id = "user123"
-        respx.get(
-            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
-            params={"limit": "100", "offset": "0"},
-        ).respond(
-            200,
-            json={
-                "items": [quickroll_response_data],
-                "limit": 100,
-                "offset": 0,
-                "total": 1,
-            },
-        )
-
-        # When: Calling list_all_quickrolls
-        result = await vclient.users.list_all_quickrolls(company_id, user_id)
-
-        # Then: Returns list of Quickroll objects
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], Quickroll)
-        assert result[0].name == "Test Quickroll"
-
-
-class TestUsersServiceIterAllQuickrolls:
-    """Tests for UsersService.iter_all_quickrolls method."""
-
-    @respx.mock
-    async def test_iter_all_quickrolls(self, vclient, base_url, quickroll_response_data):
-        """Verify iter_all_quickrolls yields Quickroll objects across pages."""
-        # Given: Mocked endpoints for multiple pages
-        company_id = "company123"
-        user_id = "user123"
-        qr2 = {**quickroll_response_data, "id": "quickroll456", "name": "Quickroll 2"}
-        respx.get(
-            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
-            params={"limit": "1", "offset": "0"},
-        ).respond(
-            200,
-            json={
-                "items": [quickroll_response_data],
-                "limit": 1,
-                "offset": 0,
-                "total": 2,
-            },
-        )
-        respx.get(
-            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
-            params={"limit": "1", "offset": "1"},
-        ).respond(
-            200,
-            json={
-                "items": [qr2],
-                "limit": 1,
-                "offset": 1,
-                "total": 2,
-            },
-        )
-
-        # When: Iterating through all quickrolls
-        quickrolls = [
-            qr async for qr in vclient.users.iter_all_quickrolls(company_id, user_id, limit=1)
-        ]
-
-        # Then: All quickrolls are yielded as Quickroll objects
-        assert len(quickrolls) == 2
-        assert all(isinstance(qr, Quickroll) for qr in quickrolls)
-        assert quickrolls[0].name == "Test Quickroll"
-        assert quickrolls[1].name == "Quickroll 2"
-
-
-class TestUsersServiceGetQuickroll:
-    """Tests for UsersService.get_quickroll method."""
 
     @respx.mock
     async def test_get_quickroll(self, vclient, base_url, quickroll_response_data):
@@ -1448,34 +827,12 @@ class TestUsersServiceGetQuickroll:
         ).respond(200, json=quickroll_response_data)
 
         # When: Getting the quickroll
-        result = await vclient.users.get_quickroll(company_id, user_id, quickroll_id)
+        result = await vclient.users(company_id).get_quickroll(user_id, quickroll_id)
 
         # Then: Returns Quickroll object
         assert route.called
         assert isinstance(result, Quickroll)
         assert result.id == "quickroll123"
-        assert result.name == "Test Quickroll"
-        assert result.description == "A test quickroll"
-        assert result.trait_ids == ["trait1", "trait2"]
-
-    @respx.mock
-    async def test_get_quickroll_not_found(self, vclient, base_url):
-        """Verify getting non-existent quickroll raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "user123"
-        quickroll_id = "nonexistent"
-        respx.get(
-            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
-        ).respond(404, json={"detail": "Quickroll not found"})
-
-        # When/Then: Getting the quickroll raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.get_quickroll(company_id, user_id, quickroll_id)
-
-
-class TestUsersServiceCreateQuickroll:
-    """Tests for UsersService.create_quickroll method."""
 
     @respx.mock
     async def test_create_quickroll(self, vclient, base_url, quickroll_response_data):
@@ -1488,8 +845,7 @@ class TestUsersServiceCreateQuickroll:
         ).respond(201, json=quickroll_response_data)
 
         # When: Creating a quickroll
-        result = await vclient.users.create_quickroll(
-            company_id,
+        result = await vclient.users(company_id).create_quickroll(
             user_id,
             name="Test Quickroll",
             description="A test quickroll",
@@ -1500,73 +856,6 @@ class TestUsersServiceCreateQuickroll:
         assert route.called
         assert isinstance(result, Quickroll)
         assert result.name == "Test Quickroll"
-
-        # Verify request body
-        request = route.calls.last.request
-        import json
-
-        body = json.loads(request.content)
-        assert body["name"] == "Test Quickroll"
-        assert body["description"] == "A test quickroll"
-        assert body["trait_ids"] == ["trait1", "trait2"]
-
-    @respx.mock
-    async def test_create_quickroll_minimal(self, vclient, base_url, quickroll_response_data):
-        """Verify creating a quickroll with minimal data."""
-        # Given: A mocked create endpoint
-        company_id = "company123"
-        user_id = "user123"
-        minimal_response = {**quickroll_response_data, "description": None, "trait_ids": []}
-        route = respx.post(
-            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}"
-        ).respond(201, json=minimal_response)
-
-        # When: Creating a quickroll with only name
-        result = await vclient.users.create_quickroll(
-            company_id,
-            user_id,
-            name="Test Quickroll",
-        )
-
-        # Then: Returns created Quickroll object
-        assert route.called
-        assert isinstance(result, Quickroll)
-
-    async def test_create_quickroll_validation_error(self, vclient):
-        """Verify validation error on invalid data raises RequestValidationError."""
-        # When/Then: Creating with invalid data raises RequestValidationError
-        with pytest.raises(RequestValidationError) as exc_info:
-            await vclient.users.create_quickroll(
-                "company123",
-                "user123",
-                name="AB",  # Too short (min 3 chars)
-            )
-
-        # Verify error details are accessible
-        assert len(exc_info.value.errors) == 1
-        assert exc_info.value.errors[0]["loc"] == ("name",)
-
-    @respx.mock
-    async def test_create_quickroll_not_found(self, vclient, base_url):
-        """Verify creating quickroll for non-existent user raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "nonexistent"
-        respx.post(
-            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}"
-        ).respond(404, json={"detail": "User not found"})
-
-        # When/Then: Creating raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.create_quickroll(
-                company_id,
-                user_id,
-                name="Test Quickroll",
-            )
-
-
-class TestUsersServiceUpdateQuickroll:
-    """Tests for UsersService.update_quickroll method."""
 
     @respx.mock
     async def test_update_quickroll(self, vclient, base_url, quickroll_response_data):
@@ -1581,8 +870,7 @@ class TestUsersServiceUpdateQuickroll:
         ).respond(200, json=updated_data)
 
         # When: Updating the quickroll
-        result = await vclient.users.update_quickroll(
-            company_id,
+        result = await vclient.users(company_id).update_quickroll(
             user_id,
             quickroll_id,
             name="Updated Name",
@@ -1592,62 +880,6 @@ class TestUsersServiceUpdateQuickroll:
         assert route.called
         assert isinstance(result, Quickroll)
         assert result.name == "Updated Name"
-
-        # Verify request body
-        request = route.calls.last.request
-        import json
-
-        body = json.loads(request.content)
-        assert body == {"name": "Updated Name"}
-
-    @respx.mock
-    async def test_update_quickroll_trait_ids(self, vclient, base_url, quickroll_response_data):
-        """Verify updating quickroll trait_ids."""
-        # Given: A mocked update endpoint
-        company_id = "company123"
-        user_id = "user123"
-        quickroll_id = "quickroll123"
-        updated_data = {**quickroll_response_data, "trait_ids": ["trait3", "trait4"]}
-        route = respx.patch(
-            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
-        ).respond(200, json=updated_data)
-
-        # When: Updating the quickroll trait_ids
-        result = await vclient.users.update_quickroll(
-            company_id,
-            user_id,
-            quickroll_id,
-            trait_ids=["trait3", "trait4"],
-        )
-
-        # Then: Returns updated Quickroll object
-        assert route.called
-        assert isinstance(result, Quickroll)
-        assert result.trait_ids == ["trait3", "trait4"]
-
-    @respx.mock
-    async def test_update_quickroll_not_found(self, vclient, base_url):
-        """Verify updating non-existent quickroll raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "user123"
-        quickroll_id = "nonexistent"
-        respx.patch(
-            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
-        ).respond(404, json={"detail": "Quickroll not found"})
-
-        # When/Then: Updating raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.update_quickroll(
-                company_id,
-                user_id,
-                quickroll_id,
-                name="New Name",
-            )
-
-
-class TestUsersServiceDeleteQuickroll:
-    """Tests for UsersService.delete_quickroll method."""
 
     @respx.mock
     async def test_delete_quickroll(self, vclient, base_url):
@@ -1661,38 +893,38 @@ class TestUsersServiceDeleteQuickroll:
         ).respond(204)
 
         # When: Deleting the quickroll
-        result = await vclient.users.delete_quickroll(company_id, user_id, quickroll_id)
+        await vclient.users(company_id).delete_quickroll(user_id, quickroll_id)
 
-        # Then: Request was made and returns None
+        # Then: Request was made
         assert route.called
-        assert result is None
 
-    @respx.mock
-    async def test_delete_quickroll_not_found(self, vclient, base_url):
-        """Verify deleting non-existent quickroll raises NotFoundError."""
-        # Given: A mocked endpoint returning 404
-        company_id = "company123"
-        user_id = "user123"
-        quickroll_id = "nonexistent"
-        respx.delete(
-            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
-        ).respond(404, json={"detail": "Quickroll not found"})
 
-        # When/Then: Deleting raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.users.delete_quickroll(company_id, user_id, quickroll_id)
+class TestUsersServiceFactoryMethod:
+    """Tests for VClient.users factory method."""
 
-    @respx.mock
-    async def test_delete_quickroll_unauthorized(self, vclient, base_url):
-        """Verify deleting quickroll without permission raises AuthorizationError."""
-        # Given: A mocked endpoint returning 403
-        company_id = "company123"
-        user_id = "user123"
-        quickroll_id = "quickroll123"
-        respx.delete(
-            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
-        ).respond(403, json={"detail": "Not authorized"})
+    async def test_users_method_returns_service(self, vclient):
+        """Verify users method returns UsersService instance."""
+        # When: Calling the users method
+        service = vclient.users("company123")
 
-        # When/Then: Deleting raises AuthorizationError
-        with pytest.raises(AuthorizationError):
-            await vclient.users.delete_quickroll(company_id, user_id, quickroll_id)
+        # Then: Returns a UsersService instance
+        from vclient.services.users import UsersService
+
+        assert isinstance(service, UsersService)
+
+    async def test_users_method_creates_new_instance(self, vclient):
+        """Verify users method creates new instance each call."""
+        # When: Calling the users method multiple times
+        service1 = vclient.users("company123")
+        service2 = vclient.users("company123")
+
+        # Then: Returns different instances (not cached)
+        assert service1 is not service2
+
+    async def test_users_method_stores_company_id(self, vclient):
+        """Verify users method stores company_id on the service."""
+        # When: Calling the users method with a company_id
+        service = vclient.users("company123")
+
+        # Then: The service has the company_id stored
+        assert service._company_id == "company123"

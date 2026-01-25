@@ -4,23 +4,41 @@ The Users Service provides methods to create, retrieve, update, and delete users
 
 ## Usage
 
+The users service is scoped to a specific company context at creation time:
+
+```python
+from vclient import VClient
+
+async with VClient(base_url="...", api_key="...") as client:
+    # Get a users service scoped to a company
+    users = client.users("company_id")
+
+    # All operations use this context
+    all_users = await users.list_all()
+    user = await users.get("user_id")
+```
+
+Or using the factory function:
+
 ```python
 from vclient import users_service
 
-users = users_service()
+# Requires a default client to be configured
+users = users_service("company_id")
+all_users = await users.list_all()
 ```
 
 ## Available Methods
 
-This service supports all [common CRUD and pagination methods](../README.md#common-service-methods):
+This service supports all common CRUD and pagination methods:
 
-- `get(company_id, user_id)` - Retrieve a user by ID
-- `create(company_id, name, email, role, requesting_user_id, discord_profile?)` - Create a new user
-- `update(company_id, user_id, requesting_user_id, name?, email?, role?, discord_profile?)` - Update a user
-- `delete(company_id, user_id, requesting_user_id)` - Delete a user
-- `get_page(company_id, user_role?, limit?, offset?)` - Get a paginated page of users
-- `list_all(company_id, user_role?)` - Get all users
-- `iter_all(company_id, user_role?, limit?)` - Iterate through all users
+- `get(user_id)` - Retrieve a user by ID
+- `create(name, email, role, requesting_user_id, discord_profile?)` - Create a new user
+- `update(user_id, requesting_user_id, name?, email?, role?, discord_profile?)` - Update a user
+- `delete(user_id, requesting_user_id)` - Delete a user
+- `get_page(user_role?, limit?, offset?)` - Get a paginated page of users
+- `list_all(user_role?)` - Get all users
+- `iter_all(user_role?, limit?)` - Iterate through all users
 
 ## Service-Specific Methods
 
@@ -32,7 +50,6 @@ Retrieve aggregated dice roll statistics for a specific user.
 
 | Parameter        | Type  | Description                                 |
 | ---------------- | ----- | ------------------------------------------- |
-| `company_id`     | `str` | The ID of the company containing the user   |
 | `user_id`        | `str` | The ID of the user to get statistics for    |
 | `num_top_traits` | `int` | Number of top traits to include (default 5) |
 
@@ -41,7 +58,7 @@ Retrieve aggregated dice roll statistics for a specific user.
 **Example:**
 
 ```python
-stats = await users.get_statistics("company_id", "user_id", num_top_traits=10)
+stats = await users.get_statistics("user_id", num_top_traits=10)
 print(f"Success rate: {stats.success_percentage}%")
 print(f"Total rolls: {stats.total_rolls}")
 ```
@@ -52,12 +69,11 @@ Retrieve a paginated list of assets for a user.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                               |
-| ------------ | ----- | ----------------------------------------- |
-| `company_id` | `str` | The ID of the company containing the user |
-| `user_id`    | `str` | The ID of the user whose assets to list   |
-| `limit`      | `int` | Maximum items to return (default 10)      |
-| `offset`     | `int` | Number of items to skip (default 0)       |
+| Parameter | Type  | Description                             |
+| --------- | ----- | --------------------------------------- |
+| `user_id` | `str` | The ID of the user whose assets to list |
+| `limit`   | `int` | Maximum items to return (default 10)    |
+| `offset`  | `int` | Number of items to skip (default 0)     |
 
 **Returns:** `PaginatedResponse[S3Asset]`
 
@@ -67,11 +83,10 @@ Retrieve details of a specific asset including its URL and metadata.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                     |
-| ------------ | ----- | ------------------------------- |
-| `company_id` | `str` | The ID of the company           |
-| `user_id`    | `str` | The ID of the user who owns it  |
-| `asset_id`   | `str` | The ID of the asset to retrieve |
+| Parameter  | Type  | Description                     |
+| ---------- | ----- | ------------------------------- |
+| `user_id`  | `str` | The ID of the user who owns it  |
+| `asset_id` | `str` | The ID of the asset to retrieve |
 
 **Returns:** `S3Asset`
 
@@ -81,11 +96,10 @@ Delete an asset from a user. This action cannot be undone.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                    |
-| ------------ | ----- | ------------------------------ |
-| `company_id` | `str` | The ID of the company          |
-| `user_id`    | `str` | The ID of the user who owns it |
-| `asset_id`   | `str` | The ID of the asset to delete  |
+| Parameter  | Type  | Description                    |
+| ---------- | ----- | ------------------------------ |
+| `user_id`  | `str` | The ID of the user who owns it |
+| `asset_id` | `str` | The ID of the asset to delete  |
 
 **Returns:** `None`
 
@@ -97,7 +111,6 @@ Upload a new asset for a user. The file is stored in S3 and associated with the 
 
 | Parameter      | Type    | Description                                                   |
 | -------------- | ------- | ------------------------------------------------------------- |
-| `company_id`   | `str`   | The ID of the company containing the user                     |
 | `user_id`      | `str`   | The ID of the user to upload the asset for                    |
 | `filename`     | `str`   | The original filename of the asset                            |
 | `content`      | `bytes` | The raw bytes of the file to upload                           |
@@ -112,8 +125,7 @@ Upload a new asset for a user. The file is stored in S3 and associated with the 
 with open("avatar.png", "rb") as f:
     content = f.read()
 
-asset = await client.users.upload_asset(
-    company_id="company_id",
+asset = await users.upload_asset(
     user_id="user_id",
     filename="avatar.png",
     content=content,
@@ -128,18 +140,17 @@ Retrieve a user's experience points and cool points for a specific campaign. Cre
 
 **Parameters:**
 
-| Parameter     | Type  | Description                               |
-| ------------- | ----- | ----------------------------------------- |
-| `company_id`  | `str` | The ID of the company containing the user |
-| `user_id`     | `str` | The ID of the user                        |
-| `campaign_id` | `str` | The ID of the campaign                    |
+| Parameter     | Type  | Description            |
+| ------------- | ----- | ---------------------- |
+| `user_id`     | `str` | The ID of the user     |
+| `campaign_id` | `str` | The ID of the campaign |
 
 **Returns:** `CampaignExperience`
 
 **Example:**
 
 ```python
-experience = await client.users.get_experience("company_id", "user_id", "campaign_id")
+experience = await users.get_experience("user_id", "campaign_id")
 print(f"Current XP: {experience.xp_current}")
 print(f"Total XP: {experience.xp_total}")
 print(f"Cool Points: {experience.cool_points}")
@@ -151,19 +162,18 @@ Award experience points to a user for a specific campaign. The XP is added to bo
 
 **Parameters:**
 
-| Parameter     | Type  | Description                               |
-| ------------- | ----- | ----------------------------------------- |
-| `company_id`  | `str` | The ID of the company containing the user |
-| `user_id`     | `str` | The ID of the user to award XP to         |
-| `campaign_id` | `str` | The ID of the campaign                    |
-| `amount`      | `int` | The amount of XP to add                   |
+| Parameter     | Type  | Description                       |
+| ------------- | ----- | --------------------------------- |
+| `user_id`     | `str` | The ID of the user to award XP to |
+| `campaign_id` | `str` | The ID of the campaign            |
+| `amount`      | `int` | The amount of XP to add           |
 
 **Returns:** `CampaignExperience`
 
 **Example:**
 
 ```python
-experience = await client.users.add_xp("company_id", "user_id", "campaign_id", amount=50)
+experience = await users.add_xp("user_id", "campaign_id", amount=50)
 print(f"New current XP: {experience.xp_current}")
 ```
 
@@ -173,19 +183,18 @@ Deduct experience points from a user's current XP pool. Returns an error if the 
 
 **Parameters:**
 
-| Parameter     | Type  | Description                               |
-| ------------- | ----- | ----------------------------------------- |
-| `company_id`  | `str` | The ID of the company containing the user |
-| `user_id`     | `str` | The ID of the user to remove XP from      |
-| `campaign_id` | `str` | The ID of the campaign                    |
-| `amount`      | `int` | The amount of XP to remove                |
+| Parameter     | Type  | Description                         |
+| ------------- | ----- | ----------------------------------- |
+| `user_id`     | `str` | The ID of the user to remove XP from|
+| `campaign_id` | `str` | The ID of the campaign              |
+| `amount`      | `int` | The amount of XP to remove          |
 
 **Returns:** `CampaignExperience`
 
 **Example:**
 
 ```python
-experience = await client.users.remove_xp("company_id", "user_id", "campaign_id", amount=25)
+experience = await users.remove_xp("user_id", "campaign_id", amount=25)
 print(f"Remaining XP: {experience.xp_current}")
 ```
 
@@ -195,19 +204,18 @@ Award cool points to a user for a specific campaign. Cool points are converted t
 
 **Parameters:**
 
-| Parameter     | Type  | Description                               |
-| ------------- | ----- | ----------------------------------------- |
-| `company_id`  | `str` | The ID of the company containing the user |
-| `user_id`     | `str` | The ID of the user to award cool points   |
-| `campaign_id` | `str` | The ID of the campaign                    |
-| `amount`      | `int` | The amount of cool points to add          |
+| Parameter     | Type  | Description                             |
+| ------------- | ----- | --------------------------------------- |
+| `user_id`     | `str` | The ID of the user to award cool points |
+| `campaign_id` | `str` | The ID of the campaign                  |
+| `amount`      | `int` | The amount of cool points to add        |
 
 **Returns:** `CampaignExperience`
 
 **Example:**
 
 ```python
-experience = await client.users.add_cool_points("company_id", "user_id", "campaign_id", amount=3)
+experience = await users.add_cool_points("user_id", "campaign_id", amount=3)
 print(f"Total cool points: {experience.cool_points}")
 ```
 
@@ -217,12 +225,11 @@ Retrieve a paginated page of notes for a user.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                               |
-| ------------ | ----- | ----------------------------------------- |
-| `company_id` | `str` | The ID of the company containing the user |
-| `user_id`    | `str` | The ID of the user whose notes to list    |
-| `limit`      | `int` | Maximum items to return (default 10)      |
-| `offset`     | `int` | Number of items to skip (default 0)       |
+| Parameter | Type  | Description                            |
+| --------- | ----- | -------------------------------------- |
+| `user_id` | `str` | The ID of the user whose notes to list |
+| `limit`   | `int` | Maximum items to return (default 10)   |
+| `offset`  | `int` | Number of items to skip (default 0)    |
 
 **Returns:** `PaginatedResponse[Note]`
 
@@ -232,10 +239,9 @@ Retrieve all notes for a user. Automatically paginates through all results.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                               |
-| ------------ | ----- | ----------------------------------------- |
-| `company_id` | `str` | The ID of the company containing the user |
-| `user_id`    | `str` | The ID of the user whose notes to list    |
+| Parameter | Type  | Description                            |
+| --------- | ----- | -------------------------------------- |
+| `user_id` | `str` | The ID of the user whose notes to list |
 
 **Returns:** `list[Note]`
 
@@ -245,11 +251,10 @@ Iterate through all notes for a user. Yields individual notes, automatically fet
 
 **Parameters:**
 
-| Parameter    | Type  | Description                               |
-| ------------ | ----- | ----------------------------------------- |
-| `company_id` | `str` | The ID of the company containing the user |
-| `user_id`    | `str` | The ID of the user whose notes to iterate |
-| `limit`      | `int` | Items per page (default 100)              |
+| Parameter | Type  | Description                               |
+| --------- | ----- | ----------------------------------------- |
+| `user_id` | `str` | The ID of the user whose notes to iterate |
+| `limit`   | `int` | Items per page (default 100)              |
 
 **Returns:** `AsyncIterator[Note]`
 
@@ -259,11 +264,10 @@ Retrieve a specific note including its content and metadata.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                    |
-| ------------ | ----- | ------------------------------ |
-| `company_id` | `str` | The ID of the company          |
-| `user_id`    | `str` | The ID of the user who owns it |
-| `note_id`    | `str` | The ID of the note to retrieve |
+| Parameter | Type  | Description                    |
+| --------- | ----- | ------------------------------ |
+| `user_id` | `str` | The ID of the user who owns it |
+| `note_id` | `str` | The ID of the note to retrieve |
 
 **Returns:** `Note`
 
@@ -273,20 +277,18 @@ Create a new note for a user. Notes support markdown formatting.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                                       |
-| ------------ | ----- | ------------------------------------------------- |
-| `company_id` | `str` | The ID of the company containing the user         |
-| `user_id`    | `str` | The ID of the user to create the note for         |
-| `title`      | `str` | The note title (3-50 characters)                  |
-| `content`    | `str` | The note content (min 3 chars, supports markdown) |
+| Parameter | Type  | Description                                       |
+| --------- | ----- | ------------------------------------------------- |
+| `user_id` | `str` | The ID of the user to create the note for         |
+| `title`   | `str` | The note title (3-50 characters)                  |
+| `content` | `str` | The note content (min 3 chars, supports markdown) |
 
 **Returns:** `Note`
 
 **Example:**
 
 ```python
-note = await client.users.create_note(
-    company_id="company_id",
+note = await users.create_note(
     user_id="user_id",
     title="Session Notes",
     content="## Session Summary\n\nThe party encountered...",
@@ -300,21 +302,19 @@ Modify a note's content. Only include fields that need to be changed.
 
 **Parameters:**
 
-| Parameter    | Type          | Description                                       |
-| ------------ | ------------- | ------------------------------------------------- |
-| `company_id` | `str`         | The ID of the company                             |
-| `user_id`    | `str`         | The ID of the user who owns it                    |
-| `note_id`    | `str`         | The ID of the note to update                      |
-| `title`      | `str \| None` | New note title (3-50 characters)                  |
-| `content`    | `str \| None` | New note content (min 3 chars, supports markdown) |
+| Parameter | Type          | Description                                       |
+| --------- | ------------- | ------------------------------------------------- |
+| `user_id` | `str`         | The ID of the user who owns it                    |
+| `note_id` | `str`         | The ID of the note to update                      |
+| `title`   | `str \| None` | New note title (3-50 characters)                  |
+| `content` | `str \| None` | New note content (min 3 chars, supports markdown) |
 
 **Returns:** `Note`
 
 **Example:**
 
 ```python
-note = await client.users.update_note(
-    company_id="company_id",
+note = await users.update_note(
     user_id="user_id",
     note_id="note_id",
     title="Updated Title",
@@ -328,11 +328,10 @@ Remove a note from a user. This action cannot be undone.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                    |
-| ------------ | ----- | ------------------------------ |
-| `company_id` | `str` | The ID of the company          |
-| `user_id`    | `str` | The ID of the user who owns it |
-| `note_id`    | `str` | The ID of the note to delete   |
+| Parameter | Type  | Description                    |
+| --------- | ----- | ------------------------------ |
+| `user_id` | `str` | The ID of the user who owns it |
+| `note_id` | `str` | The ID of the note to delete   |
 
 **Returns:** `None`
 
@@ -342,12 +341,11 @@ Retrieve a paginated page of quickrolls for a user. Quickrolls are pre-configure
 
 **Parameters:**
 
-| Parameter    | Type  | Description                                   |
-| ------------ | ----- | --------------------------------------------- |
-| `company_id` | `str` | The ID of the company containing the user     |
-| `user_id`    | `str` | The ID of the user whose quickrolls to list   |
-| `limit`      | `int` | Maximum items to return (default 10)          |
-| `offset`     | `int` | Number of items to skip (default 0)           |
+| Parameter | Type  | Description                                 |
+| --------- | ----- | ------------------------------------------- |
+| `user_id` | `str` | The ID of the user whose quickrolls to list |
+| `limit`   | `int` | Maximum items to return (default 10)        |
+| `offset`  | `int` | Number of items to skip (default 0)         |
 
 **Returns:** `PaginatedResponse[Quickroll]`
 
@@ -357,10 +355,9 @@ Retrieve all quickrolls for a user. Automatically paginates through all results.
 
 **Parameters:**
 
-| Parameter    | Type  | Description                                   |
-| ------------ | ----- | --------------------------------------------- |
-| `company_id` | `str` | The ID of the company containing the user     |
-| `user_id`    | `str` | The ID of the user whose quickrolls to list   |
+| Parameter | Type  | Description                                 |
+| --------- | ----- | ------------------------------------------- |
+| `user_id` | `str` | The ID of the user whose quickrolls to list |
 
 **Returns:** `list[Quickroll]`
 
@@ -370,11 +367,10 @@ Iterate through all quickrolls for a user. Yields individual quickrolls, automat
 
 **Parameters:**
 
-| Parameter    | Type  | Description                                     |
-| ------------ | ----- | ----------------------------------------------- |
-| `company_id` | `str` | The ID of the company containing the user       |
-| `user_id`    | `str` | The ID of the user whose quickrolls to iterate  |
-| `limit`      | `int` | Items per page (default 100)                    |
+| Parameter | Type  | Description                                   |
+| --------- | ----- | --------------------------------------------- |
+| `user_id` | `str` | The ID of the user whose quickrolls to iterate|
+| `limit`   | `int` | Items per page (default 100)                  |
 
 **Returns:** `AsyncIterator[Quickroll]`
 
@@ -386,7 +382,6 @@ Retrieve a specific quickroll including its name and trait configuration.
 
 | Parameter      | Type  | Description                          |
 | -------------- | ----- | ------------------------------------ |
-| `company_id`   | `str` | The ID of the company                |
 | `user_id`      | `str` | The ID of the user who owns it       |
 | `quickroll_id` | `str` | The ID of the quickroll to retrieve  |
 
@@ -398,21 +393,19 @@ Create a new quickroll for a user. Quickroll names must be unique per user.
 
 **Parameters:**
 
-| Parameter     | Type               | Description                                     |
-| ------------- | ------------------ | ----------------------------------------------- |
-| `company_id`  | `str`              | The ID of the company containing the user       |
-| `user_id`     | `str`              | The ID of the user to create the quickroll for  |
-| `name`        | `str`              | The quickroll name (3-50 characters)            |
-| `description` | `str \| None`      | Optional description of the quickroll           |
-| `trait_ids`   | `list[str] \| None`| List of trait IDs that make up the dice pool    |
+| Parameter     | Type               | Description                                   |
+| ------------- | ------------------ | --------------------------------------------- |
+| `user_id`     | `str`              | The ID of the user to create the quickroll for|
+| `name`        | `str`              | The quickroll name (3-50 characters)          |
+| `description` | `str \| None`      | Optional description of the quickroll         |
+| `trait_ids`   | `list[str] \| None`| List of trait IDs that make up the dice pool  |
 
 **Returns:** `Quickroll`
 
 **Example:**
 
 ```python
-quickroll = await client.users.create_quickroll(
-    company_id="company_id",
+quickroll = await users.create_quickroll(
     user_id="user_id",
     name="Strength + Brawl",
     description="Standard combat roll",
@@ -427,22 +420,20 @@ Modify a quickroll's name or trait configuration. Only include fields that need 
 
 **Parameters:**
 
-| Parameter      | Type               | Description                                    |
-| -------------- | ------------------ | ---------------------------------------------- |
-| `company_id`   | `str`              | The ID of the company                          |
-| `user_id`      | `str`              | The ID of the user who owns it                 |
-| `quickroll_id` | `str`              | The ID of the quickroll to update              |
-| `name`         | `str \| None`      | New quickroll name (3-50 characters)           |
-| `description`  | `str \| None`      | New description of the quickroll               |
-| `trait_ids`    | `list[str] \| None`| New list of trait IDs for the dice pool        |
+| Parameter      | Type               | Description                              |
+| -------------- | ------------------ | ---------------------------------------- |
+| `user_id`      | `str`              | The ID of the user who owns it           |
+| `quickroll_id` | `str`              | The ID of the quickroll to update        |
+| `name`         | `str \| None`      | New quickroll name (3-50 characters)     |
+| `description`  | `str \| None`      | New description of the quickroll         |
+| `trait_ids`    | `list[str] \| None`| New list of trait IDs for the dice pool  |
 
 **Returns:** `Quickroll`
 
 **Example:**
 
 ```python
-quickroll = await client.users.update_quickroll(
-    company_id="company_id",
+quickroll = await users.update_quickroll(
     user_id="user_id",
     quickroll_id="quickroll_id",
     name="Updated Name",
@@ -456,11 +447,10 @@ Remove a quickroll from a user. This action cannot be undone.
 
 **Parameters:**
 
-| Parameter      | Type  | Description                          |
-| -------------- | ----- | ------------------------------------ |
-| `company_id`   | `str` | The ID of the company                |
-| `user_id`      | `str` | The ID of the user who owns it       |
-| `quickroll_id` | `str` | The ID of the quickroll to delete    |
+| Parameter      | Type  | Description                        |
+| -------------- | ----- | ---------------------------------- |
+| `user_id`      | `str` | The ID of the user who owns it     |
+| `quickroll_id` | `str` | The ID of the quickroll to delete  |
 
 **Returns:** `None`
 
@@ -583,12 +573,14 @@ Represents a pre-configured dice pool for frequently used trait combinations.
 from vclient import VClient
 
 async with VClient(base_url="...", api_key="...") as client:
-    # List all users in a company
-    users = await client.users.list_all("company_id")
+    # Get users service for a specific company
+    users = client.users("company_id")
+
+    # List all users in the company
+    all_users = await users.list_all()
 
     # Create a new user
-    new_user = await client.users.create(
-        company_id="company_id",
+    new_user = await users.create(
         name="John Doe",
         email="john@example.com",
         role="PLAYER",
@@ -596,17 +588,16 @@ async with VClient(base_url="...", api_key="...") as client:
     )
 
     # Get user statistics
-    stats = await client.users.get_statistics("company_id", new_user.id)
+    stats = await users.get_statistics(new_user.id)
     print(f"Total rolls: {stats.total_rolls}")
 
     # List user assets
-    assets = await client.users.list_assets("company_id", new_user.id)
+    assets = await users.list_assets(new_user.id)
     for asset in assets.items:
         print(f"Asset: {asset.original_filename}")
 
     # Create a note for a user
-    note = await client.users.create_note(
-        company_id="company_id",
+    note = await users.create_note(
         user_id=new_user.id,
         title="Session Notes",
         content="Notes from today's session...",
@@ -614,13 +605,12 @@ async with VClient(base_url="...", api_key="...") as client:
     print(f"Created note: {note.title}")
 
     # List all notes for a user
-    notes = await client.users.list_all_notes("company_id", new_user.id)
+    notes = await users.list_all_notes(new_user.id)
     for note in notes:
         print(f"Note: {note.title}")
 
     # Create a quickroll for faster dice rolling
-    quickroll = await client.users.create_quickroll(
-        company_id="company_id",
+    quickroll = await users.create_quickroll(
         user_id=new_user.id,
         name="Strength + Brawl",
         description="Standard combat roll",
@@ -629,7 +619,7 @@ async with VClient(base_url="...", api_key="...") as client:
     print(f"Created quickroll: {quickroll.name}")
 
     # List all quickrolls for a user
-    quickrolls = await client.users.list_all_quickrolls("company_id", new_user.id)
+    quickrolls = await users.list_all_quickrolls(new_user.id)
     for qr in quickrolls:
         print(f"Quickroll: {qr.name} ({len(qr.trait_ids)} traits)")
 ```

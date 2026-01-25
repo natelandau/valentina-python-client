@@ -85,15 +85,15 @@ client = VClient(config=config)
 
 ### Configuration Options
 
-| Option                  | Type    | Default  | Description                                         |
-| ----------------------- | ------- | -------- | --------------------------------------------------- |
-| `base_url`              | `str`   | Required | Base URL for the API                                |
-| `api_key`               | `str`   | Required | API key for authentication                          |
-| `timeout`               | `float` | `30.0`   | Request timeout in seconds                          |
-| `max_retries`           | `int`   | `3`      | Maximum retry attempts for failed requests          |
-| `retry_delay`           | `float` | `1.0`    | Base delay between retries in seconds               |
-| `auto_retry_rate_limit` | `bool`  | `True`   | Automatically retry rate-limited requests           |
-| `auto_idempotency_keys` | `bool`  | `False`  | Auto-generate idempotency keys for POST/PUT/PATCH   |
+| Option                  | Type    | Default  | Description                                       |
+| ----------------------- | ------- | -------- | ------------------------------------------------- |
+| `base_url`              | `str`   | Required | Base URL for the API                              |
+| `api_key`               | `str`   | Required | API key for authentication                        |
+| `timeout`               | `float` | `30.0`   | Request timeout in seconds                        |
+| `max_retries`           | `int`   | `3`      | Maximum retry attempts for failed requests        |
+| `retry_delay`           | `float` | `1.0`    | Base delay between retries in seconds             |
+| `auto_retry_rate_limit` | `bool`  | `True`   | Automatically retry rate-limited requests         |
+| `auto_idempotency_keys` | `bool`  | `False`  | Auto-generate idempotency keys for POST/PUT/PATCH |
 
 ### Idempotency Keys
 

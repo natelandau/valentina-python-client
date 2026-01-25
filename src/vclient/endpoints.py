@@ -66,3 +66,17 @@ class Endpoints:
     USER_QUICKROLL = (
         f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/quickrolls/{{quickroll_id}}"
     )
+
+    # Campaign endpoints
+    CAMPAIGNS = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/campaigns"
+    CAMPAIGN = f"{CAMPAIGNS}/{{campaign_id}}"
+    CAMPAIGN_STATISTICS = f"{CAMPAIGN}/statistics"
+
+    # Campaign asset endpoints
+    CAMPAIGN_ASSETS = f"{CAMPAIGN}/assets"
+    CAMPAIGN_ASSET = f"{CAMPAIGN_ASSETS}/{{asset_id}}"
+    CAMPAIGN_ASSET_UPLOAD = f"{CAMPAIGN_ASSETS}/upload"
+
+    # Campaign note endpoints
+    CAMPAIGN_NOTES = f"{CAMPAIGN}/notes"
+    CAMPAIGN_NOTE = f"{CAMPAIGN_NOTES}/{{note_id}}"

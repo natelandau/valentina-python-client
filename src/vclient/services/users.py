@@ -1,22 +1,25 @@
 """Service for interacting with the Users API."""
 
 from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
 
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models.pagination import PaginatedResponse
+from vclient.models.shared import (
+    CreateNoteRequest,
+    Note,
+    RollStatistics,
+    S3Asset,
+    UpdateNoteRequest,
+)
 from vclient.models.users import (
     CampaignExperience,
-    CreateNoteRequest,
     CreateQuickrollRequest,
     CreateUserRequest,
     DiscordProfile,
     ExperienceAddRemoveRequest,
-    Note,
     Quickroll,
-    RollStatistics,
-    S3Asset,
-    UpdateNoteRequest,
     UpdateQuickrollRequest,
     UpdateUserRequest,
     User,
@@ -24,22 +27,46 @@ from vclient.models.users import (
 )
 from vclient.services.base import BaseService
 
+if TYPE_CHECKING:
+    from vclient.client import VClient
+
 
 class UsersService(BaseService):
     """Service for managing users within a company in the Valentina API.
+
+    This service is scoped to a specific company at initialization time.
+    All methods operate within that company context.
 
     Provides methods to create, retrieve, update, and delete users,
     as well as access user statistics and assets.
 
     Example:
         >>> async with VClient() as client:
-        ...     users = await client.users.list_all("company_id")
-        ...     user = await client.users.get("company_id", "user_id")
+        ...     users = client.users("company_id")
+        ...     all_users = await users.list_all()
+        ...     user = await users.get("user_id")
     """
+
+    def __init__(self, client: "VClient", company_id: str) -> None:
+        """Initialize the service scoped to a specific company.
+
+        Args:
+            client: The VClient instance to use for requests.
+            company_id: The ID of the company to operate within.
+        """
+        super().__init__(client)
+        self._company_id = company_id
+
+    def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
+        """Format an endpoint with the scoped company_id plus any extra params."""
+        return endpoint.format(company_id=self._company_id, **kwargs)
+
+    # -------------------------------------------------------------------------
+    # User CRUD Methods
+    # -------------------------------------------------------------------------
 
     async def get_page(
         self,
-        company_id: str,
         *,
         user_role: UserRole | None = None,
         limit: int = DEFAULT_PAGE_LIMIT,
@@ -51,7 +78,6 @@ class UsersService(BaseService):
         or storytellers.
 
         Args:
-            company_id: The ID of the company containing the users.
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
@@ -64,7 +90,7 @@ class UsersService(BaseService):
             params["user_role"] = user_role
 
         return await self._get_paginated_as(
-            Endpoints.USERS.format(company_id=company_id),
+            self._format_endpoint(Endpoints.USERS),
             User,
             limit=limit,
             offset=offset,
@@ -73,7 +99,6 @@ class UsersService(BaseService):
 
     async def list_all(
         self,
-        company_id: str,
         *,
         user_role: UserRole | None = None,
     ) -> list[User]:
@@ -83,17 +108,15 @@ class UsersService(BaseService):
         or `iter_all()` for memory-efficient streaming of large datasets.
 
         Args:
-            company_id: The ID of the company containing the users.
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
 
         Returns:
             A list of all User objects.
         """
-        return [user async for user in self.iter_all(company_id, user_role=user_role)]
+        return [user async for user in self.iter_all(user_role=user_role)]
 
     async def iter_all(
         self,
-        company_id: str,
         *,
         user_role: UserRole | None = None,
         limit: int = 100,
@@ -104,7 +127,6 @@ class UsersService(BaseService):
         all items have been retrieved.
 
         Args:
-            company_id: The ID of the company containing the users.
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
             limit: Items per page (default 100 for efficiency).
 
@@ -112,7 +134,7 @@ class UsersService(BaseService):
             Individual User objects.
 
         Example:
-            >>> async for user in client.users.iter_all("company_id"):
+            >>> async for user in users.iter_all():
             ...     print(user.name)
         """
         params = {}
@@ -120,19 +142,18 @@ class UsersService(BaseService):
             params["user_role"] = user_role
 
         async for item in self._iter_all_pages(
-            Endpoints.USERS.format(company_id=company_id),
+            self._format_endpoint(Endpoints.USERS),
             limit=limit,
             params=params if params else None,
         ):
             yield User.model_validate(item)
 
-    async def get(self, company_id: str, user_id: str) -> User:
+    async def get(self, user_id: str) -> User:
         """Retrieve detailed information about a specific user.
 
         Fetches the user including their role, experience, and Discord profile.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to retrieve.
 
         Returns:
@@ -142,12 +163,11 @@ class UsersService(BaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = await self._get(Endpoints.USER.format(company_id=company_id, user_id=user_id))
+        response = await self._get(self._format_endpoint(Endpoints.USER, user_id=user_id))
         return User.model_validate(response.json())
 
     async def create(
         self,
-        company_id: str,
         name: str,
         email: str,
         role: UserRole,
@@ -162,7 +182,6 @@ class UsersService(BaseService):
         integration.
 
         Args:
-            company_id: The ID of the company to add the user to.
             name: User's display name (3-50 characters).
             email: User's email address.
             role: User's role (ADMIN, STORYTELLER, PLAYER).
@@ -186,14 +205,13 @@ class UsersService(BaseService):
             discord_profile=discord_profile,
         )
         response = await self._post(
-            Endpoints.USERS.format(company_id=company_id),
+            self._format_endpoint(Endpoints.USERS),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())
 
-    async def update(  # noqa: PLR0913
+    async def update(
         self,
-        company_id: str,
         user_id: str,
         requesting_user_id: str,
         *,
@@ -207,7 +225,6 @@ class UsersService(BaseService):
         Only include fields that need to be changed; omitted fields remain unchanged.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to update.
             requesting_user_id: ID of the user making the request.
             name: New display name (3-50 characters).
@@ -233,14 +250,13 @@ class UsersService(BaseService):
             requesting_user_id=requesting_user_id,
         )
         response = await self._patch(
-            Endpoints.USER.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER, user_id=user_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())
 
     async def delete(
         self,
-        company_id: str,
         user_id: str,
         requesting_user_id: str,
     ) -> None:
@@ -249,7 +265,6 @@ class UsersService(BaseService):
         The user is removed from the company's user list and their data is archived.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to delete.
             requesting_user_id: ID of the user making the request.
 
@@ -258,13 +273,12 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have appropriate access.
         """
         await self._delete(
-            Endpoints.USER.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER, user_id=user_id),
             params={"requesting_user_id": requesting_user_id},
         )
 
     async def get_statistics(
         self,
-        company_id: str,
         user_id: str,
         *,
         num_top_traits: int = 5,
@@ -274,7 +288,6 @@ class UsersService(BaseService):
         Includes success rates, critical frequencies, most-used traits, etc.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to get statistics for.
             num_top_traits: Number of top traits to include (default 5).
 
@@ -286,7 +299,7 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have access to the company.
         """
         response = await self._get(
-            Endpoints.USER_STATISTICS.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_STATISTICS, user_id=user_id),
             params={"num_top_traits": num_top_traits},
         )
         return RollStatistics.model_validate(response.json())
@@ -297,7 +310,6 @@ class UsersService(BaseService):
 
     async def list_assets(
         self,
-        company_id: str,
         user_id: str,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
@@ -306,7 +318,6 @@ class UsersService(BaseService):
         """Retrieve a paginated list of assets for a user.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user whose assets to list.
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
@@ -319,7 +330,7 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have access to the company.
         """
         return await self._get_paginated_as(
-            Endpoints.USER_ASSETS.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_ASSETS, user_id=user_id),
             S3Asset,
             limit=limit,
             offset=offset,
@@ -327,14 +338,12 @@ class UsersService(BaseService):
 
     async def get_asset(
         self,
-        company_id: str,
         user_id: str,
         asset_id: str,
     ) -> S3Asset:
         """Retrieve details of a specific asset including its URL and metadata.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user who owns the asset.
             asset_id: The ID of the asset to retrieve.
 
@@ -346,13 +355,12 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have access to the company.
         """
         response = await self._get(
-            Endpoints.USER_ASSET.format(company_id=company_id, user_id=user_id, asset_id=asset_id)
+            self._format_endpoint(Endpoints.USER_ASSET, user_id=user_id, asset_id=asset_id)
         )
         return S3Asset.model_validate(response.json())
 
     async def delete_asset(
         self,
-        company_id: str,
         user_id: str,
         asset_id: str,
     ) -> None:
@@ -361,7 +369,6 @@ class UsersService(BaseService):
         This action cannot be undone. The asset file is permanently removed.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user who owns the asset.
             asset_id: The ID of the asset to delete.
 
@@ -370,12 +377,11 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have appropriate access.
         """
         await self._delete(
-            Endpoints.USER_ASSET.format(company_id=company_id, user_id=user_id, asset_id=asset_id)
+            self._format_endpoint(Endpoints.USER_ASSET, user_id=user_id, asset_id=asset_id)
         )
 
     async def upload_asset(
         self,
-        company_id: str,
         user_id: str,
         filename: str,
         content: bytes,
@@ -386,7 +392,6 @@ class UsersService(BaseService):
         Uploads a file to S3 storage and associates it with the user.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to upload the asset for.
             filename: The original filename of the asset.
             content: The raw bytes of the file to upload.
@@ -401,7 +406,7 @@ class UsersService(BaseService):
             ValidationError: If the file is invalid or exceeds size limits.
         """
         response = await self._post_file(
-            Endpoints.USER_ASSET_UPLOAD.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_ASSET_UPLOAD, user_id=user_id),
             file=(filename, content, content_type),
         )
         return S3Asset.model_validate(response.json())
@@ -412,7 +417,6 @@ class UsersService(BaseService):
 
     async def get_experience(
         self,
-        company_id: str,
         user_id: str,
         campaign_id: str,
     ) -> CampaignExperience:
@@ -421,7 +425,6 @@ class UsersService(BaseService):
         Creates the experience record automatically if it doesn't exist for the campaign.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to get experience for.
             campaign_id: The ID of the campaign to get experience for.
 
@@ -433,15 +436,14 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have access to the company.
         """
         response = await self._get(
-            Endpoints.USER_EXPERIENCE_CAMPAIGN.format(
-                company_id=company_id, user_id=user_id, campaign_id=campaign_id
+            self._format_endpoint(
+                Endpoints.USER_EXPERIENCE_CAMPAIGN, user_id=user_id, campaign_id=campaign_id
             )
         )
         return CampaignExperience.model_validate(response.json())
 
     async def add_xp(
         self,
-        company_id: str,
         user_id: str,
         campaign_id: str,
         amount: int,
@@ -452,7 +454,6 @@ class UsersService(BaseService):
         the total XP tracker (lifetime earned).
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to award XP to.
             campaign_id: The ID of the campaign to add XP for.
             amount: The amount of XP to add.
@@ -472,14 +473,13 @@ class UsersService(BaseService):
             campaign_id=campaign_id,
         )
         response = await self._post(
-            Endpoints.USER_EXPERIENCE_XP_ADD.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_ADD, user_id=user_id),
             json=body.model_dump(mode="json"),
         )
         return CampaignExperience.model_validate(response.json())
 
     async def remove_xp(
         self,
-        company_id: str,
         user_id: str,
         campaign_id: str,
         amount: int,
@@ -489,7 +489,6 @@ class UsersService(BaseService):
         Returns an error if the user has insufficient XP to complete the deduction.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to remove XP from.
             campaign_id: The ID of the campaign to remove XP for.
             amount: The amount of XP to remove.
@@ -510,14 +509,13 @@ class UsersService(BaseService):
             campaign_id=campaign_id,
         )
         response = await self._post(
-            Endpoints.USER_EXPERIENCE_XP_REMOVE.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_REMOVE, user_id=user_id),
             json=body.model_dump(mode="json"),
         )
         return CampaignExperience.model_validate(response.json())
 
     async def add_cool_points(
         self,
-        company_id: str,
         user_id: str,
         campaign_id: str,
         amount: int,
@@ -528,7 +526,6 @@ class UsersService(BaseService):
         configured exchange rate.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to award cool points to.
             campaign_id: The ID of the campaign to add cool points for.
             amount: The amount of cool points to add.
@@ -548,7 +545,7 @@ class UsersService(BaseService):
             campaign_id=campaign_id,
         )
         response = await self._post(
-            Endpoints.USER_EXPERIENCE_CP_ADD.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_EXPERIENCE_CP_ADD, user_id=user_id),
             json=body.model_dump(mode="json"),
         )
         return CampaignExperience.model_validate(response.json())
@@ -559,7 +556,6 @@ class UsersService(BaseService):
 
     async def get_notes_page(
         self,
-        company_id: str,
         user_id: str,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
@@ -568,7 +564,6 @@ class UsersService(BaseService):
         """Retrieve a paginated page of notes for a user.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user whose notes to list.
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
@@ -581,7 +576,7 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have access to the company.
         """
         return await self._get_paginated_as(
-            Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id),
             Note,
             limit=limit,
             offset=offset,
@@ -589,7 +584,6 @@ class UsersService(BaseService):
 
     async def list_all_notes(
         self,
-        company_id: str,
         user_id: str,
     ) -> list[Note]:
         """Retrieve all notes for a user.
@@ -598,7 +592,6 @@ class UsersService(BaseService):
         access or `iter_all_notes()` for memory-efficient streaming of large datasets.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user whose notes to list.
 
         Returns:
@@ -608,11 +601,10 @@ class UsersService(BaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        return [note async for note in self.iter_all_notes(company_id, user_id)]
+        return [note async for note in self.iter_all_notes(user_id)]
 
     async def iter_all_notes(
         self,
-        company_id: str,
         user_id: str,
         *,
         limit: int = 100,
@@ -623,7 +615,6 @@ class UsersService(BaseService):
         all items have been retrieved.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user whose notes to iterate.
             limit: Items per page (default 100 for efficiency).
 
@@ -631,25 +622,23 @@ class UsersService(BaseService):
             Individual Note objects.
 
         Example:
-            >>> async for note in client.users.iter_all_notes("company_id", "user_id"):
+            >>> async for note in users.iter_all_notes("user_id"):
             ...     print(note.title)
         """
         async for item in self._iter_all_pages(
-            Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id),
             limit=limit,
         ):
             yield Note.model_validate(item)
 
     async def get_note(
         self,
-        company_id: str,
         user_id: str,
         note_id: str,
     ) -> Note:
         """Retrieve a specific note including its content and metadata.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user who owns the note.
             note_id: The ID of the note to retrieve.
 
@@ -661,13 +650,12 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have access to the company.
         """
         response = await self._get(
-            Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)
+            self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id)
         )
         return Note.model_validate(response.json())
 
     async def create_note(
         self,
-        company_id: str,
         user_id: str,
         title: str,
         content: str,
@@ -677,7 +665,6 @@ class UsersService(BaseService):
         Notes support markdown formatting for rich text content.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to create the note for.
             title: The note title (3-50 characters).
             content: The note content (minimum 3 characters, supports markdown).
@@ -697,14 +684,13 @@ class UsersService(BaseService):
             content=content,
         )
         response = await self._post(
-            Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return Note.model_validate(response.json())
 
     async def update_note(
         self,
-        company_id: str,
         user_id: str,
         note_id: str,
         *,
@@ -716,7 +702,6 @@ class UsersService(BaseService):
         Only include fields that need to be changed; omitted fields remain unchanged.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user who owns the note.
             note_id: The ID of the note to update.
             title: New note title (3-50 characters).
@@ -737,14 +722,13 @@ class UsersService(BaseService):
             content=content,
         )
         response = await self._patch(
-            Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id),
+            self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return Note.model_validate(response.json())
 
     async def delete_note(
         self,
-        company_id: str,
         user_id: str,
         note_id: str,
     ) -> None:
@@ -753,7 +737,6 @@ class UsersService(BaseService):
         This action cannot be undone.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user who owns the note.
             note_id: The ID of the note to delete.
 
@@ -762,7 +745,7 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have appropriate access.
         """
         await self._delete(
-            Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)
+            self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id)
         )
 
     # -------------------------------------------------------------------------
@@ -771,7 +754,6 @@ class UsersService(BaseService):
 
     async def get_quickrolls_page(
         self,
-        company_id: str,
         user_id: str,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
@@ -783,7 +765,6 @@ class UsersService(BaseService):
         allowing faster gameplay.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user whose quickrolls to list.
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
@@ -796,7 +777,7 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have access to the company.
         """
         return await self._get_paginated_as(
-            Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id),
             Quickroll,
             limit=limit,
             offset=offset,
@@ -804,7 +785,6 @@ class UsersService(BaseService):
 
     async def list_all_quickrolls(
         self,
-        company_id: str,
         user_id: str,
     ) -> list[Quickroll]:
         """Retrieve all quickrolls for a user.
@@ -813,7 +793,6 @@ class UsersService(BaseService):
         paginated access or `iter_all_quickrolls()` for memory-efficient streaming.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user whose quickrolls to list.
 
         Returns:
@@ -823,11 +802,10 @@ class UsersService(BaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        return [qr async for qr in self.iter_all_quickrolls(company_id, user_id)]
+        return [qr async for qr in self.iter_all_quickrolls(user_id)]
 
     async def iter_all_quickrolls(
         self,
-        company_id: str,
         user_id: str,
         *,
         limit: int = 100,
@@ -838,7 +816,6 @@ class UsersService(BaseService):
         all items have been retrieved.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user whose quickrolls to iterate.
             limit: Items per page (default 100 for efficiency).
 
@@ -846,25 +823,23 @@ class UsersService(BaseService):
             Individual Quickroll objects.
 
         Example:
-            >>> async for qr in client.users.iter_all_quickrolls("company_id", "user_id"):
+            >>> async for qr in users.iter_all_quickrolls("user_id"):
             ...     print(qr.name)
         """
         async for item in self._iter_all_pages(
-            Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id),
             limit=limit,
         ):
             yield Quickroll.model_validate(item)
 
     async def get_quickroll(
         self,
-        company_id: str,
         user_id: str,
         quickroll_id: str,
     ) -> Quickroll:
         """Retrieve a specific quickroll including its name and trait configuration.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user who owns the quickroll.
             quickroll_id: The ID of the quickroll to retrieve.
 
@@ -876,15 +851,14 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have access to the company.
         """
         response = await self._get(
-            Endpoints.USER_QUICKROLL.format(
-                company_id=company_id, user_id=user_id, quickroll_id=quickroll_id
+            self._format_endpoint(
+                Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id
             )
         )
         return Quickroll.model_validate(response.json())
 
     async def create_quickroll(
         self,
-        company_id: str,
         user_id: str,
         name: str,
         *,
@@ -897,7 +871,6 @@ class UsersService(BaseService):
         per user.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user to create the quickroll for.
             name: The quickroll name (3-50 characters).
             description: Optional description of the quickroll.
@@ -919,14 +892,13 @@ class UsersService(BaseService):
             trait_ids=trait_ids if trait_ids is not None else [],
         )
         response = await self._post(
-            Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id),
+            self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return Quickroll.model_validate(response.json())
 
     async def update_quickroll(
         self,
-        company_id: str,
         user_id: str,
         quickroll_id: str,
         *,
@@ -939,7 +911,6 @@ class UsersService(BaseService):
         Only include fields that need to be changed; omitted fields remain unchanged.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user who owns the quickroll.
             quickroll_id: The ID of the quickroll to update.
             name: New quickroll name (3-50 characters).
@@ -962,8 +933,8 @@ class UsersService(BaseService):
             trait_ids=trait_ids,
         )
         response = await self._patch(
-            Endpoints.USER_QUICKROLL.format(
-                company_id=company_id, user_id=user_id, quickroll_id=quickroll_id
+            self._format_endpoint(
+                Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id
             ),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
@@ -971,7 +942,6 @@ class UsersService(BaseService):
 
     async def delete_quickroll(
         self,
-        company_id: str,
         user_id: str,
         quickroll_id: str,
     ) -> None:
@@ -980,7 +950,6 @@ class UsersService(BaseService):
         This action cannot be undone.
 
         Args:
-            company_id: The ID of the company containing the user.
             user_id: The ID of the user who owns the quickroll.
             quickroll_id: The ID of the quickroll to delete.
 
@@ -989,7 +958,7 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have appropriate access.
         """
         await self._delete(
-            Endpoints.USER_QUICKROLL.format(
-                company_id=company_id, user_id=user_id, quickroll_id=quickroll_id
+            self._format_endpoint(
+                Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id
             )
         )
