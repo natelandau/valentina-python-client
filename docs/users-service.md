@@ -95,12 +95,12 @@ Upload a new asset for a user. The file is stored in S3 and associated with the 
 
 **Parameters:**
 
-| Parameter      | Type    | Description                                              |
-| -------------- | ------- | -------------------------------------------------------- |
-| `company_id`   | `str`   | The ID of the company containing the user                |
-| `user_id`      | `str`   | The ID of the user to upload the asset for               |
-| `filename`     | `str`   | The original filename of the asset                       |
-| `content`      | `bytes` | The raw bytes of the file to upload                      |
+| Parameter      | Type    | Description                                                   |
+| -------------- | ------- | ------------------------------------------------------------- |
+| `company_id`   | `str`   | The ID of the company containing the user                     |
+| `user_id`      | `str`   | The ID of the user to upload the asset for                    |
+| `filename`     | `str`   | The original filename of the asset                            |
+| `content`      | `bytes` | The raw bytes of the file to upload                           |
 | `content_type` | `str`   | The MIME type of the file (default: application/octet-stream) |
 
 **Returns:** `S3Asset`

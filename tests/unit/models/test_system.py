@@ -9,13 +9,16 @@ from vclient.api.models.system import ServiceStatus, SystemHealth
 class TestServiceStatus:
     """Tests for ServiceStatus enum."""
 
-    def test_online_value(self):
-        """Verify ONLINE status has correct value."""
-        assert ServiceStatus.ONLINE == "online"
-
-    def test_offline_value(self):
-        """Verify OFFLINE status has correct value."""
-        assert ServiceStatus.OFFLINE == "offline"
+    @pytest.mark.parametrize(
+        ("status", "expected"),
+        [
+            (ServiceStatus.ONLINE, "online"),
+            (ServiceStatus.OFFLINE, "offline"),
+        ],
+    )
+    def test_status_values(self, status, expected):
+        """Verify status enum values."""
+        assert status == expected
 
     def test_all_values(self):
         """Verify all expected status values exist."""
@@ -59,33 +62,20 @@ class TestSystemHealth:
         assert health.database_status == ServiceStatus.OFFLINE
         assert health.cache_status == ServiceStatus.OFFLINE
 
-    def test_health_missing_database_status_raises(self):
-        """Verify missing database_status raises ValidationError."""
-        # Given: Health response missing database_status
-        data = {
-            "cache_status": "online",
-            "version": "1.0.0",
-        }
-
-        # When/Then: Parsing raises ValidationError
+    @pytest.mark.parametrize(
+        ("data", "missing_field"),
+        [
+            ({"cache_status": "online", "version": "1.0.0"}, "database_status"),
+            ({"database_status": "online", "version": "1.0.0"}, "cache_status"),
+        ],
+    )
+    def test_health_missing_required_field_raises(self, data, missing_field):
+        """Verify missing required fields raise ValidationError."""
+        # When/Then: Parsing raises ValidationError with field name
         with pytest.raises(ValidationError) as exc_info:
             SystemHealth.model_validate(data)
 
-        assert "database_status" in str(exc_info.value)
-
-    def test_health_missing_cache_status_raises(self):
-        """Verify missing cache_status raises ValidationError."""
-        # Given: Health response missing cache_status
-        data = {
-            "database_status": "online",
-            "version": "1.0.0",
-        }
-
-        # When/Then: Parsing raises ValidationError
-        with pytest.raises(ValidationError) as exc_info:
-            SystemHealth.model_validate(data)
-
-        assert "cache_status" in str(exc_info.value)
+        assert missing_field in str(exc_info.value)
 
     def test_health_invalid_status_raises(self):
         """Verify invalid status value raises ValidationError."""

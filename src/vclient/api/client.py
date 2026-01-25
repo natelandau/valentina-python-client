@@ -44,6 +44,7 @@ class VClient:
         api_key: str | None = None,
         *,
         timeout: float = 30.0,
+        auto_idempotency_keys: bool = False,
         config: APIConfig | None = None,
         set_as_default: bool = True,
     ) -> None:
@@ -53,6 +54,8 @@ class VClient:
             base_url: Base URL for the API.
             api_key: API key for authentication.
             timeout: Request timeout in seconds.
+            auto_idempotency_keys: Automatically generate idempotency keys for
+                POST/PUT/PATCH requests. Defaults to False.
             config: Optional APIConfig instance (overrides other parameters).
             set_as_default: If True, register this client as the default for factory
                 functions. Set to False when creating multiple clients or when using
@@ -72,6 +75,7 @@ class VClient:
                 base_url=base_url,
                 api_key=api_key,
                 timeout=timeout,
+                auto_idempotency_keys=auto_idempotency_keys,
             )
 
         self._http: httpx.AsyncClient = self._create_http_client()

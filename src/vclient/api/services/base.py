@@ -355,6 +355,9 @@ class BaseService:
         Returns:
             The HTTP response.
         """
+        if idempotency_key is None and self._client._config.auto_idempotency_keys:  # noqa: SLF001
+            idempotency_key = self._generate_idempotency_key()
+
         return await self._request(
             "POST",
             path,
@@ -385,6 +388,9 @@ class BaseService:
         Returns:
             The HTTP response.
         """
+        if idempotency_key is None and self._client._config.auto_idempotency_keys:  # noqa: SLF001
+            idempotency_key = self._generate_idempotency_key()
+
         return await self._request(
             "PUT",
             path,
@@ -415,6 +421,9 @@ class BaseService:
         Returns:
             The HTTP response.
         """
+        if idempotency_key is None and self._client._config.auto_idempotency_keys:  # noqa: SLF001
+            idempotency_key = self._generate_idempotency_key()
+
         return await self._request(
             "PATCH",
             path,

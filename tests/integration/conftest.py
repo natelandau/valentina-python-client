@@ -1,4 +1,4 @@
-"""API-specific test fixtures."""
+"""Integration test fixtures."""
 
 import pytest
 import respx
@@ -32,6 +32,18 @@ async def vclient(api_config) -> VClient:
     await client.close()
 
 
+@pytest.fixture
+async def vclient_with_auto_idempotency(base_url, api_key) -> VClient:
+    """Return a VClient with auto_idempotency_keys enabled for testing."""
+    client = VClient(
+        base_url=base_url,
+        api_key=api_key,
+        auto_idempotency_keys=True,
+    )
+    yield client
+    await client.close()
+
+
 class ConcreteService(BaseService):
     """Concrete implementation of BaseService for testing."""
 
@@ -40,3 +52,11 @@ class ConcreteService(BaseService):
 async def base_service(vclient) -> ConcreteService:
     """Return a BaseService instance for testing."""
     return ConcreteService(vclient)
+
+
+@pytest.fixture
+async def base_service_with_auto_idempotency(
+    vclient_with_auto_idempotency,
+) -> ConcreteService:
+    """Return a BaseService instance with auto_idempotency_keys enabled."""
+    return ConcreteService(vclient_with_auto_idempotency)

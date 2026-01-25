@@ -53,37 +53,47 @@ class TestVClientInit:
         assert client._config.base_url == "https://config.api.com"
         assert client._config.api_key == "config-key"
 
+    def test_auto_idempotency_keys_default_false(self):
+        """Verify auto_idempotency_keys defaults to False."""
+        # When: Creating a client without specifying auto_idempotency_keys
+        client = VClient(base_url="https://test.api.com", api_key="my-key")
+
+        # Then: auto_idempotency_keys defaults to False
+        assert client._config.auto_idempotency_keys is False
+
+    def test_auto_idempotency_keys_passed_to_config(self):
+        """Verify auto_idempotency_keys parameter is passed to config."""
+        # When: Creating a client with auto_idempotency_keys enabled
+        client = VClient(
+            base_url="https://test.api.com",
+            api_key="my-key",
+            auto_idempotency_keys=True,
+        )
+
+        # Then: Config has auto_idempotency_keys enabled
+        assert client._config.auto_idempotency_keys is True
+
 
 class TestVClientHTTPClient:
     """Tests for VClient HTTP client configuration."""
 
-    def test_http_client_has_correct_base_url(self):
-        """Verify HTTP client is configured with correct base URL."""
-        # When: Creating a client with a specific base URL
-        client = VClient(base_url="https://test.api.com", api_key="my-key")
-
-        # Then: HTTP client has the correct base URL
-        assert str(client._http.base_url) == "https://test.api.com"
-
-    def test_http_client_has_api_key_header(self):
-        """Verify HTTP client includes API key header."""
-        # When: Creating a client with an API key
-        client = VClient(base_url="https://test.api.com", api_key="my-key")
-
-        # Then: HTTP client headers include the API key
-        assert client._http.headers.get(API_KEY_HEADER) == "my-key"
-
-    def test_http_client_has_json_headers(self):
-        """Verify HTTP client has JSON content type headers."""
+    def test_http_client_configuration(self):
+        """Verify HTTP client is properly configured with URL, headers, and API key."""
         # When: Creating a client
         client = VClient(base_url="https://test.api.com", api_key="my-key")
 
-        # Then: HTTP client has JSON headers
+        # Then: HTTP client has correct base URL
+        assert str(client._http.base_url) == "https://test.api.com"
+
+        # And: HTTP client headers include the API key
+        assert client._http.headers.get(API_KEY_HEADER) == "my-key"
+
+        # And: HTTP client has JSON headers
         assert client._http.headers.get("Accept") == "application/json"
         assert client._http.headers.get("Content-Type") == "application/json"
 
-    def test_http_client_no_api_key_header_when_none(self):
-        """Verify no API key header is set when api_key is None."""
+    def test_http_client_requires_api_key(self):
+        """Verify creating a client without an API key raises ValueError."""
         # When: Creating a client without an API key
         with pytest.raises(ValueError):
             VClient(base_url="https://test.api.com", api_key=None)

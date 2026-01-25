@@ -4,7 +4,7 @@ import httpx
 import pytest
 import respx
 
-from vclient.api.constants import IDEMPOTENCY_KEY_HEADER
+from vclient.api.constants import API_KEY_HEADER, IDEMPOTENCY_KEY_HEADER
 from vclient.api.exceptions import (
     APIError,
     AuthenticationError,
@@ -219,115 +219,63 @@ class TestBaseServiceHTTPMethods:
     """Tests for BaseService HTTP method helpers."""
 
     @respx.mock
-    async def test_get_method(self, base_service, base_url):
-        """Verify _get method makes GET request."""
-        # Given: A mocked GET endpoint
-        route = respx.get(f"{base_url}/path").respond(200, json={})
+    @pytest.mark.parametrize(
+        ("method", "status"),
+        [
+            ("GET", 200),
+            ("POST", 201),
+            ("PUT", 200),
+            ("PATCH", 200),
+            ("DELETE", 204),
+        ],
+    )
+    async def test_http_methods(self, base_service, base_url, method, status):
+        """Verify HTTP methods make correct requests."""
+        # Given: A mocked endpoint for the HTTP method
+        route = getattr(respx, method.lower())(f"{base_url}/path").respond(
+            status, json={} if method != "DELETE" else None
+        )
 
-        # When: Calling _get method
-        await base_service._get("/path")
+        # When: Calling the corresponding method
+        service_method = getattr(base_service, f"_{method.lower()}")
+        if method in ("POST", "PUT", "PATCH"):
+            await service_method("/path", json={"data": "value"})
+        else:
+            await service_method("/path")
 
-        # Then: GET request was made
+        # Then: Correct HTTP method was used
         assert route.called
-        assert route.calls.last.request.method == "GET"
-
-    @respx.mock
-    async def test_post_method(self, base_service, base_url):
-        """Verify _post method makes POST request."""
-        # Given: A mocked POST endpoint
-        route = respx.post(f"{base_url}/path").respond(201, json={})
-
-        # When: Calling _post method
-        await base_service._post("/path", json={"data": "value"})
-
-        # Then: POST request was made
-        assert route.called
-        assert route.calls.last.request.method == "POST"
-
-    @respx.mock
-    async def test_put_method(self, base_service, base_url):
-        """Verify _put method makes PUT request."""
-        # Given: A mocked PUT endpoint
-        route = respx.put(f"{base_url}/path").respond(200, json={})
-
-        # When: Calling _put method
-        await base_service._put("/path", json={"data": "value"})
-
-        # Then: PUT request was made
-        assert route.called
-        assert route.calls.last.request.method == "PUT"
-
-    @respx.mock
-    async def test_patch_method(self, base_service, base_url):
-        """Verify _patch method makes PATCH request."""
-        # Given: A mocked PATCH endpoint
-        route = respx.patch(f"{base_url}/path").respond(200, json={})
-
-        # When: Calling _patch method
-        await base_service._patch("/path", json={"data": "value"})
-
-        # Then: PATCH request was made
-        assert route.called
-        assert route.calls.last.request.method == "PATCH"
-
-    @respx.mock
-    async def test_delete_method(self, base_service, base_url):
-        """Verify _delete method makes DELETE request."""
-        # Given: A mocked DELETE endpoint
-        route = respx.delete(f"{base_url}/path").respond(204)
-
-        # When: Calling _delete method
-        await base_service._delete("/path")
-
-        # Then: DELETE request was made
-        assert route.called
-        assert route.calls.last.request.method == "DELETE"
+        assert route.calls.last.request.method == method
 
 
 class TestBaseServiceIdempotency:
     """Tests for BaseService idempotency key support."""
 
     @respx.mock
-    async def test_post_with_idempotency_key(self, base_service, base_url):
-        """Verify POST request includes idempotency key header."""
-        # Given: A mocked POST endpoint
-        route = respx.post(f"{base_url}/items").respond(201, json={})
+    @pytest.mark.parametrize(
+        ("method", "path", "status", "key"),
+        [
+            ("POST", "/items", 201, "post-key"),
+            ("PUT", "/items/1", 200, "put-key"),
+            ("PATCH", "/items/1", 200, "patch-key"),
+        ],
+    )
+    async def test_explicit_idempotency_key(
+        self, base_service, base_url, api_key, method, path, status, key
+    ):
+        """Verify requests include explicit idempotency key and preserve other headers."""
+        # Given: A mocked endpoint
+        route = getattr(respx, method.lower())(f"{base_url}{path}").respond(status, json={})
 
-        # When: Making a POST request with idempotency key
-        await base_service._post("/items", json={}, idempotency_key="my-key-123")
+        # When: Making a request with explicit idempotency key
+        service_method = getattr(base_service, f"_{method.lower()}")
+        await service_method(path, json={}, idempotency_key=key)
 
-        # Then: Request includes the idempotency key header
+        # Then: Request includes the idempotency key header and other headers
         assert route.called
         request = route.calls.last.request
-        assert request.headers.get(IDEMPOTENCY_KEY_HEADER) == "my-key-123"
-
-    @respx.mock
-    async def test_put_with_idempotency_key(self, base_service, base_url):
-        """Verify PUT request includes idempotency key header."""
-        # Given: A mocked PUT endpoint
-        route = respx.put(f"{base_url}/items/1").respond(200, json={})
-
-        # When: Making a PUT request with idempotency key
-        await base_service._put("/items/1", json={}, idempotency_key="put-key")
-
-        # Then: Request includes the idempotency key header
-        assert route.called
-        request = route.calls.last.request
-        assert request.headers.get(IDEMPOTENCY_KEY_HEADER) == "put-key"
-
-    @respx.mock
-    async def test_patch_with_idempotency_key(self, base_service, base_url):
-        """Verify PATCH request includes idempotency key header."""
-        # Given: A mocked PATCH endpoint
-        route = respx.patch(f"{base_url}/items/1").respond(200, json={})
-
-        # When: Making a PATCH request with idempotency key
-        await base_service._patch("/items/1", json={}, idempotency_key="patch-key")
-
-        # Then: Request includes the idempotency key header
-        assert route.called
-        request = route.calls.last.request
-        assert request.headers.get(IDEMPOTENCY_KEY_HEADER) == "patch-key"
+        assert request.headers.get(IDEMPOTENCY_KEY_HEADER) == key
+        assert request.headers.get(API_KEY_HEADER) == api_key
 
     @respx.mock
     async def test_post_without_idempotency_key(self, base_service, base_url):
@@ -343,8 +291,8 @@ class TestBaseServiceIdempotency:
         request = route.calls.last.request
         assert IDEMPOTENCY_KEY_HEADER not in request.headers
 
-    def test_generate_idempotency_key_format(self):
-        """Verify generated idempotency keys are valid UUIDs."""
+    def test_generate_idempotency_key(self):
+        """Verify generated idempotency keys are valid UUIDs and unique."""
         # When: Generating an idempotency key
         key = BaseService._generate_idempotency_key()
 
@@ -352,13 +300,59 @@ class TestBaseServiceIdempotency:
         assert len(key) == 36
         assert key.count("-") == 4
 
-    def test_generate_idempotency_key_unique(self):
-        """Verify generated keys are unique."""
         # When: Generating 100 idempotency keys
         keys = {BaseService._generate_idempotency_key() for _ in range(100)}
 
         # Then: All keys are unique
         assert len(keys) == 100
+
+    @respx.mock
+    @pytest.mark.parametrize(
+        ("method", "path", "status"),
+        [
+            ("POST", "/items", 201),
+            ("PUT", "/items/1", 200),
+            ("PATCH", "/items/1", 200),
+        ],
+    )
+    async def test_auto_generates_idempotency_key_when_enabled(
+        self, base_service_with_auto_idempotency, base_url, api_key, method, path, status
+    ):
+        """Verify requests auto-generate idempotency key and preserve other headers."""
+        # Given: A mocked endpoint
+        route = getattr(respx, method.lower())(f"{base_url}{path}").respond(status, json={})
+
+        # When: Making a request without explicit idempotency key
+        service_method = getattr(base_service_with_auto_idempotency, f"_{method.lower()}")
+        await service_method(path, json={})
+
+        # Then: Request includes an auto-generated idempotency key header and other headers
+        assert route.called
+        request = route.calls.last.request
+        key = request.headers.get(IDEMPOTENCY_KEY_HEADER)
+        assert key is not None
+        assert len(key) == 36
+        assert key.count("-") == 4
+        assert request.headers.get(API_KEY_HEADER) == api_key
+
+    @respx.mock
+    async def test_explicit_key_takes_precedence_over_auto(
+        self, base_service_with_auto_idempotency, base_url, api_key
+    ):
+        """Verify explicit idempotency key takes precedence and preserves other headers."""
+        # Given: A mocked POST endpoint
+        route = respx.post(f"{base_url}/items").respond(201, json={})
+
+        # When: Making a POST request with explicit idempotency key
+        await base_service_with_auto_idempotency._post(
+            "/items", json={}, idempotency_key="explicit-key"
+        )
+
+        # Then: Request uses the explicit key and preserves other headers
+        assert route.called
+        request = route.calls.last.request
+        assert request.headers.get(IDEMPOTENCY_KEY_HEADER) == "explicit-key"
+        assert request.headers.get(API_KEY_HEADER) == api_key
 
 
 class TestBaseServicePagination:
