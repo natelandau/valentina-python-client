@@ -8,13 +8,16 @@ from vclient.models.pagination import PaginatedResponse
 from vclient.models.users import (
     CampaignExperience,
     CreateNoteRequest,
+    CreateQuickrollRequest,
     CreateUserRequest,
     DiscordProfile,
     ExperienceAddRemoveRequest,
     Note,
+    Quickroll,
     RollStatistics,
     S3Asset,
     UpdateNoteRequest,
+    UpdateQuickrollRequest,
     UpdateUserRequest,
     User,
     UserRole,
@@ -760,4 +763,233 @@ class UsersService(BaseService):
         """
         await self._delete(
             Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)
+        )
+
+    # -------------------------------------------------------------------------
+    # Quickroll Methods
+    # -------------------------------------------------------------------------
+
+    async def get_quickrolls_page(
+        self,
+        company_id: str,
+        user_id: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> PaginatedResponse[Quickroll]:
+        """Retrieve a paginated page of quickrolls for a user.
+
+        Quickrolls are pre-configured dice pools for frequently used trait combinations,
+        allowing faster gameplay.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user whose quickrolls to list.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+
+        Returns:
+            A PaginatedResponse containing Quickroll objects and pagination metadata.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        return await self._get_paginated_as(
+            Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id),
+            Quickroll,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def list_all_quickrolls(
+        self,
+        company_id: str,
+        user_id: str,
+    ) -> list[Quickroll]:
+        """Retrieve all quickrolls for a user.
+
+        Automatically paginates through all results. Use `get_quickrolls_page()` for
+        paginated access or `iter_all_quickrolls()` for memory-efficient streaming.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user whose quickrolls to list.
+
+        Returns:
+            A list of all Quickroll objects.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        return [qr async for qr in self.iter_all_quickrolls(company_id, user_id)]
+
+    async def iter_all_quickrolls(
+        self,
+        company_id: str,
+        user_id: str,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[Quickroll]:
+        """Iterate through all quickrolls for a user.
+
+        Yields individual quickrolls, automatically fetching subsequent pages until
+        all items have been retrieved.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user whose quickrolls to iterate.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual Quickroll objects.
+
+        Example:
+            >>> async for qr in client.users.iter_all_quickrolls("company_id", "user_id"):
+            ...     print(qr.name)
+        """
+        async for item in self._iter_all_pages(
+            Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id),
+            limit=limit,
+        ):
+            yield Quickroll.model_validate(item)
+
+    async def get_quickroll(
+        self,
+        company_id: str,
+        user_id: str,
+        quickroll_id: str,
+    ) -> Quickroll:
+        """Retrieve a specific quickroll including its name and trait configuration.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user who owns the quickroll.
+            quickroll_id: The ID of the quickroll to retrieve.
+
+        Returns:
+            The Quickroll object with full details.
+
+        Raises:
+            NotFoundError: If the quickroll does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        response = await self._get(
+            Endpoints.USER_QUICKROLL.format(
+                company_id=company_id, user_id=user_id, quickroll_id=quickroll_id
+            )
+        )
+        return Quickroll.model_validate(response.json())
+
+    async def create_quickroll(
+        self,
+        company_id: str,
+        user_id: str,
+        name: str,
+        *,
+        description: str | None = None,
+        trait_ids: list[str] | None = None,
+    ) -> Quickroll:
+        """Create a new quickroll for a user.
+
+        Define the traits that make up the dice pool. Quickroll names must be unique
+        per user.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user to create the quickroll for.
+            name: The quickroll name (3-50 characters).
+            description: Optional description of the quickroll.
+            trait_ids: List of trait IDs that make up the dice pool.
+
+        Returns:
+            The newly created Quickroll object.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the request data is invalid.
+        """
+        body = self._validate_request(
+            CreateQuickrollRequest,
+            name=name,
+            description=description,
+            trait_ids=trait_ids if trait_ids is not None else [],
+        )
+        response = await self._post(
+            Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return Quickroll.model_validate(response.json())
+
+    async def update_quickroll(
+        self,
+        company_id: str,
+        user_id: str,
+        quickroll_id: str,
+        *,
+        name: str | None = None,
+        description: str | None = None,
+        trait_ids: list[str] | None = None,
+    ) -> Quickroll:
+        """Modify a quickroll's name or trait configuration.
+
+        Only include fields that need to be changed; omitted fields remain unchanged.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user who owns the quickroll.
+            quickroll_id: The ID of the quickroll to update.
+            name: New quickroll name (3-50 characters).
+            description: New description of the quickroll.
+            trait_ids: New list of trait IDs that make up the dice pool.
+
+        Returns:
+            The updated Quickroll object.
+
+        Raises:
+            NotFoundError: If the quickroll does not exist.
+            AuthorizationError: If you don't have appropriate access.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the request data is invalid.
+        """
+        body = self._validate_request(
+            UpdateQuickrollRequest,
+            name=name,
+            description=description,
+            trait_ids=trait_ids,
+        )
+        response = await self._patch(
+            Endpoints.USER_QUICKROLL.format(
+                company_id=company_id, user_id=user_id, quickroll_id=quickroll_id
+            ),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return Quickroll.model_validate(response.json())
+
+    async def delete_quickroll(
+        self,
+        company_id: str,
+        user_id: str,
+        quickroll_id: str,
+    ) -> None:
+        """Remove a quickroll from a user.
+
+        This action cannot be undone.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user who owns the quickroll.
+            quickroll_id: The ID of the quickroll to delete.
+
+        Raises:
+            NotFoundError: If the quickroll does not exist.
+            AuthorizationError: If you don't have appropriate access.
+        """
+        await self._delete(
+            Endpoints.USER_QUICKROLL.format(
+                company_id=company_id, user_id=user_id, quickroll_id=quickroll_id
+            )
         )

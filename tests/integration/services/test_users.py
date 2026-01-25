@@ -10,6 +10,7 @@ from vclient.models.users import (
     CampaignExperience,
     DiscordProfile,
     Note,
+    Quickroll,
     RollStatistics,
     S3Asset,
     User,
@@ -105,6 +106,20 @@ def note_response_data() -> dict:
         "date_modified": "2024-01-15T10:30:00Z",
         "title": "Test Note",
         "content": "This is test content",
+    }
+
+
+@pytest.fixture
+def quickroll_response_data() -> dict:
+    """Return sample quickroll response data."""
+    return {
+        "id": "quickroll123",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "name": "Test Quickroll",
+        "description": "A test quickroll",
+        "user_id": "user123",
+        "trait_ids": ["trait1", "trait2"],
     }
 
 
@@ -1274,3 +1289,410 @@ class TestUsersServiceClientIntegration:
 
         # Then: Returns the same instance
         assert service1 is service2
+
+
+class TestUsersServiceGetQuickrollsPage:
+    """Tests for UsersService.get_quickrolls_page method."""
+
+    @respx.mock
+    async def test_get_quickrolls_page(self, vclient, base_url, quickroll_response_data):
+        """Verify get_quickrolls_page returns paginated Quickroll objects."""
+        # Given: A mocked quickrolls list endpoint
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [quickroll_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Getting a page of quickrolls
+        result = await vclient.users.get_quickrolls_page(company_id, user_id)
+
+        # Then: Returns PaginatedResponse with Quickroll objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], Quickroll)
+        assert result.items[0].name == "Test Quickroll"
+        assert result.total == 1
+
+    @respx.mock
+    async def test_get_quickrolls_page_with_pagination(
+        self, vclient, base_url, quickroll_response_data
+    ):
+        """Verify get_quickrolls_page accepts pagination parameters."""
+        # Given: A mocked endpoint expecting custom pagination
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "25", "offset": "50"},
+        ).respond(
+            200,
+            json={
+                "items": [quickroll_response_data],
+                "limit": 25,
+                "offset": 50,
+                "total": 100,
+            },
+        )
+
+        # When: Getting a page with custom pagination
+        result = await vclient.users.get_quickrolls_page(company_id, user_id, limit=25, offset=50)
+
+        # Then: Request was made with correct params
+        assert route.called
+        assert result.limit == 25
+        assert result.offset == 50
+
+
+class TestUsersServiceListAllQuickrolls:
+    """Tests for UsersService.list_all_quickrolls method."""
+
+    @respx.mock
+    async def test_list_all_quickrolls(self, vclient, base_url, quickroll_response_data):
+        """Verify list_all_quickrolls returns all quickrolls."""
+        # Given: Mocked endpoint
+        company_id = "company123"
+        user_id = "user123"
+        respx.get(
+            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "100", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [quickroll_response_data],
+                "limit": 100,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Calling list_all_quickrolls
+        result = await vclient.users.list_all_quickrolls(company_id, user_id)
+
+        # Then: Returns list of Quickroll objects
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], Quickroll)
+        assert result[0].name == "Test Quickroll"
+
+
+class TestUsersServiceIterAllQuickrolls:
+    """Tests for UsersService.iter_all_quickrolls method."""
+
+    @respx.mock
+    async def test_iter_all_quickrolls(self, vclient, base_url, quickroll_response_data):
+        """Verify iter_all_quickrolls yields Quickroll objects across pages."""
+        # Given: Mocked endpoints for multiple pages
+        company_id = "company123"
+        user_id = "user123"
+        qr2 = {**quickroll_response_data, "id": "quickroll456", "name": "Quickroll 2"}
+        respx.get(
+            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "1", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [quickroll_response_data],
+                "limit": 1,
+                "offset": 0,
+                "total": 2,
+            },
+        )
+        respx.get(
+            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "1", "offset": "1"},
+        ).respond(
+            200,
+            json={
+                "items": [qr2],
+                "limit": 1,
+                "offset": 1,
+                "total": 2,
+            },
+        )
+
+        # When: Iterating through all quickrolls
+        quickrolls = [
+            qr async for qr in vclient.users.iter_all_quickrolls(company_id, user_id, limit=1)
+        ]
+
+        # Then: All quickrolls are yielded as Quickroll objects
+        assert len(quickrolls) == 2
+        assert all(isinstance(qr, Quickroll) for qr in quickrolls)
+        assert quickrolls[0].name == "Test Quickroll"
+        assert quickrolls[1].name == "Quickroll 2"
+
+
+class TestUsersServiceGetQuickroll:
+    """Tests for UsersService.get_quickroll method."""
+
+    @respx.mock
+    async def test_get_quickroll(self, vclient, base_url, quickroll_response_data):
+        """Verify getting a specific quickroll returns Quickroll object."""
+        # Given: A mocked quickroll endpoint
+        company_id = "company123"
+        user_id = "user123"
+        quickroll_id = "quickroll123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
+        ).respond(200, json=quickroll_response_data)
+
+        # When: Getting the quickroll
+        result = await vclient.users.get_quickroll(company_id, user_id, quickroll_id)
+
+        # Then: Returns Quickroll object
+        assert route.called
+        assert isinstance(result, Quickroll)
+        assert result.id == "quickroll123"
+        assert result.name == "Test Quickroll"
+        assert result.description == "A test quickroll"
+        assert result.trait_ids == ["trait1", "trait2"]
+
+    @respx.mock
+    async def test_get_quickroll_not_found(self, vclient, base_url):
+        """Verify getting non-existent quickroll raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "user123"
+        quickroll_id = "nonexistent"
+        respx.get(
+            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
+        ).respond(404, json={"detail": "Quickroll not found"})
+
+        # When/Then: Getting the quickroll raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.get_quickroll(company_id, user_id, quickroll_id)
+
+
+class TestUsersServiceCreateQuickroll:
+    """Tests for UsersService.create_quickroll method."""
+
+    @respx.mock
+    async def test_create_quickroll(self, vclient, base_url, quickroll_response_data):
+        """Verify creating a quickroll returns Quickroll object."""
+        # Given: A mocked create endpoint
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}"
+        ).respond(201, json=quickroll_response_data)
+
+        # When: Creating a quickroll
+        result = await vclient.users.create_quickroll(
+            company_id,
+            user_id,
+            name="Test Quickroll",
+            description="A test quickroll",
+            trait_ids=["trait1", "trait2"],
+        )
+
+        # Then: Returns created Quickroll object
+        assert route.called
+        assert isinstance(result, Quickroll)
+        assert result.name == "Test Quickroll"
+
+        # Verify request body
+        request = route.calls.last.request
+        import json
+
+        body = json.loads(request.content)
+        assert body["name"] == "Test Quickroll"
+        assert body["description"] == "A test quickroll"
+        assert body["trait_ids"] == ["trait1", "trait2"]
+
+    @respx.mock
+    async def test_create_quickroll_minimal(self, vclient, base_url, quickroll_response_data):
+        """Verify creating a quickroll with minimal data."""
+        # Given: A mocked create endpoint
+        company_id = "company123"
+        user_id = "user123"
+        minimal_response = {**quickroll_response_data, "description": None, "trait_ids": []}
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}"
+        ).respond(201, json=minimal_response)
+
+        # When: Creating a quickroll with only name
+        result = await vclient.users.create_quickroll(
+            company_id,
+            user_id,
+            name="Test Quickroll",
+        )
+
+        # Then: Returns created Quickroll object
+        assert route.called
+        assert isinstance(result, Quickroll)
+
+    async def test_create_quickroll_validation_error(self, vclient):
+        """Verify validation error on invalid data raises RequestValidationError."""
+        # When/Then: Creating with invalid data raises RequestValidationError
+        with pytest.raises(RequestValidationError) as exc_info:
+            await vclient.users.create_quickroll(
+                "company123",
+                "user123",
+                name="AB",  # Too short (min 3 chars)
+            )
+
+        # Verify error details are accessible
+        assert len(exc_info.value.errors) == 1
+        assert exc_info.value.errors[0]["loc"] == ("name",)
+
+    @respx.mock
+    async def test_create_quickroll_not_found(self, vclient, base_url):
+        """Verify creating quickroll for non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        respx.post(
+            f"{base_url}{Endpoints.USER_QUICKROLLS.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Creating raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.create_quickroll(
+                company_id,
+                user_id,
+                name="Test Quickroll",
+            )
+
+
+class TestUsersServiceUpdateQuickroll:
+    """Tests for UsersService.update_quickroll method."""
+
+    @respx.mock
+    async def test_update_quickroll(self, vclient, base_url, quickroll_response_data):
+        """Verify updating a quickroll returns Quickroll object."""
+        # Given: A mocked update endpoint
+        company_id = "company123"
+        user_id = "user123"
+        quickroll_id = "quickroll123"
+        updated_data = {**quickroll_response_data, "name": "Updated Name"}
+        route = respx.patch(
+            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
+        ).respond(200, json=updated_data)
+
+        # When: Updating the quickroll
+        result = await vclient.users.update_quickroll(
+            company_id,
+            user_id,
+            quickroll_id,
+            name="Updated Name",
+        )
+
+        # Then: Returns updated Quickroll object
+        assert route.called
+        assert isinstance(result, Quickroll)
+        assert result.name == "Updated Name"
+
+        # Verify request body
+        request = route.calls.last.request
+        import json
+
+        body = json.loads(request.content)
+        assert body == {"name": "Updated Name"}
+
+    @respx.mock
+    async def test_update_quickroll_trait_ids(self, vclient, base_url, quickroll_response_data):
+        """Verify updating quickroll trait_ids."""
+        # Given: A mocked update endpoint
+        company_id = "company123"
+        user_id = "user123"
+        quickroll_id = "quickroll123"
+        updated_data = {**quickroll_response_data, "trait_ids": ["trait3", "trait4"]}
+        route = respx.patch(
+            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
+        ).respond(200, json=updated_data)
+
+        # When: Updating the quickroll trait_ids
+        result = await vclient.users.update_quickroll(
+            company_id,
+            user_id,
+            quickroll_id,
+            trait_ids=["trait3", "trait4"],
+        )
+
+        # Then: Returns updated Quickroll object
+        assert route.called
+        assert isinstance(result, Quickroll)
+        assert result.trait_ids == ["trait3", "trait4"]
+
+    @respx.mock
+    async def test_update_quickroll_not_found(self, vclient, base_url):
+        """Verify updating non-existent quickroll raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "user123"
+        quickroll_id = "nonexistent"
+        respx.patch(
+            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
+        ).respond(404, json={"detail": "Quickroll not found"})
+
+        # When/Then: Updating raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.update_quickroll(
+                company_id,
+                user_id,
+                quickroll_id,
+                name="New Name",
+            )
+
+
+class TestUsersServiceDeleteQuickroll:
+    """Tests for UsersService.delete_quickroll method."""
+
+    @respx.mock
+    async def test_delete_quickroll(self, vclient, base_url):
+        """Verify deleting a quickroll."""
+        # Given: A mocked delete endpoint
+        company_id = "company123"
+        user_id = "user123"
+        quickroll_id = "quickroll123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
+        ).respond(204)
+
+        # When: Deleting the quickroll
+        result = await vclient.users.delete_quickroll(company_id, user_id, quickroll_id)
+
+        # Then: Request was made and returns None
+        assert route.called
+        assert result is None
+
+    @respx.mock
+    async def test_delete_quickroll_not_found(self, vclient, base_url):
+        """Verify deleting non-existent quickroll raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "user123"
+        quickroll_id = "nonexistent"
+        respx.delete(
+            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
+        ).respond(404, json={"detail": "Quickroll not found"})
+
+        # When/Then: Deleting raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.delete_quickroll(company_id, user_id, quickroll_id)
+
+    @respx.mock
+    async def test_delete_quickroll_unauthorized(self, vclient, base_url):
+        """Verify deleting quickroll without permission raises AuthorizationError."""
+        # Given: A mocked endpoint returning 403
+        company_id = "company123"
+        user_id = "user123"
+        quickroll_id = "quickroll123"
+        respx.delete(
+            f"{base_url}{Endpoints.USER_QUICKROLL.format(company_id=company_id, user_id=user_id, quickroll_id=quickroll_id)}"
+        ).respond(403, json={"detail": "Not authorized"})
+
+        # When/Then: Deleting raises AuthorizationError
+        with pytest.raises(AuthorizationError):
+            await vclient.users.delete_quickroll(company_id, user_id, quickroll_id)
