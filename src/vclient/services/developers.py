@@ -1,12 +1,12 @@
 """Service for interacting with the Developer API."""
 
-from vclient.api.endpoints import Endpoints
-from vclient.api.models.developers import (
+from vclient.endpoints import Endpoints
+from vclient.models.developers import (
     MeDeveloper,
     MeDeveloperWithApiKey,
     UpdateMeDeveloperRequest,
 )
-from vclient.api.services.base import BaseService
+from vclient.services.base import BaseService
 
 
 class DeveloperService(BaseService):

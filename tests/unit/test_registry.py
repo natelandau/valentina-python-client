@@ -2,24 +2,24 @@
 
 import pytest
 
-from vclient.api import VClient
-from vclient.api.registry import (
+from vclient import VClient
+from vclient.registry import (
     companies_service,
     configure_default_client,
     default_client,
     global_admin_service,
     system_service,
 )
-from vclient.api.services.companies import CompaniesService
-from vclient.api.services.global_admin import GlobalAdminService
-from vclient.api.services.system import SystemService
+from vclient.services.companies import CompaniesService
+from vclient.services.global_admin import GlobalAdminService
+from vclient.services.system import SystemService
 
 
 @pytest.fixture(autouse=True)
 def reset_default_client():
     """Reset the default client before and after each test."""
     # Given: Clear any existing default client
-    from vclient.api import registry
+    from vclient import registry
 
     registry._default_client = None
     yield
@@ -39,7 +39,7 @@ class TestConfigureDefaultClient:
         configure_default_client(client)
 
         # Then: The client is stored
-        from vclient.api import registry
+        from vclient import registry
 
         assert registry._default_client is client
 
@@ -54,7 +54,7 @@ class TestConfigureDefaultClient:
         configure_default_client(client2)
 
         # Then: The second client is stored
-        from vclient.api import registry
+        from vclient import registry
 
         assert registry._default_client is client2
 
@@ -180,9 +180,9 @@ class TestTopLevelImports:
         assert callable(system_service)
 
     def test_imports_from_vclient_api(self) -> None:
-        """Verify factory functions are importable from vclient.api package."""
-        # When: Importing from vclient.api
-        from vclient.api import (
+        """Verify factory functions are importable from vclient package."""
+        # When: Importing from vclient
+        from vclient import (
             companies_service,
             configure_default_client,
             default_client,

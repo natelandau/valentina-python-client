@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from vclient.api.models.developers import (
+from vclient.models.developers import (
     MeDeveloper,
     MeDeveloperCompanyPermission,
     MeDeveloperWithApiKey,

@@ -2,7 +2,7 @@
 
 import pytest
 
-from vclient.api.config import APIConfig
+from vclient.config import APIConfig
 
 
 class TestAPIConfig:

@@ -30,11 +30,11 @@ Add, update, or revoke a developer's permission level for a company.
 
 **Parameters:**
 
-| Parameter      | Type              | Description                                                      |
-| -------------- | ----------------- | ---------------------------------------------------------------- |
-| `company_id`   | `str`             | The ID of the company                                            |
-| `developer_id` | `str`             | The ID of the developer to grant/modify access for               |
-| `permission`   | `PermissionLevel` | The permission level (`USER`, `ADMIN`, `OWNER`, or `REVOKE`)     |
+| Parameter      | Type              | Description                                                  |
+| -------------- | ----------------- | ------------------------------------------------------------ |
+| `company_id`   | `str`             | The ID of the company                                        |
+| `developer_id` | `str`             | The ID of the developer to grant/modify access for           |
+| `permission`   | `PermissionLevel` | The permission level (`USER`, `ADMIN`, `OWNER`, or `REVOKE`) |
 
 **Returns:** `CompanyPermissions`
 
@@ -61,28 +61,28 @@ print(f"Granted {permissions.permission} access to {permissions.name}")
 
 Represents a company entity returned from the API.
 
-| Field           | Type                      | Description                                    |
-| --------------- | ------------------------- | ---------------------------------------------- |
-| `id`            | `str`                     | MongoDB document ObjectID                      |
-| `date_created`  | `datetime`                | Timestamp when the company was created         |
-| `date_modified` | `datetime`                | Timestamp when the company was last modified   |
-| `name`          | `str`                     | Company name                                   |
-| `description`   | `str \| None`             | Company description                            |
-| `email`         | `str`                     | Company contact email                          |
-| `user_ids`      | `list[str]`               | List of user IDs associated with the company   |
-| `settings`      | `CompanySettings \| None` | Company settings and configuration             |
+| Field           | Type                      | Description                                  |
+| --------------- | ------------------------- | -------------------------------------------- |
+| `id`            | `str`                     | MongoDB document ObjectID                    |
+| `date_created`  | `datetime`                | Timestamp when the company was created       |
+| `date_modified` | `datetime`                | Timestamp when the company was last modified |
+| `name`          | `str`                     | Company name                                 |
+| `description`   | `str \| None`             | Company description                          |
+| `email`         | `str`                     | Company contact email                        |
+| `user_ids`      | `list[str]`               | List of user IDs associated with the company |
+| `settings`      | `CompanySettings \| None` | Company settings and configuration           |
 
 ### `CompanySettings`
 
-Configuration options for a company. Import with `from vclient.api import CompanySettings`.
+Configuration options for a company. Import with `from vclient import CompanySettings`.
 
-| Field                          | Type                               | Description                                       |
-| ------------------------------ | ---------------------------------- | ------------------------------------------------- |
-| `character_autogen_xp_cost`    | `int \| None`                      | Cost to autogen XP for a character (0-100)        |
-| `character_autogen_num_choices`| `int \| None`                      | Number of characters generated for selection (1-10)|
-| `permission_manage_campaign`   | `ManageCampaignPermission \| None` | Permission level for managing campaigns           |
-| `permission_grant_xp`          | `GrantXPPermission \| None`        | Permission level for granting XP                  |
-| `permission_free_trait_changes`| `FreeTraitChangesPermission \| None`| Permission level for free trait changes          |
+| Field | Type | Description |
+| --- | --- | --- |
+| `character_autogen_xp_cost` | `int \| None` | Cost to autogen XP for a character (0-100) |
+| `character_autogen_num_choices` | `int \| None` | Number of characters generated for selection (1-10) |
+| `permission_manage_campaign` | `ManageCampaignPermission \| None` | Permission level for managing campaigns |
+| `permission_grant_xp` | `GrantXPPermission \| None` | Permission level for granting XP |
+| `permission_free_trait_changes` | `FreeTraitChangesPermission \| None` | Permission level for free trait changes |
 
 ### `CompanyPermissions`
 
@@ -96,9 +96,9 @@ Response from granting or modifying developer access.
 
 ## Permission Levels
 
-| Level    | Description                              |
-| -------- | ---------------------------------------- |
-| `USER`   | Basic access to view company data        |
-| `ADMIN`  | Can modify company settings and data     |
+| Level    | Description                                 |
+| -------- | ------------------------------------------- |
+| `USER`   | Basic access to view company data           |
+| `ADMIN`  | Can modify company settings and data        |
 | `OWNER`  | Full control including managing permissions |
-| `REVOKE` | Removes all access to the company        |
+| `REVOKE` | Removes all access to the company           |

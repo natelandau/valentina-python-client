@@ -1,8 +1,8 @@
 """Service for interacting with the System API."""
 
-from vclient.api.endpoints import Endpoints
-from vclient.api.models.system import SystemHealth
-from vclient.api.services.base import BaseService
+from vclient.endpoints import Endpoints
+from vclient.models.system import SystemHealth
+from vclient.services.base import BaseService
 
 
 class SystemService(BaseService):

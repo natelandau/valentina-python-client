@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
-from vclient.api.models.users import (
+from vclient.models.users import (
     CampaignExperience,
     CreateNoteRequest,
     CreateQuickrollRequest,

@@ -4,7 +4,7 @@ import pytest
 from pydantic import BaseModel, Field
 from pydantic import ValidationError as PydanticValidationError
 
-from vclient.api.exceptions import (
+from vclient.exceptions import (
     APIError,
     AuthenticationError,
     AuthorizationError,

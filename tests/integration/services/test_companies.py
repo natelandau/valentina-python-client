@@ -1,16 +1,16 @@
-"""Tests for vclient.api.services.companies."""
+"""Tests for vclient.services.companies."""
 
 import pytest
 import respx
 
-from vclient.api.endpoints import Endpoints
-from vclient.api.exceptions import AuthorizationError, NotFoundError, RequestValidationError
-from vclient.api.models.companies import (
+from vclient.endpoints import Endpoints
+from vclient.exceptions import AuthorizationError, NotFoundError, RequestValidationError
+from vclient.models.companies import (
     Company,
     CompanyPermissions,
     CompanySettings,
 )
-from vclient.api.models.pagination import PaginatedResponse
+from vclient.models.pagination import PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 
@@ -524,7 +524,7 @@ class TestCompaniesServiceClientIntegration:
         service = vclient.companies
 
         # Then: Returns a CompaniesService instance
-        from vclient.api.services.companies import CompaniesService
+        from vclient.services.companies import CompaniesService
 
         assert isinstance(service, CompaniesService)
 

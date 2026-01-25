@@ -21,11 +21,11 @@ Example:
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from vclient.api.client import VClient
-    from vclient.api.services.companies import CompaniesService
-    from vclient.api.services.developers import DeveloperService
-    from vclient.api.services.global_admin import GlobalAdminService
-    from vclient.api.services.system import SystemService
+    from vclient.client import VClient
+    from vclient.services.companies import CompaniesService
+    from vclient.services.developers import DeveloperService
+    from vclient.services.global_admin import GlobalAdminService
+    from vclient.services.system import SystemService
 
 _default_client: "VClient | None" = None
 
@@ -87,7 +87,7 @@ def companies_service() -> "CompaniesService":
         all_companies = await companies.list_all()
         ```
     """
-    from vclient.api.services.companies import CompaniesService
+    from vclient.services.companies import CompaniesService
 
     return CompaniesService(default_client())
 
@@ -110,7 +110,7 @@ def developer_service() -> "DeveloperService":
         me = await developer.get_me()
         ```
     """
-    from vclient.api.services.developers import DeveloperService
+    from vclient.services.developers import DeveloperService
 
     return DeveloperService(default_client())
 
@@ -133,7 +133,7 @@ def global_admin_service() -> "GlobalAdminService":
         developers = await admins.list_all()
         ```
     """
-    from vclient.api.services.global_admin import GlobalAdminService
+    from vclient.services.global_admin import GlobalAdminService
 
     return GlobalAdminService(default_client())
 
@@ -156,6 +156,6 @@ def system_service() -> "SystemService":
         health = await system.health()
         ```
     """
-    from vclient.api.services.system import SystemService
+    from vclient.services.system import SystemService
 
     return SystemService(default_client())

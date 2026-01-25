@@ -3,8 +3,8 @@
 import pytest
 import respx
 
-from vclient.api import APIConfig, VClient
-from vclient.api.services.base import BaseService
+from vclient import APIConfig, VClient
+from vclient.services.base import BaseService
 
 
 @pytest.fixture

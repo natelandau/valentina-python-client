@@ -1,11 +1,11 @@
-"""Tests for vclient.api.services.system."""
+"""Tests for vclient.services.system."""
 
 import pytest
 import respx
 
-from vclient.api.endpoints import Endpoints
-from vclient.api.models.system import ServiceStatus, SystemHealth
-from vclient.api.services.system import SystemService
+from vclient.endpoints import Endpoints
+from vclient.models.system import ServiceStatus, SystemHealth
+from vclient.services.system import SystemService
 
 pytestmark = pytest.mark.anyio
 

@@ -1,6 +1,6 @@
 """Data models for API responses."""
 
-from vclient.api.models.companies import (
+from .companies import (
     Company,
     CompanyPermissions,
     CompanySettings,
@@ -12,21 +12,21 @@ from vclient.api.models.companies import (
     PermissionLevel,
     UpdateCompanyRequest,
 )
-from vclient.api.models.developers import (
+from .developers import (
     MeDeveloper,
     MeDeveloperCompanyPermission,
     MeDeveloperWithApiKey,
     UpdateMeDeveloperRequest,
 )
-from vclient.api.models.global_admin import (
+from .global_admin import (
     CreateDeveloperRequest,
     Developer,
     DeveloperCompanyPermission,
     DeveloperWithApiKey,
     UpdateDeveloperRequest,
 )
-from vclient.api.models.pagination import PaginatedResponse
-from vclient.api.models.system import ServiceStatus, SystemHealth
+from .pagination import PaginatedResponse
+from .system import ServiceStatus, SystemHealth
 
 __all__ = [
     "Company",

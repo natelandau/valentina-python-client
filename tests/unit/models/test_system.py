@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from vclient.api.models.system import ServiceStatus, SystemHealth
+from vclient.models.system import ServiceStatus, SystemHealth
 
 
 class TestServiceStatus:

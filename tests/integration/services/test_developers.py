@@ -1,13 +1,13 @@
-"""Tests for vclient.api.services.developers."""
+"""Tests for vclient.services.developers."""
 
 import json
 
 import pytest
 import respx
 
-from vclient.api.endpoints import Endpoints
-from vclient.api.exceptions import AuthenticationError
-from vclient.api.models.developers import MeDeveloper, MeDeveloperWithApiKey
+from vclient.endpoints import Endpoints
+from vclient.exceptions import AuthenticationError
+from vclient.models.developers import MeDeveloper, MeDeveloperWithApiKey
 
 pytestmark = pytest.mark.anyio
 
@@ -196,7 +196,7 @@ class TestDeveloperServiceClientIntegration:
         service = vclient.developer
 
         # Then: Returns a DeveloperService instance
-        from vclient.api.services.developers import DeveloperService
+        from vclient.services.developers import DeveloperService
 
         assert isinstance(service, DeveloperService)
 

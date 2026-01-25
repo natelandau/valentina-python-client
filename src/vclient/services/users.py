@@ -2,21 +2,24 @@
 
 from collections.abc import AsyncIterator
 
-from vclient.api.constants import DEFAULT_PAGE_LIMIT
-from vclient.api.endpoints import Endpoints
-from vclient.api.models.pagination import PaginatedResponse
-from vclient.api.models.users import (
+from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.endpoints import Endpoints
+from vclient.models.pagination import PaginatedResponse
+from vclient.models.users import (
     CampaignExperience,
+    CreateNoteRequest,
     CreateUserRequest,
     DiscordProfile,
     ExperienceAddRemoveRequest,
+    Note,
     RollStatistics,
     S3Asset,
+    UpdateNoteRequest,
     UpdateUserRequest,
     User,
     UserRole,
 )
-from vclient.api.services.base import BaseService
+from vclient.services.base import BaseService
 
 
 class UsersService(BaseService):
@@ -546,3 +549,215 @@ class UsersService(BaseService):
             json=body.model_dump(mode="json"),
         )
         return CampaignExperience.model_validate(response.json())
+
+    # -------------------------------------------------------------------------
+    # Notes Methods
+    # -------------------------------------------------------------------------
+
+    async def get_notes_page(
+        self,
+        company_id: str,
+        user_id: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> PaginatedResponse[Note]:
+        """Retrieve a paginated page of notes for a user.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user whose notes to list.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+
+        Returns:
+            A PaginatedResponse containing Note objects and pagination metadata.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        return await self._get_paginated_as(
+            Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id),
+            Note,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def list_all_notes(
+        self,
+        company_id: str,
+        user_id: str,
+    ) -> list[Note]:
+        """Retrieve all notes for a user.
+
+        Automatically paginates through all results. Use `get_notes_page()` for paginated
+        access or `iter_all_notes()` for memory-efficient streaming of large datasets.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user whose notes to list.
+
+        Returns:
+            A list of all Note objects.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        return [note async for note in self.iter_all_notes(company_id, user_id)]
+
+    async def iter_all_notes(
+        self,
+        company_id: str,
+        user_id: str,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[Note]:
+        """Iterate through all notes for a user.
+
+        Yields individual notes, automatically fetching subsequent pages until
+        all items have been retrieved.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user whose notes to iterate.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual Note objects.
+
+        Example:
+            >>> async for note in client.users.iter_all_notes("company_id", "user_id"):
+            ...     print(note.title)
+        """
+        async for item in self._iter_all_pages(
+            Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id),
+            limit=limit,
+        ):
+            yield Note.model_validate(item)
+
+    async def get_note(
+        self,
+        company_id: str,
+        user_id: str,
+        note_id: str,
+    ) -> Note:
+        """Retrieve a specific note including its content and metadata.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user who owns the note.
+            note_id: The ID of the note to retrieve.
+
+        Returns:
+            The Note object with full details.
+
+        Raises:
+            NotFoundError: If the note does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        response = await self._get(
+            Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)
+        )
+        return Note.model_validate(response.json())
+
+    async def create_note(
+        self,
+        company_id: str,
+        user_id: str,
+        title: str,
+        content: str,
+    ) -> Note:
+        """Create a new note for a user.
+
+        Notes support markdown formatting for rich text content.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user to create the note for.
+            title: The note title (3-50 characters).
+            content: The note content (minimum 3 characters, supports markdown).
+
+        Returns:
+            The newly created Note object.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the request data is invalid.
+        """
+        body = self._validate_request(
+            CreateNoteRequest,
+            title=title,
+            content=content,
+        )
+        response = await self._post(
+            Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return Note.model_validate(response.json())
+
+    async def update_note(
+        self,
+        company_id: str,
+        user_id: str,
+        note_id: str,
+        *,
+        title: str | None = None,
+        content: str | None = None,
+    ) -> Note:
+        """Modify a note's content.
+
+        Only include fields that need to be changed; omitted fields remain unchanged.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user who owns the note.
+            note_id: The ID of the note to update.
+            title: New note title (3-50 characters).
+            content: New note content (minimum 3 characters, supports markdown).
+
+        Returns:
+            The updated Note object.
+
+        Raises:
+            NotFoundError: If the note does not exist.
+            AuthorizationError: If you don't have appropriate access.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the request data is invalid.
+        """
+        body = self._validate_request(
+            UpdateNoteRequest,
+            title=title,
+            content=content,
+        )
+        response = await self._patch(
+            Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return Note.model_validate(response.json())
+
+    async def delete_note(
+        self,
+        company_id: str,
+        user_id: str,
+        note_id: str,
+    ) -> None:
+        """Remove a note from a user.
+
+        This action cannot be undone.
+
+        Args:
+            company_id: The ID of the company containing the user.
+            user_id: The ID of the user who owns the note.
+            note_id: The ID of the note to delete.
+
+        Raises:
+            NotFoundError: If the note does not exist.
+            AuthorizationError: If you don't have appropriate access.
+        """
+        await self._delete(
+            Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)
+        )

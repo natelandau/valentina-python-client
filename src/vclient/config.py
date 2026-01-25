@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 
-from vclient.api.constants import (
+from vclient.constants import (
     DEFAULT_MAX_RETRIES,
     DEFAULT_RETRY_DELAY,
     DEFAULT_TIMEOUT,

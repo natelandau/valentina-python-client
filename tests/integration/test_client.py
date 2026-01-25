@@ -2,8 +2,8 @@
 
 import pytest
 
-from vclient.api import APIConfig, VClient
-from vclient.api.constants import API_KEY_HEADER
+from vclient import APIConfig, VClient
+from vclient.constants import API_KEY_HEADER
 
 pytestmark = pytest.mark.anyio
 

@@ -2,9 +2,9 @@
 
 from collections.abc import AsyncIterator
 
-from vclient.api.constants import DEFAULT_PAGE_LIMIT
-from vclient.api.endpoints import Endpoints
-from vclient.api.models.companies import (
+from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.endpoints import Endpoints
+from vclient.models.companies import (
     Company,
     CompanyPermissions,
     CompanySettings,
@@ -13,8 +13,8 @@ from vclient.api.models.companies import (
     PermissionLevel,
     UpdateCompanyRequest,
 )
-from vclient.api.models.pagination import PaginatedResponse
-from vclient.api.services.base import BaseService
+from vclient.models.pagination import PaginatedResponse
+from vclient.services.base import BaseService
 
 
 class CompaniesService(BaseService):

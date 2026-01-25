@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
-from vclient.api.models.companies import (
+from vclient.models.companies import (
     Company,
     CompanyPermissions,
     CompanySettings,

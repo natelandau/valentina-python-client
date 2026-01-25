@@ -2,7 +2,7 @@
 
 import pytest
 
-from vclient.api import APIConfig
+from vclient import APIConfig
 
 
 @pytest.fixture

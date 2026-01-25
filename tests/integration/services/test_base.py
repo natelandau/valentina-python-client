@@ -1,11 +1,11 @@
-"""Tests for vclient.api.services.base."""
+"""Tests for vclient.services.base."""
 
 import httpx
 import pytest
 import respx
 
-from vclient.api.constants import API_KEY_HEADER, IDEMPOTENCY_KEY_HEADER
-from vclient.api.exceptions import (
+from vclient.constants import API_KEY_HEADER, IDEMPOTENCY_KEY_HEADER
+from vclient.exceptions import (
     APIError,
     AuthenticationError,
     AuthorizationError,
@@ -15,8 +15,8 @@ from vclient.api.exceptions import (
     ServerError,
     ValidationError,
 )
-from vclient.api.models.pagination import PaginatedResponse
-from vclient.api.services.base import BaseService
+from vclient.models.pagination import PaginatedResponse
+from vclient.services.base import BaseService
 
 pytestmark = pytest.mark.anyio
 
@@ -90,7 +90,7 @@ class TestBaseServiceErrorHandling:
     ):
         """Verify error status codes raise appropriate exceptions."""
         # Given: Mock sleep to avoid delays on 429 retries
-        mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: A mocked endpoint returning an error status
         respx.get(f"{base_url}/error").respond(status_code, json={"detail": "Error message"})
@@ -149,7 +149,7 @@ class TestBaseServiceErrorHandling:
     async def test_rate_limit_error_includes_retry_after(self, base_service, base_url, mocker):
         """Verify RateLimitError includes retry_after from Retry-After header."""
         # Given: Mock sleep to avoid actual delays during retries
-        mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: A mocked endpoint returning 429 with Retry-After header
         respx.get(f"{base_url}/limited").respond(
@@ -177,7 +177,7 @@ class TestBaseServiceErrorHandling:
     ):
         """Verify RateLimitError works without Retry-After header."""
         # Given: Mock sleep to avoid actual delays during retries
-        mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: A mocked endpoint returning 429 without Retry-After header
         respx.get(f"{base_url}/limited").respond(
@@ -198,7 +198,7 @@ class TestBaseServiceErrorHandling:
     ):
         """Verify RateLimitError handles invalid Retry-After header gracefully."""
         # Given: Mock sleep to avoid actual delays during retries
-        mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: A mocked endpoint returning 429 with non-numeric Retry-After
         respx.get(f"{base_url}/limited").respond(
@@ -536,7 +536,7 @@ class TestBaseServiceRateLimitHeaderParsing:
     ):
         """Verify RateLimitError includes remaining tokens from RateLimit header."""
         # Given: Mock sleep to avoid actual delays during retries
-        mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: A mocked endpoint returning 429 with RateLimit header
         respx.get(f"{base_url}/limited").respond(
@@ -558,7 +558,7 @@ class TestBaseServiceRateLimitHeaderParsing:
     ):
         """Verify RateLimit header 't' value is preferred over Retry-After."""
         # Given: Mock sleep to avoid actual delays during retries
-        mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: A mocked endpoint with both RateLimit and Retry-After headers
         respx.get(f"{base_url}/limited").respond(
@@ -583,7 +583,7 @@ class TestBaseServiceRateLimitHeaderParsing:
     ):
         """Verify Retry-After header is used when RateLimit header lacks 't' value."""
         # Given: Mock sleep to avoid actual delays during retries
-        mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: A mocked endpoint with only Retry-After header
         respx.get(f"{base_url}/limited").respond(
@@ -618,10 +618,10 @@ class TestBaseServiceRateLimitRetry:
         )
 
         # Given: Mock asyncio.sleep to avoid actual delays
-        mock_sleep = mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
 
         # When: Making a request
-        from vclient.api.services.base import BaseService
+        from vclient.services.base import BaseService
 
         service = BaseService(vclient)
         response = await service._get("/test")
@@ -643,10 +643,10 @@ class TestBaseServiceRateLimitRetry:
         )
 
         # Given: Mock asyncio.sleep to avoid actual delays
-        mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mocker.patch("vclient.services.base.asyncio.sleep")
 
         # When/Then: Making a request raises RateLimitError after max retries
-        from vclient.api.services.base import BaseService
+        from vclient.services.base import BaseService
 
         service = BaseService(vclient)
         with pytest.raises(RateLimitError):
@@ -670,8 +670,8 @@ class TestBaseServiceRateLimitRetry:
         )
 
         # When/Then: Making a request raises RateLimitError immediately
-        from vclient.api import VClient
-        from vclient.api.services.base import BaseService
+        from vclient import VClient
+        from vclient.services.base import BaseService
 
         async with VClient(config=api_config) as client:
             service = BaseService(client)
@@ -697,10 +697,10 @@ class TestBaseServiceRateLimitRetry:
         )
 
         # Given: Mock asyncio.sleep to capture the delay
-        mock_sleep = mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
 
         # When: Making a request
-        from vclient.api.services.base import BaseService
+        from vclient.services.base import BaseService
 
         service = BaseService(vclient)
         await service._get("/test")
@@ -736,10 +736,10 @@ class TestBaseServiceRateLimitRetry:
         )
 
         # Given: Mock asyncio.sleep to capture the delays
-        mock_sleep = mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
 
         # When: Making a request
-        from vclient.api.services.base import BaseService
+        from vclient.services.base import BaseService
 
         service = BaseService(vclient)
         await service._get("/test")
@@ -767,7 +767,7 @@ class TestBaseServiceRateLimitRetry:
         )
 
         # Given: Mock asyncio.sleep
-        mock_sleep = mocker.patch("vclient.api.services.base.asyncio.sleep")
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
 
         # When/Then: Making a request raises ServerError immediately
         with pytest.raises(ServerError):

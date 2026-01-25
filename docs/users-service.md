@@ -211,6 +211,131 @@ experience = await client.users.add_cool_points("company_id", "user_id", "campai
 print(f"Total cool points: {experience.cool_points}")
 ```
 
+### `get_notes_page()`
+
+Retrieve a paginated page of notes for a user.
+
+**Parameters:**
+
+| Parameter    | Type  | Description                               |
+| ------------ | ----- | ----------------------------------------- |
+| `company_id` | `str` | The ID of the company containing the user |
+| `user_id`    | `str` | The ID of the user whose notes to list    |
+| `limit`      | `int` | Maximum items to return (default 10)      |
+| `offset`     | `int` | Number of items to skip (default 0)       |
+
+**Returns:** `PaginatedResponse[Note]`
+
+### `list_all_notes()`
+
+Retrieve all notes for a user. Automatically paginates through all results.
+
+**Parameters:**
+
+| Parameter    | Type  | Description                               |
+| ------------ | ----- | ----------------------------------------- |
+| `company_id` | `str` | The ID of the company containing the user |
+| `user_id`    | `str` | The ID of the user whose notes to list    |
+
+**Returns:** `list[Note]`
+
+### `iter_all_notes()`
+
+Iterate through all notes for a user. Yields individual notes, automatically fetching subsequent pages.
+
+**Parameters:**
+
+| Parameter    | Type  | Description                               |
+| ------------ | ----- | ----------------------------------------- |
+| `company_id` | `str` | The ID of the company containing the user |
+| `user_id`    | `str` | The ID of the user whose notes to iterate |
+| `limit`      | `int` | Items per page (default 100)              |
+
+**Returns:** `AsyncIterator[Note]`
+
+### `get_note()`
+
+Retrieve a specific note including its content and metadata.
+
+**Parameters:**
+
+| Parameter    | Type  | Description                    |
+| ------------ | ----- | ------------------------------ |
+| `company_id` | `str` | The ID of the company          |
+| `user_id`    | `str` | The ID of the user who owns it |
+| `note_id`    | `str` | The ID of the note to retrieve |
+
+**Returns:** `Note`
+
+### `create_note()`
+
+Create a new note for a user. Notes support markdown formatting.
+
+**Parameters:**
+
+| Parameter    | Type  | Description                                       |
+| ------------ | ----- | ------------------------------------------------- |
+| `company_id` | `str` | The ID of the company containing the user         |
+| `user_id`    | `str` | The ID of the user to create the note for         |
+| `title`      | `str` | The note title (3-50 characters)                  |
+| `content`    | `str` | The note content (min 3 chars, supports markdown) |
+
+**Returns:** `Note`
+
+**Example:**
+
+```python
+note = await client.users.create_note(
+    company_id="company_id",
+    user_id="user_id",
+    title="Session Notes",
+    content="## Session Summary\n\nThe party encountered...",
+)
+print(f"Created note: {note.title}")
+```
+
+### `update_note()`
+
+Modify a note's content. Only include fields that need to be changed.
+
+**Parameters:**
+
+| Parameter    | Type          | Description                                       |
+| ------------ | ------------- | ------------------------------------------------- |
+| `company_id` | `str`         | The ID of the company                             |
+| `user_id`    | `str`         | The ID of the user who owns it                    |
+| `note_id`    | `str`         | The ID of the note to update                      |
+| `title`      | `str \| None` | New note title (3-50 characters)                  |
+| `content`    | `str \| None` | New note content (min 3 chars, supports markdown) |
+
+**Returns:** `Note`
+
+**Example:**
+
+```python
+note = await client.users.update_note(
+    company_id="company_id",
+    user_id="user_id",
+    note_id="note_id",
+    title="Updated Title",
+)
+print(f"Updated note: {note.title}")
+```
+
+### `delete_note()`
+
+Remove a note from a user. This action cannot be undone.
+
+**Parameters:**
+
+| Parameter    | Type  | Description                    |
+| ------------ | ----- | ------------------------------ |
+| `company_id` | `str` | The ID of the company          |
+| `user_id`    | `str` | The ID of the user who owns it |
+| `note_id`    | `str` | The ID of the note to delete   |
+
+**Returns:** `None`
+
 ## Response Models
 
 ### `User`
@@ -290,6 +415,18 @@ Represents a file asset stored in S3.
 | `uploaded_by`       | `str`                       | ID of user who uploaded          |
 | `parent_type`       | `S3AssetParentType \| None` | Type of parent entity            |
 
+### `Note`
+
+Represents a note attached to a user.
+
+| Field           | Type       | Description                      |
+| --------------- | ---------- | -------------------------------- |
+| `id`            | `str`      | MongoDB document ObjectID        |
+| `date_created`  | `datetime` | Timestamp when created           |
+| `date_modified` | `datetime` | Timestamp when modified          |
+| `title`         | `str`      | Note title (3-50 characters)     |
+| `content`       | `str`      | Note content (supports markdown) |
+
 ## User Roles
 
 | Role          | Description                              |
@@ -324,4 +461,18 @@ async with VClient(base_url="...", api_key="...") as client:
     assets = await client.users.list_assets("company_id", new_user.id)
     for asset in assets.items:
         print(f"Asset: {asset.original_filename}")
+
+    # Create a note for a user
+    note = await client.users.create_note(
+        company_id="company_id",
+        user_id=new_user.id,
+        title="Session Notes",
+        content="Notes from today's session...",
+    )
+    print(f"Created note: {note.title}")
+
+    # List all notes for a user
+    notes = await client.users.list_all_notes("company_id", new_user.id)
+    for note in notes:
+        print(f"Note: {note.title}")
 ```

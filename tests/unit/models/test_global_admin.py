@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from vclient.api.models.global_admin import (
+from vclient.models.global_admin import (
     CreateDeveloperRequest,
     Developer,
     DeveloperCompanyPermission,

@@ -1,14 +1,14 @@
-"""Tests for vclient.api.services.global_admin."""
+"""Tests for vclient.services.global_admin."""
 
 import json
 
 import pytest
 import respx
 
-from vclient.api.endpoints import Endpoints
-from vclient.api.exceptions import AuthorizationError, NotFoundError
-from vclient.api.models.global_admin import Developer, DeveloperWithApiKey
-from vclient.api.models.pagination import PaginatedResponse
+from vclient.endpoints import Endpoints
+from vclient.exceptions import AuthorizationError, NotFoundError
+from vclient.models.global_admin import Developer, DeveloperWithApiKey
+from vclient.models.pagination import PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 
@@ -494,7 +494,7 @@ class TestGlobalAdminServiceClientIntegration:
         service = vclient.global_admin
 
         # Then: Returns a GlobalAdminService instance
-        from vclient.api.services.global_admin import GlobalAdminService
+        from vclient.services.global_admin import GlobalAdminService
 
         assert isinstance(service, GlobalAdminService)
 

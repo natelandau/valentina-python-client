@@ -1,14 +1,15 @@
-"""Tests for vclient.api.services.users."""
+"""Tests for vclient.services.users."""
 
 import pytest
 import respx
 
-from vclient.api.endpoints import Endpoints
-from vclient.api.exceptions import AuthorizationError, NotFoundError, RequestValidationError
-from vclient.api.models.pagination import PaginatedResponse
-from vclient.api.models.users import (
+from vclient.endpoints import Endpoints
+from vclient.exceptions import AuthorizationError, NotFoundError, RequestValidationError
+from vclient.models.pagination import PaginatedResponse
+from vclient.models.users import (
     CampaignExperience,
     DiscordProfile,
+    Note,
     RollStatistics,
     S3Asset,
     User,
@@ -92,6 +93,18 @@ def experience_response_data() -> dict:
         "xp_current": 50,
         "xp_total": 100,
         "cool_points": 5,
+    }
+
+
+@pytest.fixture
+def note_response_data() -> dict:
+    """Return sample note response data."""
+    return {
+        "id": "note123",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "title": "Test Note",
+        "content": "This is test content",
     }
 
 
@@ -860,6 +873,386 @@ class TestUsersServiceAddCoolPoints:
             await vclient.users.add_cool_points(company_id, user_id, campaign_id, amount=5)
 
 
+class TestUsersServiceGetNotesPage:
+    """Tests for UsersService.get_notes_page method."""
+
+    @respx.mock
+    async def test_get_notes_page(self, vclient, base_url, note_response_data):
+        """Verify get_notes_page returns paginated Note objects."""
+        # Given: A mocked notes list endpoint
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [note_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Getting a page of notes
+        result = await vclient.users.get_notes_page(company_id, user_id)
+
+        # Then: Returns PaginatedResponse with Note objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], Note)
+        assert result.items[0].title == "Test Note"
+        assert result.total == 1
+
+    @respx.mock
+    async def test_get_notes_page_with_pagination(self, vclient, base_url, note_response_data):
+        """Verify get_notes_page accepts pagination parameters."""
+        # Given: A mocked endpoint expecting custom pagination
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "25", "offset": "50"},
+        ).respond(
+            200,
+            json={
+                "items": [note_response_data],
+                "limit": 25,
+                "offset": 50,
+                "total": 100,
+            },
+        )
+
+        # When: Getting a page with custom pagination
+        result = await vclient.users.get_notes_page(company_id, user_id, limit=25, offset=50)
+
+        # Then: Request was made with correct params
+        assert route.called
+        assert result.limit == 25
+        assert result.offset == 50
+
+
+class TestUsersServiceListAllNotes:
+    """Tests for UsersService.list_all_notes method."""
+
+    @respx.mock
+    async def test_list_all_notes(self, vclient, base_url, note_response_data):
+        """Verify list_all_notes returns all notes."""
+        # Given: Mocked endpoint
+        company_id = "company123"
+        user_id = "user123"
+        respx.get(
+            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "100", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [note_response_data],
+                "limit": 100,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Calling list_all_notes
+        result = await vclient.users.list_all_notes(company_id, user_id)
+
+        # Then: Returns list of Note objects
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], Note)
+        assert result[0].title == "Test Note"
+
+
+class TestUsersServiceIterAllNotes:
+    """Tests for UsersService.iter_all_notes method."""
+
+    @respx.mock
+    async def test_iter_all_notes(self, vclient, base_url, note_response_data):
+        """Verify iter_all_notes yields Note objects across pages."""
+        # Given: Mocked endpoints for multiple pages
+        company_id = "company123"
+        user_id = "user123"
+        note2 = {**note_response_data, "id": "note456", "title": "Note 2"}
+        respx.get(
+            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "1", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [note_response_data],
+                "limit": 1,
+                "offset": 0,
+                "total": 2,
+            },
+        )
+        respx.get(
+            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "1", "offset": "1"},
+        ).respond(
+            200,
+            json={
+                "items": [note2],
+                "limit": 1,
+                "offset": 1,
+                "total": 2,
+            },
+        )
+
+        # When: Iterating through all notes
+        notes = [note async for note in vclient.users.iter_all_notes(company_id, user_id, limit=1)]
+
+        # Then: All notes are yielded as Note objects
+        assert len(notes) == 2
+        assert all(isinstance(n, Note) for n in notes)
+        assert notes[0].title == "Test Note"
+        assert notes[1].title == "Note 2"
+
+
+class TestUsersServiceGetNote:
+    """Tests for UsersService.get_note method."""
+
+    @respx.mock
+    async def test_get_note(self, vclient, base_url, note_response_data):
+        """Verify getting a specific note returns Note object."""
+        # Given: A mocked note endpoint
+        company_id = "company123"
+        user_id = "user123"
+        note_id = "note123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
+        ).respond(200, json=note_response_data)
+
+        # When: Getting the note
+        result = await vclient.users.get_note(company_id, user_id, note_id)
+
+        # Then: Returns Note object
+        assert route.called
+        assert isinstance(result, Note)
+        assert result.id == "note123"
+        assert result.title == "Test Note"
+        assert result.content == "This is test content"
+
+    @respx.mock
+    async def test_get_note_not_found(self, vclient, base_url):
+        """Verify getting non-existent note raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "user123"
+        note_id = "nonexistent"
+        respx.get(
+            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
+        ).respond(404, json={"detail": "Note not found"})
+
+        # When/Then: Getting the note raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.get_note(company_id, user_id, note_id)
+
+
+class TestUsersServiceCreateNote:
+    """Tests for UsersService.create_note method."""
+
+    @respx.mock
+    async def test_create_note(self, vclient, base_url, note_response_data):
+        """Verify creating a note returns Note object."""
+        # Given: A mocked create endpoint
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}"
+        ).respond(201, json=note_response_data)
+
+        # When: Creating a note
+        result = await vclient.users.create_note(
+            company_id,
+            user_id,
+            title="Test Note",
+            content="This is test content",
+        )
+
+        # Then: Returns created Note object
+        assert route.called
+        assert isinstance(result, Note)
+        assert result.title == "Test Note"
+
+        # Verify request body
+        request = route.calls.last.request
+        import json
+
+        body = json.loads(request.content)
+        assert body["title"] == "Test Note"
+        assert body["content"] == "This is test content"
+
+    async def test_create_note_validation_error(self, vclient):
+        """Verify validation error on invalid data raises RequestValidationError."""
+        # When/Then: Creating with invalid data raises RequestValidationError
+        with pytest.raises(RequestValidationError) as exc_info:
+            await vclient.users.create_note(
+                "company123",
+                "user123",
+                title="AB",  # Too short (min 3 chars)
+                content="Valid content",
+            )
+
+        # Verify error details are accessible
+        assert len(exc_info.value.errors) == 1
+        assert exc_info.value.errors[0]["loc"] == ("title",)
+
+    @respx.mock
+    async def test_create_note_not_found(self, vclient, base_url):
+        """Verify creating note for non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        respx.post(
+            f"{base_url}{Endpoints.USER_NOTES.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Creating raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.create_note(
+                company_id,
+                user_id,
+                title="Test Note",
+                content="Test content",
+            )
+
+
+class TestUsersServiceUpdateNote:
+    """Tests for UsersService.update_note method."""
+
+    @respx.mock
+    async def test_update_note(self, vclient, base_url, note_response_data):
+        """Verify updating a note returns Note object."""
+        # Given: A mocked update endpoint
+        company_id = "company123"
+        user_id = "user123"
+        note_id = "note123"
+        updated_data = {**note_response_data, "title": "Updated Title"}
+        route = respx.patch(
+            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
+        ).respond(200, json=updated_data)
+
+        # When: Updating the note
+        result = await vclient.users.update_note(
+            company_id,
+            user_id,
+            note_id,
+            title="Updated Title",
+        )
+
+        # Then: Returns updated Note object
+        assert route.called
+        assert isinstance(result, Note)
+        assert result.title == "Updated Title"
+
+        # Verify request body
+        request = route.calls.last.request
+        import json
+
+        body = json.loads(request.content)
+        assert body == {"title": "Updated Title"}
+
+    @respx.mock
+    async def test_update_note_content(self, vclient, base_url, note_response_data):
+        """Verify updating note content."""
+        # Given: A mocked update endpoint
+        company_id = "company123"
+        user_id = "user123"
+        note_id = "note123"
+        updated_data = {**note_response_data, "content": "Updated content"}
+        route = respx.patch(
+            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
+        ).respond(200, json=updated_data)
+
+        # When: Updating the note content
+        result = await vclient.users.update_note(
+            company_id,
+            user_id,
+            note_id,
+            content="Updated content",
+        )
+
+        # Then: Returns updated Note object
+        assert route.called
+        assert isinstance(result, Note)
+        assert result.content == "Updated content"
+
+    @respx.mock
+    async def test_update_note_not_found(self, vclient, base_url):
+        """Verify updating non-existent note raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "user123"
+        note_id = "nonexistent"
+        respx.patch(
+            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
+        ).respond(404, json={"detail": "Note not found"})
+
+        # When/Then: Updating raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.update_note(
+                company_id,
+                user_id,
+                note_id,
+                title="New Title",
+            )
+
+
+class TestUsersServiceDeleteNote:
+    """Tests for UsersService.delete_note method."""
+
+    @respx.mock
+    async def test_delete_note(self, vclient, base_url):
+        """Verify deleting a note."""
+        # Given: A mocked delete endpoint
+        company_id = "company123"
+        user_id = "user123"
+        note_id = "note123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
+        ).respond(204)
+
+        # When: Deleting the note
+        result = await vclient.users.delete_note(company_id, user_id, note_id)
+
+        # Then: Request was made and returns None
+        assert route.called
+        assert result is None
+
+    @respx.mock
+    async def test_delete_note_not_found(self, vclient, base_url):
+        """Verify deleting non-existent note raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "user123"
+        note_id = "nonexistent"
+        respx.delete(
+            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
+        ).respond(404, json={"detail": "Note not found"})
+
+        # When/Then: Deleting raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users.delete_note(company_id, user_id, note_id)
+
+    @respx.mock
+    async def test_delete_note_unauthorized(self, vclient, base_url):
+        """Verify deleting note without permission raises AuthorizationError."""
+        # Given: A mocked endpoint returning 403
+        company_id = "company123"
+        user_id = "user123"
+        note_id = "note123"
+        respx.delete(
+            f"{base_url}{Endpoints.USER_NOTE.format(company_id=company_id, user_id=user_id, note_id=note_id)}"
+        ).respond(403, json={"detail": "Not authorized"})
+
+        # When/Then: Deleting raises AuthorizationError
+        with pytest.raises(AuthorizationError):
+            await vclient.users.delete_note(company_id, user_id, note_id)
+
+
 class TestUsersServiceClientIntegration:
     """Tests for VClient.users property."""
 
@@ -869,7 +1262,7 @@ class TestUsersServiceClientIntegration:
         service = vclient.users
 
         # Then: Returns a UsersService instance
-        from vclient.api.services.users import UsersService
+        from vclient.services.users import UsersService
 
         assert isinstance(service, UsersService)
 

@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING, Self
 
 import httpx
 
-from vclient.api.config import APIConfig
-from vclient.api.constants import API_KEY_HEADER
+from vclient.config import APIConfig
+from vclient.constants import API_KEY_HEADER
 
 if TYPE_CHECKING:
-    from vclient.api.services.companies import CompaniesService
-    from vclient.api.services.developers import DeveloperService
-    from vclient.api.services.global_admin import GlobalAdminService
-    from vclient.api.services.system import SystemService
-    from vclient.api.services.users import UsersService
+    from vclient.services.companies import CompaniesService
+    from vclient.services.developers import DeveloperService
+    from vclient.services.global_admin import GlobalAdminService
+    from vclient.services.system import SystemService
+    from vclient.services.users import UsersService
 
 
 class VClient:
@@ -86,7 +86,7 @@ class VClient:
         self._users: UsersService | None = None
 
         if set_as_default:
-            from vclient.api.registry import configure_default_client
+            from vclient.registry import configure_default_client
 
             configure_default_client(self)
 
@@ -137,7 +137,7 @@ class VClient:
             The CompaniesService instance for company operations.
         """
         if self._companies is None:
-            from vclient.api.services.companies import CompaniesService
+            from vclient.services.companies import CompaniesService
 
             self._companies = CompaniesService(self)
         return self._companies
@@ -153,7 +153,7 @@ class VClient:
             The DeveloperService instance for self-service operations.
         """
         if self._developer is None:
-            from vclient.api.services.developers import DeveloperService
+            from vclient.services.developers import DeveloperService
 
             self._developer = DeveloperService(self)
         return self._developer
@@ -169,7 +169,7 @@ class VClient:
             The GlobalAdminService instance for developer management operations.
         """
         if self._global_admin is None:
-            from vclient.api.services.global_admin import GlobalAdminService
+            from vclient.services.global_admin import GlobalAdminService
 
             self._global_admin = GlobalAdminService(self)
         return self._global_admin
@@ -182,7 +182,7 @@ class VClient:
             The SystemService instance for system operations like health checks.
         """
         if self._system is None:
-            from vclient.api.services.system import SystemService
+            from vclient.services.system import SystemService
 
             self._system = SystemService(self)
         return self._system
@@ -198,7 +198,7 @@ class VClient:
             The UsersService instance for user management operations.
         """
         if self._users is None:
-            from vclient.api.services.users import UsersService
+            from vclient.services.users import UsersService
 
             self._users = UsersService(self)
         return self._users

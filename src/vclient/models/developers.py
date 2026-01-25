@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from vclient.api.models.companies import PermissionLevel
+from vclient.models.companies import PermissionLevel
 
 
 class MeDeveloperCompanyPermission(BaseModel):

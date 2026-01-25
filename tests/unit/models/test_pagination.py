@@ -2,7 +2,7 @@
 
 import pytest
 
-from vclient.api.models.pagination import PaginatedResponse
+from vclient.models.pagination import PaginatedResponse
 
 
 class TestPaginatedResponse:

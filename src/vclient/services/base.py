@@ -10,7 +10,7 @@ import httpx
 from pydantic import BaseModel
 from pydantic import ValidationError as PydanticValidationError
 
-from vclient.api.constants import (
+from vclient.constants import (
     DEFAULT_PAGE_LIMIT,
     HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_600_UPPER_BOUND,
@@ -18,7 +18,7 @@ from vclient.api.constants import (
     MAX_PAGE_LIMIT,
     RATE_LIMIT_HEADER,
 )
-from vclient.api.exceptions import (
+from vclient.exceptions import (
     APIError,
     AuthenticationError,
     AuthorizationError,
@@ -29,12 +29,12 @@ from vclient.api.exceptions import (
     ServerError,
     ValidationError,
 )
-from vclient.api.models.pagination import PaginatedResponse
+from vclient.models.pagination import PaginatedResponse
 
 T = TypeVar("T", bound=BaseModel)
 
 if TYPE_CHECKING:
-    from vclient.api.client import VClient
+    from vclient.client import VClient
 
 
 class BaseService:
