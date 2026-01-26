@@ -120,7 +120,8 @@ When enabled, the client automatically generates and includes an `Idempotency-Ke
 | [Developers Service](docs/developers-service.md) | `developer_service()` | Manage your own developer profile |
 | [Global Admin Service](docs/global-admin-service.md) | `global_admin_service()` | Manage developer accounts (requires admin) |
 | [Campaigns Service](docs/campaigns-service.md) | `campaigns_service(company_id, user_id)` | Manage campaigns, assets, and notes |
-| [Campaign Books Service](docs/campaign-books-service.md) | `campaign_books_service(company_id, user_id, campaign_id)` | Manage campaign books, notes, and assets |
+| [Books Service](docs/campaign-books-service.md) | `books_service(company_id, user_id, campaign_id)` | Manage campaign books, notes, and assets |
+| [Chapters Service](docs/campaign-book-chapters-service.md) | `campaign_book_chapters_service(company_id, user_id, campaign_id, book_id)` | Manage campaign book chapters, notes, and assets |
 
 ## Common Service Methods
 

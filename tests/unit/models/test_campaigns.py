@@ -59,14 +59,12 @@ class TestCreateCampaignRequest:
         request = CreateCampaignRequest(
             name="Test Campaign",
             description="A test campaign",
-            asset_ids=["asset1"],
             desperation=2,
             danger=3,
         )
 
         assert request.name == "Test Campaign"
         assert request.description == "A test campaign"
-        assert request.asset_ids == ["asset1"]
         assert request.desperation == 2
         assert request.danger == 3
 
@@ -76,7 +74,6 @@ class TestCreateCampaignRequest:
 
         assert request.name == "Test"
         assert request.description is None
-        assert request.asset_ids == []
         assert request.desperation == 0
         assert request.danger == 0
 
@@ -125,7 +122,6 @@ class TestUpdateCampaignRequest:
 
         assert request.name is None
         assert request.description is None
-        assert request.asset_ids is None
         assert request.desperation is None
         assert request.danger is None
 

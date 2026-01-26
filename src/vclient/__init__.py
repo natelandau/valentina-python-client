@@ -63,7 +63,7 @@ from vclient.models import (
     UserRole,
 )
 from vclient.registry import (
-    campaign_books_service,
+    books_service,
     campaigns_service,
     companies_service,
     configure_default_client,
@@ -74,7 +74,7 @@ from vclient.registry import (
     users_service,
 )
 from vclient.services import (
-    CampaignBooksService,
+    BooksService,
     CampaignsService,
     CompaniesService,
     DeveloperService,
@@ -88,9 +88,9 @@ __all__ = [
     "APIError",
     "AuthenticationError",
     "AuthorizationError",
+    "BooksService",
     "Campaign",
     "CampaignBook",
-    "CampaignBooksService",
     "CampaignExperience",
     "CampaignsService",
     "CompaniesService",
@@ -149,7 +149,7 @@ __all__ = [
     "UsersService",
     "VClient",
     "ValidationError",
-    "campaign_books_service",
+    "books_service",
     "campaigns_service",
     "companies_service",
     "configure_default_client",

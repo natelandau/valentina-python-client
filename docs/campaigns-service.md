@@ -33,8 +33,8 @@ all_campaigns = await campaigns.list_all()
 ### Campaign CRUD
 
 - `get(campaign_id)` - Retrieve a campaign by ID
-- `create(name, description?, asset_ids?, desperation?, danger?)` - Create a new campaign
-- `update(campaign_id, name?, description?, asset_ids?, desperation?, danger?)` - Update a campaign
+- `create(name, description?, desperation?, danger?)` - Create a new campaign
+- `update(campaign_id, name?, description?, desperation?, danger?)` - Update a campaign
 - `delete(campaign_id)` - Delete a campaign
 - `get_page(limit?, offset?)` - Get a paginated page of campaigns
 - `list_all()` - Get all campaigns
@@ -89,13 +89,12 @@ Create a new campaign within the company.
 
 **Parameters:**
 
-| Parameter     | Type               | Description                                |
-| ------------- | ------------------ | ------------------------------------------ |
-| `name`        | `str`              | Campaign name (3-50 characters)            |
-| `description` | `str \| None`      | Optional description (min 3 chars)         |
-| `asset_ids`   | `list[str] \| None`| Optional list of asset IDs to associate    |
-| `desperation` | `int`              | Desperation level (0-5, default 0)         |
-| `danger`      | `int`              | Danger level (0-5, default 0)              |
+| Parameter     | Type          | Description                        |
+| ------------- | ------------- | ---------------------------------- |
+| `name`        | `str`         | Campaign name (3-50 characters)    |
+| `description` | `str \| None` | Optional description (min 3 chars) |
+| `desperation` | `int`         | Desperation level (0-5, default 0) |
+| `danger`      | `int`         | Danger level (0-5, default 0)      |
 
 **Returns:** `Campaign`
 
@@ -117,14 +116,13 @@ Modify a campaign's properties. Only include fields that need to be changed.
 
 **Parameters:**
 
-| Parameter     | Type               | Description                           |
-| ------------- | ------------------ | ------------------------------------- |
-| `campaign_id` | `str`              | The ID of the campaign to update      |
-| `name`        | `str \| None`      | New campaign name (3-50 characters)   |
-| `description` | `str \| None`      | New description (min 3 chars)         |
-| `asset_ids`   | `list[str] \| None`| New list of asset IDs                 |
-| `desperation` | `int \| None`      | New desperation level (0-5)           |
-| `danger`      | `int \| None`      | New danger level (0-5)                |
+| Parameter     | Type          | Description                         |
+| ------------- | ------------- | ----------------------------------- |
+| `campaign_id` | `str`         | The ID of the campaign to update    |
+| `name`        | `str \| None` | New campaign name (3-50 characters) |
+| `description` | `str \| None` | New description (min 3 chars)       |
+| `desperation` | `int \| None` | New desperation level (0-5)         |
+| `danger`      | `int \| None` | New danger level (0-5)              |
 
 **Returns:** `Campaign`
 
@@ -222,17 +220,17 @@ print(f"Created note: {note.title}")
 
 Represents a campaign entity returned from the API.
 
-| Field           | Type           | Description                         |
-| --------------- | -------------- | ----------------------------------- |
-| `id`            | `str`          | MongoDB document ObjectID           |
-| `date_created`  | `datetime`     | Timestamp when the campaign was created |
-| `date_modified` | `datetime`     | Timestamp when the campaign was modified |
-| `name`          | `str`          | Campaign name (3-50 characters)     |
-| `description`   | `str \| None`  | Campaign description                |
-| `asset_ids`     | `list[str]`    | List of associated asset IDs        |
-| `desperation`   | `int`          | Desperation level (0-5)             |
-| `danger`        | `int`          | Danger level (0-5)                  |
-| `company_id`    | `str`          | ID of the company                   |
+| Field           | Type          | Description                              |
+| --------------- | ------------- | ---------------------------------------- |
+| `id`            | `str`         | MongoDB document ObjectID                |
+| `date_created`  | `datetime`    | Timestamp when the campaign was created  |
+| `date_modified` | `datetime`    | Timestamp when the campaign was modified |
+| `name`          | `str`         | Campaign name (3-50 characters)          |
+| `description`   | `str \| None` | Campaign description                     |
+| `asset_ids`     | `list[str]`   | List of associated asset IDs             |
+| `desperation`   | `int`         | Desperation level (0-5)                  |
+| `danger`        | `int`         | Danger level (0-5)                       |
+| `company_id`    | `str`         | ID of the company                        |
 
 ### `RollStatistics`
 

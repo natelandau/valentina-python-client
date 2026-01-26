@@ -11,7 +11,7 @@ from vclient import VClient
 
 async with VClient(base_url="...", api_key="...") as client:
     # Get a campaign books service scoped to a company, user, and campaign
-    books = client.campaign_books("company_id", "user_id", "campaign_id")
+    books = client.books("company_id", "user_id", "campaign_id")
 
     # All operations use this context
     all_books = await books.list_all()
@@ -21,10 +21,10 @@ async with VClient(base_url="...", api_key="...") as client:
 Or using the factory function:
 
 ```python
-from vclient import campaign_books_service
+from vclient import books_service
 
 # Requires a default client to be configured
-books = campaign_books_service("company_id", "user_id", "campaign_id")
+books = books_service("company_id", "user_id", "campaign_id")
 all_books = await books.list_all()
 ```
 
@@ -33,8 +33,8 @@ all_books = await books.list_all()
 ### Book CRUD
 
 - `get(book_id)` - Retrieve a book by ID
-- `create(name, description?, asset_ids?)` - Create a new book
-- `update(book_id, name?, description?, asset_ids?)` - Update a book
+- `create(name, description?)` - Create a new book
+- `update(book_id, name?, description?)` - Update a book
 - `delete(book_id)` - Delete a book
 - `renumber(book_id, number)` - Change a book's position number
 - `get_page(limit?, offset?)` - Get a paginated page of books
@@ -86,11 +86,10 @@ Create a new campaign book within the campaign.
 
 **Parameters:**
 
-| Parameter     | Type               | Description                             |
-| ------------- | ------------------ | --------------------------------------- |
-| `name`        | `str`              | Book name (3-50 characters)             |
-| `description` | `str \| None`      | Optional description (min 3 chars)      |
-| `asset_ids`   | `list[str] \| None`| Optional list of asset IDs to associate |
+| Parameter     | Type          | Description                        |
+| ------------- | ------------- | ---------------------------------- |
+| `name`        | `str`         | Book name (3-50 characters)        |
+| `description` | `str \| None` | Optional description (min 3 chars) |
 
 **Returns:** `CampaignBook`
 
@@ -110,12 +109,11 @@ Modify a campaign book's properties. Only include fields that need to be changed
 
 **Parameters:**
 
-| Parameter     | Type               | Description                        |
-| ------------- | ------------------ | ---------------------------------- |
-| `book_id`     | `str`              | The ID of the book to update       |
-| `name`        | `str \| None`      | New book name (3-50 characters)    |
-| `description` | `str \| None`      | New description (min 3 chars)      |
-| `asset_ids`   | `list[str] \| None`| New list of asset IDs              |
+| Parameter     | Type          | Description                     |
+| ------------- | ------------- | ------------------------------- |
+| `book_id`     | `str`         | The ID of the book to update    |
+| `name`        | `str \| None` | New book name (3-50 characters) |
+| `description` | `str \| None` | New description (min 3 chars)   |
 
 **Returns:** `CampaignBook`
 
@@ -137,9 +135,9 @@ Change the book's position number within the campaign.
 
 **Parameters:**
 
-| Parameter | Type  | Description                 |
-| --------- | ----- | --------------------------- |
-| `book_id` | `str` | The ID of the book          |
+| Parameter | Type  | Description                    |
+| --------- | ----- | ------------------------------ |
+| `book_id` | `str` | The ID of the book             |
 | `number`  | `int` | New book number (must be >= 1) |
 
 **Returns:** `CampaignBook`
@@ -212,16 +210,16 @@ print(f"Created note: {note.title}")
 
 Represents a campaign book entity returned from the API.
 
-| Field           | Type          | Description                             |
-| --------------- | ------------- | --------------------------------------- |
-| `id`            | `str \| None` | MongoDB document ObjectID               |
-| `date_created`  | `datetime`    | Timestamp when the book was created     |
-| `date_modified` | `datetime`    | Timestamp when the book was modified    |
-| `name`          | `str`         | Book name (3-50 characters)             |
-| `description`   | `str \| None` | Book description                        |
-| `asset_ids`     | `list[str]`   | List of associated asset IDs            |
-| `number`        | `int`         | Book number within the campaign         |
-| `campaign_id`   | `str`         | ID of the parent campaign               |
+| Field           | Type          | Description                          |
+| --------------- | ------------- | ------------------------------------ |
+| `id`            | `str \| None` | MongoDB document ObjectID            |
+| `date_created`  | `datetime`    | Timestamp when the book was created  |
+| `date_modified` | `datetime`    | Timestamp when the book was modified |
+| `name`          | `str`         | Book name (3-50 characters)          |
+| `description`   | `str \| None` | Book description                     |
+| `asset_ids`     | `list[str]`   | List of associated asset IDs         |
+| `number`        | `int`         | Book number within the campaign      |
+| `campaign_id`   | `str`         | ID of the parent campaign            |
 
 ### `S3Asset`
 
@@ -257,7 +255,7 @@ from vclient import VClient
 
 async with VClient(base_url="...", api_key="...") as client:
     # Get campaign books service for a specific context
-    books = client.campaign_books("company_id", "user_id", "campaign_id")
+    books = client.books("company_id", "user_id", "campaign_id")
 
     # List all books
     all_books = await books.list_all()

@@ -65,8 +65,8 @@ def note_response_data() -> dict:
     }
 
 
-class TestCampaignBooksServiceGetPage:
-    """Tests for CampaignBooksService.get_page method."""
+class TestBooksServiceGetPage:
+    """Tests for BooksService.get_page method."""
 
     @respx.mock
     async def test_get_page_books(self, vclient, base_url, paginated_books_response):
@@ -81,7 +81,7 @@ class TestCampaignBooksServiceGetPage:
         ).respond(200, json=paginated_books_response)
 
         # When: Getting a page of books
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).get_page()
+        result = await vclient.books(company_id, user_id, campaign_id).get_page()
 
         # Then: Returns PaginatedResponse with CampaignBook objects
         assert route.called
@@ -112,9 +112,7 @@ class TestCampaignBooksServiceGetPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).get_page(
-            limit=25, offset=50
-        )
+        result = await vclient.books(company_id, user_id, campaign_id).get_page(limit=25, offset=50)
 
         # Then: Request was made with correct params
         assert route.called
@@ -122,8 +120,8 @@ class TestCampaignBooksServiceGetPage:
         assert result.offset == 50
 
 
-class TestCampaignBooksServiceListAll:
-    """Tests for CampaignBooksService.list_all method."""
+class TestBooksServiceListAll:
+    """Tests for BooksService.list_all method."""
 
     @respx.mock
     async def test_list_all_books(self, vclient, base_url, book_response_data):
@@ -146,7 +144,7 @@ class TestCampaignBooksServiceListAll:
         )
 
         # When: Calling list_all
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).list_all()
+        result = await vclient.books(company_id, user_id, campaign_id).list_all()
 
         # Then: Returns list of CampaignBook objects
         assert isinstance(result, list)
@@ -154,8 +152,8 @@ class TestCampaignBooksServiceListAll:
         assert isinstance(result[0], CampaignBook)
 
 
-class TestCampaignBooksServiceIterAll:
-    """Tests for CampaignBooksService.iter_all method."""
+class TestBooksServiceIterAll:
+    """Tests for BooksService.iter_all method."""
 
     @respx.mock
     async def test_iter_all_books(self, vclient, base_url, book_response_data):
@@ -196,12 +194,7 @@ class TestCampaignBooksServiceIterAll:
         )
 
         # When: Iterating through all books
-        books = [
-            b
-            async for b in vclient.campaign_books(company_id, user_id, campaign_id).iter_all(
-                limit=1
-            )
-        ]
+        books = [b async for b in vclient.books(company_id, user_id, campaign_id).iter_all(limit=1)]
 
         # Then: All books are yielded as CampaignBook objects
         assert len(books) == 2
@@ -210,8 +203,8 @@ class TestCampaignBooksServiceIterAll:
         assert books[1].name == "Book 2"
 
 
-class TestCampaignBooksServiceGet:
-    """Tests for CampaignBooksService.get method."""
+class TestBooksServiceGet:
+    """Tests for BooksService.get method."""
 
     @respx.mock
     async def test_get_book(self, vclient, base_url, book_response_data):
@@ -226,7 +219,7 @@ class TestCampaignBooksServiceGet:
         ).respond(200, json=book_response_data)
 
         # When: Getting the book
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).get(book_id)
+        result = await vclient.books(company_id, user_id, campaign_id).get(book_id)
 
         # Then: Returns CampaignBook object with correct data
         assert route.called
@@ -249,11 +242,11 @@ class TestCampaignBooksServiceGet:
 
         # When/Then: Getting the book raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.campaign_books(company_id, user_id, campaign_id).get(book_id)
+            await vclient.books(company_id, user_id, campaign_id).get(book_id)
 
 
-class TestCampaignBooksServiceCreate:
-    """Tests for CampaignBooksService.create method."""
+class TestBooksServiceCreate:
+    """Tests for BooksService.create method."""
 
     @respx.mock
     async def test_create_book_minimal(self, vclient, base_url, book_response_data):
@@ -267,9 +260,7 @@ class TestCampaignBooksServiceCreate:
         ).respond(201, json=book_response_data)
 
         # When: Creating a book with minimal data
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).create(
-            name="Test Book"
-        )
+        result = await vclient.books(company_id, user_id, campaign_id).create(name="Test Book")
 
         # Then: Returns created CampaignBook object
         assert route.called
@@ -295,10 +286,9 @@ class TestCampaignBooksServiceCreate:
         ).respond(201, json=book_response_data)
 
         # When: Creating a book with all fields
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).create(
+        result = await vclient.books(company_id, user_id, campaign_id).create(
             name="Test Book",
             description="A test book description",
-            asset_ids=["asset1", "asset2"],
         )
 
         # Then: Returns created CampaignBook object
@@ -312,17 +302,16 @@ class TestCampaignBooksServiceCreate:
         body = json.loads(request.content)
         assert body["name"] == "Test Book"
         assert body["description"] == "A test book description"
-        assert body["asset_ids"] == ["asset1", "asset2"]
 
     async def test_create_book_validation_error(self, vclient):
         """Verify validation error on invalid data raises RequestValidationError."""
         # When/Then: Creating with invalid data raises RequestValidationError
         with pytest.raises(RequestValidationError):
-            await vclient.campaign_books("company123", "user123", "campaign123").create(name="AB")
+            await vclient.books("company123", "user123", "campaign123").create(name="AB")
 
 
-class TestCampaignBooksServiceUpdate:
-    """Tests for CampaignBooksService.update method."""
+class TestBooksServiceUpdate:
+    """Tests for BooksService.update method."""
 
     @respx.mock
     async def test_update_book_name(self, vclient, base_url, book_response_data):
@@ -338,7 +327,7 @@ class TestCampaignBooksServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating the book name
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).update(
+        result = await vclient.books(company_id, user_id, campaign_id).update(
             book_id, name="Updated Name"
         )
 
@@ -368,13 +357,11 @@ class TestCampaignBooksServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.campaign_books(company_id, user_id, campaign_id).update(
-                book_id, name="New Name"
-            )
+            await vclient.books(company_id, user_id, campaign_id).update(book_id, name="New Name")
 
 
-class TestCampaignBooksServiceDelete:
-    """Tests for CampaignBooksService.delete method."""
+class TestBooksServiceDelete:
+    """Tests for BooksService.delete method."""
 
     @respx.mock
     async def test_delete_book(self, vclient, base_url):
@@ -389,7 +376,7 @@ class TestCampaignBooksServiceDelete:
         ).respond(204)
 
         # When: Deleting the book
-        await vclient.campaign_books(company_id, user_id, campaign_id).delete(book_id)
+        await vclient.books(company_id, user_id, campaign_id).delete(book_id)
 
         # Then: Request was made
         assert route.called
@@ -408,11 +395,11 @@ class TestCampaignBooksServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.campaign_books(company_id, user_id, campaign_id).delete(book_id)
+            await vclient.books(company_id, user_id, campaign_id).delete(book_id)
 
 
-class TestCampaignBooksServiceRenumber:
-    """Tests for CampaignBooksService.renumber method."""
+class TestBooksServiceRenumber:
+    """Tests for BooksService.renumber method."""
 
     @respx.mock
     async def test_renumber_book(self, vclient, base_url, book_response_data):
@@ -428,9 +415,7 @@ class TestCampaignBooksServiceRenumber:
         ).respond(200, json=updated_data)
 
         # When: Renumbering the book
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).renumber(
-            book_id, number=3
-        )
+        result = await vclient.books(company_id, user_id, campaign_id).renumber(book_id, number=3)
 
         # Then: Returns updated CampaignBook object
         assert route.called
@@ -448,13 +433,13 @@ class TestCampaignBooksServiceRenumber:
         """Verify validation error on invalid number raises RequestValidationError."""
         # When/Then: Renumbering with invalid number raises RequestValidationError
         with pytest.raises(RequestValidationError):
-            await vclient.campaign_books("company123", "user123", "campaign123").renumber(
+            await vclient.books("company123", "user123", "campaign123").renumber(
                 "book_id", number=0
             )
 
 
-class TestCampaignBooksServiceNotes:
-    """Tests for CampaignBooksService note methods."""
+class TestBooksServiceNotes:
+    """Tests for BooksService note methods."""
 
     @respx.mock
     async def test_get_notes_page(self, vclient, base_url, note_response_data):
@@ -478,9 +463,7 @@ class TestCampaignBooksServiceNotes:
         )
 
         # When: Getting a page of notes
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).get_notes_page(
-            book_id
-        )
+        result = await vclient.books(company_id, user_id, campaign_id).get_notes_page(book_id)
 
         # Then: Returns paginated Note objects
         assert route.called
@@ -510,9 +493,7 @@ class TestCampaignBooksServiceNotes:
         )
 
         # When: Calling list_all_notes
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).list_all_notes(
-            book_id
-        )
+        result = await vclient.books(company_id, user_id, campaign_id).list_all_notes(book_id)
 
         # Then: Returns list of Note objects
         assert isinstance(result, list)
@@ -533,9 +514,7 @@ class TestCampaignBooksServiceNotes:
         ).respond(200, json=note_response_data)
 
         # When: Getting the note
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).get_note(
-            book_id, note_id
-        )
+        result = await vclient.books(company_id, user_id, campaign_id).get_note(book_id, note_id)
 
         # Then: Returns Note object
         assert route.called
@@ -556,7 +535,7 @@ class TestCampaignBooksServiceNotes:
         ).respond(201, json=note_response_data)
 
         # When: Creating a note
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).create_note(
+        result = await vclient.books(company_id, user_id, campaign_id).create_note(
             book_id, title="Test Note", content="This is test content"
         )
 
@@ -580,7 +559,7 @@ class TestCampaignBooksServiceNotes:
         ).respond(200, json=updated_data)
 
         # When: Updating the note
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).update_note(
+        result = await vclient.books(company_id, user_id, campaign_id).update_note(
             book_id, note_id, title="Updated Title"
         )
 
@@ -603,14 +582,14 @@ class TestCampaignBooksServiceNotes:
         ).respond(204)
 
         # When: Deleting the note
-        await vclient.campaign_books(company_id, user_id, campaign_id).delete_note(book_id, note_id)
+        await vclient.books(company_id, user_id, campaign_id).delete_note(book_id, note_id)
 
         # Then: Request was made
         assert route.called
 
 
-class TestCampaignBooksServiceAssets:
-    """Tests for CampaignBooksService asset methods."""
+class TestBooksServiceAssets:
+    """Tests for BooksService asset methods."""
 
     @respx.mock
     async def test_list_assets(self, vclient, base_url, asset_response_data):
@@ -634,7 +613,7 @@ class TestCampaignBooksServiceAssets:
         )
 
         # When: Listing assets
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).list_assets(book_id)
+        result = await vclient.books(company_id, user_id, campaign_id).list_assets(book_id)
 
         # Then: Returns paginated S3Asset objects
         assert route.called
@@ -656,9 +635,7 @@ class TestCampaignBooksServiceAssets:
         ).respond(200, json=asset_response_data)
 
         # When: Getting the asset
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).get_asset(
-            book_id, asset_id
-        )
+        result = await vclient.books(company_id, user_id, campaign_id).get_asset(book_id, asset_id)
 
         # Then: Returns S3Asset object
         assert route.called
@@ -679,9 +656,7 @@ class TestCampaignBooksServiceAssets:
         ).respond(204)
 
         # When: Deleting the asset
-        await vclient.campaign_books(company_id, user_id, campaign_id).delete_asset(
-            book_id, asset_id
-        )
+        await vclient.books(company_id, user_id, campaign_id).delete_asset(book_id, asset_id)
 
         # Then: Request was made
         assert route.called
@@ -699,7 +674,7 @@ class TestCampaignBooksServiceAssets:
         ).respond(201, json=asset_response_data)
 
         # When: Uploading an asset
-        result = await vclient.campaign_books(company_id, user_id, campaign_id).upload_asset(
+        result = await vclient.books(company_id, user_id, campaign_id).upload_asset(
             book_id,
             filename="test.png",
             content=b"test content",

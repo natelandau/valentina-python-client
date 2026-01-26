@@ -40,7 +40,6 @@ class CreateCampaignRequest(BaseModel):
 
     name: str = Field(min_length=3, max_length=50)
     description: str | None = Field(default=None, min_length=3)
-    asset_ids: list[str] = Field(default_factory=list)
     desperation: int = Field(default=0, ge=0, le=5)
     danger: int = Field(default=0, ge=0, le=5)
 
@@ -53,6 +52,5 @@ class UpdateCampaignRequest(BaseModel):
 
     name: str | None = Field(default=None, min_length=3, max_length=50)
     description: str | None = Field(default=None, min_length=3)
-    asset_ids: list[str] | None = None
     desperation: int | None = Field(default=None, ge=0, le=5)
     danger: int | None = Field(default=None, ge=0, le=5)

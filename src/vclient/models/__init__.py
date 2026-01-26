@@ -11,6 +11,12 @@ from .campaigns import (
     CreateCampaignRequest,
     UpdateCampaignRequest,
 )
+from .chapters import (
+    CampaignChapter,
+    CreateChapterRequest,
+    RenumberChapterRequest,
+    UpdateChapterRequest,
+)
 from .companies import (
     Company,
     CompanyPermissions,
@@ -63,12 +69,14 @@ from .users import (
 __all__ = [
     "Campaign",
     "CampaignBook",
+    "CampaignChapter",
     "CampaignExperience",
     "Company",
     "CompanyPermissions",
     "CompanySettings",
     "CreateBookRequest",
     "CreateCampaignRequest",
+    "CreateChapterRequest",
     "CreateCompanyRequest",
     "CreateDeveloperRequest",
     "CreateNoteRequest",
@@ -91,6 +99,7 @@ __all__ = [
     "PermissionLevel",
     "Quickroll",
     "RenumberBookRequest",
+    "RenumberChapterRequest",
     "RollStatistics",
     "S3Asset",
     "S3AssetParentType",
@@ -99,6 +108,7 @@ __all__ = [
     "SystemHealth",
     "UpdateBookRequest",
     "UpdateCampaignRequest",
+    "UpdateChapterRequest",
     "UpdateCompanyRequest",
     "UpdateDeveloperRequest",
     "UpdateMeDeveloperRequest",

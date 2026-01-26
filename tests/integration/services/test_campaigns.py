@@ -301,7 +301,6 @@ class TestCampaignsServiceCreate:
         result = await vclient.campaigns(company_id, user_id).create(
             name="Test Campaign",
             description="A test campaign description",
-            asset_ids=["asset1", "asset2"],
             desperation=2,
             danger=3,
         )
@@ -317,7 +316,6 @@ class TestCampaignsServiceCreate:
         body = json.loads(request.content)
         assert body["name"] == "Test Campaign"
         assert body["description"] == "A test campaign description"
-        assert body["asset_ids"] == ["asset1", "asset2"]
         assert body["desperation"] == 2
         assert body["danger"] == 3
 

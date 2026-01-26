@@ -94,3 +94,17 @@ class Endpoints:
     BOOK_ASSETS = f"{CAMPAIGN_BOOK}/assets"
     BOOK_ASSET_UPLOAD = f"{BOOK_ASSETS}/upload"
     BOOK_ASSET = f"{BOOK_ASSETS}/{{asset_id}}"
+
+    # Book chapter endpoints
+    BOOK_CHAPTERS = f"{CAMPAIGN_BOOK}/chapters"
+    BOOK_CHAPTER = f"{BOOK_CHAPTERS}/{{chapter_id}}"
+    BOOK_CHAPTER_NUMBER = f"{BOOK_CHAPTER}/number"
+
+    # Book chapter note endpoints
+    BOOK_CHAPTER_NOTES = f"{BOOK_CHAPTER}/notes"
+    BOOK_CHAPTER_NOTE = f"{BOOK_CHAPTER_NOTES}/{{note_id}}"
+
+    # Book chapter asset endpoints
+    BOOK_CHAPTER_ASSETS = f"{BOOK_CHAPTER}/assets"
+    BOOK_CHAPTER_ASSET_UPLOAD = f"{BOOK_CHAPTER_ASSETS}/upload"
+    BOOK_CHAPTER_ASSET = f"{BOOK_CHAPTER_ASSETS}/{{asset_id}}"

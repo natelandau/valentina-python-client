@@ -148,7 +148,6 @@ class CampaignsService(BaseService):
         name: str,
         *,
         description: str | None = None,
-        asset_ids: list[str] | None = None,
         desperation: int = 0,
         danger: int = 0,
     ) -> Campaign:
@@ -157,7 +156,6 @@ class CampaignsService(BaseService):
         Args:
             name: Campaign name (3-50 characters).
             description: Optional campaign description (minimum 3 characters).
-            asset_ids: Optional list of asset IDs to associate.
             desperation: Desperation level (0-5, default 0).
             danger: Danger level (0-5, default 0).
 
@@ -173,7 +171,6 @@ class CampaignsService(BaseService):
             CreateCampaignRequest,
             name=name,
             description=description,
-            asset_ids=asset_ids if asset_ids is not None else [],
             desperation=desperation,
             danger=danger,
         )
@@ -189,7 +186,6 @@ class CampaignsService(BaseService):
         *,
         name: str | None = None,
         description: str | None = None,
-        asset_ids: list[str] | None = None,
         desperation: int | None = None,
         danger: int | None = None,
     ) -> Campaign:
@@ -201,7 +197,6 @@ class CampaignsService(BaseService):
             campaign_id: The ID of the campaign to update.
             name: New campaign name (3-50 characters).
             description: New campaign description (minimum 3 characters).
-            asset_ids: New list of asset IDs to associate.
             desperation: New desperation level (0-5).
             danger: New danger level (0-5).
 
@@ -218,7 +213,6 @@ class CampaignsService(BaseService):
             UpdateCampaignRequest,
             name=name,
             description=description,
-            asset_ids=asset_ids,
             desperation=desperation,
             danger=danger,
         )

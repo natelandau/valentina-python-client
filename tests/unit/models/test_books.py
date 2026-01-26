@@ -57,12 +57,10 @@ class TestCreateBookRequest:
         request = CreateBookRequest(
             name="Test Book",
             description="A test book",
-            asset_ids=["asset1"],
         )
 
         assert request.name == "Test Book"
         assert request.description == "A test book"
-        assert request.asset_ids == ["asset1"]
 
     def test_minimal_request(self):
         """Verify minimal valid request with defaults."""
@@ -70,7 +68,6 @@ class TestCreateBookRequest:
 
         assert request.name == "Test"
         assert request.description is None
-        assert request.asset_ids == []
 
     def test_name_min_length(self):
         """Verify name minimum length validation."""
@@ -97,7 +94,6 @@ class TestUpdateBookRequest:
 
         assert request.name is None
         assert request.description is None
-        assert request.asset_ids is None
 
     def test_partial_update(self):
         """Verify partial update works."""
@@ -105,7 +101,6 @@ class TestUpdateBookRequest:
 
         assert request.name == "New Name"
         assert request.description is None
-        assert request.asset_ids is None
 
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""

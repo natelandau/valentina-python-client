@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from vclient.client import VClient
 
 
-class CampaignBooksService(BaseService):
+class BooksService(BaseService):
     """Service for managing campaign books within a campaign in the Valentina API.
 
     This service is scoped to a specific company, user, and campaign at initialization time.
@@ -35,7 +35,7 @@ class CampaignBooksService(BaseService):
 
     Example:
         >>> async with VClient() as client:
-        ...     books = client.campaign_books("company_id", "user_id", "campaign_id")
+        ...     books = client.books("company_id", "user_id", "campaign_id")
         ...     all_books = await books.list_all()
         ...     book = await books.get("book_id")
     """
@@ -149,14 +149,12 @@ class CampaignBooksService(BaseService):
         name: str,
         *,
         description: str | None = None,
-        asset_ids: list[str] | None = None,
     ) -> CampaignBook:
         """Create a new campaign book.
 
         Args:
             name: Book name (3-50 characters).
             description: Optional book description (minimum 3 characters).
-            asset_ids: Optional list of asset IDs to associate.
 
         Returns:
             The newly created CampaignBook object.
@@ -170,7 +168,6 @@ class CampaignBooksService(BaseService):
             CreateBookRequest,
             name=name,
             description=description,
-            asset_ids=asset_ids if asset_ids is not None else [],
         )
         response = await self._post(
             self._format_endpoint(Endpoints.CAMPAIGN_BOOKS),
@@ -184,7 +181,6 @@ class CampaignBooksService(BaseService):
         *,
         name: str | None = None,
         description: str | None = None,
-        asset_ids: list[str] | None = None,
     ) -> CampaignBook:
         """Modify a campaign book's properties.
 
@@ -194,7 +190,6 @@ class CampaignBooksService(BaseService):
             book_id: The ID of the book to update.
             name: New book name (3-50 characters).
             description: New book description (minimum 3 characters).
-            asset_ids: New list of asset IDs to associate.
 
         Returns:
             The updated CampaignBook object.
@@ -209,7 +204,6 @@ class CampaignBooksService(BaseService):
             UpdateBookRequest,
             name=name,
             description=description,
-            asset_ids=asset_ids,
         )
         response = await self._patch(
             self._format_endpoint(Endpoints.CAMPAIGN_BOOK, book_id=book_id),

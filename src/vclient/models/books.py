@@ -31,9 +31,6 @@ class CreateBookRequest(BaseModel):
     description: str | None = Field(
         default=None, min_length=3, description="Book description (minimum 3 characters)."
     )
-    asset_ids: list[str] = Field(
-        default_factory=list, description="List of asset IDs to associate."
-    )
 
 
 class UpdateBookRequest(BaseModel):
@@ -47,9 +44,6 @@ class UpdateBookRequest(BaseModel):
     )
     description: str | None = Field(
         default=None, min_length=3, description="New book description (minimum 3 characters)."
-    )
-    asset_ids: list[str] | None = Field(
-        default=None, description="New list of asset IDs to associate."
     )
 
 

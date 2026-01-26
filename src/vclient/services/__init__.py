@@ -1,7 +1,8 @@
 """API services for interacting with specific endpoints."""
 
 from .base import BaseService
-from .campaign_books import CampaignBooksService
+from .campaign_book_chapters import ChaptersService
+from .campaign_books import BooksService
 from .campaigns import CampaignsService
 from .companies import CompaniesService
 from .developers import DeveloperService
@@ -11,8 +12,9 @@ from .users import UsersService
 
 __all__ = [
     "BaseService",
-    "CampaignBooksService",
+    "BooksService",
     "CampaignsService",
+    "ChaptersService",
     "CompaniesService",
     "DeveloperService",
     "GlobalAdminService",
