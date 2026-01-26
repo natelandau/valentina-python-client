@@ -1,0 +1,924 @@
+"""Integration tests for CharactersService."""
+
+from datetime import UTC, datetime
+
+import pytest
+import respx
+from httpx import Response
+
+from vclient.endpoints import Endpoints
+from vclient.exceptions import NotFoundError
+from vclient.models.characters import Character, CharacterInventoryItem
+from vclient.models.pagination import PaginatedResponse
+from vclient.models.shared import Note, RollStatistics, S3Asset
+
+pytestmark = pytest.mark.anyio
+
+
+@pytest.fixture
+def character_response_data() -> dict:
+    """Return sample character response data."""
+    return {
+        "id": "char123",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "date_killed": None,
+        "character_class": "VAMPIRE",
+        "type": "PLAYER",
+        "game_version": "V5",
+        "status": "ALIVE",
+        "starting_points": 0,
+        "name_first": "John",
+        "name_last": "Doe",
+        "name_nick": "Johnny",
+        "name": "Johnny",
+        "name_full": "John Doe",
+        "age": 35,
+        "biography": "A mysterious vampire.",
+        "demeanor": "Friendly",
+        "nature": "Warrior",
+        "concept_id": "concept123",
+        "user_creator_id": "user123",
+        "user_player_id": "user456",
+        "company_id": "company123",
+        "campaign_id": "campaign123",
+        "asset_ids": ["asset1", "asset2"],
+        "character_trait_ids": ["trait1", "trait2"],
+        "specialties": [{"id": "spec1", "name": "Brawl: Kindred", "trait_id": "trait1"}],
+        "vampire_attributes": {
+            "clan_id": "clan123",
+            "clan_name": "Ventrue",
+            "generation": 10,
+            "sire": "Ancient One",
+            "bane": {"name": "Rarefied Tastes", "description": "Feeds only on specific blood"},
+            "compulsion": None,
+        },
+        "werewolf_attributes": None,
+        "mage_attributes": None,
+        "hunter_attributes": None,
+    }
+
+
+@pytest.fixture
+def paginated_character_response(character_response_data: dict) -> dict:
+    """Return a paginated response with characters."""
+    return {
+        "items": [character_response_data],
+        "limit": 10,
+        "offset": 0,
+        "total": 1,
+    }
+
+
+@pytest.fixture
+def statistics_response_data() -> dict:
+    """Return sample statistics response data."""
+    return {
+        "botches": 5,
+        "successes": 50,
+        "failures": 30,
+        "criticals": 15,
+        "total_rolls": 100,
+        "average_difficulty": 6.5,
+        "average_pool": 4.2,
+        "top_traits": [{"name": "Strength", "count": 20}],
+        "criticals_percentage": 15.0,
+        "success_percentage": 50.0,
+        "failure_percentage": 30.0,
+        "botch_percentage": 5.0,
+    }
+
+
+@pytest.fixture
+def asset_response_data() -> dict:
+    """Return sample asset response data."""
+    return {
+        "id": "asset123",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "file_type": "image",
+        "original_filename": "character.png",
+        "public_url": "https://example.com/character.png",
+        "uploaded_by": "user123",
+        "parent_type": "character",
+    }
+
+
+@pytest.fixture
+def note_response_data() -> dict:
+    """Return sample note response data."""
+    return {
+        "id": "note123",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "title": "Test Note",
+        "content": "This is test content",
+    }
+
+
+@pytest.fixture
+def inventory_item_response_data() -> dict:
+    """Return sample inventory item response data."""
+    return {
+        "id": "item123",
+        "character_id": "char123",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "name": "Test Item",
+        "type": "BOOK",
+        "description": "This is test content",
+    }
+
+
+class TestCharactersServiceGetPage:
+    """Tests for CharactersService.get_page method."""
+
+    @respx.mock
+    async def test_get_page(self, vclient, base_url, paginated_character_response) -> None:
+        """Verify getting a page of characters returns paginated response."""
+        # Given: A mocked characters list endpoint
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(200, json=paginated_character_response))
+
+        # When: Requesting a page of characters
+        result = await vclient.characters("company123", "user123", "campaign123").get_page()
+
+        # Then: The route was called and response is paginated
+        assert route.called
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], Character)
+        assert result.items[0].name_first == "John"
+        assert result.total == 1
+
+    @respx.mock
+    async def test_get_page_with_filters(
+        self, vclient, base_url, paginated_character_response
+    ) -> None:
+        """Verify get_page passes filter parameters correctly."""
+        # Given: A mocked endpoint expecting filter params
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}",
+            params={
+                "limit": "10",
+                "offset": "0",
+                "character_class": "VAMPIRE",
+                "status": "ALIVE",
+            },
+        ).mock(return_value=Response(200, json=paginated_character_response))
+
+        # When: Requesting with filters
+        result = await vclient.characters("company123", "user123", "campaign123").get_page(
+            character_class="VAMPIRE", status="ALIVE"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+
+class TestCharactersServiceGet:
+    """Tests for CharactersService.get method."""
+
+    @respx.mock
+    async def test_get_character(self, vclient, base_url, character_response_data) -> None:
+        """Verify getting a character returns Character object."""
+        # Given: A mocked character endpoint
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=character_response_data))
+
+        # When: Requesting a character
+        result = await vclient.characters("company123", "user123", "campaign123").get("char123")
+
+        # Then: The route was called and character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.id == "char123"
+        assert result.name_first == "John"
+        assert result.name_last == "Doe"
+        assert result.character_class == "VAMPIRE"
+        assert result.game_version == "V5"
+
+    @respx.mock
+    async def test_get_character_not_found(self, vclient, base_url) -> None:
+        """Verify getting a non-existent character raises NotFoundError."""
+        # Given: A mocked 404 response
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='nonexistent')}"
+        ).mock(
+            return_value=Response(404, json={"detail": "Character not found", "status_code": 404})
+        )
+
+        # When/Then: Requesting raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.characters("company123", "user123", "campaign123").get("nonexistent")
+
+        assert route.called
+
+
+class TestCharactersServiceCreate:
+    """Tests for CharactersService.create method."""
+
+    @respx.mock
+    async def test_create_character_minimal(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify creating a character with minimal fields."""
+        # Given: A mocked create endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(201, json=character_response_data))
+
+        # When: Creating a character with required fields only
+        result = await vclient.characters("company123", "user123", "campaign123").create(
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+        )
+
+        # Then: The route was called and character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.name_first == "John"
+
+        # Verify request body
+        request = route.calls[0].request
+        import json
+
+        body = json.loads(request.content)
+        assert body["character_class"] == "VAMPIRE"
+        assert body["game_version"] == "V5"
+        assert body["name_first"] == "John"
+        assert body["name_last"] == "Doe"
+
+    @respx.mock
+    async def test_create_character_with_all_options(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify creating a character with all optional fields."""
+        # Given: A mocked create endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(201, json=character_response_data))
+
+        # When: Creating a character with all fields
+        result = await vclient.characters("company123", "user123", "campaign123").create(
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            character_type="NPC",
+            name_nick="Johnny",
+            age=35,
+            biography="A mysterious vampire.",
+            demeanor="Friendly",
+            nature="Warrior",
+            concept_id="concept123",
+            user_player_id="user456",
+            asset_ids=["asset1", "asset2"],
+        )
+
+        # Then: The route was called and character is returned
+        assert route.called
+        assert isinstance(result, Character)
+
+        # Verify request body includes optional fields
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert body["type"] == "NPC"
+        assert body["name_nick"] == "Johnny"
+        assert body["age"] == 35
+        assert body["biography"] == "A mysterious vampire."
+
+
+class TestCharactersServiceUpdate:
+    """Tests for CharactersService.update method."""
+
+    @respx.mock
+    async def test_update_character_name(self, vclient, base_url, character_response_data) -> None:
+        """Verify updating a character's name."""
+        # Given: A mocked update endpoint
+        updated_data = {**character_response_data, "name_first": "Jane"}
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=updated_data))
+
+        # When: Updating the character's name
+        result = await vclient.characters("company123", "user123", "campaign123").update(
+            "char123", name_first="Jane"
+        )
+
+        # Then: The route was called and updated character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.name_first == "Jane"
+
+        # Verify only name_first was in request body
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert body == {"name_first": "Jane"}
+
+    @respx.mock
+    async def test_update_character_status(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify updating a character's status to dead."""
+        # Given: A mocked update endpoint
+        updated_data = {
+            **character_response_data,
+            "status": "DEAD",
+            "date_killed": "2024-06-15T10:00:00Z",
+        }
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=updated_data))
+
+        # When: Updating the character's status
+        result = await vclient.characters("company123", "user123", "campaign123").update(
+            "char123", status="DEAD"
+        )
+
+        # Then: The route was called and updated character is returned
+        assert route.called
+        assert result.status == "DEAD"
+
+    @respx.mock
+    async def test_update_character_not_found(self, vclient, base_url) -> None:
+        """Verify updating a non-existent character raises NotFoundError."""
+        # Given: A mocked 404 response
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='nonexistent')}"
+        ).mock(
+            return_value=Response(404, json={"detail": "Character not found", "status_code": 404})
+        )
+
+        # When/Then: Updating raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.characters("company123", "user123", "campaign123").update(
+                "nonexistent", name_first="Jane"
+            )
+
+        assert route.called
+
+
+class TestCharactersServiceDelete:
+    """Tests for CharactersService.delete method."""
+
+    @respx.mock
+    async def test_delete_character(self, vclient, base_url) -> None:
+        """Verify deleting a character."""
+        # Given: A mocked delete endpoint
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(204))
+
+        # When: Deleting the character
+        result = await vclient.characters("company123", "user123", "campaign123").delete("char123")
+
+        # Then: The route was called and None is returned
+        assert route.called
+        assert result is None
+
+    @respx.mock
+    async def test_delete_character_not_found(self, vclient, base_url) -> None:
+        """Verify deleting a non-existent character raises NotFoundError."""
+        # Given: A mocked 404 response
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='nonexistent')}"
+        ).mock(
+            return_value=Response(404, json={"detail": "Character not found", "status_code": 404})
+        )
+
+        # When/Then: Deleting raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.characters("company123", "user123", "campaign123").delete("nonexistent")
+
+        assert route.called
+
+
+class TestCharactersServiceListAll:
+    """Tests for CharactersService.list_all method."""
+
+    @respx.mock
+    async def test_list_all_characters(self, vclient, base_url, character_response_data) -> None:
+        """Verify list_all returns all characters across pages."""
+        # Given: A mocked endpoint that returns paginated results
+        paginated_response = {
+            "items": [character_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting all characters
+        result = await vclient.characters("company123", "user123", "campaign123").list_all()
+
+        # Then: All characters are returned as a list
+        assert route.called
+        assert len(result) == 1
+        assert isinstance(result[0], Character)
+        assert result[0].name_first == "John"
+
+
+class TestCharactersServiceIterAll:
+    """Tests for CharactersService.iter_all method."""
+
+    @respx.mock
+    async def test_iter_all_characters(self, vclient, base_url, character_response_data) -> None:
+        """Verify iter_all yields characters across pages."""
+        # Given: A mocked endpoint
+        paginated_response = {
+            "items": [character_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating through all characters
+        characters = [
+            character
+            async for character in vclient.characters(
+                "company123", "user123", "campaign123"
+            ).iter_all()
+        ]
+
+        # Then: All characters are yielded
+        assert route.called
+        assert len(characters) == 1
+        assert isinstance(characters[0], Character)
+
+
+class TestCharactersServiceVampireAttributes:
+    """Tests for character vampire attributes handling."""
+
+    @respx.mock
+    async def test_get_character_with_vampire_attributes(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify vampire attributes are properly parsed."""
+        # Given: A mocked character endpoint
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=character_response_data))
+
+        # When: Requesting the character
+        result = await vclient.characters("company123", "user123", "campaign123").get("char123")
+
+        # Then: Vampire attributes are properly parsed
+        assert route.called
+        assert result.vampire_attributes is not None
+        assert result.vampire_attributes.clan_name == "Ventrue"
+        assert result.vampire_attributes.generation == 10
+        assert result.vampire_attributes.sire == "Ancient One"
+
+
+class TestCharactersServiceAssets:
+    """Tests for CharactersService asset methods."""
+
+    @respx.mock
+    async def test_list_assets(self, vclient, base_url, asset_response_data):
+        """Verify listing characters assets."""
+        # Given: A mocked assets endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_ASSETS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id='char123')}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [asset_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Listing assets
+        result = await vclient.characters(company_id, user_id, campaign_id).list_assets("char123")
+
+        # Then: Returns paginated S3Asset objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], S3Asset)
+
+    @respx.mock
+    async def test_get_asset(self, vclient, base_url, asset_response_data):
+        """Verify getting a specific asset."""
+        # Given: A mocked asset endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        asset_id = "asset123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_ASSET.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id='char123', asset_id=asset_id)}"
+        ).respond(200, json=asset_response_data)
+
+        # When: Getting the asset
+        result = await vclient.characters(company_id, user_id, campaign_id).get_asset(
+            "char123", asset_id
+        )
+
+        # Then: Returns S3Asset object
+        assert route.called
+        assert isinstance(result, S3Asset)
+        assert result.id == "asset123"
+
+    @respx.mock
+    async def test_delete_asset(self, vclient, base_url):
+        """Verify deleting an asset."""
+        # Given: A mocked delete endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        asset_id = "asset123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_ASSET.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id='char123', asset_id=asset_id)}"
+        ).respond(204)
+
+        # When: Deleting the asset
+        await vclient.characters(company_id, user_id, campaign_id).delete_asset("char123", asset_id)
+
+        # Then: Request was made
+        assert route.called
+
+    @respx.mock
+    async def test_upload_asset(self, vclient, base_url, asset_response_data):
+        """Verify uploading an asset."""
+        # Given: A mocked upload endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_ASSET_UPLOAD.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id='char123')}"
+        ).respond(201, json=asset_response_data)
+
+        # When: Uploading an asset
+        result = await vclient.characters(company_id, user_id, campaign_id).upload_asset(
+            "char123",
+            filename="test.png",
+            content=b"test content",
+            content_type="image/png",
+        )
+
+        # Then: Returns S3Asset object
+        assert route.called
+        assert isinstance(result, S3Asset)
+        assert result.id == "asset123"
+
+
+class TestCharactersServiceNotes:
+    """Tests for CharactersService note methods."""
+
+    @respx.mock
+    async def test_get_notes_page(self, vclient, base_url, note_response_data):
+        """Verify getting a page of notes."""
+        # Given: A mocked notes endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_NOTES.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id='char123')}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [note_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Getting a page of notes
+        result = await vclient.characters(company_id, user_id, campaign_id).get_notes_page(
+            "char123"
+        )
+
+        # Then: Returns paginated Note objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], Note)
+
+    @respx.mock
+    async def test_get_note(self, vclient, base_url, note_response_data):
+        """Verify getting a specific note."""
+        # Given: A mocked note endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        note_id = "note123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_NOTE.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id='char123', note_id=note_id)}"
+        ).respond(200, json=note_response_data)
+
+        # When: Getting the note
+        result = await vclient.characters(company_id, user_id, campaign_id).get_note(
+            "char123", note_id
+        )
+
+        # Then: Returns Note object
+        assert route.called
+        assert isinstance(result, Note)
+        assert result.id == "note123"
+        assert result.title == "Test Note"
+
+    @respx.mock
+    async def test_create_note(self, vclient, base_url, note_response_data):
+        """Verify creating a note."""
+        # Given: A mocked create endpoint
+        company_id = "company123"
+        user_id = "user123"
+        character_id = "char123"
+        campaign_id = "campaign123"
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_NOTES.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}"
+        ).respond(201, json=note_response_data)
+
+        # When: Creating a note
+        result = await vclient.characters(company_id, user_id, campaign_id).create_note(
+            character_id, title="Test Note", content="This is test content"
+        )
+
+        # Then: Returns Note object
+        assert route.called
+        assert isinstance(result, Note)
+        assert result.title == "Test Note"
+
+    @respx.mock
+    async def test_update_note(self, vclient, base_url, note_response_data):
+        """Verify updating a note."""
+        # Given: A mocked update endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        note_id = "note123"
+        updated_data = {**note_response_data, "title": "Updated Title"}
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER_NOTE.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, note_id=note_id)}"
+        ).respond(200, json=updated_data)
+
+        # When: Updating the note
+        result = await vclient.characters(company_id, user_id, campaign_id).update_note(
+            character_id, note_id, title="Updated Title"
+        )
+
+        # Then: Returns updated Note object
+        assert route.called
+        assert isinstance(result, Note)
+        assert result.title == "Updated Title"
+
+    @respx.mock
+    async def test_delete_note(self, vclient, base_url):
+        """Verify deleting a note."""
+        # Given: A mocked delete endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        note_id = "note123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_NOTE.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id='char123', note_id=note_id)}"
+        ).respond(204)
+
+        # When: Deleting the note
+        await vclient.characters(company_id, user_id, campaign_id).delete_note("char123", note_id)
+
+        # Then: Request was made
+        assert route.called
+
+
+class TestCharactersServiceGetStatistics:
+    """Tests for CharactersService.get_statistics method."""
+
+    @respx.mock
+    async def test_get_statistics(self, vclient, base_url, statistics_response_data):
+        """Verify getting character statistics."""
+        # Given: A mocked statistics endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "507f1f77bcf86cd799439011"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_STATISTICS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+            params={"num_top_traits": "5"},
+        ).respond(200, json=statistics_response_data)
+
+        # When: Getting statistics
+        result = await vclient.characters(company_id, user_id, campaign_id).get_statistics(
+            character_id
+        )
+
+        # Then: Returns RollStatistics object
+        assert route.called
+        assert isinstance(result, RollStatistics)
+        assert result.total_rolls == 100
+        assert result.success_percentage == 50.0
+
+
+class TestCharactersServiceInventory:
+    """Tests for CharactersService inventory methods."""
+
+    @respx.mock
+    async def test_get_inventory_page(self, vclient, base_url, inventory_item_response_data):
+        """Verify getting a page of inventory items."""
+        # Given: A mocked inventory endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_INVENTORY.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [inventory_item_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Getting a page of inventory items
+        result = await vclient.characters(company_id, user_id, campaign_id).get_inventory_page(
+            character_id
+        )
+
+        # Then: Returns paginated CharacterInventoryItem objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], CharacterInventoryItem)
+        assert result.items[0].name == "Test Item"
+        assert result.items[0].type == "BOOK"
+        assert result.items[0].description == "This is test content"
+        assert result.items[0].character_id == "char123"
+        assert result.items[0].date_created == datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC)
+        assert result.items[0].date_modified == datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC)
+
+    @respx.mock
+    async def test_list_all_inventory(self, vclient, base_url, inventory_item_response_data):
+        """Verify listing all inventory items."""
+        # Given: A mocked inventory endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_INVENTORY.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(
+            200,
+            json={"items": [inventory_item_response_data], "total": 1, "limit": 100, "offset": 0},
+        )
+
+        # When: Listing all inventory items
+        result = await vclient.characters(company_id, user_id, campaign_id).list_all_inventory(
+            character_id
+        )
+
+        # Then: Returns list of CharacterInventoryItem objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], CharacterInventoryItem)
+        assert result[0].name == "Test Item"
+
+    @respx.mock
+    async def test_iter_all_inventory(self, vclient, base_url, inventory_item_response_data):
+        """Verify iterating through all inventory items."""
+        # Given: A mocked inventory endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_INVENTORY.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(
+            200,
+            json={"items": [inventory_item_response_data], "total": 1, "limit": 100, "offset": 0},
+        )
+        # When: Iterating through all inventory items
+        result = [
+            item
+            async for item in vclient.characters(
+                company_id, user_id, campaign_id
+            ).iter_all_inventory(character_id)
+        ]
+
+        # Then: Returns list of CharacterInventoryItem objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], CharacterInventoryItem)
+        assert result[0].name == "Test Item"
+
+    @respx.mock
+    async def test_get_inventory_item(self, vclient, base_url, inventory_item_response_data):
+        """Verify getting a specific inventory item."""
+        # Given: A mocked inventory item endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        item_id = "item123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_INVENTORY_ITEM.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, item_id=item_id)}"
+        ).respond(200, json=inventory_item_response_data)
+        # When: Getting the inventory item
+        result = await vclient.characters(company_id, user_id, campaign_id).get_inventory_item(
+            character_id, item_id
+        )
+
+        # Then: Returns CharacterInventoryItem object
+        assert route.called
+        assert isinstance(result, CharacterInventoryItem)
+        assert result.name == "Test Item"
+        assert result.type == "BOOK"
+        assert result.description == "This is test content"
+        assert result.character_id == "char123"
+
+    @respx.mock
+    async def test_create_inventory_item(self, vclient, base_url, inventory_item_response_data):
+        """Verify creating a new inventory item."""
+        # Given: A mocked create endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_INVENTORY.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}"
+        ).respond(201, json=inventory_item_response_data)
+        # When: Creating the inventory item
+        result = await vclient.characters(company_id, user_id, campaign_id).create_inventory_item(
+            character_id, name="Test Item", type="BOOK", description="This is test content"
+        )
+
+        # Then: Returns CharacterInventoryItem object
+        assert route.called
+        assert isinstance(result, CharacterInventoryItem)
+        assert result.name == "Test Item"
+        assert result.type == "BOOK"
+        assert result.description == "This is test content"
+        assert result.character_id == "char123"
+
+    @respx.mock
+    async def test_update_inventory_item(self, vclient, base_url, inventory_item_response_data):
+        """Verify updating an inventory item."""
+        # Given: A mocked update endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        item_id = "item123"
+        updated_data = {**inventory_item_response_data, "name": "Updated Item"}
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER_INVENTORY_ITEM.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, item_id=item_id)}"
+        ).respond(200, json=updated_data)
+
+        # When: Updating the inventory item
+        result = await vclient.characters(company_id, user_id, campaign_id).update_inventory_item(
+            character_id, item_id, name="Updated Item"
+        )
+
+        # Then: Returns CharacterInventoryItem object
+        assert route.called
+        assert isinstance(result, CharacterInventoryItem)
+        assert result.name == "Updated Item"
+        assert result.type == "BOOK"
+        assert result.description == "This is test content"
+        assert result.character_id == "char123"
+
+    @respx.mock
+    async def test_delete_inventory_item(self, vclient, base_url):
+        """Verify deleting an inventory item."""
+        # Given: A mocked delete endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        item_id = "item123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_INVENTORY_ITEM.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, item_id=item_id)}"
+        ).respond(204)
+
+        # When: Deleting the inventory item
+        await vclient.characters(company_id, user_id, campaign_id).delete_inventory_item(
+            character_id, item_id
+        )
+
+        # Then: Request was made
+        assert route.called

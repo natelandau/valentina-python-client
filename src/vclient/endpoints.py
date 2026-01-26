@@ -108,3 +108,18 @@ class Endpoints:
     BOOK_CHAPTER_ASSETS = f"{BOOK_CHAPTER}/assets"
     BOOK_CHAPTER_ASSET_UPLOAD = f"{BOOK_CHAPTER_ASSETS}/upload"
     BOOK_CHAPTER_ASSET = f"{BOOK_CHAPTER_ASSETS}/{{asset_id}}"
+
+    # Character endpoints
+    CHARACTERS = f"{CAMPAIGN}/characters"
+    CHARACTER = f"{CHARACTERS}/{{character_id}}"
+    CHARACTER_STATISTICS = f"{CHARACTER}/statistics"
+    # Character asset endpoints
+    CHARACTER_ASSETS = f"{CHARACTER}/assets"
+    CHARACTER_ASSET = f"{CHARACTER_ASSETS}/{{asset_id}}"
+    CHARACTER_ASSET_UPLOAD = f"{CHARACTER_ASSETS}/upload"
+    # Character note endpoints
+    CHARACTER_NOTES = f"{CHARACTER}/notes"
+    CHARACTER_NOTE = f"{CHARACTER_NOTES}/{{note_id}}"
+    # Character inventory endpoints
+    CHARACTER_INVENTORY = f"{CHARACTER}/inventory"
+    CHARACTER_INVENTORY_ITEM = f"{CHARACTER_INVENTORY}/{{item_id}}"

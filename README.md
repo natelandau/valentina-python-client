@@ -122,6 +122,7 @@ When enabled, the client automatically generates and includes an `Idempotency-Ke
 | [Campaigns Service](docs/campaigns-service.md) | `campaigns_service(company_id, user_id)` | Manage campaigns, assets, and notes |
 | [Books Service](docs/campaign-books-service.md) | `books_service(company_id, user_id, campaign_id)` | Manage campaign books, notes, and assets |
 | [Chapters Service](docs/campaign-book-chapters-service.md) | `campaign_book_chapters_service(company_id, user_id, campaign_id, book_id)` | Manage campaign book chapters, notes, and assets |
+| [Characters Service](docs/characters-service.md) | `characters_service(company_id, user_id, campaign_id)` | Manage characters, assets, and notes |
 
 ## Common Service Methods
 

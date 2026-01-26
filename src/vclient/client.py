@@ -13,6 +13,7 @@ if TYPE_CHECKING:
         BooksService,
         CampaignsService,
         ChaptersService,
+        CharactersService,
         CompaniesService,
         DeveloperService,
         GlobalAdminService,
@@ -289,3 +290,26 @@ class VClient:
         from vclient.services.campaign_book_chapters import ChaptersService
 
         return ChaptersService(self, company_id, user_id, campaign_id, book_id)
+
+    def characters(self, company_id: str, user_id: str, campaign_id: str) -> "CharactersService":
+        """Get a CharactersService scoped to a specific company, user, and campaign.
+
+        Provides methods to create, retrieve, update, and delete characters within
+        a campaign.
+
+        Args:
+            company_id: The ID of the company to operate within.
+            user_id: The ID of the user to operate as.
+            campaign_id: The ID of the campaign to operate within.
+
+        Returns:
+            A CharactersService instance scoped to the specified context.
+
+        Example:
+            >>> characters = client.characters("company_id", "user_id", "campaign_id")
+            >>> all_characters = await characters.list_all()
+            >>> character = await characters.get("character_id")
+        """
+        from vclient.services.characters import CharactersService
+
+        return CharactersService(self, company_id, user_id, campaign_id)

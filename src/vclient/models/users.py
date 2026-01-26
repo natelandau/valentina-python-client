@@ -5,35 +5,17 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-# Re-export shared models for backwards compatibility
-from vclient.models.shared import (
-    CreateNoteRequest,
-    Note,
-    RollStatistics,
-    S3Asset,
-    S3AssetParentType,
-    S3AssetType,
-    UpdateNoteRequest,
-)
-
 # Type aliases for user-related constrained values
 UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER"]
 
 # Re-export for module-level access
 __all__ = [
     "CampaignExperience",
-    "CreateNoteRequest",
     "CreateQuickrollRequest",
     "CreateUserRequest",
     "DiscordProfile",
     "ExperienceAddRemoveRequest",
-    "Note",
     "Quickroll",
-    "RollStatistics",
-    "S3Asset",
-    "S3AssetParentType",
-    "S3AssetType",
-    "UpdateNoteRequest",
     "UpdateQuickrollRequest",
     "UpdateUserRequest",
     "User",

@@ -10,7 +10,8 @@ S3AssetType = Literal["image", "text", "audio", "video", "document", "archive", 
 S3AssetParentType = Literal[
     "character", "campaign", "campaignbook", "campaignchapter", "user", "company", "unknown"
 ]
-
+GameVersion = Literal["V4", "V5"]
+CharacterClass = Literal["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"]
 
 # -----------------------------------------------------------------------------
 # Asset Models
@@ -95,3 +96,39 @@ class RollStatistics(BaseModel):
     success_percentage: float
     failure_percentage: float
     botch_percentage: float
+
+
+# -----------------------------------------------------------------------------
+# Trait Models
+# -----------------------------------------------------------------------------
+
+
+class Trait(BaseModel):
+    """Response model for a trait.
+
+    Represents a trait assigned to a character.
+    """
+
+    id: str
+    name: str
+    description: str | None = None
+    date_created: datetime
+    date_modified: datetime
+    link: str | None = None
+    show_when_zero: bool = True
+    max_value: int = 5
+    min_value: int = 0
+    is_custom: bool = False
+    initial_cost: int = 1
+    upgrade_cost: int = 2
+
+    sheet_section_name: str | None = None
+    sheet_section_id: str | None = None
+    parent_category_name: str | None = None
+    parent_category_id: str
+    custom_for_character_id: str | None = None
+    advantage_category_id: str | None = None
+    advantage_category_name: str | None = None
+
+    character_classes: list[CharacterClass] = Field(default_factory=list)
+    game_versions: list[GameVersion] = Field(default_factory=list)
