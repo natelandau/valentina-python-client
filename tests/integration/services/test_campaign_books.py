@@ -5,9 +5,7 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError, RequestValidationError
-from vclient.models.books import CampaignBook
-from vclient.models.pagination import PaginatedResponse
-from vclient.models.shared import Note, S3Asset
+from vclient.models import CampaignBook, Note, PaginatedResponse, S3Asset
 
 pytestmark = pytest.mark.anyio
 

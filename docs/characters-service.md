@@ -18,6 +18,15 @@ async with VClient(base_url="...", api_key="...") as client:
     character = await characters.get("character_id")
 ```
 
+Or using the factory function:
+
+```python
+from vclient import characters_service
+
+characters = characters_service("company_id", "user_id", "campaign_id")
+all_characters = await characters.list_all()
+```
+
 ## Available Methods
 
 ### Character CRUD
@@ -60,6 +69,24 @@ async with VClient(base_url="...", api_key="...") as client:
 - `create_inventory_item(character_id, name, type, description)` - Create an inventory item
 - `update_inventory_item(character_id, item_id, name?, type?, description?)` - Update an inventory item
 - `delete_inventory_item(character_id, item_id)` - Delete an inventory item
+
+### Werewolf Gifts
+
+- `get_gifts_page(character_id, limit?, offset?)` - Get a paginated page of werewolf gifts
+- `list_all_gifts(character_id)` - Get all werewolf gifts
+- `iter_all_gifts(character_id, limit?)` - Iterate through all werewolf gifts
+- `get_gift(character_id, werewolf_gift_id)` - Get a specific werewolf gift
+- `add_gift(character_id, werewolf_gift_id)` - Add a werewolf gift to a character
+- `remove_gift(character_id, werewolf_gift_id)` - Remove a werewolf gift from a character
+
+### Werewolf Rites
+
+- `get_rites_page(character_id, limit?, offset?)` - Get a paginated page of werewolf rites
+- `list_all_rites(character_id)` - Get all werewolf rites
+- `iter_all_rites(character_id, limit?)` - Iterate through all werewolf rites
+- `get_rite(character_id, werewolf_rite_id)` - Get a specific werewolf rite
+- `add_rite(character_id, werewolf_rite_id)` - Add a werewolf rite to a character
+- `remove_rite(character_id, werewolf_rite_id)` - Remove a werewolf rite from a character
 
 ## Response Models
 
@@ -197,47 +224,45 @@ Aggregated dice roll statistics.
 | `failure_percentage`   | `float`                | Percentage of failed rolls     |
 | `botch_percentage`     | `float`                | Percentage of botched rolls    |
 
-## Example Usage
+### `WerewolfGift`
 
-```python
-from vclient import VClient
+Represents a werewolf gift ability.
 
-async with VClient(base_url="...", api_key="...") as client:
-    # Get characters service for a specific campaign
-    characters = client.characters("company_id", "user_id", "campaign_id")
+| Field             | Type           | Description                              |
+| ----------------- | -------------- | ---------------------------------------- |
+| `id`              | `str`          | MongoDB document ObjectID                |
+| `name`            | `str`          | Gift name                                |
+| `description`     | `str \| None`  | Gift description                         |
+| `game_version`    | `GameVersion`  | Game version (V4 or V5)                  |
+| `date_created`    | `datetime`     | Timestamp when created                   |
+| `date_modified`   | `datetime`     | Timestamp when last modified             |
+| `renown`          | `WerewolfRenown` | Renown type (HONOR, GLORY, or WISDOM)  |
+| `cost`            | `str \| None`  | Cost to activate the gift                |
+| `duration`        | `str \| None`  | Duration of the gift effect              |
+| `dice_pool`       | `list[str]`    | Dice pool attributes for the gift        |
+| `opposing_pool`   | `list[str]`    | Opposing dice pool for contested rolls   |
+| `minimum_renown`  | `int \| None`  | Minimum renown level required            |
+| `is_native_gift`  | `bool`         | Whether this is a native tribe/auspice gift |
+| `notes`           | `str \| None`  | Additional notes about the gift          |
+| `tribe_id`        | `str \| None`  | Associated tribe ID (if tribal gift)     |
+| `auspice_id`      | `str \| None`  | Associated auspice ID (if auspice gift)  |
 
-    # List all characters in the campaign
-    all_characters = await characters.list_all()
-    for c in all_characters:
-        print(f"{c.name_full} ({c.character_class}) - {c.status}")
+### `WerewolfRite`
 
-    # Create a new vampire character
-    vampire = await characters.create(
-        character_class="VAMPIRE",
-        game_version="V5",
-        name_first="Victor",
-        name_last="Ashwood",
-        character_type="PLAYER",
-        biography="A cunning Ventrue with ambitions of power.",
-        demeanor="Confident",
-        nature="Schemer",
-    )
-    print(f"Created vampire: {vampire.id}")
+Represents a werewolf rite ritual.
 
-    # Get all NPCs
-    npcs = await characters.list_all(character_type="NPC")
-    print(f"Found {len(npcs)} NPCs")
+| Field           | Type          | Description                  |
+| --------------- | ------------- | ---------------------------- |
+| `id`            | `str`         | MongoDB document ObjectID    |
+| `name`          | `str`         | Rite name                    |
+| `description`   | `str \| None` | Rite description             |
+| `game_version`  | `GameVersion` | Game version (V4 or V5)      |
+| `date_created`  | `datetime`    | Timestamp when created       |
+| `date_modified` | `datetime`    | Timestamp when last modified |
+| `pool`          | `str \| None` | Dice pool for the rite       |
 
-    # Update character status after story event
-    updated = await characters.update(
-        vampire.id,
-        status="DEAD",
-    )
-    print(f"Character is now: {updated.status}")
+### Type Aliases
 
-    # Get a specific character with full details
-    character = await characters.get(vampire.id)
-    if character.vampire_attributes:
-        print(f"Clan: {character.vampire_attributes.clan_name}")
-        print(f"Generation: {character.vampire_attributes.generation}")
-```
+| Type             | Values                 | Description                      |
+| ---------------- | ---------------------- | -------------------------------- |
+| `WerewolfRenown` | HONOR, GLORY, WISDOM   | Werewolf renown type for gifts   |

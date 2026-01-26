@@ -5,12 +5,14 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError, RequestValidationError
-from vclient.models.pagination import PaginatedResponse
-from vclient.models.shared import Note, RollStatistics, S3Asset
-from vclient.models.users import (
+from vclient.models import (
     CampaignExperience,
     DiscordProfile,
+    Note,
+    PaginatedResponse,
     Quickroll,
+    RollStatistics,
+    S3Asset,
     User,
 )
 

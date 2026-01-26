@@ -7,7 +7,7 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import AuthenticationError
-from vclient.models.developers import MeDeveloper, MeDeveloperWithApiKey
+from vclient.models import MeDeveloper, MeDeveloperWithApiKey
 
 pytestmark = pytest.mark.anyio
 

@@ -26,6 +26,8 @@ from vclient.models.shared import (
     RollStatistics,
     S3Asset,
     UpdateNoteRequest,
+    WerewolfGift,
+    WerewolfRite,
 )
 from vclient.services.base import BaseService
 
@@ -935,3 +937,271 @@ class CharactersService(BaseService):
                 Endpoints.CHARACTER_INVENTORY_ITEM, character_id=character_id, item_id=item_id
             )
         )
+
+    # -------------------------------------------------------------------------
+    # Werewolf Gift Methods
+    # -------------------------------------------------------------------------
+
+    async def get_gifts_page(
+        self,
+        character_id: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> PaginatedResponse[WerewolfGift]:
+        """Retrieve a paginated page of werewolf gifts for a character.
+
+        Args:
+            character_id: The ID of the character whose werewolf gifts to list.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+
+        Returns:
+            A PaginatedResponse containing WerewolfGift objects and pagination metadata.
+        """
+        return await self._get_paginated_as(
+            self._format_endpoint(Endpoints.CHARACTER_WEREWOLF_GIFTS, character_id=character_id),
+            WerewolfGift,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def list_all_gifts(
+        self,
+        character_id: str,
+    ) -> list[WerewolfGift]:
+        """Retrieve all werewolf gifts for a character.
+
+        Automatically paginates through all results. Use `get_gifts_page()` for paginated
+        access or `iter_all_gifts()` for memory-efficient streaming of large datasets.
+
+        Args:
+            character_id: The ID of the character whose werewolf gifts to list.
+
+        Returns:
+            A list of all WerewolfGift objects.
+        """
+        return [gift async for gift in self.iter_all_gifts(character_id)]
+
+    async def iter_all_gifts(
+        self,
+        character_id: str,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[WerewolfGift]:
+        """Iterate through all werewolf gifts for a character.
+
+        Yields individual werewolf gifts, automatically fetching subsequent pages until
+        all items have been retrieved.
+
+        Args:
+            character_id: The ID of the character whose werewolf gifts to iterate.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual WerewolfGift objects.
+        """
+        async for gift in self._iter_all_pages(
+            self._format_endpoint(Endpoints.CHARACTER_WEREWOLF_GIFTS, character_id=character_id),
+            limit=limit,
+        ):
+            yield WerewolfGift.model_validate(gift)
+
+    async def get_gift(
+        self,
+        character_id: str,
+        werewolf_gift_id: str,
+    ) -> WerewolfGift:
+        """Retrieve a specific werewolf gift including its content and metadata.
+
+        Args:
+            character_id: The ID of the character that owns the werewolf gift.
+            werewolf_gift_id: The ID of the werewolf gift to retrieve.
+
+        Returns:
+            The WerewolfGift object with full details.
+
+        Raises:
+            NotFoundError: If the werewolf gift does not exist.
+            AuthorizationError: If you don't have access.
+        """
+        response = await self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_WEREWOLF_GIFT_DETAIL,
+                character_id=character_id,
+                werewolf_gift_id=werewolf_gift_id,
+            )
+        )
+
+        return WerewolfGift.model_validate(response.json())
+
+    async def add_gift(
+        self,
+        character_id: str,
+        werewolf_gift_id: str,
+    ) -> WerewolfGift:
+        """Add a werewolf gift to a character.
+
+        Args:
+            character_id: The ID of the character to add the werewolf gift to.
+            werewolf_gift_id: The ID of the werewolf gift to add.
+        """
+        response = await self._post(
+            self._format_endpoint(
+                Endpoints.CHARACTER_WEREWOLF_GIFT_DETAIL,
+                character_id=character_id,
+                werewolf_gift_id=werewolf_gift_id,
+            )
+        )
+        return WerewolfGift.model_validate(response.json())
+
+    async def remove_gift(
+        self,
+        character_id: str,
+        werewolf_gift_id: str,
+    ) -> WerewolfGift:
+        """Remove a werewolf gift from a character.
+
+        Args:
+            character_id: The ID of the character to remove the werewolf gift from.
+            werewolf_gift_id: The ID of the werewolf gift to remove.
+        """
+        response = await self._delete(
+            self._format_endpoint(
+                Endpoints.CHARACTER_WEREWOLF_GIFT_DETAIL,
+                character_id=character_id,
+                werewolf_gift_id=werewolf_gift_id,
+            )
+        )
+        return WerewolfGift.model_validate(response.json())
+
+    # -------------------------------------------------------------------------
+    # Werewolf Rite Methods
+    # -------------------------------------------------------------------------
+    async def get_rites_page(
+        self,
+        character_id: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> PaginatedResponse[WerewolfRite]:
+        """Retrieve a paginated page of werewolf rites for a character.
+
+        Args:
+            character_id: The ID of the character whose werewolf rites to list.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+
+        Returns:
+            A PaginatedResponse containing WerewolfRite objects and pagination metadata.
+        """
+        return await self._get_paginated_as(
+            self._format_endpoint(Endpoints.CHARACTER_WEREWOLF_RITES, character_id=character_id),
+            WerewolfRite,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def list_all_rites(
+        self,
+        character_id: str,
+    ) -> list[WerewolfRite]:
+        """Retrieve all werewolf rites for a character.
+
+        Automatically paginates through all results. Use `get_rites_page()` for paginated
+        access or `iter_all_rites()` for memory-efficient streaming of large datasets.
+
+        Args:
+            character_id: The ID of the character whose werewolf rites to list.
+
+        Returns:
+            A list of all WerewolfRite objects.
+        """
+        return [rite async for rite in self.iter_all_rites(character_id)]
+
+    async def iter_all_rites(
+        self,
+        character_id: str,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[WerewolfRite]:
+        """Iterate through all werewolf rites for a character.
+
+        Yields individual werewolf rites, automatically fetching subsequent pages until
+        all items have been retrieved.
+
+        Args:
+            character_id: The ID of the character whose werewolf rites to iterate.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual WerewolfRite objects.
+        """
+        async for rite in self._iter_all_pages(
+            self._format_endpoint(Endpoints.CHARACTER_WEREWOLF_RITES, character_id=character_id),
+            limit=limit,
+        ):
+            yield WerewolfRite.model_validate(rite)
+
+    async def get_rite(
+        self,
+        character_id: str,
+        werewolf_rite_id: str,
+    ) -> WerewolfRite:
+        """Retrieve a specific werewolf rite including its content and metadata.
+
+        Args:
+            character_id: The ID of the character that owns the werewolf rite.
+            werewolf_rite_id: The ID of the werewolf rite to retrieve.
+
+        Returns:
+            The WerewolfRite object with full details.
+        """
+        response = await self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL,
+                character_id=character_id,
+                werewolf_rite_id=werewolf_rite_id,
+            )
+        )
+        return WerewolfRite.model_validate(response.json())
+
+    async def add_rite(
+        self,
+        character_id: str,
+        werewolf_rite_id: str,
+    ) -> WerewolfRite:
+        """Add a werewolf rite to a character.
+
+        Args:
+            character_id: The ID of the character to add the werewolf rite to.
+            werewolf_rite_id: The ID of the werewolf rite to add.
+        """
+        response = await self._post(
+            self._format_endpoint(
+                Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL,
+                character_id=character_id,
+                werewolf_rite_id=werewolf_rite_id,
+            )
+        )
+        return WerewolfRite.model_validate(response.json())
+
+    async def remove_rite(
+        self,
+        character_id: str,
+        werewolf_rite_id: str,
+    ) -> WerewolfRite:
+        """Remove a werewolf rite from a character.
+
+        Args:
+            character_id: The ID of the character to remove the werewolf rite from.
+            werewolf_rite_id: The ID of the werewolf rite to remove.
+        """
+        response = await self._delete(
+            self._format_endpoint(
+                Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL,
+                character_id=character_id,
+                werewolf_rite_id=werewolf_rite_id,
+            )
+        )
+        return WerewolfRite.model_validate(response.json())

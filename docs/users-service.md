@@ -183,11 +183,11 @@ Deduct experience points from a user's current XP pool. Returns an error if the 
 
 **Parameters:**
 
-| Parameter     | Type  | Description                         |
-| ------------- | ----- | ----------------------------------- |
-| `user_id`     | `str` | The ID of the user to remove XP from|
-| `campaign_id` | `str` | The ID of the campaign              |
-| `amount`      | `int` | The amount of XP to remove          |
+| Parameter     | Type  | Description                          |
+| ------------- | ----- | ------------------------------------ |
+| `user_id`     | `str` | The ID of the user to remove XP from |
+| `campaign_id` | `str` | The ID of the campaign               |
+| `amount`      | `int` | The amount of XP to remove           |
 
 **Returns:** `CampaignExperience`
 
@@ -367,10 +367,10 @@ Iterate through all quickrolls for a user. Yields individual quickrolls, automat
 
 **Parameters:**
 
-| Parameter | Type  | Description                                   |
-| --------- | ----- | --------------------------------------------- |
-| `user_id` | `str` | The ID of the user whose quickrolls to iterate|
-| `limit`   | `int` | Items per page (default 100)                  |
+| Parameter | Type  | Description                                    |
+| --------- | ----- | ---------------------------------------------- |
+| `user_id` | `str` | The ID of the user whose quickrolls to iterate |
+| `limit`   | `int` | Items per page (default 100)                   |
 
 **Returns:** `AsyncIterator[Quickroll]`
 
@@ -380,10 +380,10 @@ Retrieve a specific quickroll including its name and trait configuration.
 
 **Parameters:**
 
-| Parameter      | Type  | Description                          |
-| -------------- | ----- | ------------------------------------ |
-| `user_id`      | `str` | The ID of the user who owns it       |
-| `quickroll_id` | `str` | The ID of the quickroll to retrieve  |
+| Parameter      | Type  | Description                         |
+| -------------- | ----- | ----------------------------------- |
+| `user_id`      | `str` | The ID of the user who owns it      |
+| `quickroll_id` | `str` | The ID of the quickroll to retrieve |
 
 **Returns:** `Quickroll`
 
@@ -393,12 +393,12 @@ Create a new quickroll for a user. Quickroll names must be unique per user.
 
 **Parameters:**
 
-| Parameter     | Type               | Description                                   |
-| ------------- | ------------------ | --------------------------------------------- |
-| `user_id`     | `str`              | The ID of the user to create the quickroll for|
-| `name`        | `str`              | The quickroll name (3-50 characters)          |
-| `description` | `str \| None`      | Optional description of the quickroll         |
-| `trait_ids`   | `list[str] \| None`| List of trait IDs that make up the dice pool  |
+| Parameter     | Type                | Description                                    |
+| ------------- | ------------------- | ---------------------------------------------- |
+| `user_id`     | `str`               | The ID of the user to create the quickroll for |
+| `name`        | `str`               | The quickroll name (3-50 characters)           |
+| `description` | `str \| None`       | Optional description of the quickroll          |
+| `trait_ids`   | `list[str] \| None` | List of trait IDs that make up the dice pool   |
 
 **Returns:** `Quickroll`
 
@@ -420,13 +420,13 @@ Modify a quickroll's name or trait configuration. Only include fields that need 
 
 **Parameters:**
 
-| Parameter      | Type               | Description                              |
-| -------------- | ------------------ | ---------------------------------------- |
-| `user_id`      | `str`              | The ID of the user who owns it           |
-| `quickroll_id` | `str`              | The ID of the quickroll to update        |
-| `name`         | `str \| None`      | New quickroll name (3-50 characters)     |
-| `description`  | `str \| None`      | New description of the quickroll         |
-| `trait_ids`    | `list[str] \| None`| New list of trait IDs for the dice pool  |
+| Parameter      | Type                | Description                             |
+| -------------- | ------------------- | --------------------------------------- |
+| `user_id`      | `str`               | The ID of the user who owns it          |
+| `quickroll_id` | `str`               | The ID of the quickroll to update       |
+| `name`         | `str \| None`       | New quickroll name (3-50 characters)    |
+| `description`  | `str \| None`       | New description of the quickroll        |
+| `trait_ids`    | `list[str] \| None` | New list of trait IDs for the dice pool |
 
 **Returns:** `Quickroll`
 
@@ -447,10 +447,10 @@ Remove a quickroll from a user. This action cannot be undone.
 
 **Parameters:**
 
-| Parameter      | Type  | Description                        |
-| -------------- | ----- | ---------------------------------- |
-| `user_id`      | `str` | The ID of the user who owns it     |
-| `quickroll_id` | `str` | The ID of the quickroll to delete  |
+| Parameter      | Type  | Description                       |
+| -------------- | ----- | --------------------------------- |
+| `user_id`      | `str` | The ID of the user who owns it    |
+| `quickroll_id` | `str` | The ID of the quickroll to delete |
 
 **Returns:** `None`
 
@@ -549,15 +549,15 @@ Represents a note attached to a user.
 
 Represents a pre-configured dice pool for frequently used trait combinations.
 
-| Field           | Type           | Description                                  |
-| --------------- | -------------- | -------------------------------------------- |
-| `id`            | `str`          | MongoDB document ObjectID                    |
-| `date_created`  | `datetime`     | Timestamp when created                       |
-| `date_modified` | `datetime`     | Timestamp when modified                      |
-| `name`          | `str`          | Quickroll name (3-50 characters)             |
-| `description`   | `str \| None`  | Optional description of the quickroll        |
-| `user_id`       | `str`          | ID of the user who owns this quickroll       |
-| `trait_ids`     | `list[str]`    | List of trait IDs that make up the dice pool |
+| Field           | Type          | Description                                  |
+| --------------- | ------------- | -------------------------------------------- |
+| `id`            | `str`         | MongoDB document ObjectID                    |
+| `date_created`  | `datetime`    | Timestamp when created                       |
+| `date_modified` | `datetime`    | Timestamp when modified                      |
+| `name`          | `str`         | Quickroll name (3-50 characters)             |
+| `description`   | `str \| None` | Optional description of the quickroll        |
+| `user_id`       | `str`         | ID of the user who owns this quickroll       |
+| `trait_ids`     | `list[str]`   | List of trait IDs that make up the dice pool |
 
 ## User Roles
 
@@ -566,60 +566,3 @@ Represents a pre-configured dice pool for frequently used trait combinations.
 | `ADMIN`       | Administrative access within the company |
 | `STORYTELLER` | Game master / storyteller role           |
 | `PLAYER`      | Regular player role                      |
-
-## Example Usage
-
-```python
-from vclient import VClient
-
-async with VClient(base_url="...", api_key="...") as client:
-    # Get users service for a specific company
-    users = client.users("company_id")
-
-    # List all users in the company
-    all_users = await users.list_all()
-
-    # Create a new user
-    new_user = await users.create(
-        name="John Doe",
-        email="john@example.com",
-        role="PLAYER",
-        requesting_user_id="admin_user_id",
-    )
-
-    # Get user statistics
-    stats = await users.get_statistics(new_user.id)
-    print(f"Total rolls: {stats.total_rolls}")
-
-    # List user assets
-    assets = await users.list_assets(new_user.id)
-    for asset in assets.items:
-        print(f"Asset: {asset.original_filename}")
-
-    # Create a note for a user
-    note = await users.create_note(
-        user_id=new_user.id,
-        title="Session Notes",
-        content="Notes from today's session...",
-    )
-    print(f"Created note: {note.title}")
-
-    # List all notes for a user
-    notes = await users.list_all_notes(new_user.id)
-    for note in notes:
-        print(f"Note: {note.title}")
-
-    # Create a quickroll for faster dice rolling
-    quickroll = await users.create_quickroll(
-        user_id=new_user.id,
-        name="Strength + Brawl",
-        description="Standard combat roll",
-        trait_ids=["trait_strength_id", "trait_brawl_id"],
-    )
-    print(f"Created quickroll: {quickroll.name}")
-
-    # List all quickrolls for a user
-    quickrolls = await users.list_all_quickrolls(new_user.id)
-    for qr in quickrolls:
-        print(f"Quickroll: {qr.name} ({len(qr.trait_ids)} traits)")
-```

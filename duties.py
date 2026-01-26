@@ -98,7 +98,7 @@ def format(ctx: Context) -> None:  # noqa: A001
     ctx.run(
         tools.ruff.format(*PY_SRC_LIST, check=True, config="pyproject.toml"),
         title=pyprefix("code formatting"),
-        command="ruff format --check --config pyproject.toml src/",
+        command="ruff format --config pyproject.toml src/",
     )
 
 
@@ -130,7 +130,7 @@ def precommit(ctx: Context) -> None:
     )
 
 
-@duty(pre=[ruff, ty, typos, precommit], capture=CI)
+@duty(pre=[ruff, format, ty, typos, precommit], capture=CI)
 def lint(ctx: Context) -> None:
     """Run all linting duties."""
 

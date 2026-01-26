@@ -14,6 +14,7 @@ if TYPE_CHECKING:
         CampaignsService,
         ChaptersService,
         CharactersService,
+        CharacterTraitsService,
         CompaniesService,
         DeveloperService,
         GlobalAdminService,
@@ -313,3 +314,29 @@ class VClient:
         from vclient.services.characters import CharactersService
 
         return CharactersService(self, company_id, user_id, campaign_id)
+
+    def character_traits(
+        self, company_id: str, user_id: str, campaign_id: str, character_id: str
+    ) -> "CharacterTraitsService":
+        """Get a CharacterTraitsService scoped to a specific company, user, campaign, and character.
+
+        Provides methods to create, retrieve, update, and delete character traits within
+        a character.
+
+        Args:
+            company_id: The ID of the company to operate within.
+            user_id: The ID of the user to operate as.
+            campaign_id: The ID of the campaign to operate within.
+            character_id: The ID of the character to operate within.
+
+        Returns:
+            A CharacterTraitsService instance scoped to the specified context.
+
+        Example:
+            >>> character_traits = client.character_traits("company_id", "user_id", "campaign_id", "character_id")
+            >>> all_character_traits = await character_traits.list_all()
+            >>> character_trait = await character_traits.get("character_trait_id")
+        """
+        from vclient.services.character_traits import CharacterTraitsService
+
+        return CharacterTraitsService(self, company_id, user_id, campaign_id, character_id)

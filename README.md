@@ -123,12 +123,13 @@ When enabled, the client automatically generates and includes an `Idempotency-Ke
 | [Books Service](docs/campaign-books-service.md) | `books_service(company_id, user_id, campaign_id)` | Manage campaign books, notes, and assets |
 | [Chapters Service](docs/campaign-book-chapters-service.md) | `campaign_book_chapters_service(company_id, user_id, campaign_id, book_id)` | Manage campaign book chapters, notes, and assets |
 | [Characters Service](docs/characters-service.md) | `characters_service(company_id, user_id, campaign_id)` | Manage characters, assets, and notes |
+| [Character Traits Service](docs/character-traits-service.md) | `character_traits_service(company_id, user_id, campaign_id, character_id)` | Manage character traits |
 
 ## Common Service Methods
 
 Services that manage resources (Companies, Global Admin) share a consistent API pattern for CRUD operations and pagination.
 
-### CRUD Operations
+### Common CRUD Operations
 
 | Method            | Description                                   |
 | ----------------- | --------------------------------------------- |
@@ -161,6 +162,26 @@ Services that return collections provide three methods for accessing paginated d
 | `list_all()` | `list[T]`              | Fetch all items across all pages into a list    |
 | `iter_all()` | `AsyncIterator[T]`     | Memory-efficient streaming through all pages    |
 
+#### PaginatedResponse Model
+
+| Field    | Type      | Description                            |
+| -------- | --------- | -------------------------------------- |
+| `items`  | `list[T]` | The requested page of results          |
+| `limit`  | `int`     | The limit that was applied             |
+| `offset` | `int`     | The offset that was applied            |
+| `total`  | `int`     | Total number of items across all pages |
+
+#### Computed Properties
+
+| Property       | Type   | Description                            |
+| -------------- | ------ | -------------------------------------- |
+| `has_more`     | `bool` | Whether there are more pages available |
+| `next_offset`  | `int`  | The offset for the next page           |
+| `total_pages`  | `int`  | Total number of pages                  |
+| `current_page` | `int`  | Current page number (1-indexed)        |
+
+#### Example paginated response usage
+
 ```python
 # Get a single page with metadata
 page = await companies.get_page(limit=10, offset=0)
@@ -180,24 +201,6 @@ all_companies = await companies.list_all()
 async for company in companies.iter_all():
     print(company.name)
 ```
-
-### PaginatedResponse Model
-
-| Field    | Type      | Description                            |
-| -------- | --------- | -------------------------------------- |
-| `items`  | `list[T]` | The requested page of results          |
-| `limit`  | `int`     | The limit that was applied             |
-| `offset` | `int`     | The offset that was applied            |
-| `total`  | `int`     | Total number of items across all pages |
-
-**Computed Properties:**
-
-| Property       | Type   | Description                            |
-| -------------- | ------ | -------------------------------------- |
-| `has_more`     | `bool` | Whether there are more pages available |
-| `next_offset`  | `int`  | The offset for the next page           |
-| `total_pages`  | `int`  | Total number of pages                  |
-| `current_page` | `int`  | Current page number (1-indexed)        |
 
 ## Error Handling
 

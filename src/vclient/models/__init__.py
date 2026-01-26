@@ -17,6 +17,12 @@ from .chapters import (
     RenumberChapterRequest,
     UpdateChapterRequest,
 )
+from .character_trait import (
+    AssignCharacterTraitRequest,
+    CharacterTrait,
+    CharacterTraitValueChangeRequest,
+    CreateCharacterTraitRequest,
+)
 from .characters import (
     Character,
     CharacterInventoryItem,
@@ -71,6 +77,8 @@ from .shared import (
     S3AssetParentType,
     S3AssetType,
     UpdateNoteRequest,
+    WerewolfGift,
+    WerewolfRite,
 )
 from .system import ServiceStatus, SystemHealth
 from .users import (
@@ -87,6 +95,7 @@ from .users import (
 )
 
 __all__ = [
+    "AssignCharacterTraitRequest",
     "Campaign",
     "CampaignBook",
     "CampaignChapter",
@@ -97,6 +106,8 @@ __all__ = [
     "CharacterInventoryType",
     "CharacterSpecialty",
     "CharacterStatus",
+    "CharacterTrait",
+    "CharacterTraitValueChangeRequest",
     "CharacterType",
     "Company",
     "CompanyPermissions",
@@ -106,6 +117,7 @@ __all__ = [
     "CreateChapterRequest",
     "CreateCharacterInventoryItemRequest",
     "CreateCharacterRequest",
+    "CreateCharacterTraitRequest",
     "CreateCompanyRequest",
     "CreateDeveloperRequest",
     "CreateNoteRequest",
@@ -155,4 +167,6 @@ __all__ = [
     "UserRole",
     "VampireAttributes",
     "WerewolfAttributes",
+    "WerewolfGift",
+    "WerewolfRite",
 ]

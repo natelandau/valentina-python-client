@@ -7,8 +7,7 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import AuthorizationError, NotFoundError
-from vclient.models.global_admin import Developer, DeveloperWithApiKey
-from vclient.models.pagination import PaginatedResponse
+from vclient.models import Developer, DeveloperWithApiKey, PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 

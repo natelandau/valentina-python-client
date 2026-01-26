@@ -4,8 +4,8 @@ import pytest
 import respx
 
 from vclient.endpoints import Endpoints
-from vclient.models.system import ServiceStatus, SystemHealth
-from vclient.services.system import SystemService
+from vclient.models import ServiceStatus, SystemHealth
+from vclient.services import SystemService
 
 pytestmark = pytest.mark.anyio
 

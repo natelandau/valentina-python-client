@@ -12,7 +12,10 @@ S3AssetParentType = Literal[
 ]
 GameVersion = Literal["V4", "V5"]
 CharacterClass = Literal["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"]
-
+WerewolfRenown = Literal["HONOR", "GLORY", "WISDOM"]
+HunterCreed = Literal["ENTREPRENEURIAL", "FAITHFUL", "INQUISITIVE", "MARTIAL", "UNDERGROUND"]
+HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
+SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
 # -----------------------------------------------------------------------------
 # Asset Models
 # -----------------------------------------------------------------------------
@@ -132,3 +135,41 @@ class Trait(BaseModel):
 
     character_classes: list[CharacterClass] = Field(default_factory=list)
     game_versions: list[GameVersion] = Field(default_factory=list)
+
+
+# -----------------------------------------------------------------------------
+# Character Special Models
+# -----------------------------------------------------------------------------
+
+
+class WerewolfGift(BaseModel):
+    """Response model for a werewolf gift."""
+
+    id: str
+    name: str
+    description: str | None = None
+    game_version: GameVersion
+    date_created: datetime
+    date_modified: datetime
+    renown: WerewolfRenown
+    cost: str | None = None
+    duration: str | None = None
+    dice_pool: list[str] = Field(default_factory=list)
+    opposing_pool: list[str] = Field(default_factory=list)
+    minimum_renown: int | None = None
+    is_native_gift: bool = False
+    notes: str | None = None
+    tribe_id: str | None = None
+    auspice_id: str | None = None
+
+
+class WerewolfRite(BaseModel):
+    """Response model for a werewolf gift."""
+
+    id: str
+    name: str
+    description: str | None = None
+    game_version: GameVersion
+    date_created: datetime
+    date_modified: datetime
+    pool: str | None = None

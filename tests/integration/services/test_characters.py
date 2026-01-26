@@ -8,9 +8,16 @@ from httpx import Response
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
-from vclient.models.characters import Character, CharacterInventoryItem
-from vclient.models.pagination import PaginatedResponse
-from vclient.models.shared import Note, RollStatistics, S3Asset
+from vclient.models import (
+    Character,
+    CharacterInventoryItem,
+    Note,
+    PaginatedResponse,
+    RollStatistics,
+    S3Asset,
+    WerewolfGift,
+    WerewolfRite,
+)
 
 pytestmark = pytest.mark.anyio
 
@@ -127,6 +134,43 @@ def inventory_item_response_data() -> dict:
         "name": "Test Item",
         "type": "BOOK",
         "description": "This is test content",
+    }
+
+
+@pytest.fixture
+def werewolf_gift_response_data() -> dict:
+    """Return sample werewolf gift response data."""
+    return {
+        "id": "gift123",
+        "name": "Sense Prey",
+        "description": "The werewolf can sense the presence of prey.",
+        "game_version": "V5",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "renown": "HONOR",
+        "cost": "1 Rage",
+        "duration": "One scene",
+        "dice_pool": ["Wits", "Survival"],
+        "opposing_pool": [],
+        "minimum_renown": 1,
+        "is_native_gift": True,
+        "notes": "Can be used once per scene",
+        "tribe_id": "tribe123",
+        "auspice_id": "auspice123",
+    }
+
+
+@pytest.fixture
+def werewolf_rite_response_data() -> dict:
+    """Return sample werewolf rite response data."""
+    return {
+        "id": "rite123",
+        "name": "Rite of the Moon",
+        "description": "A sacred ritual performed under the full moon.",
+        "game_version": "V5",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "pool": "Charisma + Rituals",
     }
 
 
@@ -922,3 +966,338 @@ class TestCharactersServiceInventory:
 
         # Then: Request was made
         assert route.called
+
+
+class TestCharactersServiceWerewolfGifts:
+    """Tests for CharactersService werewolf gift methods."""
+
+    @respx.mock
+    async def test_get_gifts_page(self, vclient, base_url, werewolf_gift_response_data):
+        """Verify getting a page of werewolf gifts."""
+        # Given: A mocked gifts endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_GIFTS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [werewolf_gift_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Getting a page of gifts
+        result = await vclient.characters(company_id, user_id, campaign_id).get_gifts_page(
+            character_id
+        )
+
+        # Then: Returns paginated WerewolfGift objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], WerewolfGift)
+        assert result.items[0].name == "Sense Prey"
+        assert result.items[0].renown == "HONOR"
+
+    @respx.mock
+    async def test_list_all_gifts(self, vclient, base_url, werewolf_gift_response_data):
+        """Verify listing all werewolf gifts."""
+        # Given: A mocked gifts endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_GIFTS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(
+            200,
+            json={"items": [werewolf_gift_response_data], "total": 1, "limit": 100, "offset": 0},
+        )
+
+        # When: Listing all gifts
+        result = await vclient.characters(company_id, user_id, campaign_id).list_all_gifts(
+            character_id
+        )
+
+        # Then: Returns list of WerewolfGift objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], WerewolfGift)
+        assert result[0].name == "Sense Prey"
+
+    @respx.mock
+    async def test_iter_all_gifts(self, vclient, base_url, werewolf_gift_response_data):
+        """Verify iterating through all werewolf gifts."""
+        # Given: A mocked gifts endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_GIFTS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(
+            200,
+            json={"items": [werewolf_gift_response_data], "total": 1, "limit": 100, "offset": 0},
+        )
+
+        # When: Iterating through all gifts
+        result = [
+            gift
+            async for gift in vclient.characters(company_id, user_id, campaign_id).iter_all_gifts(
+                character_id
+            )
+        ]
+
+        # Then: Returns list of WerewolfGift objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], WerewolfGift)
+        assert result[0].name == "Sense Prey"
+
+    @respx.mock
+    async def test_get_gift(self, vclient, base_url, werewolf_gift_response_data):
+        """Verify getting a specific werewolf gift."""
+        # Given: A mocked gift endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        werewolf_gift_id = "gift123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_GIFT_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, werewolf_gift_id=werewolf_gift_id)}"
+        ).respond(200, json=werewolf_gift_response_data)
+
+        # When: Getting the gift
+        result = await vclient.characters(company_id, user_id, campaign_id).get_gift(
+            character_id, werewolf_gift_id
+        )
+
+        # Then: Returns WerewolfGift object
+        assert route.called
+        assert isinstance(result, WerewolfGift)
+        assert result.id == "gift123"
+        assert result.name == "Sense Prey"
+        assert result.renown == "HONOR"
+        assert result.cost == "1 Rage"
+        assert result.is_native_gift is True
+
+    @respx.mock
+    async def test_add_gift(self, vclient, base_url, werewolf_gift_response_data):
+        """Verify adding a werewolf gift to a character."""
+        # Given: A mocked add gift endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        werewolf_gift_id = "gift123"
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_GIFT_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, werewolf_gift_id=werewolf_gift_id)}"
+        ).respond(201, json=werewolf_gift_response_data)
+
+        # When: Adding the gift
+        result = await vclient.characters(company_id, user_id, campaign_id).add_gift(
+            character_id, werewolf_gift_id
+        )
+
+        # Then: Returns WerewolfGift object
+        assert route.called
+        assert isinstance(result, WerewolfGift)
+        assert result.id == "gift123"
+        assert result.name == "Sense Prey"
+
+    @respx.mock
+    async def test_remove_gift(self, vclient, base_url, werewolf_gift_response_data):
+        """Verify removing a werewolf gift from a character."""
+        # Given: A mocked remove gift endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        werewolf_gift_id = "gift123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_GIFT_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, werewolf_gift_id=werewolf_gift_id)}"
+        ).respond(200, json=werewolf_gift_response_data)
+
+        # When: Removing the gift
+        result = await vclient.characters(company_id, user_id, campaign_id).remove_gift(
+            character_id, werewolf_gift_id
+        )
+
+        # Then: Returns WerewolfGift object
+        assert route.called
+        assert isinstance(result, WerewolfGift)
+        assert result.id == "gift123"
+
+
+class TestCharactersServiceWerewolfRites:
+    """Tests for CharactersService werewolf rite methods."""
+
+    @respx.mock
+    async def test_get_rites_page(self, vclient, base_url, werewolf_rite_response_data):
+        """Verify getting a page of werewolf rites."""
+        # Given: A mocked rites endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_RITES.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [werewolf_rite_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Getting a page of rites
+        result = await vclient.characters(company_id, user_id, campaign_id).get_rites_page(
+            character_id
+        )
+
+        # Then: Returns paginated WerewolfRite objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], WerewolfRite)
+        assert result.items[0].name == "Rite of the Moon"
+
+    @respx.mock
+    async def test_list_all_rites(self, vclient, base_url, werewolf_rite_response_data):
+        """Verify listing all werewolf rites."""
+        # Given: A mocked rites endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_RITES.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(
+            200,
+            json={"items": [werewolf_rite_response_data], "total": 1, "limit": 100, "offset": 0},
+        )
+
+        # When: Listing all rites
+        result = await vclient.characters(company_id, user_id, campaign_id).list_all_rites(
+            character_id
+        )
+
+        # Then: Returns list of WerewolfRite objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], WerewolfRite)
+        assert result[0].name == "Rite of the Moon"
+
+    @respx.mock
+    async def test_iter_all_rites(self, vclient, base_url, werewolf_rite_response_data):
+        """Verify iterating through all werewolf rites."""
+        # Given: A mocked rites endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_RITES.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(
+            200,
+            json={"items": [werewolf_rite_response_data], "total": 1, "limit": 100, "offset": 0},
+        )
+
+        # When: Iterating through all rites
+        result = [
+            rite
+            async for rite in vclient.characters(company_id, user_id, campaign_id).iter_all_rites(
+                character_id
+            )
+        ]
+
+        # Then: Returns list of WerewolfRite objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], WerewolfRite)
+        assert result[0].name == "Rite of the Moon"
+
+    @respx.mock
+    async def test_get_rite(self, vclient, base_url, werewolf_rite_response_data):
+        """Verify getting a specific werewolf rite."""
+        # Given: A mocked rite endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        werewolf_rite_id = "rite123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, werewolf_rite_id=werewolf_rite_id)}"
+        ).respond(200, json=werewolf_rite_response_data)
+
+        # When: Getting the rite
+        result = await vclient.characters(company_id, user_id, campaign_id).get_rite(
+            character_id, werewolf_rite_id
+        )
+
+        # Then: Returns WerewolfRite object
+        assert route.called
+        assert isinstance(result, WerewolfRite)
+        assert result.id == "rite123"
+        assert result.name == "Rite of the Moon"
+        assert result.pool == "Charisma + Rituals"
+
+    @respx.mock
+    async def test_add_rite(self, vclient, base_url, werewolf_rite_response_data):
+        """Verify adding a werewolf rite to a character."""
+        # Given: A mocked add rite endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        werewolf_rite_id = "rite123"
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, werewolf_rite_id=werewolf_rite_id)}"
+        ).respond(201, json=werewolf_rite_response_data)
+
+        # When: Adding the rite
+        result = await vclient.characters(company_id, user_id, campaign_id).add_rite(
+            character_id, werewolf_rite_id
+        )
+
+        # Then: Returns WerewolfRite object
+        assert route.called
+        assert isinstance(result, WerewolfRite)
+        assert result.id == "rite123"
+        assert result.name == "Rite of the Moon"
+
+    @respx.mock
+    async def test_remove_rite(self, vclient, base_url, werewolf_rite_response_data):
+        """Verify removing a werewolf rite from a character."""
+        # Given: A mocked remove rite endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        werewolf_rite_id = "rite123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, werewolf_rite_id=werewolf_rite_id)}"
+        ).respond(200, json=werewolf_rite_response_data)
+
+        # When: Removing the rite
+        result = await vclient.characters(company_id, user_id, campaign_id).remove_rite(
+            character_id, werewolf_rite_id
+        )
+
+        # Then: Returns WerewolfRite object
+        assert route.called
+        assert isinstance(result, WerewolfRite)
+        assert result.id == "rite123"

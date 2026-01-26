@@ -5,12 +5,12 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import AuthorizationError, NotFoundError, RequestValidationError
-from vclient.models.companies import (
+from vclient.models import (
     Company,
     CompanyPermissions,
     CompanySettings,
+    PaginatedResponse,
 )
-from vclient.models.pagination import PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 

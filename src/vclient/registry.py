@@ -22,14 +22,18 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from vclient.client import VClient
-    from vclient.services.campaign_book_chapters import ChaptersService
-    from vclient.services.campaign_books import BooksService
-    from vclient.services.campaigns import CampaignsService
-    from vclient.services.companies import CompaniesService
-    from vclient.services.developers import DeveloperService
-    from vclient.services.global_admin import GlobalAdminService
-    from vclient.services.system import SystemService
-    from vclient.services.users import UsersService
+    from vclient.services import (
+        BooksService,
+        CampaignsService,
+        ChaptersService,
+        CharactersService,
+        CharacterTraitsService,
+        CompaniesService,
+        DeveloperService,
+        GlobalAdminService,
+        SystemService,
+        UsersService,
+    )
 
 _default_client: "VClient | None" = None
 
@@ -260,3 +264,27 @@ def chapters_service(
     from vclient.services.campaign_book_chapters import ChaptersService
 
     return ChaptersService(default_client(), company_id, user_id, campaign_id, book_id)
+
+
+def characters_service(company_id: str, user_id: str, campaign_id: str) -> "CharactersService":
+    """Create a CharactersService scoped to a specific company, user, and campaign.
+
+    Provides access to character management operations (list, get, create, update, delete)
+    within a specific company, user, and campaign context without needing to pass a client instance.
+    """
+    from vclient.services.characters import CharactersService
+
+    return CharactersService(default_client(), company_id, user_id, campaign_id)
+
+
+def character_traits_service(
+    company_id: str, user_id: str, campaign_id: str, character_id: str
+) -> "CharacterTraitsService":
+    """Create a CharacterTraitsService scoped to a specific company, user, campaign, and character.
+
+    Provides access to character trait management operations (list, get, create, update, delete)
+    within a specific company, user, campaign, and character context without needing to pass a client instance.
+    """
+    from vclient.services.character_traits import CharacterTraitsService
+
+    return CharacterTraitsService(default_client(), company_id, user_id, campaign_id, character_id)

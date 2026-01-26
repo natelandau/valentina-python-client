@@ -123,3 +123,27 @@ class Endpoints:
     # Character inventory endpoints
     CHARACTER_INVENTORY = f"{CHARACTER}/inventory"
     CHARACTER_INVENTORY_ITEM = f"{CHARACTER_INVENTORY}/{{item_id}}"
+    # Werewolf Gifts
+    CHARACTER_WEREWOLF_GIFTS = f"{CHARACTER}/gifts"
+    CHARACTER_WEREWOLF_GIFT_DETAIL = f"{CHARACTER_WEREWOLF_GIFTS}/{{werewolf_gift_id}}"
+    # Werewolf Rites
+    CHARACTER_WEREWOLF_RITES = f"{CHARACTER}/rites"
+    CHARACTER_WEREWOLF_RITE_DETAIL = f"{CHARACTER_WEREWOLF_RITES}/{{werewolf_rite_id}}"
+    # Hunter Edges
+    CHARACTER_EDGES = f"{CHARACTER}/edges"
+    CHARACTER_EDGE_DETAIL = f"{CHARACTER_EDGES}/{{hunter_edge_id}}"
+    # Hunter Edge Perks (nested under edges)
+    CHARACTER_EDGE_PERKS = f"{CHARACTER_EDGE_DETAIL}/perks"
+    CHARACTER_EDGE_PERK_DETAIL = f"{CHARACTER_EDGE_PERKS}/{{hunter_edge_perk_id}}"
+
+    # Character trait endpoints
+    CHARACTER_TRAITS = f"{CHARACTER}/traits"
+    CHARACTER_TRAIT = f"{CHARACTER_TRAITS}/{{character_trait_id}}"
+    CHARACTER_TRAIT_ASSIGN = f"{CHARACTER_TRAITS}/assign"
+    CHARACTER_TRAIT_CREATE = f"{CHARACTER_TRAITS}/create"
+    CHARACTER_TRAIT_INCREASE = f"{CHARACTER_TRAIT}/increase"
+    CHARACTER_TRAIT_DECREASE = f"{CHARACTER_TRAIT}/decrease"
+    CHARACTER_TRAIT_XP_PURCHASE = f"{CHARACTER_TRAIT}/xp/purchase"
+    CHARACTER_TRAIT_XP_REFUND = f"{CHARACTER_TRAIT}/xp/refund"
+    CHARACTER_TRAIT_STARTINGPOINTS_PURCHASE = f"{CHARACTER_TRAIT}/startingpoints/purchase"
+    CHARACTER_TRAIT_STARTINGPOINTS_REFUND = f"{CHARACTER_TRAIT}/startingpoints/refund"
