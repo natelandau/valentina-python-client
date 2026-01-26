@@ -41,12 +41,10 @@ class Endpoints:
     USERS = f"{_BASE}/companies/{{company_id}}/users"
     USER = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}"
     USER_STATISTICS = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/statistics"
-
     # User asset endpoints
     USER_ASSETS = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/assets"
     USER_ASSET = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/assets/{{asset_id}}"
     USER_ASSET_UPLOAD = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/assets/upload"
-
     # User experience endpoints
     USER_EXPERIENCE_CAMPAIGN = (
         f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/experience/{{campaign_id}}"
@@ -56,11 +54,9 @@ class Endpoints:
         f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/experience/xp/remove"
     )
     USER_EXPERIENCE_CP_ADD = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/experience/cp/add"
-
     # User notes endpoints
     USER_NOTES = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/notes"
     USER_NOTE = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/notes/{{note_id}}"
-
     # User quickroll endpoints
     USER_QUICKROLLS = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/quickrolls"
     USER_QUICKROLL = (
@@ -71,12 +67,10 @@ class Endpoints:
     CAMPAIGNS = f"{_BASE}/companies/{{company_id}}/users/{{user_id}}/campaigns"
     CAMPAIGN = f"{CAMPAIGNS}/{{campaign_id}}"
     CAMPAIGN_STATISTICS = f"{CAMPAIGN}/statistics"
-
     # Campaign asset endpoints
     CAMPAIGN_ASSETS = f"{CAMPAIGN}/assets"
     CAMPAIGN_ASSET = f"{CAMPAIGN_ASSETS}/{{asset_id}}"
     CAMPAIGN_ASSET_UPLOAD = f"{CAMPAIGN_ASSETS}/upload"
-
     # Campaign note endpoints
     CAMPAIGN_NOTES = f"{CAMPAIGN}/notes"
     CAMPAIGN_NOTE = f"{CAMPAIGN_NOTES}/{{note_id}}"
@@ -85,11 +79,9 @@ class Endpoints:
     CAMPAIGN_BOOKS = f"{CAMPAIGN}/books"
     CAMPAIGN_BOOK = f"{CAMPAIGN_BOOKS}/{{book_id}}"
     CAMPAIGN_BOOK_NUMBER = f"{CAMPAIGN_BOOK}/number"
-
     # Book note endpoints
     BOOK_NOTES = f"{CAMPAIGN_BOOK}/notes"
     BOOK_NOTE = f"{BOOK_NOTES}/{{note_id}}"
-
     # Book asset endpoints
     BOOK_ASSETS = f"{CAMPAIGN_BOOK}/assets"
     BOOK_ASSET_UPLOAD = f"{BOOK_ASSETS}/upload"
@@ -99,11 +91,9 @@ class Endpoints:
     BOOK_CHAPTERS = f"{CAMPAIGN_BOOK}/chapters"
     BOOK_CHAPTER = f"{BOOK_CHAPTERS}/{{chapter_id}}"
     BOOK_CHAPTER_NUMBER = f"{BOOK_CHAPTER}/number"
-
     # Book chapter note endpoints
     BOOK_CHAPTER_NOTES = f"{BOOK_CHAPTER}/notes"
     BOOK_CHAPTER_NOTE = f"{BOOK_CHAPTER_NOTES}/{{note_id}}"
-
     # Book chapter asset endpoints
     BOOK_CHAPTER_ASSETS = f"{BOOK_CHAPTER}/assets"
     BOOK_CHAPTER_ASSET_UPLOAD = f"{BOOK_CHAPTER_ASSETS}/upload"
@@ -130,11 +120,11 @@ class Endpoints:
     CHARACTER_WEREWOLF_RITES = f"{CHARACTER}/rites"
     CHARACTER_WEREWOLF_RITE_DETAIL = f"{CHARACTER_WEREWOLF_RITES}/{{werewolf_rite_id}}"
     # Hunter Edges
-    CHARACTER_EDGES = f"{CHARACTER}/edges"
-    CHARACTER_EDGE_DETAIL = f"{CHARACTER_EDGES}/{{hunter_edge_id}}"
+    CHARACTER_HUNTER_EDGES = f"{CHARACTER}/edges"
+    CHARACTER_HUNTER_EDGE_DETAIL = f"{CHARACTER_HUNTER_EDGES}/{{hunter_edge_id}}"
     # Hunter Edge Perks (nested under edges)
-    CHARACTER_EDGE_PERKS = f"{CHARACTER_EDGE_DETAIL}/perks"
-    CHARACTER_EDGE_PERK_DETAIL = f"{CHARACTER_EDGE_PERKS}/{{hunter_edge_perk_id}}"
+    CHARACTER_HUNTER_EDGE_PERKS = f"{CHARACTER_HUNTER_EDGE_DETAIL}/perks"
+    CHARACTER_HUNTER_EDGE_PERK_DETAIL = f"{CHARACTER_HUNTER_EDGE_PERKS}/{{hunter_edge_perk_id}}"
 
     # Character trait endpoints
     CHARACTER_TRAITS = f"{CHARACTER}/traits"

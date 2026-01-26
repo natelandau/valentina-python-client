@@ -25,8 +25,10 @@ from .character_trait import (
 )
 from .characters import (
     Character,
+    CharacterEdgeAndPerksDTO,
     CharacterInventoryItem,
     CharacterInventoryType,
+    CharacterPerkDTO,
     CharacterSpecialty,
     CharacterStatus,
     CharacterType,
@@ -102,8 +104,10 @@ __all__ = [
     "CampaignExperience",
     "Character",
     "CharacterClass",
+    "CharacterEdgeAndPerksDTO",
     "CharacterInventoryItem",
     "CharacterInventoryType",
+    "CharacterPerkDTO",
     "CharacterSpecialty",
     "CharacterStatus",
     "CharacterTrait",

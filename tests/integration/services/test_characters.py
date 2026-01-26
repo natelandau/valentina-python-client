@@ -10,7 +10,9 @@ from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
 from vclient.models import (
     Character,
+    CharacterEdgeAndPerksDTO,
     CharacterInventoryItem,
+    CharacterPerkDTO,
     Note,
     PaginatedResponse,
     RollStatistics,
@@ -171,6 +173,30 @@ def werewolf_rite_response_data() -> dict:
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
         "pool": "Charisma + Rituals",
+    }
+
+
+@pytest.fixture
+def hunter_edge_perk_response_data() -> dict:
+    """Return sample hunter edge perk response data."""
+    return {
+        "id": "perk123",
+        "name": "Advanced Tracking",
+        "description": "Enhanced ability to track supernatural prey.",
+    }
+
+
+@pytest.fixture
+def hunter_edge_response_data(hunter_edge_perk_response_data: dict) -> dict:
+    """Return sample hunter edge response data."""
+    return {
+        "id": "edge123",
+        "name": "Beast Hunter",
+        "description": "Specialized training for hunting supernatural beasts.",
+        "pool": "Wits + Investigation",
+        "system": "Roll to track supernatural creatures.",
+        "type": "APTITUDES",
+        "perks": [hunter_edge_perk_response_data],
     }
 
 
@@ -1301,3 +1327,354 @@ class TestCharactersServiceWerewolfRites:
         assert route.called
         assert isinstance(result, WerewolfRite)
         assert result.id == "rite123"
+
+
+class TestCharactersServiceHunterEdges:
+    """Tests for CharactersService hunter edge methods."""
+
+    @respx.mock
+    async def test_get_edges_page(self, vclient, base_url, hunter_edge_response_data):
+        """Verify getting a page of hunter edges."""
+        # Given: A mocked edges endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGES.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [hunter_edge_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Getting a page of edges
+        result = await vclient.characters(company_id, user_id, campaign_id).get_edges_page(
+            character_id
+        )
+
+        # Then: Returns paginated CharacterEdgeAndPerksDTO objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], CharacterEdgeAndPerksDTO)
+        assert result.items[0].name == "Beast Hunter"
+        assert result.items[0].type == "APTITUDES"
+
+    @respx.mock
+    async def test_list_all_edges(self, vclient, base_url, hunter_edge_response_data):
+        """Verify listing all hunter edges."""
+        # Given: A mocked edges endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGES.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(
+            200,
+            json={"items": [hunter_edge_response_data], "total": 1, "limit": 100, "offset": 0},
+        )
+
+        # When: Listing all edges
+        result = await vclient.characters(company_id, user_id, campaign_id).list_all_edges(
+            character_id
+        )
+
+        # Then: Returns list of CharacterEdgeAndPerksDTO objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], CharacterEdgeAndPerksDTO)
+        assert result[0].name == "Beast Hunter"
+
+    @respx.mock
+    async def test_iter_all_edges(self, vclient, base_url, hunter_edge_response_data):
+        """Verify iterating through all hunter edges."""
+        # Given: A mocked edges endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGES.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(
+            200,
+            json={"items": [hunter_edge_response_data], "total": 1, "limit": 100, "offset": 0},
+        )
+
+        # When: Iterating through all edges
+        result = [
+            edge
+            async for edge in vclient.characters(company_id, user_id, campaign_id).iter_all_edges(
+                character_id
+            )
+        ]
+
+        # Then: Returns list of CharacterEdgeAndPerksDTO objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], CharacterEdgeAndPerksDTO)
+        assert result[0].name == "Beast Hunter"
+
+    @respx.mock
+    async def test_get_edge(self, vclient, base_url, hunter_edge_response_data):
+        """Verify getting a specific hunter edge."""
+        # Given: A mocked edge endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id)}"
+        ).respond(200, json=hunter_edge_response_data)
+
+        # When: Getting the edge
+        result = await vclient.characters(company_id, user_id, campaign_id).get_edge(
+            character_id, hunter_edge_id
+        )
+
+        # Then: Returns CharacterEdgeAndPerksDTO object
+        assert route.called
+        assert isinstance(result, CharacterEdgeAndPerksDTO)
+        assert result.id == "edge123"
+        assert result.name == "Beast Hunter"
+        assert result.pool == "Wits + Investigation"
+        assert result.type == "APTITUDES"
+        assert len(result.perks) == 1
+
+    @respx.mock
+    async def test_add_edge(self, vclient, base_url, hunter_edge_response_data):
+        """Verify adding a hunter edge to a character."""
+        # Given: A mocked add edge endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id)}"
+        ).respond(201, json=hunter_edge_response_data)
+
+        # When: Adding the edge
+        result = await vclient.characters(company_id, user_id, campaign_id).add_edge(
+            character_id, hunter_edge_id
+        )
+
+        # Then: Returns CharacterEdgeAndPerksDTO object
+        assert route.called
+        assert isinstance(result, CharacterEdgeAndPerksDTO)
+        assert result.id == "edge123"
+        assert result.name == "Beast Hunter"
+
+    @respx.mock
+    async def test_remove_edge(self, vclient, base_url, hunter_edge_response_data):
+        """Verify removing a hunter edge from a character."""
+        # Given: A mocked remove edge endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id)}"
+        ).respond(200, json=hunter_edge_response_data)
+
+        # When: Removing the edge
+        result = await vclient.characters(company_id, user_id, campaign_id).remove_edge(
+            character_id, hunter_edge_id
+        )
+
+        # Then: Returns CharacterEdgeAndPerksDTO object
+        assert route.called
+        assert isinstance(result, CharacterEdgeAndPerksDTO)
+        assert result.id == "edge123"
+
+
+class TestCharactersServiceHunterEdgePerks:
+    """Tests for CharactersService hunter edge perk methods."""
+
+    @respx.mock
+    async def test_get_edge_perks_page(self, vclient, base_url, hunter_edge_perk_response_data):
+        """Verify getting a page of hunter edge perks."""
+        # Given: A mocked edge perks endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_PERKS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [hunter_edge_perk_response_data],
+                "limit": 10,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Getting a page of edge perks
+        result = await vclient.characters(company_id, user_id, campaign_id).get_edge_perks_page(
+            character_id, hunter_edge_id
+        )
+
+        # Then: Returns paginated CharacterPerkDTO objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], CharacterPerkDTO)
+        assert result.items[0].name == "Advanced Tracking"
+
+    @respx.mock
+    async def test_list_all_edge_perks(self, vclient, base_url, hunter_edge_perk_response_data):
+        """Verify listing all hunter edge perks."""
+        # Given: A mocked edge perks endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_PERKS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id)}",
+        ).respond(
+            200,
+            json={
+                "items": [hunter_edge_perk_response_data],
+                "total": 1,
+                "limit": 100,
+                "offset": 0,
+            },
+        )
+
+        # When: Listing all edge perks
+        result = await vclient.characters(company_id, user_id, campaign_id).list_all_edge_perks(
+            character_id, hunter_edge_id
+        )
+
+        # Then: Returns list of CharacterPerkDTO objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], CharacterPerkDTO)
+        assert result[0].name == "Advanced Tracking"
+
+    @respx.mock
+    async def test_iter_all_edge_perks(self, vclient, base_url, hunter_edge_perk_response_data):
+        """Verify iterating through all hunter edge perks."""
+        # Given: A mocked edge perks endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_PERKS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id)}",
+        ).respond(
+            200,
+            json={
+                "items": [hunter_edge_perk_response_data],
+                "total": 1,
+                "limit": 100,
+                "offset": 0,
+            },
+        )
+
+        # When: Iterating through all edge perks
+        result = [
+            perk
+            async for perk in vclient.characters(
+                company_id, user_id, campaign_id
+            ).iter_all_edge_perks(character_id, hunter_edge_id)
+        ]
+
+        # Then: Returns list of CharacterPerkDTO objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], CharacterPerkDTO)
+        assert result[0].name == "Advanced Tracking"
+
+    @respx.mock
+    async def test_get_edge_perk(self, vclient, base_url, hunter_edge_perk_response_data):
+        """Verify getting a specific hunter edge perk."""
+        # Given: A mocked edge perk endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        hunter_edge_perk_id = "perk123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_PERK_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id, hunter_edge_perk_id=hunter_edge_perk_id)}"
+        ).respond(200, json=hunter_edge_perk_response_data)
+
+        # When: Getting the edge perk
+        result = await vclient.characters(company_id, user_id, campaign_id).get_edge_perk(
+            character_id, hunter_edge_id, hunter_edge_perk_id
+        )
+
+        # Then: Returns CharacterPerkDTO object
+        assert route.called
+        assert isinstance(result, CharacterPerkDTO)
+        assert result.id == "perk123"
+        assert result.name == "Advanced Tracking"
+        assert result.description == "Enhanced ability to track supernatural prey."
+
+    @respx.mock
+    async def test_add_edge_perk(self, vclient, base_url, hunter_edge_perk_response_data):
+        """Verify adding a hunter edge perk to an edge."""
+        # Given: A mocked add edge perk endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        hunter_edge_perk_id = "perk123"
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_PERK_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id, hunter_edge_perk_id=hunter_edge_perk_id)}"
+        ).respond(201, json=hunter_edge_perk_response_data)
+
+        # When: Adding the edge perk
+        result = await vclient.characters(company_id, user_id, campaign_id).add_edge_perk(
+            character_id, hunter_edge_id, hunter_edge_perk_id
+        )
+
+        # Then: Returns CharacterPerkDTO object
+        assert route.called
+        assert isinstance(result, CharacterPerkDTO)
+        assert result.id == "perk123"
+        assert result.name == "Advanced Tracking"
+
+    @respx.mock
+    async def test_remove_edge_perk(self, vclient, base_url, hunter_edge_perk_response_data):
+        """Verify removing a hunter edge perk from an edge."""
+        # Given: A mocked remove edge perk endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        character_id = "char123"
+        hunter_edge_id = "edge123"
+        hunter_edge_perk_id = "perk123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_HUNTER_EDGE_PERK_DETAIL.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, hunter_edge_id=hunter_edge_id, hunter_edge_perk_id=hunter_edge_perk_id)}"
+        ).respond(200, json=hunter_edge_perk_response_data)
+
+        # When: Removing the edge perk
+        result = await vclient.characters(company_id, user_id, campaign_id).remove_edge_perk(
+            character_id, hunter_edge_id, hunter_edge_perk_id
+        )
+
+        # Then: Returns CharacterPerkDTO object
+        assert route.called
+        assert isinstance(result, CharacterPerkDTO)
+        assert result.id == "perk123"

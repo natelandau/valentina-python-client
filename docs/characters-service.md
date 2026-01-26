@@ -88,6 +88,24 @@ all_characters = await characters.list_all()
 - `add_rite(character_id, werewolf_rite_id)` - Add a werewolf rite to a character
 - `remove_rite(character_id, werewolf_rite_id)` - Remove a werewolf rite from a character
 
+### Hunter Edges
+
+- `get_edges_page(character_id, limit?, offset?)` - Get a paginated page of hunter edges
+- `list_all_edges(character_id)` - Get all hunter edges
+- `iter_all_edges(character_id, limit?)` - Iterate through all hunter edges
+- `get_edge(character_id, hunter_edge_id)` - Get a specific hunter edge with its perks
+- `add_edge(character_id, hunter_edge_id)` - Add a hunter edge to a character
+- `remove_edge(character_id, hunter_edge_id)` - Remove a hunter edge from a character
+
+### Hunter Edge Perks
+
+- `get_edge_perks_page(character_id, hunter_edge_id, limit?, offset?)` - Get a paginated page of perks for an edge
+- `list_all_edge_perks(character_id, hunter_edge_id)` - Get all perks for an edge
+- `iter_all_edge_perks(character_id, hunter_edge_id, limit?)` - Iterate through all perks for an edge
+- `get_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Get a specific perk
+- `add_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Add a perk to an edge
+- `remove_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Remove a perk from an edge
+
 ## Response Models
 
 ### `Character`
@@ -261,8 +279,33 @@ Represents a werewolf rite ritual.
 | `date_modified` | `datetime`    | Timestamp when last modified |
 | `pool`          | `str \| None` | Dice pool for the rite       |
 
+### `CharacterEdgeAndPerksDTO`
+
+Represents a hunter edge with its associated perks.
+
+| Field         | Type                     | Description                    |
+| ------------- | ------------------------ | ------------------------------ |
+| `id`          | `str`                    | MongoDB document ObjectID      |
+| `name`        | `str`                    | Edge name                      |
+| `description` | `str \| None`            | Edge description               |
+| `pool`        | `str \| None`            | Dice pool for the edge         |
+| `system`      | `str \| None`            | System rules for the edge      |
+| `type`        | `HunterEdgeType \| None` | Type of hunter edge            |
+| `perks`       | `list[CharacterPerkDTO]` | List of associated perks       |
+
+### `CharacterPerkDTO`
+
+Represents a perk associated with a hunter edge.
+
+| Field         | Type          | Description               |
+| ------------- | ------------- | ------------------------- |
+| `id`          | `str`         | MongoDB document ObjectID |
+| `name`        | `str`         | Perk name                 |
+| `description` | `str \| None` | Perk description          |
+
 ### Type Aliases
 
-| Type             | Values                 | Description                      |
-| ---------------- | ---------------------- | -------------------------------- |
-| `WerewolfRenown` | HONOR, GLORY, WISDOM   | Werewolf renown type for gifts   |
+| Type             | Values                        | Description                    |
+| ---------------- | ----------------------------- | ------------------------------ |
+| `WerewolfRenown` | HONOR, GLORY, WISDOM          | Werewolf renown type for gifts |
+| `HunterEdgeType` | ASSETS, APTITUDES, ENDOWMENTS | Hunter edge category type      |

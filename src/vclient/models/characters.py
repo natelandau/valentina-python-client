@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from vclient.models.shared import CharacterClass, GameVersion
+from vclient.models.shared import CharacterClass, GameVersion, HunterEdgeType
 
 # -----------------------------------------------------------------------------
 # Type Aliases
@@ -275,3 +275,28 @@ class UpdateCharacterInventoryItemRequest(BaseModel):
     name: str | None = Field(default=None, description="Name of the item.")
     type: CharacterInventoryType | None = Field(default=None, description="Type of the item.")
     description: str | None = Field(default=None, description="Description of the item.")
+
+
+# -----------------------------------------------------------------------------
+# Character Specific Hunter Edge Response Models
+# -----------------------------------------------------------------------------
+
+
+class CharacterPerkDTO(BaseModel):
+    """Character perk DTO."""
+
+    id: str
+    name: str
+    description: str | None = None
+
+
+class CharacterEdgeAndPerksDTO(BaseModel):
+    """Character edge and perks DTO."""
+
+    id: str
+    name: str
+    description: str | None = None
+    pool: str | None = None
+    system: str | None = None
+    type: HunterEdgeType | None = None
+    perks: list[CharacterPerkDTO] = Field(default_factory=list)

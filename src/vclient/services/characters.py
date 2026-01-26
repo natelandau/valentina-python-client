@@ -9,22 +9,22 @@ from vclient.endpoints import Endpoints
 from vclient.models import (
     Character,
     CharacterClass,
+    CharacterEdgeAndPerksDTO,
     CharacterInventoryItem,
     CharacterInventoryType,
+    CharacterPerkDTO,
     CharacterStatus,
     CharacterType,
     CreateCharacterInventoryItemRequest,
     CreateCharacterRequest,
-    GameVersion,
-    UpdateCharacterInventoryItemRequest,
-    UpdateCharacterRequest,
-)
-from vclient.models.pagination import PaginatedResponse
-from vclient.models.shared import (
     CreateNoteRequest,
+    GameVersion,
     Note,
+    PaginatedResponse,
     RollStatistics,
     S3Asset,
+    UpdateCharacterInventoryItemRequest,
+    UpdateCharacterRequest,
     UpdateNoteRequest,
     WerewolfGift,
     WerewolfRite,
@@ -1205,3 +1205,273 @@ class CharactersService(BaseService):
             )
         )
         return WerewolfRite.model_validate(response.json())
+
+    # -------------------------------------------------------------------------
+    # Hunter Edge Methods
+    # -------------------------------------------------------------------------
+    async def get_edges_page(
+        self,
+        character_id: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> PaginatedResponse[CharacterEdgeAndPerksDTO]:
+        """Retrieve a paginated page of hunter edges for a character.
+
+        Args:
+            character_id: The ID of the character whose hunter edges to list.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+
+        Returns:
+            A PaginatedResponse containing CharacterEdgeAndPerksDTO objects and pagination metadata.
+        """
+        return await self._get_paginated_as(
+            self._format_endpoint(Endpoints.CHARACTER_HUNTER_EDGES, character_id=character_id),
+            CharacterEdgeAndPerksDTO,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def list_all_edges(
+        self,
+        character_id: str,
+    ) -> list[CharacterEdgeAndPerksDTO]:
+        """Retrieve all hunter edges for a character.
+
+        Automatically paginates through all results. Use `get_edges_page()` for paginated
+        access or `iter_all_edges()` for memory-efficient streaming of large datasets.
+        """
+        return [edge async for edge in self.iter_all_edges(character_id)]
+
+    async def iter_all_edges(
+        self,
+        character_id: str,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[CharacterEdgeAndPerksDTO]:
+        """Iterate through all hunter edges for a character.
+
+        Yields individual hunter edges, automatically fetching subsequent pages until
+        all items have been retrieved.
+
+        Args:
+            character_id: The ID of the character whose hunter edges to iterate.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual CharacterEdgeAndPerksDTO objects.
+        """
+        async for edge in self._iter_all_pages(
+            self._format_endpoint(Endpoints.CHARACTER_HUNTER_EDGES, character_id=character_id),
+            limit=limit,
+        ):
+            yield CharacterEdgeAndPerksDTO.model_validate(edge)
+
+    async def get_edge(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+    ) -> CharacterEdgeAndPerksDTO:
+        """Retrieve a specific hunter edge including its perks.
+
+        Args:
+            character_id: The ID of the character that owns the hunter edge.
+            hunter_edge_id: The ID of the hunter edge to retrieve.
+        """
+        response = await self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_HUNTER_EDGE_DETAIL,
+                character_id=character_id,
+                hunter_edge_id=hunter_edge_id,
+            )
+        )
+        return CharacterEdgeAndPerksDTO.model_validate(response.json())
+
+    async def add_edge(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+    ) -> CharacterEdgeAndPerksDTO:
+        """Add a hunter edge to a character.
+
+        Args:
+            character_id: The ID of the character to add the hunter edge to.
+            hunter_edge_id: The ID of the hunter edge to add.
+        """
+        response = await self._post(
+            self._format_endpoint(
+                Endpoints.CHARACTER_HUNTER_EDGE_DETAIL,
+                character_id=character_id,
+                hunter_edge_id=hunter_edge_id,
+            )
+        )
+        return CharacterEdgeAndPerksDTO.model_validate(response.json())
+
+    async def remove_edge(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+    ) -> CharacterEdgeAndPerksDTO:
+        """Remove a hunter edge from a character.
+
+        Args:
+            character_id: The ID of the character to remove the hunter edge from.
+            hunter_edge_id: The ID of the hunter edge to remove.
+        """
+        response = await self._delete(
+            self._format_endpoint(
+                Endpoints.CHARACTER_HUNTER_EDGE_DETAIL,
+                character_id=character_id,
+                hunter_edge_id=hunter_edge_id,
+            )
+        )
+        return CharacterEdgeAndPerksDTO.model_validate(response.json())
+
+    async def get_edge_perks_page(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> PaginatedResponse[CharacterPerkDTO]:
+        """Retrieve the perks for a specific hunter edge.
+
+        Args:
+            character_id: The ID of the character that owns the hunter edge.
+            hunter_edge_id: The ID of the hunter edge to retrieve the perks for.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+        """
+        return await self._get_paginated_as(
+            self._format_endpoint(
+                Endpoints.CHARACTER_HUNTER_EDGE_PERKS,
+                character_id=character_id,
+                hunter_edge_id=hunter_edge_id,
+            ),
+            CharacterPerkDTO,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def list_all_edge_perks(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+    ) -> list[CharacterPerkDTO]:
+        """Retrieve all perks for a specific hunter edge.
+
+        Automatically paginates through all results. Use `get_edge_perks_page()` for paginated
+        access or `iter_all_edge_perks()` for memory-efficient streaming of large datasets.
+
+        Args:
+            character_id: The ID of the character that owns the hunter edge.
+            hunter_edge_id: The ID of the hunter edge to retrieve the perks for.
+        """
+        return [perk async for perk in self.iter_all_edge_perks(character_id, hunter_edge_id)]
+
+    async def iter_all_edge_perks(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[CharacterPerkDTO]:
+        """Iterate through all perks for a specific hunter edge.
+
+        Yields individual perks, automatically fetching subsequent pages until
+        all items have been retrieved.
+
+        Args:
+            character_id: The ID of the character that owns the hunter edge.
+            hunter_edge_id: The ID of the hunter edge to iterate the perks for.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual CharacterPerkDTO objects.
+        """
+        async for perk in self._iter_all_pages(
+            self._format_endpoint(
+                Endpoints.CHARACTER_HUNTER_EDGE_PERKS,
+                character_id=character_id,
+                hunter_edge_id=hunter_edge_id,
+            ),
+            limit=limit,
+        ):
+            yield CharacterPerkDTO.model_validate(perk)
+
+    async def get_edge_perk(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+        hunter_edge_perk_id: str,
+    ) -> CharacterPerkDTO:
+        """Retrieve a specific perk for a hunter edge.
+
+        Args:
+            character_id: The ID of the character that owns the hunter edge.
+            hunter_edge_id: The ID of the hunter edge to retrieve the perk for.
+            hunter_edge_perk_id: The ID of the hunter edge perk to retrieve.
+        """
+        response = await self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_HUNTER_EDGE_PERK_DETAIL,
+                character_id=character_id,
+                hunter_edge_id=hunter_edge_id,
+                hunter_edge_perk_id=hunter_edge_perk_id,
+            )
+        )
+        return CharacterPerkDTO.model_validate(response.json())
+
+    async def add_edge_perk(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+        hunter_edge_perk_id: str,
+    ) -> CharacterPerkDTO:
+        """Add a perk to a hunter edge.
+
+        Args:
+            character_id: The ID of the character to add the perk to.
+            hunter_edge_id: The ID of the hunter edge to add the perk to.
+            hunter_edge_perk_id: The ID of the hunter edge perk to add.
+
+        Returns:
+            The added CharacterPerkDTO object.
+        """
+        response = await self._post(
+            self._format_endpoint(
+                Endpoints.CHARACTER_HUNTER_EDGE_PERK_DETAIL,
+                character_id=character_id,
+                hunter_edge_id=hunter_edge_id,
+                hunter_edge_perk_id=hunter_edge_perk_id,
+            )
+        )
+        return CharacterPerkDTO.model_validate(response.json())
+
+    async def remove_edge_perk(
+        self,
+        character_id: str,
+        hunter_edge_id: str,
+        hunter_edge_perk_id: str,
+    ) -> CharacterPerkDTO:
+        """Remove a perk from a hunter edge.
+
+        Args:
+            character_id: The ID of the character to remove the perk from.
+            hunter_edge_id: The ID of the hunter edge to remove the perk from.
+            hunter_edge_perk_id: The ID of the hunter edge perk to remove.
+
+        Returns:
+            The removed CharacterPerkDTO object.
+        """
+        response = await self._delete(
+            self._format_endpoint(
+                Endpoints.CHARACTER_HUNTER_EDGE_PERK_DETAIL,
+                character_id=character_id,
+                hunter_edge_id=hunter_edge_id,
+                hunter_edge_perk_id=hunter_edge_perk_id,
+            )
+        )
+        return CharacterPerkDTO.model_validate(response.json())
