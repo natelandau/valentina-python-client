@@ -5,17 +5,15 @@ from typing import TYPE_CHECKING
 
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
-from vclient.models.books import (
+from vclient.models import (
     CampaignBook,
     CreateBookRequest,
-    RenumberBookRequest,
-    UpdateBookRequest,
-)
-from vclient.models.pagination import PaginatedResponse
-from vclient.models.shared import (
     CreateNoteRequest,
     Note,
+    PaginatedResponse,
+    RenumberBookRequest,
     S3Asset,
+    UpdateBookRequest,
     UpdateNoteRequest,
 )
 from vclient.services.base import BaseService

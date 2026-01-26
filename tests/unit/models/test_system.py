@@ -3,27 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from vclient.models.system import ServiceStatus, SystemHealth
-
-
-class TestServiceStatus:
-    """Tests for ServiceStatus enum."""
-
-    @pytest.mark.parametrize(
-        ("status", "expected"),
-        [
-            (ServiceStatus.ONLINE, "online"),
-            (ServiceStatus.OFFLINE, "offline"),
-        ],
-    )
-    def test_status_values(self, status, expected):
-        """Verify status enum values."""
-        assert status == expected
-
-    def test_all_values(self):
-        """Verify all expected status values exist."""
-        values = [status.value for status in ServiceStatus]
-        assert values == ["online", "offline"]
+from vclient.models.system import SystemHealth
 
 
 class TestSystemHealth:
@@ -42,8 +22,8 @@ class TestSystemHealth:
         health = SystemHealth.model_validate(data)
 
         # Then: All fields are correctly parsed
-        assert health.database_status == ServiceStatus.ONLINE
-        assert health.cache_status == ServiceStatus.ONLINE
+        assert health.database_status == "online"
+        assert health.cache_status == "online"
         assert health.version == "1.0.0"
 
     def test_health_with_offline_status(self):
@@ -59,8 +39,8 @@ class TestSystemHealth:
         health = SystemHealth.model_validate(data)
 
         # Then: Offline status is correctly parsed
-        assert health.database_status == ServiceStatus.OFFLINE
-        assert health.cache_status == ServiceStatus.OFFLINE
+        assert health.database_status == "offline"
+        assert health.cache_status == "offline"
 
     @pytest.mark.parametrize(
         ("data", "missing_field"),

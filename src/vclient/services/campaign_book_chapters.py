@@ -8,14 +8,12 @@ from vclient.endpoints import Endpoints
 from vclient.models import (
     CampaignChapter,
     CreateChapterRequest,
-    RenumberChapterRequest,
-    UpdateChapterRequest,
-)
-from vclient.models.pagination import PaginatedResponse
-from vclient.models.shared import (
     CreateNoteRequest,
     Note,
+    PaginatedResponse,
+    RenumberChapterRequest,
     S3Asset,
+    UpdateChapterRequest,
     UpdateNoteRequest,
 )
 from vclient.services.base import BaseService

@@ -4,13 +4,13 @@ from collections.abc import AsyncIterator
 
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
-from vclient.models.global_admin import (
+from vclient.models import (
     CreateDeveloperRequest,
     Developer,
     DeveloperWithApiKey,
+    PaginatedResponse,
     UpdateDeveloperRequest,
 )
-from vclient.models.pagination import PaginatedResponse
 from vclient.services.base import BaseService
 
 

@@ -4,21 +4,23 @@ from collections.abc import AsyncIterator
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import (
+    DEFAULT_PAGE_LIMIT,
+    CharacterClass,
+    CharacterInventoryType,
+    CharacterStatus,
+    CharacterType,
+    GameVersion,
+)
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Character,
-    CharacterClass,
     CharacterEdgeAndPerksDTO,
     CharacterInventoryItem,
-    CharacterInventoryType,
     CharacterPerkDTO,
-    CharacterStatus,
-    CharacterType,
     CreateCharacterInventoryItemRequest,
     CreateCharacterRequest,
     CreateNoteRequest,
-    GameVersion,
     Note,
     PaginatedResponse,
     RollStatistics,

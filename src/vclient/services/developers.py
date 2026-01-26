@@ -1,7 +1,7 @@
 """Service for interacting with the Developer API."""
 
 from vclient.endpoints import Endpoints
-from vclient.models.developers import (
+from vclient.models import (
     MeDeveloper,
     MeDeveloperWithApiKey,
     UpdateMeDeveloperRequest,

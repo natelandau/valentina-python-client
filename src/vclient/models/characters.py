@@ -1,25 +1,18 @@
 """Pydantic models for Character API responses and requests."""
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, Field
 
-from vclient.models.shared import CharacterClass, GameVersion, HunterEdgeType
-
-# -----------------------------------------------------------------------------
-# Type Aliases
-# -----------------------------------------------------------------------------
-CharacterType = Literal["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"]
-CharacterStatus = Literal["ALIVE", "DEAD"]
-CharacterInventoryType = Literal[
-    "BOOK",
-    "CONSUMABLE",
-    "ENCHANTED",
-    "EQUIPMENT",
-    "OTHER",
-    "WEAPON",
-]
+from vclient.constants import (
+    CharacterClass,
+    CharacterInventoryType,
+    CharacterStatus,
+    CharacterType,
+    GameVersion,
+    HunterEdgeType,
+)
 
 # -----------------------------------------------------------------------------
 # Nested Models

@@ -3,27 +3,24 @@
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import DEFAULT_PAGE_LIMIT, UserRole
 from vclient.endpoints import Endpoints
-from vclient.models.pagination import PaginatedResponse
-from vclient.models.shared import (
-    CreateNoteRequest,
-    Note,
-    RollStatistics,
-    S3Asset,
-    UpdateNoteRequest,
-)
-from vclient.models.users import (
+from vclient.models import (
     CampaignExperience,
+    CreateNoteRequest,
     CreateQuickrollRequest,
     CreateUserRequest,
     DiscordProfile,
     ExperienceAddRemoveRequest,
+    Note,
+    PaginatedResponse,
     Quickroll,
+    RollStatistics,
+    S3Asset,
+    UpdateNoteRequest,
     UpdateQuickrollRequest,
     UpdateUserRequest,
     User,
-    UserRole,
 )
 from vclient.services.base import BaseService
 

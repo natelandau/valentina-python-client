@@ -1,27 +1,10 @@
 """Pydantic models for User API responses and requests."""
 
 from datetime import datetime
-from typing import Literal
 
 from pydantic import BaseModel, Field
 
-# Type aliases for user-related constrained values
-UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER"]
-
-# Re-export for module-level access
-__all__ = [
-    "CampaignExperience",
-    "CreateQuickrollRequest",
-    "CreateUserRequest",
-    "DiscordProfile",
-    "ExperienceAddRemoveRequest",
-    "Quickroll",
-    "UpdateQuickrollRequest",
-    "UpdateUserRequest",
-    "User",
-    "UserRole",
-]
-
+from vclient.constants import UserRole
 
 # -----------------------------------------------------------------------------
 # Nested/Shared Models

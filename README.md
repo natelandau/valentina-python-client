@@ -256,24 +256,6 @@ except APIError as e:
 
 All API responses are returned as [Pydantic](https://docs.pydantic.dev/) models, providing automatic validation, serialization, and IDE autocompletion support.
 
-```python
-from vclient import companies_service
-
-companies = companies_service()
-company = await companies.get("company-id")
-
-# Access attributes directly
-print(company.name)
-print(company.date_created)
-
-# Convert to dictionary
-data = company.model_dump()
-
-# Convert to JSON string
-json_str = company.model_dump_json()
-
-# Exclude None values when serializing
-data = company.model_dump(exclude_none=True)
-```
+Import models from `vclient.models` for use in your code.
 
 See individual service documentation for detailed response model specifications.

@@ -4,7 +4,7 @@ import pytest
 import respx
 
 from vclient.endpoints import Endpoints
-from vclient.models import ServiceStatus, SystemHealth
+from vclient.models import SystemHealth
 from vclient.services import SystemService
 
 pytestmark = pytest.mark.anyio
@@ -35,8 +35,8 @@ class TestSystemServiceHealth:
         # Then: Returns SystemHealth object with correct data
         assert route.called
         assert isinstance(result, SystemHealth)
-        assert result.database_status == ServiceStatus.ONLINE
-        assert result.cache_status == ServiceStatus.ONLINE
+        assert result.database_status == "online"
+        assert result.cache_status == "online"
         assert result.version == "0.7.0"
 
     @respx.mock
@@ -55,8 +55,8 @@ class TestSystemServiceHealth:
 
         # Then: Returns correct offline status
         assert route.called
-        assert result.database_status == ServiceStatus.OFFLINE
-        assert result.cache_status == ServiceStatus.ONLINE
+        assert result.database_status == "offline"
+        assert result.cache_status == "online"
 
     @respx.mock
     async def test_health_with_offline_cache(self, vclient, base_url):
@@ -74,8 +74,8 @@ class TestSystemServiceHealth:
 
         # Then: Returns correct offline status
         assert route.called
-        assert result.database_status == ServiceStatus.ONLINE
-        assert result.cache_status == ServiceStatus.OFFLINE
+        assert result.database_status == "online"
+        assert result.cache_status == "offline"
 
     @respx.mock
     async def test_health_with_all_services_offline(self, vclient, base_url):
@@ -93,8 +93,8 @@ class TestSystemServiceHealth:
 
         # Then: Returns correct offline status for all services
         assert route.called
-        assert result.database_status == ServiceStatus.OFFLINE
-        assert result.cache_status == ServiceStatus.OFFLINE
+        assert result.database_status == "offline"
+        assert result.cache_status == "offline"
 
 
 class TestSystemServiceClientIntegration:

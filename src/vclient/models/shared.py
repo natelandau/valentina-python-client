@@ -1,21 +1,18 @@
 """Shared Pydantic models used across multiple services."""
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, Field
 
-# Type aliases for asset-related constrained values
-S3AssetType = Literal["image", "text", "audio", "video", "document", "archive", "other"]
-S3AssetParentType = Literal[
-    "character", "campaign", "campaignbook", "campaignchapter", "user", "company", "unknown"
-]
-GameVersion = Literal["V4", "V5"]
-CharacterClass = Literal["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"]
-WerewolfRenown = Literal["HONOR", "GLORY", "WISDOM"]
-HunterCreed = Literal["ENTREPRENEURIAL", "FAITHFUL", "INQUISITIVE", "MARTIAL", "UNDERGROUND"]
-HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
-SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
+from vclient.constants import (
+    CharacterClass,
+    GameVersion,
+    S3AssetParentType,
+    S3AssetType,
+    WerewolfRenown,
+)
+
 # -----------------------------------------------------------------------------
 # Asset Models
 # -----------------------------------------------------------------------------

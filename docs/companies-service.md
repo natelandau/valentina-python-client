@@ -74,7 +74,7 @@ Represents a company entity returned from the API.
 
 ### `CompanySettings`
 
-Configuration options for a company. Import with `from vclient import CompanySettings`.
+Configuration options for a company. Import with `from vclient.models import CompanySettings`.
 
 | Field | Type | Description |
 | --- | --- | --- |

@@ -10,8 +10,8 @@ from vclient.models import (
     CharacterTrait,
     CharacterTraitValueChangeRequest,
     CreateCharacterTraitRequest,
+    PaginatedResponse,
 )
-from vclient.models.pagination import PaginatedResponse
 from vclient.services.base import BaseService
 
 if TYPE_CHECKING:

@@ -29,7 +29,7 @@ class SystemService(BaseService):
 
         Example:
             >>> health = await client.system.health()
-            >>> if health.database_status == ServiceStatus.ONLINE:
+            >>> if health.database_status == "online":
             ...     print("Database is healthy")
         """
         response = await self._get(Endpoints.HEALTH)
