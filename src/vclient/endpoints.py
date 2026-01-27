@@ -100,6 +100,11 @@ class Endpoints:
     CHARACTER_HUNTER_EDGE_PERKS = f"{CHARACTER_HUNTER_EDGE_DETAIL}/perks"
     CHARACTER_HUNTER_EDGE_PERK_DETAIL = f"{CHARACTER_HUNTER_EDGE_PERKS}/{{hunter_edge_perk_id}}"
 
+    # Character RNG generation
+    AUTOGENERATE = f"{CHARACTERS}/autogenerate"
+    CHARGEN_START = f"{CHARACTERS}/chargen/start"
+    CHARGEN_FINALIZE = f"{CHARACTERS}/chargen/finalize"
+
     # Character trait endpoints
     CHARACTER_TRAITS = f"{CHARACTER}/traits"
     CHARACTER_TRAIT = f"{CHARACTER_TRAITS}/{{character_trait_id}}"

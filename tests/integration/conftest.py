@@ -6,6 +6,8 @@ import respx
 from vclient import APIConfig, VClient
 from vclient.services.base import BaseService
 
+pytestmark = pytest.mark.anyio
+
 
 @pytest.fixture
 def api_config(base_url, api_key) -> APIConfig:

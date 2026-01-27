@@ -115,19 +115,21 @@ When enabled, the client automatically generates and includes an `Idempotency-Ke
 
 | Service | Factory Function | Description |
 | --- | --- | --- |
-| [System Service](docs/system-service.md) | `system_service()` | Health checks and system status |
+| [Campaigns Service](docs/campaigns-service.md) | `campaigns_service(company_id, user_id)` | Manage campaigns, assets, and notes |
+| [Campaigns Books Service](docs/campaign-books-service.md) | `books_service(company_id, user_id, campaign_id)` | Manage campaign books, notes, and assets |
+| [Campaigns Chapters Service](docs/campaign-book-chapters-service.md) | `campaign_book_chapters_service(company_id, user_id, campaign_id, book_id)` | Manage campaign book chapters, notes, and assets |
+| [Character Autogen Service](docs/character-autogen.md) | `character_autogen_service(company_id, user_id, campaign_id)` | Manage character autogen |
+| [Character Blueprint Service](docs/character-blueprint-service.md) | `character_blueprint_service(company_id, user_id, campaign_id)` | Manage character blueprints |
+| [Character Traits Service](docs/character-traits-service.md) | `character_traits_service(company_id, user_id, campaign_id, character_id)` | Manage character traits |
+| [Characters Service](docs/characters-service.md) | `characters_service(company_id, user_id, campaign_id)` | Manage characters, assets, and notes |
 | [Companies Service](docs/companies-service.md) | `companies_service()` | Manage companies and permissions |
 | [Developers Service](docs/developers-service.md) | `developer_service()` | Manage your own developer profile |
-| [Global Admin Service](docs/global-admin-service.md) | `global_admin_service()` | Manage developer accounts (requires admin) |
-| [Campaigns Service](docs/campaigns-service.md) | `campaigns_service(company_id, user_id)` | Manage campaigns, assets, and notes |
-| [Books Service](docs/campaign-books-service.md) | `books_service(company_id, user_id, campaign_id)` | Manage campaign books, notes, and assets |
-| [Chapters Service](docs/campaign-book-chapters-service.md) | `campaign_book_chapters_service(company_id, user_id, campaign_id, book_id)` | Manage campaign book chapters, notes, and assets |
-| [Characters Service](docs/characters-service.md) | `characters_service(company_id, user_id, campaign_id)` | Manage characters, assets, and notes |
-| [Character Traits Service](docs/character-traits-service.md) | `character_traits_service(company_id, user_id, campaign_id, character_id)` | Manage character traits |
-| [Dictionary Service](docs/dictionary-service.md) | `dictionary_service(company_id)` | Manage dictionary terms |
-| [Character Blueprint Service](docs/character-blueprint-service.md) | `character_blueprint_service(company_id, user_id, campaign_id)` | Manage character blueprints |
 | [Dicreoll Service](docs/dicerolls.md) | `dicreolls_service(company_id, user_id)` | Manage dicreolls |
+| [Dictionary Service](docs/dictionary-service.md) | `dictionary_service(company_id)` | Manage dictionary terms |
+| [Global Admin Service](docs/global-admin-service.md) | `global_admin_service()` | Manage developer accounts (requires admin) |
 | [Options Service](docs/options-service.md) | `options_service(company_id)` | Retrieve all options and enumerations for the api |
+| [Users Service](docs/users-service.md) | `users_service(company_id)` | Manage users and permissions |
+| [System Service](docs/system-service.md) | `system_service()` | Health checks and system status |
 
 ## Common Service Methods
 

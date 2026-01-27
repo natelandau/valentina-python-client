@@ -13,6 +13,7 @@ if TYPE_CHECKING:
         BooksService,
         CampaignsService,
         ChaptersService,
+        CharacterAutogenService,
         CharacterBlueprintService,
         CharactersService,
         CharacterTraitsService,
@@ -394,3 +395,19 @@ class VClient:
         from vclient.services.options import OptionsService
 
         return OptionsService(self, company_id)
+
+    def character_autogen(
+        self, company_id: str, user_id: str, campaign_id: str
+    ) -> "CharacterAutogenService":
+        """Get a CharacterAutogenService scoped to a specific company, user, and campaign.
+
+        Provides methods to create, retrieve, update, and delete character autogen.
+
+        Args:
+            company_id: The ID of the company to operate within.
+            user_id: The ID of the user to operate as.
+            campaign_id: The ID of the campaign to operate within.
+        """
+        from vclient.services.character_autogen import CharacterAutogenService
+
+        return CharacterAutogenService(self, company_id, user_id, campaign_id)

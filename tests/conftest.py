@@ -2,6 +2,9 @@
 
 import pytest
 
+pytest_plugins = ("tests.shared_response_fixtures",)
+pytestmark = pytest.mark.anyio
+
 
 @pytest.fixture
 def api_key() -> str:

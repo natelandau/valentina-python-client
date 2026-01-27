@@ -27,6 +27,8 @@ RATE_LIMIT_HEADER = "RateLimit"
 RATE_LIMIT_POLICY_HEADER = "RateLimit-Policy"
 
 # Valentina API Constants
+AbilityFocus = Literal["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"]
+AutoGenExperienceLevel = Literal["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"]
 CharacterClass = Literal["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"]
 CharacterInventoryType = Literal[
     "BOOK",

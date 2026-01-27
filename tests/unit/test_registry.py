@@ -7,6 +7,7 @@ from vclient.registry import (
     books_service,
     campaigns_service,
     chapters_service,
+    character_autogen_service,
     character_blueprint_service,
     character_traits_service,
     characters_service,
@@ -25,6 +26,7 @@ from vclient.services import (
     BooksService,
     CampaignsService,
     ChaptersService,
+    CharacterAutogenService,
     CharacterBlueprintService,
     CharactersService,
     CharacterTraitsService,
@@ -517,4 +519,33 @@ class TestOptionsService:
 
         # Then: A OptionsService is returned with the correct client
         assert isinstance(service, OptionsService)
+        assert service._client is client
+
+
+class TestCharacterAutogenService:
+    """Tests for character_autogen_service factory function."""
+
+    def test_character_autogen_service_raises_when_not_configured(self) -> None:
+        """Verify character_autogen_service raises RuntimeError when no client is configured."""
+        # Given: No default client configured
+
+        # When/Then: Calling character_autogen_service raises RuntimeError
+        with pytest.raises(RuntimeError, match="No default client configured"):
+            character_autogen_service(
+                company_id="company_id", user_id="user_id", campaign_id="campaign_id"
+            )
+
+    def test_character_autogen_service_returns_service_instance(self, api_config) -> None:
+        """Verify character_autogen_service returns a CharacterAutogenService with the default client."""
+        # Given: A configured default client
+        client = VClient(config=api_config)
+        configure_default_client(client)
+
+        # When: Getting the character autogen service
+        service = character_autogen_service(
+            company_id="company_id", user_id="user_id", campaign_id="campaign_id"
+        )
+
+        # Then: A CharacterAutogenService is returned with the correct client
+        assert isinstance(service, CharacterAutogenService)
         assert service._client is client

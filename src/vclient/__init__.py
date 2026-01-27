@@ -16,6 +16,7 @@ from vclient.exceptions import (
 from vclient.registry import (
     books_service,
     campaigns_service,
+    character_autogen_service,
     character_blueprint_service,
     character_traits_service,
     characters_service,
@@ -33,6 +34,7 @@ from vclient.registry import (
 from vclient.services import (
     BooksService,
     CampaignsService,
+    CharacterAutogenService,
     CharacterBlueprintService,
     CharactersService,
     CharacterTraitsService,
@@ -53,6 +55,7 @@ __all__ = (
     "AuthorizationError",
     "BooksService",
     "CampaignsService",
+    "CharacterAutogenService",
     "CharacterBlueprintService",
     "CharacterTraitsService",
     "CharactersService",
@@ -73,6 +76,7 @@ __all__ = (
     "ValidationError",
     "books_service",
     "campaigns_service",
+    "character_autogen_service",
     "character_blueprint_service",
     "character_traits_service",
     "characters_service",

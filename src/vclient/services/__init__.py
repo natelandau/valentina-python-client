@@ -4,6 +4,7 @@ from .base import BaseService
 from .campaign_book_chapters import ChaptersService
 from .campaign_books import BooksService
 from .campaigns import CampaignsService
+from .character_autogen import CharacterAutogenService
 from .character_blueprint import CharacterBlueprintService
 from .character_traits import CharacterTraitsService
 from .characters import CharactersService
@@ -21,6 +22,7 @@ __all__ = [
     "BooksService",
     "CampaignsService",
     "ChaptersService",
+    "CharacterAutogenService",
     "CharacterBlueprintService",
     "CharacterTraitsService",
     "CharactersService",
