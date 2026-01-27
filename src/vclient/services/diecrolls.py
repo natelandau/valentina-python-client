@@ -1,0 +1,162 @@
+"""Service for interacting with the Dice Rolls API."""
+
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
+
+from vclient.constants import DEFAULT_PAGE_LIMIT, DiceSize
+from vclient.endpoints import Endpoints
+from vclient.models import (
+    CreateDicreollQuickrollRequest,
+    CreateDicreollRequest,
+    Dicreoll,
+    PaginatedResponse,
+)
+from vclient.services.base import BaseService
+
+if TYPE_CHECKING:
+    from vclient.client import VClient
+
+
+class DicreollService(BaseService):
+    """Service for interacting with the Dice Rolls API."""
+
+    def __init__(self, client: "VClient", company_id: str, user_id: str) -> None:
+        """Initialize the service.
+
+        Args:
+            client: The VClient instance to use for requests.
+            company_id: The ID of the company to operate within.
+            user_id: The ID of the user to operate as.
+        """
+        super().__init__(client)
+        self._company_id = company_id
+        self._user_id = user_id
+
+    def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
+        """Format an endpoint with the scoped company_id and user_id plus any extra params."""
+        return endpoint.format(company_id=self._company_id, user_id=self._user_id, **kwargs)
+
+    # -------------------------------------------------------------------------
+    # Dicreoll CRUD Methods
+    # -------------------------------------------------------------------------
+
+    async def get_page(
+        self,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        userid: str | None = None,
+        characterid: str | None = None,
+        campaignid: str | None = None,
+    ) -> PaginatedResponse[Dicreoll]:
+        """Retrieve a paginated page of dicreolls."""
+        params = {}
+        if userid is not None:
+            params["userid"] = userid
+        if characterid is not None:
+            params["characterid"] = characterid
+        if campaignid is not None:
+            params["campaignid"] = campaignid
+
+        return await self._get_paginated_as(
+            self._format_endpoint(Endpoints.DICREOLLS),
+            Dicreoll,
+            limit=limit,
+            offset=offset,
+            params=params if params else None,
+        )
+
+    async def list_all(
+        self,
+        *,
+        userid: str | None = None,
+        characterid: str | None = None,
+        campaignid: str | None = None,
+    ) -> list[Dicreoll]:
+        """Retrieve all dicreolls."""
+        return [
+            dicreoll
+            async for dicreoll in self.iter_all(
+                userid=userid, characterid=characterid, campaignid=campaignid
+            )
+        ]
+
+    async def iter_all(
+        self,
+        *,
+        userid: str | None = None,
+        characterid: str | None = None,
+        campaignid: str | None = None,
+        limit: int = 100,
+    ) -> AsyncIterator[Dicreoll]:
+        """Iterate through all dicreolls."""
+        params = {}
+        if userid is not None:
+            params["userid"] = userid
+        if characterid is not None:
+            params["characterid"] = characterid
+        if campaignid is not None:
+            params["campaignid"] = campaignid
+        async for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.DICREOLLS),
+            limit=limit,
+            params=params if params else None,
+        ):
+            yield Dicreoll.model_validate(item)
+
+    async def get(self, dicreoll_id: str) -> Dicreoll:
+        """Retrieve a specific dicreoll."""
+        response = await self._get(
+            self._format_endpoint(Endpoints.DICREOLL, dicreoll_id=dicreoll_id)
+        )
+        return Dicreoll.model_validate(response.json())
+
+    async def create(
+        self,
+        *,
+        dice_size: DiceSize,
+        difficulty: int | None = None,
+        num_dice: int,
+        num_desperation_dice: int = 0,
+        comment: str | None = None,
+        trait_ids: list[str] = [],
+        character_id: str | None = None,
+        campaign_id: str | None = None,
+    ) -> Dicreoll:
+        """Create a new dicreoll."""
+        response = await self._post(
+            self._format_endpoint(Endpoints.DICREOLLS),
+            json=CreateDicreollRequest(
+                dice_size=dice_size,
+                difficulty=difficulty,
+                num_dice=num_dice,
+                num_desperation_dice=num_desperation_dice,
+                comment=comment,
+                trait_ids=trait_ids,
+                character_id=character_id,
+                campaign_id=campaign_id,
+            ).model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return Dicreoll.model_validate(response.json())
+
+    async def create_quickroll(
+        self,
+        *,
+        quickroll_id: str,
+        character_id: str,
+        comment: str | None = None,
+        difficulty: int = 6,
+        num_desperation_dice: int = 0,
+    ) -> Dicreoll:
+        """Create a new dicreoll quickroll."""
+        response = await self._post(
+            self._format_endpoint(Endpoints.DICEROLL_QUICKROLL),
+            json=CreateDicreollQuickrollRequest(
+                quickroll_id=quickroll_id,
+                character_id=character_id,
+                comment=comment,
+                difficulty=difficulty,
+                num_desperation_dice=num_desperation_dice,
+            ).model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return Dicreoll.model_validate(response.json())

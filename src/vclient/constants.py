@@ -38,6 +38,7 @@ CharacterInventoryType = Literal[
 ]
 CharacterStatus = Literal["ALIVE", "DEAD"]
 CharacterType = Literal["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"]
+DiceSize = Literal[4, 6, 8, 10, 20, 100]
 FreeTraitChangesPermission = Literal["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"]
 GameVersion = Literal["V4", "V5"]
 GrantXPPermission = Literal["UNRESTRICTED", "PLAYER", "STORYTELLER"]
@@ -45,6 +46,7 @@ HunterCreed = Literal["ENTREPRENEURIAL", "FAITHFUL", "INQUISITIVE", "MARTIAL", "
 HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
+RollResultType = Literal["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"]
 S3AssetParentType = Literal[
     "character", "campaign", "campaignbook", "campaignchapter", "user", "company", "unknown"
 ]

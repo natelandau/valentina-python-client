@@ -31,6 +31,7 @@ if TYPE_CHECKING:
         CharacterTraitsService,
         CompaniesService,
         DeveloperService,
+        DicreollService,
         DictionaryService,
         GlobalAdminService,
         SystemService,
@@ -312,3 +313,14 @@ def dictionary_service(company_id: str) -> "DictionaryService":
     from vclient.services.dictionary import DictionaryService
 
     return DictionaryService(default_client(), company_id)
+
+
+def dicreolls_service(company_id: str, user_id: str) -> "DicreollService":
+    """Create a DicreollService scoped to a specific company and user.
+
+    Provides access to dicreoll management operations (list, get, create, update, delete)
+    within a specific company and user context without needing to pass a client instance.
+    """
+    from vclient.services.diecrolls import DicreollService
+
+    return DicreollService(default_client(), company_id, user_id)

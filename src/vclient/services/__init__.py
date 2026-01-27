@@ -10,6 +10,7 @@ from .characters import CharactersService
 from .companies import CompaniesService
 from .developers import DeveloperService
 from .dictionary import DictionaryService
+from .diecrolls import DicreollService
 from .global_admin import GlobalAdminService
 from .system import SystemService
 from .users import UsersService
@@ -24,6 +25,7 @@ __all__ = [
     "CharactersService",
     "CompaniesService",
     "DeveloperService",
+    "DicreollService",
     "DictionaryService",
     "GlobalAdminService",
     "SystemService",

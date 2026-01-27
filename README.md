@@ -126,6 +126,7 @@ When enabled, the client automatically generates and includes an `Idempotency-Ke
 | [Character Traits Service](docs/character-traits-service.md) | `character_traits_service(company_id, user_id, campaign_id, character_id)` | Manage character traits |
 | [Dictionary Service](docs/dictionary-service.md) | `dictionary_service(company_id)` | Manage dictionary terms |
 | [Character Blueprint Service](docs/character-blueprint-service.md) | `character_blueprint_service(company_id, user_id, campaign_id)` | Manage character blueprints |
+| [Dicreoll Service](docs/dicerolls.md) | `dicreolls_service(company_id, user_id)` | Manage dicreolls |
 
 ## Common Service Methods
 

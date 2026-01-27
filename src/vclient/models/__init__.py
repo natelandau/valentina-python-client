@@ -62,6 +62,7 @@ from .developers import (
     MeDeveloperWithApiKey,
     UpdateMeDeveloperRequest,
 )
+from .diceroll import CreateDicreollQuickrollRequest, CreateDicreollRequest, Dicreoll
 from .dictionary import (
     CreateDictionaryTermRequest,
     DictionaryTerm,
@@ -125,6 +126,8 @@ __all__ = [
     "CreateCharacterTraitRequest",
     "CreateCompanyRequest",
     "CreateDeveloperRequest",
+    "CreateDicreollQuickrollRequest",
+    "CreateDicreollRequest",
     "CreateDictionaryTermRequest",
     "CreateNoteRequest",
     "CreateQuickrollRequest",
@@ -132,6 +135,7 @@ __all__ = [
     "Developer",
     "DeveloperCompanyPermission",
     "DeveloperWithApiKey",
+    "Dicreoll",
     "DictionaryTerm",
     "DiscordProfile",
     "ExperienceAddRemoveRequest",

@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         CharacterTraitsService,
         CompaniesService,
         DeveloperService,
+        DicreollService,
         DictionaryService,
         GlobalAdminService,
         SystemService,
@@ -367,3 +368,16 @@ class VClient:
         from vclient.services.dictionary import DictionaryService
 
         return DictionaryService(self, company_id)
+
+    def dicreolls(self, company_id: str, user_id: str) -> "DicreollService":
+        """Get a DicreollService scoped to a specific company and user.
+
+        Provides methods to create, retrieve, update, and delete dicreolls.
+
+        Args:
+            company_id: The ID of the company to operate within.
+            user_id: The ID of the user to operate as.
+        """
+        from vclient.services.diecrolls import DicreollService
+
+        return DicreollService(self, company_id, user_id)

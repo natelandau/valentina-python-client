@@ -141,3 +141,8 @@ class Endpoints:
     # Dictionary endpoints
     DICTIONARY_TERMS = f"{COMPANY}/dictionary"
     DICTIONARY_TERM = f"{DICTIONARY_TERMS}/{{term_id}}"
+
+    # Dicrerolls
+    DICREOLLS = f"{USER}/dicreolls"
+    DICREOLL = f"{DICREOLLS}/{{dicreoll_id}}"
+    DICEROLL_QUICKROLL = f"{DICREOLLS}/quickroll"
