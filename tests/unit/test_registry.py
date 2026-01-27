@@ -7,6 +7,7 @@ from vclient.registry import (
     books_service,
     campaigns_service,
     chapters_service,
+    character_blueprint_service,
     character_traits_service,
     characters_service,
     companies_service,
@@ -21,6 +22,7 @@ from vclient.services import (
     BooksService,
     CampaignsService,
     ChaptersService,
+    CharacterBlueprintService,
     CharactersService,
     CharacterTraitsService,
     CompaniesService,
@@ -409,4 +411,29 @@ class TestDeveloperService:
 
         # Then: A DeveloperService is returned with the correct client
         assert isinstance(service, DeveloperService)
+        assert service._client is client
+
+
+class TestCharacterBlueprintService:
+    """Tests for character_blueprint_service factory function."""
+
+    def test_character_blueprint_service_raises_when_not_configured(self) -> None:
+        """Verify character_blueprint_service raises RuntimeError when no client is configured."""
+        # Given: No default client configured
+
+        # When/Then: Calling character_blueprint_service raises RuntimeError
+        with pytest.raises(RuntimeError, match="No default client configured"):
+            character_blueprint_service(company_id="company_id")
+
+    def test_character_blueprint_service_returns_service_instance(self, api_config) -> None:
+        """Verify character_blueprint_service returns a CharacterBlueprintService with the default client."""
+        # Given: A configured default client
+        client = VClient(config=api_config)
+        configure_default_client(client)
+
+        # When: Getting the character blueprint service
+        service = character_blueprint_service(company_id="company_id")
+
+        # Then: A CharacterBlueprintService is returned with the correct client
+        assert isinstance(service, CharacterBlueprintService)
         assert service._client is client

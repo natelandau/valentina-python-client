@@ -182,7 +182,7 @@ class CharacterTraitsService(BaseService):
         )
         return CharacterTrait.model_validate(response.json())
 
-    async def create(  # noqa: PLR0913
+    async def create(
         self,
         *,
         name: str,

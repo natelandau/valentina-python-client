@@ -10,8 +10,21 @@ from vclient.constants import (
     GameVersion,
     S3AssetParentType,
     S3AssetType,
+    SpecialtyType,
     WerewolfRenown,
 )
+
+# -----------------------------------------------------------------------------
+# Utility  Models
+# -----------------------------------------------------------------------------
+
+
+class NameDescriptionSubDocument(BaseModel):
+    """Name and description base model. Use this for sub-documents that have a name and description."""
+
+    name: str | None = None
+    description: str | None = None
+
 
 # -----------------------------------------------------------------------------
 # Asset Models
@@ -170,3 +183,12 @@ class WerewolfRite(BaseModel):
     date_created: datetime
     date_modified: datetime
     pool: str | None = None
+
+
+class CharacterSpecialty(BaseModel):
+    """A character specialty for a trait."""
+
+    id: str
+    name: str
+    type: SpecialtyType
+    description: str | None = None

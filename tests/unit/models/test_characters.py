@@ -3,13 +3,11 @@
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
-from vclient.models.characters import (
+from vclient.models import (
     Character,
-    CharacterSpecialty,
     CreateCharacterRequest,
     HunterAttributes,
-    HunterEdge,
-    HunterEdgePerk,
+    HunterAttributesEdgeModel,
     MageAttributes,
     UpdateCharacterRequest,
     VampireAttributes,
@@ -77,7 +75,7 @@ class TestCharacter:
             "campaign_id": "campaign123",
             "asset_ids": ["asset1", "asset2"],
             "character_trait_ids": ["trait1"],
-            "specialties": [{"id": "spec1", "name": "Brawl: Claws", "trait_id": "trait1"}],
+            "specialties": [{"id": "spec1", "name": "Brawl: Claws", "type": "ACTION"}],
             "vampire_attributes": None,
             "werewolf_attributes": {
                 "tribe_id": "tribe123",
@@ -389,30 +387,14 @@ class TestHunterAttributes:
         # When: Creating hunter attributes with edges
         attrs = HunterAttributes(
             creed="Defender",
-            edges=[
-                HunterEdge(
-                    id="edge123",
-                    name="Thwart",
-                    description="Counter supernatural powers",
-                    pool="Composure + Resolve",
-                    type="DEFENSE",
-                    perks=[
-                        HunterEdgePerk(
-                            id="perk123",
-                            name="Shield Wall",
-                            description="Protect allies",
-                        )
-                    ],
-                )
-            ],
+            edges=[HunterAttributesEdgeModel(edge_id="edge123", perk_ids=["perk123"])],
         )
 
         # Then: All fields are set correctly
         assert attrs.creed == "Defender"
         assert len(attrs.edges) == 1
-        assert attrs.edges[0].name == "Thwart"
-        assert len(attrs.edges[0].perks) == 1
-        assert attrs.edges[0].perks[0].name == "Shield Wall"
+        assert attrs.edges[0].edge_id == "edge123"
+        assert attrs.edges[0].perk_ids == ["perk123"]
 
 
 class TestMageAttributes:
@@ -425,31 +407,3 @@ class TestMageAttributes:
 
         # Then: Field is set
         assert attrs.sphere == "Forces"
-
-
-class TestCharacterSpecialty:
-    """Tests for CharacterSpecialty model."""
-
-    def test_character_specialty(self) -> None:
-        """Verify CharacterSpecialty model."""
-        # When: Creating a specialty
-        specialty = CharacterSpecialty(
-            id="spec123",
-            name="Brawl: Kindred",
-            trait_id="trait123",
-        )
-
-        # Then: All fields are set
-        assert specialty.id == "spec123"
-        assert specialty.name == "Brawl: Kindred"
-        assert specialty.trait_id == "trait123"
-
-    def test_character_specialty_minimal(self) -> None:
-        """Verify CharacterSpecialty with required fields only."""
-        # When: Creating a specialty with name only
-        specialty = CharacterSpecialty(name="Firearms: Pistols")
-
-        # Then: Required field is set, optionals are None
-        assert specialty.name == "Firearms: Pistols"
-        assert specialty.id is None
-        assert specialty.trait_id is None

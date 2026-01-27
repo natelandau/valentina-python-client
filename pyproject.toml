@@ -41,7 +41,7 @@
         "typos>=1.42.1",
         "vulture>=2.14",
         "yamllint>=1.38.0",
-]
+    ]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"
@@ -137,7 +137,9 @@
             "TD002",  # Missing author in TODO
             "TD003",  # Missing issue link on the line following this TODO
         ]
-        per-file-ignores = { "tests/**/*.py" = [
+        per-file-ignores = { "src/vclient/services/*.py" = [
+            "PLR0913", # Too many arguments
+        ], "tests/**/*.py" = [
             "A002",
             "A003",
             "ANN001",  # Missing type annotation for function argument `cls`

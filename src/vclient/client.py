@@ -13,6 +13,7 @@ if TYPE_CHECKING:
         BooksService,
         CampaignsService,
         ChaptersService,
+        CharacterBlueprintService,
         CharactersService,
         CharacterTraitsService,
         CompaniesService,
@@ -340,3 +341,16 @@ class VClient:
         from vclient.services.character_traits import CharacterTraitsService
 
         return CharacterTraitsService(self, company_id, user_id, campaign_id, character_id)
+
+    def character_blueprint(self, company_id: str) -> "CharacterBlueprintService":
+        """Get a CharacterBlueprintService scoped to a specific company.
+
+        Provides methods to create, retrieve, update, and delete character blueprint sections,
+        categories, traits, and edges.
+
+        Args:
+            company_id: The ID of the company to operate within.
+        """
+        from vclient.services.character_blueprint import CharacterBlueprintService
+
+        return CharacterBlueprintService(self, company_id)

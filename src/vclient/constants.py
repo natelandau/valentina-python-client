@@ -52,3 +52,4 @@ S3AssetType = Literal["image", "text", "audio", "video", "document", "archive", 
 SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
 UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER"]
 WerewolfRenown = Literal["HONOR", "GLORY", "WISDOM"]
+BlueprintTraitOrderBy = Literal["NAME", "SHEET"]

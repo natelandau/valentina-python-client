@@ -79,7 +79,7 @@ class CharactersService(BaseService):
     # Character CRUD Methods
     # -------------------------------------------------------------------------
 
-    async def get_page(  # noqa: PLR0913
+    async def get_page(
         self,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
@@ -228,7 +228,7 @@ class CharactersService(BaseService):
         )
         return Character.model_validate(response.json())
 
-    async def create(  # noqa: PLR0913
+    async def create(
         self,
         character_class: CharacterClass,
         game_version: GameVersion,
@@ -296,7 +296,7 @@ class CharactersService(BaseService):
         )
         return Character.model_validate(response.json())
 
-    async def update(  # noqa: PLR0913
+    async def update(
         self,
         character_id: str,
         *,

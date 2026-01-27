@@ -26,6 +26,7 @@ if TYPE_CHECKING:
         BooksService,
         CampaignsService,
         ChaptersService,
+        CharacterBlueprintService,
         CharactersService,
         CharacterTraitsService,
         CompaniesService,
@@ -288,3 +289,14 @@ def character_traits_service(
     from vclient.services.character_traits import CharacterTraitsService
 
     return CharacterTraitsService(default_client(), company_id, user_id, campaign_id, character_id)
+
+
+def character_blueprint_service(company_id: str) -> "CharacterBlueprintService":
+    """Create a CharacterBlueprintService scoped to a specific company.
+
+    Provides access to character blueprint management operations (list, get, create, update, delete)
+    within a specific company context without needing to pass a client instance.
+    """
+    from vclient.services.character_blueprint import CharacterBlueprintService
+
+    return CharacterBlueprintService(default_client(), company_id)

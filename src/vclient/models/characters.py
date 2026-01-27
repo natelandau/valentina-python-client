@@ -14,17 +14,11 @@ from vclient.constants import (
     HunterEdgeType,
 )
 
+from .shared import CharacterSpecialty
+
 # -----------------------------------------------------------------------------
 # Nested Models
 # -----------------------------------------------------------------------------
-
-
-class CharacterSpecialty(BaseModel):
-    """A character specialty for a trait."""
-
-    id: str | None = Field(default=None, description="MongoDB document ObjectID.")
-    name: str = Field(..., description="Name of the specialty.")
-    trait_id: str | None = Field(default=None, description="ID of the associated trait.")
 
 
 class VampireAttributes(BaseModel):
@@ -54,31 +48,20 @@ class MageAttributes(BaseModel):
     sphere: str | None = Field(default=None, description="Primary sphere of magic.")
 
 
-class HunterEdgePerk(BaseModel):
-    """A perk associated with a hunter edge."""
+class HunterAttributesEdgeModel(BaseModel):
+    """Hunter edge model."""
 
-    id: str = Field(..., description="MongoDB document ObjectID.")
-    name: str = Field(..., description="Name of the perk.")
-    description: str | None = Field(default=None, description="Description of the perk.")
-
-
-class HunterEdge(BaseModel):
-    """A hunter edge with associated perks."""
-
-    id: str = Field(..., description="MongoDB document ObjectID.")
-    name: str = Field(..., description="Name of the edge.")
-    description: str | None = Field(default=None, description="Description of the edge.")
-    pool: str | None = Field(default=None, description="Dice pool for the edge.")
-    system: str | None = Field(default=None, description="System rules for the edge.")
-    type: str | None = Field(default=None, description="Type of hunter edge.")
-    perks: list[HunterEdgePerk] = Field(default_factory=list, description="Associated perks.")
+    edge_id: str
+    perk_ids: list[str] = Field(default_factory=list)
 
 
 class HunterAttributes(BaseModel):
     """Hunter-specific character attributes."""
 
     creed: str | None = Field(default=None, description="Hunter creed.")
-    edges: list[HunterEdge] = Field(default_factory=list, description="Hunter edges.")
+    edges: list[HunterAttributesEdgeModel] = Field(
+        default_factory=list, description="Hunter edges."
+    )
 
 
 # -----------------------------------------------------------------------------
