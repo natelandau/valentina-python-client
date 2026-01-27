@@ -12,6 +12,7 @@ from .developers import DeveloperService
 from .dictionary import DictionaryService
 from .diecrolls import DicreollService
 from .global_admin import GlobalAdminService
+from .options import OptionsService
 from .system import SystemService
 from .users import UsersService
 
@@ -28,6 +29,7 @@ __all__ = [
     "DicreollService",
     "DictionaryService",
     "GlobalAdminService",
+    "OptionsService",
     "SystemService",
     "UsersService",
 ]

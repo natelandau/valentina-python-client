@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         DicreollService,
         DictionaryService,
         GlobalAdminService,
+        OptionsService,
         SystemService,
         UsersService,
     )
@@ -381,3 +382,15 @@ class VClient:
         from vclient.services.diecrolls import DicreollService
 
         return DicreollService(self, company_id, user_id)
+
+    def options(self, company_id: str) -> "OptionsService":
+        """Get a OptionsService scoped to a specific company.
+
+        Provides methods to retrieve all options and enumerations for the api.
+
+        Args:
+            company_id: The ID of the company to operate within.
+        """
+        from vclient.services.options import OptionsService
+
+        return OptionsService(self, company_id)

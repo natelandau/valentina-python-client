@@ -26,6 +26,7 @@ from vclient.registry import (
     dicreolls_service,
     dictionary_service,
     global_admin_service,
+    options_service,
     system_service,
     users_service,
 )
@@ -40,6 +41,7 @@ from vclient.services import (
     DicreollService,
     DictionaryService,
     GlobalAdminService,
+    OptionsService,
     SystemService,
     UsersService,
 )
@@ -61,6 +63,7 @@ __all__ = (
     "DictionaryService",
     "GlobalAdminService",
     "NotFoundError",
+    "OptionsService",
     "RateLimitError",
     "RequestValidationError",
     "ServerError",
@@ -80,6 +83,7 @@ __all__ = (
     "dicreolls_service",
     "dictionary_service",
     "global_admin_service",
+    "options_service",
     "system_service",
     "users_service",
 )

@@ -34,6 +34,7 @@ if TYPE_CHECKING:
         DicreollService,
         DictionaryService,
         GlobalAdminService,
+        OptionsService,
         SystemService,
         UsersService,
     )
@@ -324,3 +325,14 @@ def dicreolls_service(company_id: str, user_id: str) -> "DicreollService":
     from vclient.services.diecrolls import DicreollService
 
     return DicreollService(default_client(), company_id, user_id)
+
+
+def options_service(company_id: str) -> "OptionsService":
+    """Create a OptionsService scoped to a specific company.
+
+    Provides access to options and enumerations management operations (list, get, create, update, delete)
+    within a specific company context without needing to pass a client instance.
+    """
+    from vclient.services.options import OptionsService
+
+    return OptionsService(default_client(), company_id)

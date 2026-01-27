@@ -146,3 +146,6 @@ class Endpoints:
     DICREOLLS = f"{USER}/dicreolls"
     DICREOLL = f"{DICREOLLS}/{{dicreoll_id}}"
     DICEROLL_QUICKROLL = f"{DICREOLLS}/quickroll"
+
+    # Options and enumerations
+    OPTIONS = f"{COMPANY}/options"

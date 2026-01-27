@@ -17,6 +17,7 @@ from vclient.registry import (
     dicreolls_service,
     dictionary_service,
     global_admin_service,
+    options_service,
     system_service,
     users_service,
 )
@@ -32,6 +33,7 @@ from vclient.services import (
     DicreollService,
     DictionaryService,
     GlobalAdminService,
+    OptionsService,
     SystemService,
     UsersService,
 )
@@ -490,4 +492,29 @@ class TestDicreollService:
 
         # Then: A DicreollService is returned with the correct client
         assert isinstance(service, DicreollService)
+        assert service._client is client
+
+
+class TestOptionsService:
+    """Tests for options_service factory function."""
+
+    def test_options_service_raises_when_not_configured(self) -> None:
+        """Verify options_service raises RuntimeError when no client is configured."""
+        # Given: No default client configured
+
+        # When/Then: Calling options_service raises RuntimeError
+        with pytest.raises(RuntimeError, match="No default client configured"):
+            options_service(company_id="company_id")
+
+    def test_options_service_returns_service_instance(self, api_config) -> None:
+        """Verify options_service returns a OptionsService with the default client."""
+        # Given: A configured default client
+        client = VClient(config=api_config)
+        configure_default_client(client)
+
+        # When: Getting the options service
+        service = options_service(company_id="company_id")
+
+        # Then: A OptionsService is returned with the correct client
+        assert isinstance(service, OptionsService)
         assert service._client is client
