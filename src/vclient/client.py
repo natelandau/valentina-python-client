@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         CharacterTraitsService,
         CompaniesService,
         DeveloperService,
+        DictionaryService,
         GlobalAdminService,
         SystemService,
         UsersService,
@@ -354,3 +355,15 @@ class VClient:
         from vclient.services.character_blueprint import CharacterBlueprintService
 
         return CharacterBlueprintService(self, company_id)
+
+    def dictionary(self, company_id: str) -> "DictionaryService":
+        """Get a DictionaryService scoped to a specific company.
+
+        Provides methods to create, retrieve, update, and delete dictionary terms.
+
+        Args:
+            company_id: The ID of the company to operate within.
+        """
+        from vclient.services.dictionary import DictionaryService
+
+        return DictionaryService(self, company_id)

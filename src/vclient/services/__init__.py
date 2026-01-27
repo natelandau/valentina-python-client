@@ -9,6 +9,7 @@ from .character_traits import CharacterTraitsService
 from .characters import CharactersService
 from .companies import CompaniesService
 from .developers import DeveloperService
+from .dictionary import DictionaryService
 from .global_admin import GlobalAdminService
 from .system import SystemService
 from .users import UsersService
@@ -23,6 +24,7 @@ __all__ = [
     "CharactersService",
     "CompaniesService",
     "DeveloperService",
+    "DictionaryService",
     "GlobalAdminService",
     "SystemService",
     "UsersService",

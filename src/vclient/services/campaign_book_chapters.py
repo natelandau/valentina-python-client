@@ -90,7 +90,9 @@ class ChaptersService(BaseService):
         """Create a new campaign book chapter."""
         response = await self._post(
             self._format_endpoint(Endpoints.BOOK_CHAPTERS),
-            json=CreateChapterRequest(name=name, description=description).model_dump(),
+            json=CreateChapterRequest(name=name, description=description).model_dump(
+                exclude_none=True, exclude_unset=True, mode="json"
+            ),
         )
         return CampaignChapter.model_validate(response.json())
 
@@ -100,7 +102,9 @@ class ChaptersService(BaseService):
         """Update a campaign book chapter."""
         response = await self._patch(
             self._format_endpoint(Endpoints.BOOK_CHAPTER, chapter_id=chapter_id),
-            json=UpdateChapterRequest(name=name, description=description).model_dump(),
+            json=UpdateChapterRequest(name=name, description=description).model_dump(
+                exclude_none=True, exclude_unset=True, mode="json"
+            ),
         )
         return CampaignChapter.model_validate(response.json())
 
@@ -112,7 +116,9 @@ class ChaptersService(BaseService):
         """Renumber a campaign book chapter."""
         response = await self._patch(
             self._format_endpoint(Endpoints.BOOK_CHAPTER_NUMBER, chapter_id=chapter_id),
-            json=RenumberChapterRequest(number=number).model_dump(),
+            json=RenumberChapterRequest(number=number).model_dump(
+                exclude_none=True, exclude_unset=True, mode="json"
+            ),
         )
         return CampaignChapter.model_validate(response.json())
 

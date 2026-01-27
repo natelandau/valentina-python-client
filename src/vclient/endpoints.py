@@ -137,3 +137,7 @@ class Endpoints:
     HUNTER_EDGE_DETAIL = f"{HUNTER_EDGES}/{{hunter_edge_id}}"
     HUNTER_EDGE_PERKS = f"{HUNTER_EDGE_DETAIL}/perks"
     HUNTER_EDGE_PERK_DETAIL = f"{HUNTER_EDGE_PERKS}/{{hunter_edge_perk_id}}"
+
+    # Dictionary endpoints
+    DICTIONARY_TERMS = f"{COMPANY}/dictionary"
+    DICTIONARY_TERM = f"{DICTIONARY_TERMS}/{{term_id}}"

@@ -124,6 +124,8 @@ When enabled, the client automatically generates and includes an `Idempotency-Ke
 | [Chapters Service](docs/campaign-book-chapters-service.md) | `campaign_book_chapters_service(company_id, user_id, campaign_id, book_id)` | Manage campaign book chapters, notes, and assets |
 | [Characters Service](docs/characters-service.md) | `characters_service(company_id, user_id, campaign_id)` | Manage characters, assets, and notes |
 | [Character Traits Service](docs/character-traits-service.md) | `character_traits_service(company_id, user_id, campaign_id, character_id)` | Manage character traits |
+| [Dictionary Service](docs/dictionary-service.md) | `dictionary_service(company_id)` | Manage dictionary terms |
+| [Character Blueprint Service](docs/character-blueprint-service.md) | `character_blueprint_service(company_id, user_id, campaign_id)` | Manage character blueprints |
 
 ## Common Service Methods
 

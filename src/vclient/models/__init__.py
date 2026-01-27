@@ -62,6 +62,11 @@ from .developers import (
     MeDeveloperWithApiKey,
     UpdateMeDeveloperRequest,
 )
+from .dictionary import (
+    CreateDictionaryTermRequest,
+    DictionaryTerm,
+    UpdateDictionaryTermRequest,
+)
 from .global_admin import (
     CreateDeveloperRequest,
     Developer,
@@ -120,12 +125,14 @@ __all__ = [
     "CreateCharacterTraitRequest",
     "CreateCompanyRequest",
     "CreateDeveloperRequest",
+    "CreateDictionaryTermRequest",
     "CreateNoteRequest",
     "CreateQuickrollRequest",
     "CreateUserRequest",
     "Developer",
     "DeveloperCompanyPermission",
     "DeveloperWithApiKey",
+    "DictionaryTerm",
     "DiscordProfile",
     "ExperienceAddRemoveRequest",
     "GrantAccessRequest",
@@ -156,6 +163,7 @@ __all__ = [
     "UpdateCharacterRequest",
     "UpdateCompanyRequest",
     "UpdateDeveloperRequest",
+    "UpdateDictionaryTermRequest",
     "UpdateMeDeveloperRequest",
     "UpdateNoteRequest",
     "UpdateQuickrollRequest",

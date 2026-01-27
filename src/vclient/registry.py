@@ -31,6 +31,7 @@ if TYPE_CHECKING:
         CharacterTraitsService,
         CompaniesService,
         DeveloperService,
+        DictionaryService,
         GlobalAdminService,
         SystemService,
         UsersService,
@@ -300,3 +301,14 @@ def character_blueprint_service(company_id: str) -> "CharacterBlueprintService":
     from vclient.services.character_blueprint import CharacterBlueprintService
 
     return CharacterBlueprintService(default_client(), company_id)
+
+
+def dictionary_service(company_id: str) -> "DictionaryService":
+    """Create a DictionaryService scoped to a specific company.
+
+    Provides access to dictionary term management operations (list, get, create, update, delete)
+    within a specific company context without needing to pass a client instance.
+    """
+    from vclient.services.dictionary import DictionaryService
+
+    return DictionaryService(default_client(), company_id)

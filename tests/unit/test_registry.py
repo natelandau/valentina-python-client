@@ -14,6 +14,7 @@ from vclient.registry import (
     configure_default_client,
     default_client,
     developer_service,
+    dictionary_service,
     global_admin_service,
     system_service,
     users_service,
@@ -27,6 +28,7 @@ from vclient.services import (
     CharacterTraitsService,
     CompaniesService,
     DeveloperService,
+    DictionaryService,
     GlobalAdminService,
     SystemService,
     UsersService,
@@ -436,4 +438,29 @@ class TestCharacterBlueprintService:
 
         # Then: A CharacterBlueprintService is returned with the correct client
         assert isinstance(service, CharacterBlueprintService)
+        assert service._client is client
+
+
+class TestDictionaryService:
+    """Tests for dictionary_service factory function."""
+
+    def test_dictionary_service_raises_when_not_configured(self) -> None:
+        """Verify dictionary_service raises RuntimeError when no client is configured."""
+        # Given: No default client configured
+
+        # When/Then: Calling dictionary_service raises RuntimeError
+        with pytest.raises(RuntimeError, match="No default client configured"):
+            dictionary_service(company_id="company_id")
+
+    def test_dictionary_service_returns_service_instance(self, api_config) -> None:
+        """Verify dictionary_service returns a DictionaryService with the default client."""
+        # Given: A configured default client
+        client = VClient(config=api_config)
+        configure_default_client(client)
+
+        # When: Getting the dictionary service
+        service = dictionary_service(company_id="company_id")
+
+        # Then: A DictionaryService is returned with the correct client
+        assert isinstance(service, DictionaryService)
         assert service._client is client
