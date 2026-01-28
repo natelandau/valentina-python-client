@@ -9,6 +9,7 @@ from vclient.models import (
     Company,
     CompanyPermissions,
     CompanySettings,
+    NewCompanyResponse,
     PaginatedResponse,
 )
 
@@ -44,6 +45,15 @@ def paginated_companies_response(company_response_data) -> dict:
         "limit": 10,
         "offset": 0,
         "total": 1,
+    }
+
+
+@pytest.fixture
+def new_company_response_data(company_response_data: dict, user_response_data: dict) -> dict:
+    """Return sample new company response data."""
+    return {
+        "company": company_response_data,
+        "admin_user": user_response_data,
     }
 
 
@@ -208,11 +218,11 @@ class TestCompaniesServiceCreate:
     """Tests for CompaniesService.create method."""
 
     @respx.mock
-    async def test_create_company_minimal(self, vclient, base_url, company_response_data):
+    async def test_create_company_minimal(self, vclient, base_url, new_company_response_data):
         """Verify creating company with minimal data."""
         # Given: A mocked create endpoint
         route = respx.post(f"{base_url}{Endpoints.COMPANIES}").respond(
-            201, json=company_response_data
+            201, json=new_company_response_data
         )
 
         # When: Creating a company with minimal data
@@ -223,8 +233,9 @@ class TestCompaniesServiceCreate:
 
         # Then: Returns created Company object
         assert route.called
-        assert isinstance(result, Company)
-        assert result.name == "Test Company"
+        assert isinstance(result, NewCompanyResponse)
+        assert result.company.name == "Test Company"
+        assert result.admin_user.name == "Test User"
 
         # Verify request body
         request = route.calls.last.request
@@ -236,11 +247,13 @@ class TestCompaniesServiceCreate:
         assert "description" not in body
 
     @respx.mock
-    async def test_create_company_with_all_options(self, vclient, base_url, company_response_data):
+    async def test_create_company_with_all_options(
+        self, vclient, base_url, new_company_response_data
+    ):
         """Verify creating company with all options."""
         # Given: A mocked create endpoint
         route = respx.post(f"{base_url}{Endpoints.COMPANIES}").respond(
-            201, json=company_response_data
+            201, json=new_company_response_data
         )
 
         # When: Creating a company with all options using string values
@@ -260,7 +273,9 @@ class TestCompaniesServiceCreate:
 
         # Then: Returns created Company object
         assert route.called
-        assert isinstance(result, Company)
+        assert isinstance(result, NewCompanyResponse)
+        assert result.company.name == "Test Company"
+        assert result.admin_user.name == "Test User"
 
         # Verify request body includes all options
         request = route.calls.last.request

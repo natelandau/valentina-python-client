@@ -168,7 +168,9 @@ class TestCharactersServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_response))
 
         # When: Requesting a page of characters
-        result = await vclient.characters("company123", "user123", "campaign123").get_page()
+        result = await vclient.characters(
+            "user123", "campaign123", company_id="company123"
+        ).get_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -194,9 +196,9 @@ class TestCharactersServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_response))
 
         # When: Requesting with filters
-        result = await vclient.characters("company123", "user123", "campaign123").get_page(
-            character_class="VAMPIRE", status="ALIVE"
-        )
+        result = await vclient.characters(
+            "user123", "campaign123", company_id="company123"
+        ).get_page(character_class="VAMPIRE", status="ALIVE")
 
         # Then: The route was called with correct params
         assert route.called
@@ -215,7 +217,9 @@ class TestCharactersServiceGet:
         ).mock(return_value=Response(200, json=character_response_data))
 
         # When: Requesting a character
-        result = await vclient.characters("company123", "user123", "campaign123").get("char123")
+        result = await vclient.characters("user123", "campaign123", company_id="company123").get(
+            "char123"
+        )
 
         # Then: The route was called and character is returned
         assert route.called
@@ -238,7 +242,9 @@ class TestCharactersServiceGet:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.characters("company123", "user123", "campaign123").get("nonexistent")
+            await vclient.characters("user123", "campaign123", company_id="company123").get(
+                "nonexistent"
+            )
 
         assert route.called
 
@@ -257,7 +263,7 @@ class TestCharactersServiceCreate:
         ).mock(return_value=Response(201, json=character_response_data))
 
         # When: Creating a character with required fields only
-        result = await vclient.characters("company123", "user123", "campaign123").create(
+        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -290,7 +296,7 @@ class TestCharactersServiceCreate:
         ).mock(return_value=Response(201, json=character_response_data))
 
         # When: Creating a character with all fields
-        result = await vclient.characters("company123", "user123", "campaign123").create(
+        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -333,7 +339,7 @@ class TestCharactersServiceUpdate:
         ).mock(return_value=Response(200, json=updated_data))
 
         # When: Updating the character's name
-        result = await vclient.characters("company123", "user123", "campaign123").update(
+        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
             "char123", name_first="Jane"
         )
 
@@ -364,7 +370,7 @@ class TestCharactersServiceUpdate:
         ).mock(return_value=Response(200, json=updated_data))
 
         # When: Updating the character's status
-        result = await vclient.characters("company123", "user123", "campaign123").update(
+        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
             "char123", status="DEAD"
         )
 
@@ -384,7 +390,7 @@ class TestCharactersServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.characters("company123", "user123", "campaign123").update(
+            await vclient.characters("user123", "campaign123", company_id="company123").update(
                 "nonexistent", name_first="Jane"
             )
 
@@ -403,7 +409,9 @@ class TestCharactersServiceDelete:
         ).mock(return_value=Response(204))
 
         # When: Deleting the character
-        result = await vclient.characters("company123", "user123", "campaign123").delete("char123")
+        result = await vclient.characters("user123", "campaign123", company_id="company123").delete(
+            "char123"
+        )
 
         # Then: The route was called and None is returned
         assert route.called
@@ -421,7 +429,9 @@ class TestCharactersServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.characters("company123", "user123", "campaign123").delete("nonexistent")
+            await vclient.characters("user123", "campaign123", company_id="company123").delete(
+                "nonexistent"
+            )
 
         assert route.called
 
@@ -444,7 +454,9 @@ class TestCharactersServiceListAll:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all characters
-        result = await vclient.characters("company123", "user123", "campaign123").list_all()
+        result = await vclient.characters(
+            "user123", "campaign123", company_id="company123"
+        ).list_all()
 
         # Then: All characters are returned as a list
         assert route.called
@@ -474,7 +486,7 @@ class TestCharactersServiceIterAll:
         characters = [
             character
             async for character in vclient.characters(
-                "company123", "user123", "campaign123"
+                "user123", "campaign123", company_id="company123"
             ).iter_all()
         ]
 
@@ -498,7 +510,9 @@ class TestCharactersServiceVampireAttributes:
         ).mock(return_value=Response(200, json=character_response_data))
 
         # When: Requesting the character
-        result = await vclient.characters("company123", "user123", "campaign123").get("char123")
+        result = await vclient.characters("user123", "campaign123", company_id="company123").get(
+            "char123"
+        )
 
         # Then: Vampire attributes are properly parsed
         assert route.called
@@ -532,7 +546,9 @@ class TestCharactersServiceAssets:
         )
 
         # When: Listing assets
-        result = await vclient.characters(company_id, user_id, campaign_id).list_assets("char123")
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).list_assets(
+            "char123"
+        )
 
         # Then: Returns paginated S3Asset objects
         assert route.called
@@ -553,7 +569,7 @@ class TestCharactersServiceAssets:
         ).respond(200, json=asset_response_data)
 
         # When: Getting the asset
-        result = await vclient.characters(company_id, user_id, campaign_id).get_asset(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).get_asset(
             "char123", asset_id
         )
 
@@ -575,7 +591,9 @@ class TestCharactersServiceAssets:
         ).respond(204)
 
         # When: Deleting the asset
-        await vclient.characters(company_id, user_id, campaign_id).delete_asset("char123", asset_id)
+        await vclient.characters(user_id, campaign_id, company_id=company_id).delete_asset(
+            "char123", asset_id
+        )
 
         # Then: Request was made
         assert route.called
@@ -592,7 +610,7 @@ class TestCharactersServiceAssets:
         ).respond(201, json=asset_response_data)
 
         # When: Uploading an asset
-        result = await vclient.characters(company_id, user_id, campaign_id).upload_asset(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).upload_asset(
             "char123",
             filename="test.png",
             content=b"test content",
@@ -629,9 +647,9 @@ class TestCharactersServiceNotes:
         )
 
         # When: Getting a page of notes
-        result = await vclient.characters(company_id, user_id, campaign_id).get_notes_page(
-            "char123"
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_notes_page("char123")
 
         # Then: Returns paginated Note objects
         assert route.called
@@ -652,7 +670,7 @@ class TestCharactersServiceNotes:
         ).respond(200, json=note_response_data)
 
         # When: Getting the note
-        result = await vclient.characters(company_id, user_id, campaign_id).get_note(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).get_note(
             "char123", note_id
         )
 
@@ -675,7 +693,7 @@ class TestCharactersServiceNotes:
         ).respond(201, json=note_response_data)
 
         # When: Creating a note
-        result = await vclient.characters(company_id, user_id, campaign_id).create_note(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).create_note(
             character_id, title="Test Note", content="This is test content"
         )
 
@@ -699,7 +717,7 @@ class TestCharactersServiceNotes:
         ).respond(200, json=updated_data)
 
         # When: Updating the note
-        result = await vclient.characters(company_id, user_id, campaign_id).update_note(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).update_note(
             character_id, note_id, title="Updated Title"
         )
 
@@ -721,7 +739,9 @@ class TestCharactersServiceNotes:
         ).respond(204)
 
         # When: Deleting the note
-        await vclient.characters(company_id, user_id, campaign_id).delete_note("char123", note_id)
+        await vclient.characters(user_id, campaign_id, company_id=company_id).delete_note(
+            "char123", note_id
+        )
 
         # Then: Request was made
         assert route.called
@@ -744,9 +764,9 @@ class TestCharactersServiceGetStatistics:
         ).respond(200, json=statistics_response_data)
 
         # When: Getting statistics
-        result = await vclient.characters(company_id, user_id, campaign_id).get_statistics(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_statistics(character_id)
 
         # Then: Returns RollStatistics object
         assert route.called
@@ -780,9 +800,9 @@ class TestCharactersServiceInventory:
         )
 
         # When: Getting a page of inventory items
-        result = await vclient.characters(company_id, user_id, campaign_id).get_inventory_page(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_inventory_page(character_id)
 
         # Then: Returns paginated CharacterInventoryItem objects
         assert route.called
@@ -812,9 +832,9 @@ class TestCharactersServiceInventory:
         )
 
         # When: Listing all inventory items
-        result = await vclient.characters(company_id, user_id, campaign_id).list_all_inventory(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).list_all_inventory(character_id)
 
         # Then: Returns list of CharacterInventoryItem objects
         assert route.called
@@ -841,7 +861,7 @@ class TestCharactersServiceInventory:
         result = [
             item
             async for item in vclient.characters(
-                company_id, user_id, campaign_id
+                user_id=user_id, campaign_id=campaign_id, company_id=company_id
             ).iter_all_inventory(character_id)
         ]
 
@@ -865,9 +885,9 @@ class TestCharactersServiceInventory:
             f"{base_url}{Endpoints.CHARACTER_INVENTORY_ITEM.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, item_id=item_id)}"
         ).respond(200, json=inventory_item_response_data)
         # When: Getting the inventory item
-        result = await vclient.characters(company_id, user_id, campaign_id).get_inventory_item(
-            character_id, item_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_inventory_item(character_id, item_id)
 
         # Then: Returns CharacterInventoryItem object
         assert route.called
@@ -889,7 +909,9 @@ class TestCharactersServiceInventory:
             f"{base_url}{Endpoints.CHARACTER_INVENTORY.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}"
         ).respond(201, json=inventory_item_response_data)
         # When: Creating the inventory item
-        result = await vclient.characters(company_id, user_id, campaign_id).create_inventory_item(
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).create_inventory_item(
             character_id, name="Test Item", type="BOOK", description="This is test content"
         )
 
@@ -916,9 +938,9 @@ class TestCharactersServiceInventory:
         ).respond(200, json=updated_data)
 
         # When: Updating the inventory item
-        result = await vclient.characters(company_id, user_id, campaign_id).update_inventory_item(
-            character_id, item_id, name="Updated Item"
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).update_inventory_item(character_id, item_id, name="Updated Item")
 
         # Then: Returns CharacterInventoryItem object
         assert route.called
@@ -942,7 +964,7 @@ class TestCharactersServiceInventory:
         ).respond(204)
 
         # When: Deleting the inventory item
-        await vclient.characters(company_id, user_id, campaign_id).delete_inventory_item(
+        await vclient.characters(user_id, campaign_id, company_id=company_id).delete_inventory_item(
             character_id, item_id
         )
 
@@ -975,9 +997,9 @@ class TestCharactersServiceWerewolfGifts:
         )
 
         # When: Getting a page of gifts
-        result = await vclient.characters(company_id, user_id, campaign_id).get_gifts_page(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_gifts_page(character_id)
 
         # Then: Returns paginated WerewolfGift objects
         assert route.called
@@ -1003,9 +1025,9 @@ class TestCharactersServiceWerewolfGifts:
         )
 
         # When: Listing all gifts
-        result = await vclient.characters(company_id, user_id, campaign_id).list_all_gifts(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).list_all_gifts(character_id)
 
         # Then: Returns list of WerewolfGift objects
         assert route.called
@@ -1032,9 +1054,9 @@ class TestCharactersServiceWerewolfGifts:
         # When: Iterating through all gifts
         result = [
             gift
-            async for gift in vclient.characters(company_id, user_id, campaign_id).iter_all_gifts(
-                character_id
-            )
+            async for gift in vclient.characters(
+                user_id, campaign_id, company_id=company_id
+            ).iter_all_gifts(character_id)
         ]
 
         # Then: Returns list of WerewolfGift objects
@@ -1058,7 +1080,7 @@ class TestCharactersServiceWerewolfGifts:
         ).respond(200, json=werewolf_gift_response_data)
 
         # When: Getting the gift
-        result = await vclient.characters(company_id, user_id, campaign_id).get_gift(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).get_gift(
             character_id, werewolf_gift_id
         )
 
@@ -1085,7 +1107,7 @@ class TestCharactersServiceWerewolfGifts:
         ).respond(201, json=werewolf_gift_response_data)
 
         # When: Adding the gift
-        result = await vclient.characters(company_id, user_id, campaign_id).add_gift(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).add_gift(
             character_id, werewolf_gift_id
         )
 
@@ -1109,7 +1131,7 @@ class TestCharactersServiceWerewolfGifts:
         ).respond(200, json=werewolf_gift_response_data)
 
         # When: Removing the gift
-        result = await vclient.characters(company_id, user_id, campaign_id).remove_gift(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).remove_gift(
             character_id, werewolf_gift_id
         )
 
@@ -1144,9 +1166,9 @@ class TestCharactersServiceWerewolfRites:
         )
 
         # When: Getting a page of rites
-        result = await vclient.characters(company_id, user_id, campaign_id).get_rites_page(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_rites_page(character_id)
 
         # Then: Returns paginated WerewolfRite objects
         assert route.called
@@ -1171,9 +1193,9 @@ class TestCharactersServiceWerewolfRites:
         )
 
         # When: Listing all rites
-        result = await vclient.characters(company_id, user_id, campaign_id).list_all_rites(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).list_all_rites(character_id)
 
         # Then: Returns list of WerewolfRite objects
         assert route.called
@@ -1200,9 +1222,9 @@ class TestCharactersServiceWerewolfRites:
         # When: Iterating through all rites
         result = [
             rite
-            async for rite in vclient.characters(company_id, user_id, campaign_id).iter_all_rites(
-                character_id
-            )
+            async for rite in vclient.characters(
+                user_id, campaign_id, company_id=company_id
+            ).iter_all_rites(character_id)
         ]
 
         # Then: Returns list of WerewolfRite objects
@@ -1226,7 +1248,7 @@ class TestCharactersServiceWerewolfRites:
         ).respond(200, json=werewolf_rite_response_data)
 
         # When: Getting the rite
-        result = await vclient.characters(company_id, user_id, campaign_id).get_rite(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).get_rite(
             character_id, werewolf_rite_id
         )
 
@@ -1251,7 +1273,7 @@ class TestCharactersServiceWerewolfRites:
         ).respond(201, json=werewolf_rite_response_data)
 
         # When: Adding the rite
-        result = await vclient.characters(company_id, user_id, campaign_id).add_rite(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).add_rite(
             character_id, werewolf_rite_id
         )
 
@@ -1275,7 +1297,7 @@ class TestCharactersServiceWerewolfRites:
         ).respond(200, json=werewolf_rite_response_data)
 
         # When: Removing the rite
-        result = await vclient.characters(company_id, user_id, campaign_id).remove_rite(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).remove_rite(
             character_id, werewolf_rite_id
         )
 
@@ -1310,9 +1332,9 @@ class TestCharactersServiceHunterEdges:
         )
 
         # When: Getting a page of edges
-        result = await vclient.characters(company_id, user_id, campaign_id).get_edges_page(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_edges_page(character_id)
 
         # Then: Returns paginated CharacterEdgeAndPerksDTO objects
         assert route.called
@@ -1338,9 +1360,9 @@ class TestCharactersServiceHunterEdges:
         )
 
         # When: Listing all edges
-        result = await vclient.characters(company_id, user_id, campaign_id).list_all_edges(
-            character_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).list_all_edges(character_id)
 
         # Then: Returns list of CharacterEdgeAndPerksDTO objects
         assert route.called
@@ -1367,9 +1389,9 @@ class TestCharactersServiceHunterEdges:
         # When: Iterating through all edges
         result = [
             edge
-            async for edge in vclient.characters(company_id, user_id, campaign_id).iter_all_edges(
-                character_id
-            )
+            async for edge in vclient.characters(
+                user_id, campaign_id, company_id=company_id
+            ).iter_all_edges(character_id)
         ]
 
         # Then: Returns list of CharacterEdgeAndPerksDTO objects
@@ -1393,7 +1415,7 @@ class TestCharactersServiceHunterEdges:
         ).respond(200, json=hunter_edge_response_data)
 
         # When: Getting the edge
-        result = await vclient.characters(company_id, user_id, campaign_id).get_edge(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).get_edge(
             character_id, hunter_edge_id
         )
 
@@ -1420,7 +1442,7 @@ class TestCharactersServiceHunterEdges:
         ).respond(201, json=hunter_edge_response_data)
 
         # When: Adding the edge
-        result = await vclient.characters(company_id, user_id, campaign_id).add_edge(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).add_edge(
             character_id, hunter_edge_id
         )
 
@@ -1444,7 +1466,7 @@ class TestCharactersServiceHunterEdges:
         ).respond(200, json=hunter_edge_response_data)
 
         # When: Removing the edge
-        result = await vclient.characters(company_id, user_id, campaign_id).remove_edge(
+        result = await vclient.characters(user_id, campaign_id, company_id=company_id).remove_edge(
             character_id, hunter_edge_id
         )
 
@@ -1480,9 +1502,9 @@ class TestCharactersServiceHunterEdgePerks:
         )
 
         # When: Getting a page of edge perks
-        result = await vclient.characters(company_id, user_id, campaign_id).get_edge_perks_page(
-            character_id, hunter_edge_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_edge_perks_page(character_id, hunter_edge_id)
 
         # Then: Returns paginated CharacterPerkDTO objects
         assert route.called
@@ -1513,9 +1535,9 @@ class TestCharactersServiceHunterEdgePerks:
         )
 
         # When: Listing all edge perks
-        result = await vclient.characters(company_id, user_id, campaign_id).list_all_edge_perks(
-            character_id, hunter_edge_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).list_all_edge_perks(character_id, hunter_edge_id)
 
         # Then: Returns list of CharacterPerkDTO objects
         assert route.called
@@ -1549,7 +1571,7 @@ class TestCharactersServiceHunterEdgePerks:
         result = [
             perk
             async for perk in vclient.characters(
-                company_id, user_id, campaign_id
+                user_id=user_id, campaign_id=campaign_id, company_id=company_id
             ).iter_all_edge_perks(character_id, hunter_edge_id)
         ]
 
@@ -1575,9 +1597,9 @@ class TestCharactersServiceHunterEdgePerks:
         ).respond(200, json=hunter_edge_perk_response_data)
 
         # When: Getting the edge perk
-        result = await vclient.characters(company_id, user_id, campaign_id).get_edge_perk(
-            character_id, hunter_edge_id, hunter_edge_perk_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)
 
         # Then: Returns CharacterPerkDTO object
         assert route.called
@@ -1601,9 +1623,9 @@ class TestCharactersServiceHunterEdgePerks:
         ).respond(201, json=hunter_edge_perk_response_data)
 
         # When: Adding the edge perk
-        result = await vclient.characters(company_id, user_id, campaign_id).add_edge_perk(
-            character_id, hunter_edge_id, hunter_edge_perk_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).add_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)
 
         # Then: Returns CharacterPerkDTO object
         assert route.called
@@ -1626,9 +1648,9 @@ class TestCharactersServiceHunterEdgePerks:
         ).respond(200, json=hunter_edge_perk_response_data)
 
         # When: Removing the edge perk
-        result = await vclient.characters(company_id, user_id, campaign_id).remove_edge_perk(
-            character_id, hunter_edge_id, hunter_edge_perk_id
-        )
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).remove_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)
 
         # Then: Returns CharacterPerkDTO object
         assert route.called

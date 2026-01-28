@@ -59,6 +59,7 @@ from .companies import (
     CompanySettings,
     CreateCompanyRequest,
     GrantAccessRequest,
+    NewCompanyResponse,
     UpdateCompanyRequest,
 )
 from .developers import (
@@ -157,6 +158,7 @@ __all__ = [
     "MeDeveloperCompanyPermission",
     "MeDeveloperWithApiKey",
     "NameDescriptionSubDocument",
+    "NewCompanyResponse",
     "Note",
     "PaginatedResponse",
     "Quickroll",

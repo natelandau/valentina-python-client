@@ -36,7 +36,7 @@ class TestCharacterAutogenService:
 
         # When: Starting a chargen session
         result = await vclient.character_autogen(
-            "company123", "user123", "campaign123"
+            user_id="user123", campaign_id="campaign123", company_id="company123"
         ).start_chargen_session()
 
         # Then: The route was called with correct params
@@ -60,7 +60,7 @@ class TestCharacterAutogenServiceFinalizeChargenSession:
 
         # When: Finalizing a chargen session
         result = await vclient.character_autogen(
-            "company123", "user123", "campaign123"
+            user_id="user123", campaign_id="campaign123", company_id="company123"
         ).finalize_chargen_session("session123", "char123")
 
         # Then: The route was called with correct params
@@ -88,7 +88,7 @@ class TestCharacterAutogenerateCharacter:
 
         # When: Generating a character
         result = await vclient.character_autogen(
-            "company123", "user123", "campaign123"
+            user_id="user123", campaign_id="campaign123", company_id="company123"
         ).generate_character(character_type="PLAYER")
 
         # Then: The route was called with correct params

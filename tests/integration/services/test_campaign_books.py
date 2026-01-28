@@ -79,7 +79,7 @@ class TestBooksServiceGetPage:
         ).respond(200, json=paginated_books_response)
 
         # When: Getting a page of books
-        result = await vclient.books(company_id, user_id, campaign_id).get_page()
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).get_page()
 
         # Then: Returns PaginatedResponse with CampaignBook objects
         assert route.called
@@ -110,7 +110,9 @@ class TestBooksServiceGetPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.books(company_id, user_id, campaign_id).get_page(limit=25, offset=50)
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).get_page(
+            limit=25, offset=50
+        )
 
         # Then: Request was made with correct params
         assert route.called
@@ -142,7 +144,7 @@ class TestBooksServiceListAll:
         )
 
         # When: Calling list_all
-        result = await vclient.books(company_id, user_id, campaign_id).list_all()
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).list_all()
 
         # Then: Returns list of CampaignBook objects
         assert isinstance(result, list)
@@ -192,7 +194,12 @@ class TestBooksServiceIterAll:
         )
 
         # When: Iterating through all books
-        books = [b async for b in vclient.books(company_id, user_id, campaign_id).iter_all(limit=1)]
+        books = [
+            b
+            async for b in vclient.books(user_id, campaign_id, company_id=company_id).iter_all(
+                limit=1
+            )
+        ]
 
         # Then: All books are yielded as CampaignBook objects
         assert len(books) == 2
@@ -217,7 +224,7 @@ class TestBooksServiceGet:
         ).respond(200, json=book_response_data)
 
         # When: Getting the book
-        result = await vclient.books(company_id, user_id, campaign_id).get(book_id)
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).get(book_id)
 
         # Then: Returns CampaignBook object with correct data
         assert route.called
@@ -240,7 +247,7 @@ class TestBooksServiceGet:
 
         # When/Then: Getting the book raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.books(company_id, user_id, campaign_id).get(book_id)
+            await vclient.books(user_id, campaign_id, company_id=company_id).get(book_id)
 
 
 class TestBooksServiceCreate:
@@ -258,7 +265,9 @@ class TestBooksServiceCreate:
         ).respond(201, json=book_response_data)
 
         # When: Creating a book with minimal data
-        result = await vclient.books(company_id, user_id, campaign_id).create(name="Test Book")
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).create(
+            name="Test Book"
+        )
 
         # Then: Returns created CampaignBook object
         assert route.called
@@ -284,7 +293,7 @@ class TestBooksServiceCreate:
         ).respond(201, json=book_response_data)
 
         # When: Creating a book with all fields
-        result = await vclient.books(company_id, user_id, campaign_id).create(
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).create(
             name="Test Book",
             description="A test book description",
         )
@@ -305,7 +314,7 @@ class TestBooksServiceCreate:
         """Verify validation error on invalid data raises RequestValidationError."""
         # When/Then: Creating with invalid data raises RequestValidationError
         with pytest.raises(RequestValidationError):
-            await vclient.books("company123", "user123", "campaign123").create(name="AB")
+            await vclient.books("user123", "campaign123", company_id="company123").create(name="AB")
 
 
 class TestBooksServiceUpdate:
@@ -325,7 +334,7 @@ class TestBooksServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating the book name
-        result = await vclient.books(company_id, user_id, campaign_id).update(
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).update(
             book_id, name="Updated Name"
         )
 
@@ -355,7 +364,9 @@ class TestBooksServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.books(company_id, user_id, campaign_id).update(book_id, name="New Name")
+            await vclient.books(user_id, campaign_id, company_id=company_id).update(
+                book_id, name="New Name"
+            )
 
 
 class TestBooksServiceDelete:
@@ -374,7 +385,7 @@ class TestBooksServiceDelete:
         ).respond(204)
 
         # When: Deleting the book
-        await vclient.books(company_id, user_id, campaign_id).delete(book_id)
+        await vclient.books(user_id, campaign_id, company_id=company_id).delete(book_id)
 
         # Then: Request was made
         assert route.called
@@ -393,7 +404,7 @@ class TestBooksServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.books(company_id, user_id, campaign_id).delete(book_id)
+            await vclient.books(user_id, campaign_id, company_id=company_id).delete(book_id)
 
 
 class TestBooksServiceRenumber:
@@ -413,7 +424,9 @@ class TestBooksServiceRenumber:
         ).respond(200, json=updated_data)
 
         # When: Renumbering the book
-        result = await vclient.books(company_id, user_id, campaign_id).renumber(book_id, number=3)
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).renumber(
+            book_id, number=3
+        )
 
         # Then: Returns updated CampaignBook object
         assert route.called
@@ -431,7 +444,7 @@ class TestBooksServiceRenumber:
         """Verify validation error on invalid number raises RequestValidationError."""
         # When/Then: Renumbering with invalid number raises RequestValidationError
         with pytest.raises(RequestValidationError):
-            await vclient.books("company123", "user123", "campaign123").renumber(
+            await vclient.books("user123", "campaign123", company_id="company123").renumber(
                 "book_id", number=0
             )
 
@@ -461,7 +474,9 @@ class TestBooksServiceNotes:
         )
 
         # When: Getting a page of notes
-        result = await vclient.books(company_id, user_id, campaign_id).get_notes_page(book_id)
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).get_notes_page(
+            book_id
+        )
 
         # Then: Returns paginated Note objects
         assert route.called
@@ -491,7 +506,9 @@ class TestBooksServiceNotes:
         )
 
         # When: Calling list_all_notes
-        result = await vclient.books(company_id, user_id, campaign_id).list_all_notes(book_id)
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).list_all_notes(
+            book_id
+        )
 
         # Then: Returns list of Note objects
         assert isinstance(result, list)
@@ -512,7 +529,9 @@ class TestBooksServiceNotes:
         ).respond(200, json=note_response_data)
 
         # When: Getting the note
-        result = await vclient.books(company_id, user_id, campaign_id).get_note(book_id, note_id)
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).get_note(
+            book_id, note_id
+        )
 
         # Then: Returns Note object
         assert route.called
@@ -533,7 +552,7 @@ class TestBooksServiceNotes:
         ).respond(201, json=note_response_data)
 
         # When: Creating a note
-        result = await vclient.books(company_id, user_id, campaign_id).create_note(
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).create_note(
             book_id, title="Test Note", content="This is test content"
         )
 
@@ -557,7 +576,7 @@ class TestBooksServiceNotes:
         ).respond(200, json=updated_data)
 
         # When: Updating the note
-        result = await vclient.books(company_id, user_id, campaign_id).update_note(
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).update_note(
             book_id, note_id, title="Updated Title"
         )
 
@@ -580,7 +599,9 @@ class TestBooksServiceNotes:
         ).respond(204)
 
         # When: Deleting the note
-        await vclient.books(company_id, user_id, campaign_id).delete_note(book_id, note_id)
+        await vclient.books(user_id, campaign_id, company_id=company_id).delete_note(
+            book_id, note_id
+        )
 
         # Then: Request was made
         assert route.called
@@ -611,7 +632,9 @@ class TestBooksServiceAssets:
         )
 
         # When: Listing assets
-        result = await vclient.books(company_id, user_id, campaign_id).list_assets(book_id)
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).list_assets(
+            book_id
+        )
 
         # Then: Returns paginated S3Asset objects
         assert route.called
@@ -633,7 +656,9 @@ class TestBooksServiceAssets:
         ).respond(200, json=asset_response_data)
 
         # When: Getting the asset
-        result = await vclient.books(company_id, user_id, campaign_id).get_asset(book_id, asset_id)
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).get_asset(
+            book_id, asset_id
+        )
 
         # Then: Returns S3Asset object
         assert route.called
@@ -654,7 +679,9 @@ class TestBooksServiceAssets:
         ).respond(204)
 
         # When: Deleting the asset
-        await vclient.books(company_id, user_id, campaign_id).delete_asset(book_id, asset_id)
+        await vclient.books(user_id, campaign_id, company_id=company_id).delete_asset(
+            book_id, asset_id
+        )
 
         # Then: Request was made
         assert route.called
@@ -672,7 +699,7 @@ class TestBooksServiceAssets:
         ).respond(201, json=asset_response_data)
 
         # When: Uploading an asset
-        result = await vclient.books(company_id, user_id, campaign_id).upload_asset(
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).upload_asset(
             book_id,
             filename="test.png",
             content=b"test content",

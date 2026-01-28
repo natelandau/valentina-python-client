@@ -169,10 +169,10 @@ class TestCharacterTraitsService:
         # When/Then: Calling character_traits_service raises RuntimeError
         with pytest.raises(RuntimeError, match="No default client configured"):
             character_traits_service(
-                company_id="company_id",
                 user_id="user_id",
                 campaign_id="campaign_id",
                 character_id="character_id",
+                company_id="company_id",
             )
 
     def test_character_traits_service_returns_service_instance(self, api_config) -> None:
@@ -183,10 +183,10 @@ class TestCharacterTraitsService:
 
         # When: Getting the character traits service
         service = character_traits_service(
-            company_id="company_id",
             user_id="user_id",
             campaign_id="campaign_id",
             character_id="character_id",
+            company_id="company_id",
         )
 
         # Then: A CharacterTraitsService is returned with the correct client
@@ -204,7 +204,7 @@ class TestCharactersService:
         # When/Then: Calling characters_service raises RuntimeError
         with pytest.raises(RuntimeError, match="No default client configured"):
             characters_service(
-                company_id="company_id", user_id="user_id", campaign_id="campaign_id"
+                user_id="user_id", campaign_id="campaign_id", company_id="company_id"
             )
 
     def test_characters_service_returns_service_instance(self, api_config) -> None:
@@ -215,7 +215,7 @@ class TestCharactersService:
 
         # When: Getting the characters service
         service = characters_service(
-            company_id="company_id", user_id="user_id", campaign_id="campaign_id"
+            user_id="user_id", campaign_id="campaign_id", company_id="company_id"
         )
 
         # Then: A CharactersService is returned with the correct client
@@ -233,10 +233,10 @@ class TestChaptersService:
         # When/Then: Calling chapters_service raises RuntimeError
         with pytest.raises(RuntimeError, match="No default client configured"):
             chapters_service(
-                company_id="company_id",
                 user_id="user_id",
                 campaign_id="campaign_id",
                 book_id="book_id",
+                company_id="company_id",
             )
 
     def test_chapters_service_returns_service_instance(self, api_config) -> None:
@@ -247,7 +247,7 @@ class TestChaptersService:
 
         # When: Getting the chapters service
         service = chapters_service(
-            company_id="company_id", user_id="user_id", campaign_id="campaign_id", book_id="book_id"
+            user_id="user_id", campaign_id="campaign_id", book_id="book_id", company_id="company_id"
         )
 
         # Then: A ChaptersService is returned with the correct client
@@ -264,7 +264,7 @@ class TestBooksService:
 
         # When/Then: Calling books_service raises RuntimeError
         with pytest.raises(RuntimeError, match="No default client configured"):
-            books_service(company_id="company_id", user_id="user_id", campaign_id="campaign_id")
+            books_service(user_id="user_id", campaign_id="campaign_id", company_id="company_id")
 
     def test_books_service_returns_service_instance(self, api_config) -> None:
         """Verify books_service returns a BooksService with the default client."""
@@ -274,7 +274,7 @@ class TestBooksService:
 
         # When: Getting the books service
         service = books_service(
-            company_id="company_id", user_id="user_id", campaign_id="campaign_id"
+            user_id="user_id", campaign_id="campaign_id", company_id="company_id"
         )
 
         # Then: A BooksService is returned with the correct client
@@ -291,7 +291,7 @@ class TestCampaignsService:
 
         # When/Then: Calling campaigns_service raises RuntimeError
         with pytest.raises(RuntimeError, match="No default client configured"):
-            campaigns_service(company_id="company_id", user_id="user_id")
+            campaigns_service(user_id="user_id", company_id="company_id")
 
     def test_campaigns_service_returns_service_instance(self, api_config) -> None:
         """Verify campaigns_service returns a CampaignsService with the default client."""
@@ -300,7 +300,7 @@ class TestCampaignsService:
         configure_default_client(client)
 
         # When: Getting the campaigns service
-        service = campaigns_service(company_id="company_id", user_id="user_id")
+        service = campaigns_service(user_id="user_id", company_id="company_id")
 
         # Then: A CampaignsService is returned with the correct client
         assert isinstance(service, CampaignsService)
@@ -481,7 +481,7 @@ class TestDicreollService:
 
         # When/Then: Calling dicreolls_service raises RuntimeError
         with pytest.raises(RuntimeError, match="No default client configured"):
-            dicreolls_service(company_id="company_id", user_id="user_id")
+            dicreolls_service(user_id="user_id", company_id="company_id")
 
     def test_dicreolls_service_returns_service_instance(self, api_config) -> None:
         """Verify dicreolls_service returns a DicreollService with the default client."""
@@ -490,7 +490,7 @@ class TestDicreollService:
         configure_default_client(client)
 
         # When: Getting the dicreolls service
-        service = dicreolls_service(company_id="company_id", user_id="user_id")
+        service = dicreolls_service(user_id="user_id", company_id="company_id")
 
         # Then: A DicreollService is returned with the correct client
         assert isinstance(service, DicreollService)
@@ -532,7 +532,7 @@ class TestCharacterAutogenService:
         # When/Then: Calling character_autogen_service raises RuntimeError
         with pytest.raises(RuntimeError, match="No default client configured"):
             character_autogen_service(
-                company_id="company_id", user_id="user_id", campaign_id="campaign_id"
+                user_id="user_id", campaign_id="campaign_id", company_id="company_id"
             )
 
     def test_character_autogen_service_returns_service_instance(self, api_config) -> None:
@@ -543,9 +543,120 @@ class TestCharacterAutogenService:
 
         # When: Getting the character autogen service
         service = character_autogen_service(
-            company_id="company_id", user_id="user_id", campaign_id="campaign_id"
+            user_id="user_id", campaign_id="campaign_id", company_id="company_id"
         )
 
         # Then: A CharacterAutogenService is returned with the correct client
         assert isinstance(service, CharacterAutogenService)
         assert service._client is client
+
+
+class TestDefaultCompanyId:
+    """Tests for default_company_id behavior."""
+
+    def test_uses_default_company_id_when_not_provided(self, api_config) -> None:
+        """Verify service uses default_company_id when company_id not passed."""
+        # Given: A client with default_company_id configured
+        api_config.default_company_id = "default-company"
+        client = VClient(config=api_config)
+        configure_default_client(client)
+
+        # When: Getting users service without company_id
+        service = users_service()
+
+        # Then: Service uses the default company_id
+        assert service._company_id == "default-company"
+
+    def test_explicit_company_id_overrides_default(self, api_config) -> None:
+        """Verify explicit company_id overrides default_company_id."""
+        # Given: A client with default_company_id configured
+        api_config.default_company_id = "default-company"
+        client = VClient(config=api_config)
+        configure_default_client(client)
+
+        # When: Getting users service with explicit company_id
+        service = users_service("explicit-company")
+
+        # Then: Service uses the explicit company_id
+        assert service._company_id == "explicit-company"
+
+    def test_raises_when_no_company_id_and_no_default(self, api_config) -> None:
+        """Verify ValueError raised when no company_id and no default."""
+        # Given: A client without default_company_id
+        client = VClient(config=api_config)
+        configure_default_client(client)
+
+        # When/Then: Calling users_service without company_id raises ValueError
+        with pytest.raises(ValueError, match="company_id is required"):
+            users_service()
+
+
+class TestVClientDefaultCompanyId:
+    """Tests for VClient default_company_id behavior."""
+
+    def test_default_company_id_property(self, api_config) -> None:
+        """Verify default_company_id property returns configured value."""
+        # Given: Config with default_company_id
+        api_config.default_company_id = "my-company"
+
+        # When: Creating client
+        client = VClient(config=api_config, set_as_default=False)
+
+        # Then: Property returns the value
+        assert client.default_company_id == "my-company"
+
+    def test_default_company_id_property_returns_none(self, api_config) -> None:
+        """Verify default_company_id property returns None when not configured."""
+        # Given: Config without default_company_id
+
+        # When: Creating client
+        client = VClient(config=api_config, set_as_default=False)
+
+        # Then: Property returns None
+        assert client.default_company_id is None
+
+    def test_default_company_id_from_init_param(self, base_url, api_key) -> None:
+        """Verify default_company_id can be set via init parameter."""
+        # When: Creating client with default_company_id param
+        client = VClient(
+            base_url=base_url,
+            api_key=api_key,
+            default_company_id="param-company",
+            set_as_default=False,
+        )
+
+        # Then: Property returns the value
+        assert client.default_company_id == "param-company"
+
+    def test_client_users_uses_default_company_id(self, api_config) -> None:
+        """Verify client.users() uses default_company_id when not passed."""
+        # Given: A client with default_company_id configured
+        api_config.default_company_id = "default-company"
+        client = VClient(config=api_config, set_as_default=False)
+
+        # When: Getting users service without company_id
+        service = client.users()
+
+        # Then: Service uses the default company_id
+        assert service._company_id == "default-company"
+
+    def test_client_users_explicit_overrides_default(self, api_config) -> None:
+        """Verify client.users() explicit company_id overrides default."""
+        # Given: A client with default_company_id configured
+        api_config.default_company_id = "default-company"
+        client = VClient(config=api_config, set_as_default=False)
+
+        # When: Getting users service with explicit company_id
+        service = client.users("explicit-company")
+
+        # Then: Service uses the explicit company_id
+        assert service._company_id == "explicit-company"
+
+    def test_client_users_raises_when_no_company_id_and_no_default(self, api_config) -> None:
+        """Verify client.users() raises ValueError when no company_id and no default."""
+        # Given: A client without default_company_id
+        client = VClient(config=api_config, set_as_default=False)
+
+        # When/Then: Calling users() without company_id raises ValueError
+        with pytest.raises(ValueError, match="company_id is required"):
+            client.users()

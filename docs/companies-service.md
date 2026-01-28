@@ -57,6 +57,15 @@ print(f"Granted {permissions.permission} access to {permissions.name}")
 
 ## Response Models
 
+### `NewCompanyResponse`
+
+Response from creating a new company. This also creates a new "admin" level user for the company with the same email address and username as the developer who created the company.
+
+| Field        | Type      | Description           |
+| ------------ | --------- | --------------------- |
+| `company`    | `Company` | The company object    |
+| `admin_user` | `User`    | The admin user object |
+
 ### `Company`
 
 Represents a company entity returned from the API.

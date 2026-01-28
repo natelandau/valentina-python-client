@@ -10,6 +10,7 @@ from vclient.constants import (
     ManageCampaignPermission,
     PermissionLevel,
 )
+from vclient.models.users import User
 
 
 class CompanySettings(BaseModel):
@@ -51,6 +52,16 @@ class CompanyPermissions(BaseModel):
     company_id: str
     name: str | None
     permission: PermissionLevel
+
+
+class NewCompanyResponse(BaseModel):
+    """Response model for creating a new company.
+
+    Returned when a new company is created.
+    """
+
+    company: Company
+    admin_user: User
 
 
 # -----------------------------------------------------------------------------

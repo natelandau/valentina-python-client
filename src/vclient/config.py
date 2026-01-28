@@ -21,6 +21,7 @@ class APIConfig:
         retry_delay: Base delay between retries in seconds.
         auto_retry_rate_limit: Automatically retry requests that hit rate limits (429).
         auto_idempotency_keys: Automatically generate idempotency keys for POST/PUT/PATCH.
+        default_company_id: Default company ID to use when not explicitly provided.
     """
 
     base_url: str
@@ -30,6 +31,7 @@ class APIConfig:
     retry_delay: float = DEFAULT_RETRY_DELAY
     auto_retry_rate_limit: bool = True
     auto_idempotency_keys: bool = False
+    default_company_id: str | None = None
     headers: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:

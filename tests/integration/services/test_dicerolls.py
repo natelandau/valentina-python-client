@@ -73,7 +73,7 @@ class TestDicreollServiceGetPage:
         ).respond(200, json=paginated_dicreolls_response)
 
         # When: Getting a page of dicreolls
-        result = await vclient.dicreolls(company_id="company123", user_id="user123").get_page()
+        result = await vclient.dicreolls(user_id="user123", company_id="company123").get_page()
 
         # Then: Returns paginated Dicreoll objects
         assert route.called
@@ -109,7 +109,7 @@ class TestDicreollServiceGetPage:
         ).respond(200, json=paginated_dicreolls_response)
 
         # When: Getting a page of dicreolls with filters
-        result = await vclient.dicreolls(company_id="company123", user_id="user123").get_page(
+        result = await vclient.dicreolls(user_id="user123", company_id="company123").get_page(
             userid="user123", characterid="character123", campaignid="campaign123"
         )
 
@@ -135,7 +135,7 @@ class TestDicreollServiceGetPage:
         ).respond(200, json=paginated_dicreolls_response)
 
         # When: Getting a page of dicreolls with pagination
-        result = await vclient.dicreolls(company_id="company123", user_id="user123").get_page(
+        result = await vclient.dicreolls(user_id="user123", company_id="company123").get_page(
             limit=25, offset=50
         )
 
@@ -164,7 +164,7 @@ class TestDicreollServiceListAll:
         ).respond(200, json=paginated_dicreolls_response)
 
         # When: Getting all dicreolls
-        result = await vclient.dicreolls(company_id="company123", user_id="user123").list_all()
+        result = await vclient.dicreolls(user_id="user123", company_id="company123").list_all()
 
         # Then: Returns list of Dicreoll objects
         assert route.called
@@ -189,7 +189,7 @@ class TestDicreollServiceListAll:
         ).respond(200, json=paginated_dicreolls_response)
 
         # When: Getting all dicreolls with filters
-        result = await vclient.dicreolls(company_id="company123", user_id="user123").list_all(
+        result = await vclient.dicreolls(user_id="user123", company_id="company123").list_all(
             userid="user123", characterid="character123", campaignid="campaign123"
         )
 
@@ -244,7 +244,7 @@ class TestDicreollServiceGet:
         ).respond(200, json=dicreoll_response_data)
 
         # When: Getting a dicreoll
-        result = await vclient.dicreolls(company_id="company123", user_id="user123").get(
+        result = await vclient.dicreolls(user_id="user123", company_id="company123").get(
             "dicreoll123"
         )
 
@@ -270,7 +270,7 @@ class TestDicreollServiceGet:
 
         # When/Then: Getting the dicreoll raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.dicreolls(company_id="company123", user_id="user123").get("nonexistent")
+            await vclient.dicreolls(user_id="user123", company_id="company123").get("nonexistent")
 
         assert route.called
 
@@ -287,7 +287,7 @@ class TestDicreollServiceCreate:
         ).respond(200, json=dicreoll_response_data)
 
         # When: Creating a dicreoll
-        result = await vclient.dicreolls(company_id="company123", user_id="user123").create(
+        result = await vclient.dicreolls(user_id="user123", company_id="company123").create(
             dice_size=10,
             difficulty=6,
             num_dice=1,

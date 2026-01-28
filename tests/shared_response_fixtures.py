@@ -45,3 +45,25 @@ def character_response_data() -> dict:
         "mage_attributes": None,
         "hunter_attributes": None,
     }
+
+
+@pytest.fixture
+def user_response_data() -> dict:
+    """Return sample user response data."""
+    return {
+        "id": "507f1f77bcf86cd799439011",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "name": "Test User",
+        "email": "test@example.com",
+        "role": "PLAYER",
+        "company_id": "company123",
+        "discord_profile": {
+            "id": "discord123",
+            "username": "testuser",
+        },
+        "campaign_experience": [
+            {"campaign_id": "campaign1", "xp_current": 50, "xp_total": 100, "cool_points": 5}
+        ],
+        "asset_ids": ["asset1"],
+    }

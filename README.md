@@ -85,15 +85,16 @@ client = VClient(config=config)
 
 ### Configuration Options
 
-| Option                  | Type    | Default  | Description                                       |
-| ----------------------- | ------- | -------- | ------------------------------------------------- |
-| `base_url`              | `str`   | Required | Base URL for the API                              |
-| `api_key`               | `str`   | Required | API key for authentication                        |
-| `timeout`               | `float` | `30.0`   | Request timeout in seconds                        |
-| `max_retries`           | `int`   | `3`      | Maximum retry attempts for failed requests        |
-| `retry_delay`           | `float` | `1.0`    | Base delay between retries in seconds             |
-| `auto_retry_rate_limit` | `bool`  | `True`   | Automatically retry rate-limited requests         |
-| `auto_idempotency_keys` | `bool`  | `False`  | Auto-generate idempotency keys for POST/PUT/PATCH |
+| Option                  | Type           | Default  | Description                                       |
+| ----------------------- | -------------- | -------- | ------------------------------------------------- |
+| `base_url`              | `str`          | Required | Base URL for the API                              |
+| `api_key`               | `str`          | Required | API key for authentication                        |
+| `timeout`               | `float`        | `30.0`   | Request timeout in seconds                        |
+| `max_retries`           | `int`          | `3`      | Maximum retry attempts for failed requests        |
+| `retry_delay`           | `float`        | `1.0`    | Base delay between retries in seconds             |
+| `auto_retry_rate_limit` | `bool`         | `True`   | Automatically retry rate-limited requests         |
+| `auto_idempotency_keys` | `bool`         | `False`  | Auto-generate idempotency keys for POST/PUT/PATCH |
+| `default_company_id`    | `str` or `None`| `None`   | Default company ID for service factory methods    |
 
 ### Idempotency Keys
 
@@ -111,24 +112,54 @@ client = VClient(
 
 When enabled, the client automatically generates and includes an `Idempotency-Key` header for every POST, PUT, and PATCH request. This allows the server to detect duplicate requests and return the same response, making retries safe even for non-idempotent operations.
 
+### Default Company ID
+
+Configure a default company ID to avoid passing it to every service method. The default is used when `company_id` is not explicitly provided.
+
+```python
+from vclient import VClient, users_service
+
+# Configure default company ID
+client = VClient(
+    base_url="https://api.valentina-noir.com",
+    api_key="your-api-key",
+    default_company_id="507f1f77bcf86cd799439011",
+)
+
+# Uses default company_id
+users = client.users()
+all_users = await users.list_all()
+
+# Override for a specific call
+other_users = client.users(company_id="other-company-id")
+
+# Also works with factory functions
+svc = users_service()  # Uses default
+svc2 = users_service(company_id="explicit-id")  # Override
+```
+
+If no `company_id` is provided and no default is configured, a `ValueError` is raised.
+
 ## Available Services
+
+Services that require a `company_id` accept it as an optional keyword argument. If not provided, the `default_company_id` from the client configuration is used.
 
 | Service | Factory Function | Description |
 | --- | --- | --- |
-| [Campaigns Service](docs/campaigns-service.md) | `campaigns_service(company_id, user_id)` | Manage campaigns, assets, and notes |
-| [Campaigns Books Service](docs/campaign-books-service.md) | `books_service(company_id, user_id, campaign_id)` | Manage campaign books, notes, and assets |
-| [Campaigns Chapters Service](docs/campaign-book-chapters-service.md) | `campaign_book_chapters_service(company_id, user_id, campaign_id, book_id)` | Manage campaign book chapters, notes, and assets |
-| [Character Autogen Service](docs/character-autogen.md) | `character_autogen_service(company_id, user_id, campaign_id)` | Manage character autogen |
-| [Character Blueprint Service](docs/character-blueprint-service.md) | `character_blueprint_service(company_id, user_id, campaign_id)` | Manage character blueprints |
-| [Character Traits Service](docs/character-traits-service.md) | `character_traits_service(company_id, user_id, campaign_id, character_id)` | Manage character traits |
-| [Characters Service](docs/characters-service.md) | `characters_service(company_id, user_id, campaign_id)` | Manage characters, assets, and notes |
+| [Campaigns Service](docs/campaigns-service.md) | `campaigns_service(user_id, company_id=...)` | Manage campaigns, assets, and notes |
+| [Campaigns Books Service](docs/campaign-books-service.md) | `books_service(user_id, campaign_id, company_id=...)` | Manage campaign books, notes, and assets |
+| [Campaigns Chapters Service](docs/campaign-book-chapters-service.md) | `chapters_service(user_id, campaign_id, book_id, company_id=...)` | Manage campaign book chapters, notes, and assets |
+| [Character Autogen Service](docs/character-autogen.md) | `character_autogen_service(user_id, campaign_id, company_id=...)` | Manage character autogen |
+| [Character Blueprint Service](docs/character-blueprint-service.md) | `character_blueprint_service(company_id=...)` | Manage character blueprints |
+| [Character Traits Service](docs/character-traits-service.md) | `character_traits_service(user_id, campaign_id, character_id, company_id=...)` | Manage character traits |
+| [Characters Service](docs/characters-service.md) | `characters_service(user_id, campaign_id, company_id=...)` | Manage characters, assets, and notes |
 | [Companies Service](docs/companies-service.md) | `companies_service()` | Manage companies and permissions |
 | [Developers Service](docs/developers-service.md) | `developer_service()` | Manage your own developer profile |
-| [Dicreoll Service](docs/dicerolls.md) | `dicreolls_service(company_id, user_id)` | Manage dicreolls |
-| [Dictionary Service](docs/dictionary-service.md) | `dictionary_service(company_id)` | Manage dictionary terms |
+| [Dicreoll Service](docs/dicerolls.md) | `dicreolls_service(user_id, company_id=...)` | Manage dicreolls |
+| [Dictionary Service](docs/dictionary-service.md) | `dictionary_service(company_id=...)` | Manage dictionary terms |
 | [Global Admin Service](docs/global-admin-service.md) | `global_admin_service()` | Manage developer accounts (requires admin) |
-| [Options Service](docs/options-service.md) | `options_service(company_id)` | Retrieve all options and enumerations for the api |
-| [Users Service](docs/users-service.md) | `users_service(company_id)` | Manage users and permissions |
+| [Options Service](docs/options-service.md) | `options_service(company_id=...)` | Retrieve all options and enumerations for the api |
+| [Users Service](docs/users-service.md) | `users_service(company_id=...)` | Manage users and permissions |
 | [System Service](docs/system-service.md) | `system_service()` | Health checks and system status |
 
 ## Common Service Methods

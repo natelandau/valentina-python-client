@@ -74,7 +74,10 @@ class TestCharacterTraitsServiceGetPage:
 
         # When: Requesting a page of character traits
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).get_page()
 
         # Then: The route was called and response is paginated
@@ -99,7 +102,10 @@ class TestCharacterTraitsServiceGetPage:
 
         # When: Requesting with pagination
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).get_page(limit=20, offset=10)
 
         # Then: The route was called with correct params
@@ -119,7 +125,10 @@ class TestCharacterTraitsServiceGetPage:
 
         # When: Requesting with filter
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).get_page(parent_category_id="cat123")
 
         # Then: The route was called with correct params
@@ -142,7 +151,10 @@ class TestCharacterTraitsServiceGet:
 
         # When: Requesting a character trait
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).get("ct123")
 
         # Then: The route was called and character trait is returned
@@ -167,9 +179,9 @@ class TestCharacterTraitsServiceGet:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_traits("company123", "user123", "campaign123", "char123").get(
-                "nonexistent"
-            )
+            await vclient.character_traits(
+                "user123", "campaign123", "char123", company_id="company123"
+            ).get("nonexistent")
 
         assert route.called
 
@@ -195,7 +207,10 @@ class TestCharacterTraitsServiceListAll:
 
         # When: Requesting all character traits
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).list_all()
 
         # Then: All character traits are returned as a list
@@ -223,7 +238,10 @@ class TestCharacterTraitsServiceListAll:
 
         # When: Requesting with filter
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).list_all(parent_category_id="cat123")
 
         # Then: Filtered results are returned
@@ -254,7 +272,10 @@ class TestCharacterTraitsServiceIterAll:
         traits = [
             trait
             async for trait in vclient.character_traits(
-                "company123", "user123", "campaign123", "char123"
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
             ).iter_all()
         ]
 
@@ -284,7 +305,10 @@ class TestCharacterTraitsServiceIterAll:
         traits = [
             trait
             async for trait in vclient.character_traits(
-                "company123", "user123", "campaign123", "char123"
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
             ).iter_all(parent_category_id="cat456")
         ]
 
@@ -306,7 +330,10 @@ class TestCharacterTraitsServiceAssign:
 
         # When: Assigning a trait
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).assign(trait_id="trait123", value=3)
 
         # Then: The route was called and character trait is returned
@@ -335,7 +362,10 @@ class TestCharacterTraitsServiceAssign:
 
         # When: Assigning a trait with value 0
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).assign(trait_id="trait123", value=0)
 
         # Then: The route was called and character trait is returned
@@ -354,7 +384,10 @@ class TestCharacterTraitsServiceAssign:
         # When/Then: Assigning raises NotFoundError
         with pytest.raises(NotFoundError):
             await vclient.character_traits(
-                "company123", "user123", "campaign123", "char123"
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
             ).assign(trait_id="nonexistent", value=1)
 
         assert route.called
@@ -383,7 +416,10 @@ class TestCharacterTraitsServiceCreate:
 
         # When: Creating a custom trait with required fields only
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).create(
             name="Custom Skill",
             parent_category_id="cat123",
@@ -430,7 +466,10 @@ class TestCharacterTraitsServiceCreate:
 
         # When: Creating a custom trait with all fields
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).create(
             name="Custom Background",
             parent_category_id="backgrounds_cat",
@@ -476,7 +515,10 @@ class TestCharacterTraitsServiceCreate:
 
         # When: Creating a custom trait with initial value
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).create(
             name="Custom Trait",
             parent_category_id="cat123",
@@ -502,7 +544,10 @@ class TestCharacterTraitsServiceCreate:
         # When/Then: Creating raises NotFoundError
         with pytest.raises(NotFoundError):
             await vclient.character_traits(
-                "company123", "user123", "campaign123", "char123"
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
             ).create(
                 name="Custom Trait",
                 parent_category_id="nonexistent_cat",
@@ -524,7 +569,10 @@ class TestCharacterTraitsServiceDelete:
 
         # When: Deleting the trait
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).delete("ct123")
 
         # Then: The route was called and None is returned
@@ -542,7 +590,10 @@ class TestCharacterTraitsServiceDelete:
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
             await vclient.character_traits(
-                "company123", "user123", "campaign123", "char123"
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
             ).delete("nonexistent")
 
         assert route.called
@@ -562,7 +613,10 @@ class TestCharacterTraitsServiceIncrease:
 
         # When: Increasing the trait
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).increase("ct123", num_dots=1)
 
         # Then: The route was called and updated trait is returned
@@ -589,7 +643,10 @@ class TestCharacterTraitsServiceIncrease:
 
         # When: Increasing by 2 dots
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).increase("ct123", num_dots=2)
 
         # Then: Updated trait is returned
@@ -611,7 +668,10 @@ class TestCharacterTraitsServiceDecrease:
 
         # When: Decreasing the trait
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).decrease("ct123", num_dots=1)
 
         # Then: The route was called and updated trait is returned
@@ -640,7 +700,10 @@ class TestCharacterTraitsServicePurchaseXp:
 
         # When: Purchasing with XP
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).purchase_xp("ct123", num_dots=1)
 
         # Then: The route was called and updated trait is returned
@@ -665,7 +728,10 @@ class TestCharacterTraitsServicePurchaseXp:
         # When/Then: Purchasing raises NotFoundError
         with pytest.raises(NotFoundError):
             await vclient.character_traits(
-                "company123", "user123", "campaign123", "char123"
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
             ).purchase_xp("nonexistent", num_dots=1)
 
         assert route.called
@@ -685,7 +751,10 @@ class TestCharacterTraitsServiceRefundXp:
 
         # When: Refunding XP
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).refund_xp("ct123", num_dots=1)
 
         # Then: The route was called and updated trait is returned
@@ -716,7 +785,10 @@ class TestCharacterTraitsServicePurchaseStartingPoints:
 
         # When: Purchasing with starting points
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).purchase_starting_points("ct123", num_dots=1)
 
         # Then: The route was called and updated trait is returned
@@ -747,7 +819,10 @@ class TestCharacterTraitsServiceRefundStartingPoints:
 
         # When: Refunding starting points
         result = await vclient.character_traits(
-            "company123", "user123", "campaign123", "char123"
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
         ).refund_starting_points("ct123", num_dots=1)
 
         # Then: The route was called and updated trait is returned
@@ -809,7 +884,10 @@ class TestCharacterTraitsServiceMultiplePages:
         traits = [
             trait
             async for trait in vclient.character_traits(
-                "company123", "user123", "campaign123", "char123"
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
             ).iter_all(limit=1)
         ]
 

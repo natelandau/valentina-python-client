@@ -2,6 +2,8 @@
 
 from collections.abc import AsyncIterator
 
+from rich.console import Console
+
 from vclient.constants import DEFAULT_PAGE_LIMIT, PermissionLevel
 from vclient.endpoints import Endpoints
 from vclient.models import (
@@ -10,10 +12,13 @@ from vclient.models import (
     CompanySettings,
     CreateCompanyRequest,
     GrantAccessRequest,
+    NewCompanyResponse,
     PaginatedResponse,
     UpdateCompanyRequest,
 )
 from vclient.services.base import BaseService
+
+console = Console()
 
 
 class CompaniesService(BaseService):
@@ -107,7 +112,7 @@ class CompaniesService(BaseService):
         *,
         description: str | None = None,
         settings: CompanySettings | None = None,
-    ) -> Company:
+    ) -> NewCompanyResponse:
         """Create a new company in the system.
 
         You are automatically granted OWNER permission for the new company, giving you
@@ -121,7 +126,7 @@ class CompaniesService(BaseService):
             settings: Optional company settings configuration.
 
         Returns:
-            The newly created Company object.
+            The newly created NewCompanyResponse object containing the company and admin user.
 
         Raises:
             RequestValidationError: If the input parameters fail client-side validation.
@@ -138,7 +143,7 @@ class CompaniesService(BaseService):
             Endpoints.COMPANIES,
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
-        return Company.model_validate(response.json())
+        return NewCompanyResponse.model_validate(response.json())
 
     async def update(
         self,
