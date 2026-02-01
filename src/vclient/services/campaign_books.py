@@ -244,7 +244,7 @@ class BooksService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(RenumberBookRequest, number=number)
-        response = await self._patch(
+        response = await self._put(
             self._format_endpoint(Endpoints.CAMPAIGN_BOOK_NUMBER, book_id=book_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )

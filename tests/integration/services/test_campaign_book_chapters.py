@@ -440,7 +440,7 @@ class TestChaptersServiceRenumber:
         book_id = "book123"
         chapter_id = "507f1f77bcf86cd799439011"
         updated_data = {**chapter_response_data, "number": 3}
-        route = respx.patch(
+        route = respx.put(
             f"{base_url}{Endpoints.BOOK_CHAPTER_NUMBER.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, book_id=book_id, chapter_id=chapter_id)}"
         ).respond(200, json=updated_data)
 

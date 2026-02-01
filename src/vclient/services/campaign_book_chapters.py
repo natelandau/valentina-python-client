@@ -114,7 +114,7 @@ class ChaptersService(BaseService):
 
     async def renumber(self, chapter_id: str, number: int) -> CampaignChapter:
         """Renumber a campaign book chapter."""
-        response = await self._patch(
+        response = await self._put(
             self._format_endpoint(Endpoints.BOOK_CHAPTER_NUMBER, chapter_id=chapter_id),
             json=RenumberChapterRequest(number=number).model_dump(
                 exclude_none=True, exclude_unset=True, mode="json"

@@ -419,7 +419,7 @@ class TestBooksServiceRenumber:
         campaign_id = "campaign123"
         book_id = "507f1f77bcf86cd799439011"
         updated_data = {**book_response_data, "number": 3}
-        route = respx.patch(
+        route = respx.put(
             f"{base_url}{Endpoints.CAMPAIGN_BOOK_NUMBER.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, book_id=book_id)}"
         ).respond(200, json=updated_data)
 
