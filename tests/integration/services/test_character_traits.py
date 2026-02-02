@@ -61,6 +61,24 @@ def paginated_character_trait_response(character_trait_response_data: dict) -> d
     }
 
 
+@pytest.fixture
+def calculate_cost_to_upgrade_response_data() -> dict:
+    """Return a response data for calculating the cost to upgrade a character trait."""
+    return {
+        "1": 5,
+        "2": 10,
+    }
+
+
+@pytest.fixture
+def calculate_savings_from_downgrade_response_data() -> dict:
+    """Return a response data for calculating the savings from downgrading a character trait."""
+    return {
+        "1": 5,
+        "2": 10,
+    }
+
+
 class TestCharacterTraitsServiceGetPage:
     """Tests for CharacterTraitsService.get_page method."""
 
@@ -897,3 +915,55 @@ class TestCharacterTraitsServiceMultiplePages:
         assert len(traits) == 2
         assert traits[0].trait.name == "Strength"
         assert traits[1].trait.name == "Dexterity"
+
+
+class TestCharacterTraitsServiceCalculateCostToUpgrade:
+    """Tests for CharacterTraitsService.calculate_cost_to_upgrade method."""
+
+    @respx.mock
+    async def test_calculate_cost_to_upgrade(
+        self, vclient, base_url, calculate_cost_to_upgrade_response_data
+    ) -> None:
+        """Verify calculating the cost to upgrade a character trait."""
+        # Given: A mocked calculate cost to upgrade endpoint
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_COST_TO_UPGRADE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
+        ).mock(return_value=Response(200, json=calculate_cost_to_upgrade_response_data))
+
+        # When: Calculating the cost to upgrade
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).calculate_cost_to_upgrade("ct123")
+
+        # Then: The route was called and the cost to upgrade is returned
+        assert route.called
+        assert result == calculate_cost_to_upgrade_response_data
+
+
+class TestCharacterTraitsServiceCalculateSavingsFromDowngrade:
+    """Tests for CharacterTraitsService.calculate_savings_from_downgrade method."""
+
+    @respx.mock
+    async def test_calculate_savings_from_downgrade(
+        self, vclient, base_url, calculate_savings_from_downgrade_response_data
+    ) -> None:
+        """Verify calculating the savings from downgrading a character trait."""
+        # Given: A mocked calculate savings from downgrade endpoint
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_SAVINGS_FROM_DOWNGRADE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
+        ).mock(return_value=Response(200, json=calculate_savings_from_downgrade_response_data))
+
+        # When: Calculating the savings from downgrading
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).calculate_savings_from_downgrade("ct123")
+
+        # Then: The route was called and the savings from downgrading is returned
+        assert route.called
+        assert result == calculate_savings_from_downgrade_response_data

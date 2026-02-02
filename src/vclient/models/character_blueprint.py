@@ -18,7 +18,7 @@ class SheetSection(BaseModel):
     character_classes: list[CharacterClass] = Field(default_factory=list)
     date_created: datetime
     date_modified: datetime
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
     show_when_empty: bool
     order: int
 
@@ -32,10 +32,12 @@ class TraitCategory(BaseModel):
     character_classes: list[CharacterClass] = Field(default_factory=list)
     date_created: datetime
     date_modified: datetime
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
     parent_sheet_section_id: str
     initial_cost: int
     upgrade_cost: int
+    order: int
+    show_when_empty: bool
 
 
 class VampireClan(BaseModel):
@@ -124,9 +126,7 @@ class CharacterConcept(BaseModel):
     description: str | None = None
     date_created: datetime
     date_modified: datetime
-    game_version: GameVersion
     examples: list[str]
-    company_id: str | None = None
     max_specialties: int = Field(default=1)
     specialties: list[CharacterSpecialty] = Field(default_factory=list)
     favored_ability_names: list[str] = Field(default_factory=list)

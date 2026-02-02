@@ -34,7 +34,7 @@ def section_response_data() -> dict:
         "character_classes": ["VAMPIRE", "WEREWOLF"],
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "show_when_empty": True,
         "order": 1,
     }
@@ -61,10 +61,12 @@ def category_response_data() -> dict:
         "character_classes": ["VAMPIRE", "WEREWOLF"],
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "parent_sheet_section_id": "section123",
         "initial_cost": 1,
         "upgrade_cost": 5,
+        "order": 1,
+        "show_when_empty": True,
     }
 
 
@@ -127,9 +129,7 @@ def character_concept_response_data() -> dict:
         "description": "Physical attributes",
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
-        "game_version": "V5",
         "examples": ["Example 1", "Example 2"],
-        "company_id": "company123",
         "max_specialties": 1,
         "specialties": [{"id": "spec1", "name": "Brawl: Kindred", "type": "ACTION"}],
         "favored_ability_names": ["Ability 1", "Ability 2"],
@@ -470,7 +470,7 @@ class TestCharacterBlueprintServiceSections:
         assert isinstance(result, SheetSection)
         assert result.id == "section123"
         assert result.name == "Attributes"
-        assert result.game_version == "V5"
+        assert result.game_versions == ["V5"]
         assert result.order == 1
 
     @respx.mock

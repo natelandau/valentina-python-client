@@ -116,6 +116,8 @@ class Endpoints:
     CHARACTER_TRAIT_XP_REFUND = f"{CHARACTER_TRAIT}/xp/refund"
     CHARACTER_TRAIT_STARTINGPOINTS_PURCHASE = f"{CHARACTER_TRAIT}/startingpoints/purchase"
     CHARACTER_TRAIT_STARTINGPOINTS_REFUND = f"{CHARACTER_TRAIT}/startingpoints/refund"
+    CHARACTER_TRAIT_COST_TO_UPGRADE = f"{CHARACTER_TRAIT}/cost"
+    CHARACTER_TRAIT_SAVINGS_FROM_DOWNGRADE = f"{CHARACTER_TRAIT}/savings"
 
     # Character Blueprint endpoints
     BLUEPRINT_BASE = f"{COMPANY}/characterblueprint"

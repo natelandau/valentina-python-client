@@ -369,3 +369,44 @@ class CharacterTraitsService(BaseService):
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return CharacterTrait.model_validate(response.json())
+
+    async def calculate_cost_to_upgrade(self, character_trait_id: str) -> dict[str, int]:
+        """Calculate the experience cost to upgrade a trait by each possible number of dots. The key is the number of dots, the value is the cost.
+
+        Returns an empty dictionary if the trait is at the max value.
+
+        This is informational only and does not actually upgrade the trait.
+
+        Args:
+            character_trait_id: The ID of the trait to get the cost to upgrade for.
+
+        Returns:
+            The cost to upgrade the trait.
+        """
+        response = await self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_COST_TO_UPGRADE, character_trait_id=character_trait_id
+            ),
+        )
+        return response.json()
+
+    async def calculate_savings_from_downgrade(self, character_trait_id: str) -> dict[str, int]:
+        """Calculate the savings from downgrading a trait by each possible number of dots. The key is the number of dots, the value is the savings.
+
+        Returns an empty dictionary if the trait is at the min value.
+
+        This is informational only and does not actually downgrade the trait.
+
+        Args:
+            character_trait_id: The ID of the trait to get the savings from downgrading for.
+
+        Returns:
+            The savings from downgrading the trait.
+        """
+        response = await self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_SAVINGS_FROM_DOWNGRADE,
+                character_trait_id=character_trait_id,
+            ),
+        )
+        return response.json()
