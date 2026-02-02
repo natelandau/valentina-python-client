@@ -14,7 +14,7 @@ from vclient.constants import (
     HunterEdgeType,
 )
 
-from .shared import CharacterSpecialty
+from .shared import CharacterSpecialty, NameDescriptionSubDocument
 
 # -----------------------------------------------------------------------------
 # Nested Models
@@ -32,6 +32,26 @@ class VampireAttributes(BaseModel):
     compulsion: dict[str, Any] | None = Field(default=None, description="Clan compulsion details.")
 
 
+class VampireAttributesCreate(BaseModel):
+    """Vampire-specific character attributes create request."""
+
+    clan_id: str
+    generation: int | None = None
+    sire: str | None = None
+    bane: NameDescriptionSubDocument | None = None
+    compulsion: NameDescriptionSubDocument | None = None
+
+
+class VampireAttributesUpdate(BaseModel):
+    """Vampire-specific character attributes update request."""
+
+    clan_id: str | None = None
+    generation: int | None = None
+    sire: str | None = None
+    bane: NameDescriptionSubDocument | None = None
+    compulsion: NameDescriptionSubDocument | None = None
+
+
 class WerewolfAttributes(BaseModel):
     """Werewolf-specific character attributes."""
 
@@ -40,6 +60,28 @@ class WerewolfAttributes(BaseModel):
     auspice_id: str | None = Field(default=None, description="ID of the werewolf auspice.")
     auspice_name: str | None = Field(default=None, description="Name of the werewolf auspice.")
     pack_name: str | None = Field(default=None, description="Name of the werewolf's pack.")
+    rite_ids: list[str] = Field(default_factory=list, description="List of werewolf rite IDs.")
+    gift_ids: list[str] = Field(default_factory=list, description="List of werewolf gift IDs.")
+
+
+class WerewolfAttributesCreate(BaseModel):
+    """Werewolf-specific character attributes create request."""
+
+    tribe_id: str
+    auspice_id: str | None = None
+    pack_name: str | None = None
+    rite_ids: list[str] | None = None
+    gift_ids: list[str] | None = None
+
+
+class WerewolfAttributesUpdate(BaseModel):
+    """Werewolf-specific character attributes update request."""
+
+    tribe_id: str | None = None
+    auspice_id: str | None = None
+    pack_name: str | None = None
+    rite_ids: list[str] | None = None
+    gift_ids: list[str] | None = None
 
 
 class MageAttributes(BaseModel):
@@ -62,6 +104,20 @@ class HunterAttributes(BaseModel):
     edges: list[HunterAttributesEdgeModel] = Field(
         default_factory=list, description="Hunter edges."
     )
+
+
+class HunterAttributesCreate(BaseModel):
+    """Hunter-specific character attributes create request."""
+
+    creed: str | None = None
+    edges: list[HunterAttributesEdgeModel] | None = None
+
+
+class HunterAttributesUpdate(BaseModel):
+    """Hunter-specific character attributes update request."""
+
+    creed: str | None = None
+    edges: list[HunterAttributesEdgeModel] | None = None
 
 
 # -----------------------------------------------------------------------------
@@ -178,6 +234,15 @@ class CreateCharacterRequest(BaseModel):
         default=None, description="ID of the user who will play the character."
     )
     asset_ids: list[str] | None = Field(default=None, description="List of asset IDs.")
+    vampire_attributes: VampireAttributesCreate | None = Field(
+        default=None, description="Vampire-specific attributes."
+    )
+    werewolf_attributes: WerewolfAttributesCreate | None = Field(
+        default=None, description="Werewolf-specific attributes."
+    )
+    hunter_attributes: HunterAttributesCreate | None = Field(
+        default=None, description="Hunter-specific attributes."
+    )
 
 
 class UpdateCharacterRequest(BaseModel):
@@ -217,6 +282,15 @@ class UpdateCharacterRequest(BaseModel):
     asset_ids: list[str] | None = Field(default=None, description="List of asset IDs.")
     date_killed: datetime | None = Field(
         default=None, description="Timestamp when the character was killed."
+    )
+    vampire_attributes: VampireAttributesUpdate | None = Field(
+        default=None, description="Vampire-specific attributes."
+    )
+    werewolf_attributes: WerewolfAttributesUpdate | None = Field(
+        default=None, description="Werewolf-specific attributes."
+    )
+    hunter_attributes: HunterAttributesUpdate | None = Field(
+        default=None, description="Hunter-specific attributes."
     )
 
 

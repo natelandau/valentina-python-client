@@ -1,7 +1,6 @@
 """Service for interacting with the Characters API."""
 
 from collections.abc import AsyncIterator
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 from vclient.constants import (
@@ -14,6 +13,7 @@ from vclient.constants import (
 )
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    AssignCharacterTraitRequest,
     Character,
     CharacterEdgeAndPerksDTO,
     CharacterInventoryItem,
@@ -21,6 +21,8 @@ from vclient.models import (
     CreateCharacterInventoryItemRequest,
     CreateCharacterRequest,
     CreateNoteRequest,
+    HunterAttributesCreate,
+    HunterAttributesUpdate,
     Note,
     PaginatedResponse,
     RollStatistics,
@@ -28,6 +30,10 @@ from vclient.models import (
     UpdateCharacterInventoryItemRequest,
     UpdateCharacterRequest,
     UpdateNoteRequest,
+    VampireAttributesCreate,
+    VampireAttributesUpdate,
+    WerewolfAttributesCreate,
+    WerewolfAttributesUpdate,
     WerewolfGift,
     WerewolfRite,
 )
@@ -230,20 +236,23 @@ class CharactersService(BaseService):
 
     async def create(
         self,
-        character_class: CharacterClass,
-        game_version: GameVersion,
-        name_first: str,
-        name_last: str,
         *,
-        character_type: CharacterType | None = None,
-        name_nick: str | None = None,
         age: int | None = None,
         biography: str | None = None,
-        demeanor: str | None = None,
-        nature: str | None = None,
+        character_class: CharacterClass,
+        character_type: CharacterType | None = None,
         concept_id: str | None = None,
+        demeanor: str | None = None,
+        game_version: GameVersion,
+        hunter_attributes: HunterAttributesCreate | None = None,
+        name_first: str,
+        name_last: str,
+        name_nick: str | None = None,
+        nature: str | None = None,
         user_player_id: str | None = None,
-        asset_ids: list[str] | None = None,
+        traits: list[AssignCharacterTraitRequest] | None = None,
+        vampire_attributes: VampireAttributesCreate | None = None,
+        werewolf_attributes: WerewolfAttributesCreate | None = None,
     ) -> Character:
         """Create a new character within the campaign.
 
@@ -252,19 +261,22 @@ class CharactersService(BaseService):
         the creator becomes the player.
 
         Args:
-            character_class: Character class (VAMPIRE, WEREWOLF, MAGE, etc.).
-            game_version: Game version for character sheet (V4 or V5).
-            name_first: Character's first name (minimum 3 characters).
-            name_last: Character's last name (minimum 3 characters).
-            character_type: Character type (PLAYER, NPC, STORYTELLER, DEVELOPER).
-            name_nick: Character's nickname (3-50 characters).
             age: Character's age.
             biography: Character biography (minimum 3 characters).
-            demeanor: Character's demeanor (3-50 characters).
-            nature: Character's nature (3-50 characters).
+            character_class: Character class (VAMPIRE, WEREWOLF, MAGE, etc.).
+            character_type: Character type (PLAYER, NPC, STORYTELLER, DEVELOPER).
             concept_id: ID of the character concept.
+            demeanor: Character's demeanor (3-50 characters).
+            game_version: Game version for character sheet (V4 or V5).
+            hunter_attributes: Hunter-specific attributes.
+            name_first: Character's first name (minimum 3 characters).
+            name_last: Character's last name (minimum 3 characters).
+            name_nick: Character's nickname (3-50 characters).
+            nature: Character's nature (3-50 characters).
             user_player_id: ID of the user who will play the character.
-            asset_ids: List of asset IDs to associate with the character.
+            traits: List of traits to assign to the character.
+            vampire_attributes: Vampire-specific attributes.
+            werewolf_attributes: Werewolf-specific attributes.
 
         Returns:
             The newly created Character object.
@@ -288,7 +300,10 @@ class CharactersService(BaseService):
             nature=nature,
             concept_id=concept_id,
             user_player_id=user_player_id,
-            asset_ids=asset_ids,
+            traits=traits,
+            vampire_attributes=vampire_attributes,
+            werewolf_attributes=werewolf_attributes,
+            hunter_attributes=hunter_attributes,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.CHARACTERS),
@@ -303,6 +318,7 @@ class CharactersService(BaseService):
         character_class: CharacterClass | None = None,
         character_type: CharacterType | None = None,
         game_version: GameVersion | None = None,
+        hunter_attributes: HunterAttributesUpdate | None = None,
         status: CharacterStatus | None = None,
         name_first: str | None = None,
         name_last: str | None = None,
@@ -313,8 +329,8 @@ class CharactersService(BaseService):
         nature: str | None = None,
         concept_id: str | None = None,
         user_player_id: str | None = None,
-        asset_ids: list[str] | None = None,
-        date_killed: datetime | None = None,
+        vampire_attributes: VampireAttributesUpdate | None = None,
+        werewolf_attributes: WerewolfAttributesUpdate | None = None,
     ) -> Character:
         """Modify a character's properties.
 
@@ -328,6 +344,7 @@ class CharactersService(BaseService):
             character_class: New character class.
             character_type: New character type.
             game_version: New game version.
+            hunter_attributes: Hunter-specific attributes.
             status: New character status (ALIVE or DEAD).
             name_first: New first name (minimum 3 characters).
             name_last: New last name (minimum 3 characters).
@@ -338,8 +355,8 @@ class CharactersService(BaseService):
             nature: New nature (3-50 characters).
             concept_id: New concept ID.
             user_player_id: New player user ID.
-            asset_ids: New list of asset IDs.
-            date_killed: Timestamp when the character was killed.
+            vampire_attributes: Vampire-specific attributes.
+            werewolf_attributes: Werewolf-specific attributes.
 
         Returns:
             The updated Character object.
@@ -365,8 +382,9 @@ class CharactersService(BaseService):
             nature=nature,
             concept_id=concept_id,
             user_player_id=user_player_id,
-            asset_ids=asset_ids,
-            date_killed=date_killed,
+            vampire_attributes=vampire_attributes,
+            werewolf_attributes=werewolf_attributes,
+            hunter_attributes=hunter_attributes,
         )
         response = await self._patch(
             self._format_endpoint(Endpoints.CHARACTER, character_id=character_id),

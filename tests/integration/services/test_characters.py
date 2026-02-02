@@ -13,10 +13,18 @@ from vclient.models import (
     CharacterEdgeAndPerksDTO,
     CharacterInventoryItem,
     CharacterPerkDTO,
+    HunterAttributesCreate,
+    HunterAttributesEdgeModel,
+    HunterAttributesUpdate,
+    NameDescriptionSubDocument,
     Note,
     PaginatedResponse,
     RollStatistics,
     S3Asset,
+    VampireAttributesCreate,
+    VampireAttributesUpdate,
+    WerewolfAttributesCreate,
+    WerewolfAttributesUpdate,
     WerewolfGift,
     WerewolfRite,
 )
@@ -153,6 +161,89 @@ def hunter_edge_response_data(hunter_edge_perk_response_data: dict) -> dict:
         "system": "Roll to track supernatural creatures.",
         "type": "APTITUDES",
         "perks": [hunter_edge_perk_response_data],
+    }
+
+
+@pytest.fixture
+def werewolf_character_response_data() -> dict:
+    """Return sample werewolf character response data."""
+    return {
+        "id": "char456",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "date_killed": None,
+        "character_class": "WEREWOLF",
+        "type": "PLAYER",
+        "game_version": "V5",
+        "status": "ALIVE",
+        "starting_points": 0,
+        "name_first": "Wolf",
+        "name_last": "Runner",
+        "name_nick": "Howler",
+        "name": "Howler",
+        "name_full": "Wolf Runner",
+        "age": 28,
+        "biography": "A fierce werewolf.",
+        "demeanor": "Aggressive",
+        "nature": "Survivor",
+        "concept_id": "concept456",
+        "user_creator_id": "user123",
+        "user_player_id": "user456",
+        "company_id": "company123",
+        "campaign_id": "campaign123",
+        "asset_ids": [],
+        "character_trait_ids": [],
+        "specialties": [],
+        "vampire_attributes": None,
+        "werewolf_attributes": {
+            "tribe_id": "tribe123",
+            "tribe_name": "Shadow Lords",
+            "auspice_id": "auspice123",
+            "auspice_name": "Ahroun",
+            "pack_name": "Moon Runners",
+        },
+        "mage_attributes": None,
+        "hunter_attributes": None,
+    }
+
+
+@pytest.fixture
+def hunter_character_response_data() -> dict:
+    """Return sample hunter character response data."""
+    return {
+        "id": "char789",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "date_killed": None,
+        "character_class": "HUNTER",
+        "type": "PLAYER",
+        "game_version": "V5",
+        "status": "ALIVE",
+        "starting_points": 0,
+        "name_first": "John",
+        "name_last": "Hunter",
+        "name_nick": "Slayer",
+        "name": "Slayer",
+        "name_full": "John Hunter",
+        "age": 40,
+        "biography": "A veteran hunter.",
+        "demeanor": "Determined",
+        "nature": "Avenger",
+        "concept_id": "concept789",
+        "user_creator_id": "user123",
+        "user_player_id": "user456",
+        "company_id": "company123",
+        "campaign_id": "campaign123",
+        "asset_ids": [],
+        "character_trait_ids": [],
+        "specialties": [],
+        "vampire_attributes": None,
+        "werewolf_attributes": None,
+        "mage_attributes": None,
+        "hunter_attributes": {
+            "creed": "Avenger",
+            "edges": [{"edge_id": "edge123", "perk_ids": ["perk123"]}],
+        },
     }
 
 
@@ -309,7 +400,6 @@ class TestCharactersServiceCreate:
             nature="Warrior",
             concept_id="concept123",
             user_player_id="user456",
-            asset_ids=["asset1", "asset2"],
         )
 
         # Then: The route was called and character is returned
@@ -324,6 +414,135 @@ class TestCharactersServiceCreate:
         assert body["name_nick"] == "Johnny"
         assert body["age"] == 35
         assert body["biography"] == "A mysterious vampire."
+
+    @respx.mock
+    async def test_create_character_with_vampire_attributes(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify creating a character with vampire attributes."""
+        # Given: A mocked create endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(201, json=character_response_data))
+
+        # Given: Vampire attributes to create
+        vampire_attrs = VampireAttributesCreate(
+            clan_id="clan123",
+            generation=10,
+            sire="Ancient One",
+            bane=NameDescriptionSubDocument(
+                name="Rarefied Tastes",
+                description="Feeds only on specific blood",
+            ),
+        )
+
+        # When: Creating a character with vampire attributes
+        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            vampire_attributes=vampire_attrs,
+        )
+
+        # Then: The route was called and character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.vampire_attributes is not None
+        assert result.vampire_attributes.clan_name == "Ventrue"
+
+        # Verify request body includes vampire_attributes
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert "vampire_attributes" in body
+        assert body["vampire_attributes"]["clan_id"] == "clan123"
+        assert body["vampire_attributes"]["generation"] == 10
+        assert body["vampire_attributes"]["sire"] == "Ancient One"
+        assert body["vampire_attributes"]["bane"]["name"] == "Rarefied Tastes"
+
+    @respx.mock
+    async def test_create_character_with_werewolf_attributes(
+        self, vclient, base_url, werewolf_character_response_data
+    ) -> None:
+        """Verify creating a character with werewolf attributes."""
+        # Given: A mocked create endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(201, json=werewolf_character_response_data))
+
+        # Given: Werewolf attributes to create
+        werewolf_attrs = WerewolfAttributesCreate(
+            tribe_id="tribe123",
+            auspice_id="auspice123",
+            pack_name="Moon Runners",
+        )
+
+        # When: Creating a character with werewolf attributes
+        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            character_class="WEREWOLF",
+            game_version="V5",
+            name_first="Wolf",
+            name_last="Runner",
+            werewolf_attributes=werewolf_attrs,
+        )
+
+        # Then: The route was called and character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.werewolf_attributes is not None
+        assert result.werewolf_attributes.tribe_name == "Shadow Lords"
+        assert result.werewolf_attributes.auspice_name == "Ahroun"
+
+        # Verify request body includes werewolf_attributes
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert "werewolf_attributes" in body
+        assert body["werewolf_attributes"]["tribe_id"] == "tribe123"
+        assert body["werewolf_attributes"]["auspice_id"] == "auspice123"
+        assert body["werewolf_attributes"]["pack_name"] == "Moon Runners"
+
+    @respx.mock
+    async def test_create_character_with_hunter_attributes(
+        self, vclient, base_url, hunter_character_response_data
+    ) -> None:
+        """Verify creating a character with hunter attributes."""
+        # Given: A mocked create endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(201, json=hunter_character_response_data))
+
+        # Given: Hunter attributes to create
+        hunter_attrs = HunterAttributesCreate(
+            creed="Avenger",
+            edges=[HunterAttributesEdgeModel(edge_id="edge123", perk_ids=["perk123"])],
+        )
+
+        # When: Creating a character with hunter attributes
+        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            character_class="HUNTER",
+            game_version="V5",
+            name_first="John",
+            name_last="Hunter",
+            hunter_attributes=hunter_attrs,
+        )
+
+        # Then: The route was called and character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.hunter_attributes is not None
+        assert result.hunter_attributes.creed == "Avenger"
+        assert len(result.hunter_attributes.edges) == 1
+
+        # Verify request body includes hunter_attributes
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert "hunter_attributes" in body
+        assert body["hunter_attributes"]["creed"] == "Avenger"
+        assert body["hunter_attributes"]["edges"][0]["edge_id"] == "edge123"
+        assert body["hunter_attributes"]["edges"][0]["perk_ids"] == ["perk123"]
 
 
 class TestCharactersServiceUpdate:
@@ -395,6 +614,156 @@ class TestCharactersServiceUpdate:
             )
 
         assert route.called
+
+    @respx.mock
+    async def test_update_character_vampire_attributes(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify updating a character's vampire attributes."""
+        # Given: A mocked update endpoint with updated vampire attributes
+        updated_data = {
+            **character_response_data,
+            "vampire_attributes": {
+                "clan_id": "clan456",
+                "clan_name": "Toreador",
+                "generation": 9,
+                "sire": "New Sire",
+                "bane": None,
+                "compulsion": {"name": "Obsession", "description": "Cannot resist beauty"},
+            },
+        }
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=updated_data))
+
+        # Given: Vampire attributes to update
+        vampire_attrs = VampireAttributesUpdate(
+            clan_id="clan456",
+            generation=9,
+            sire="New Sire",
+            compulsion=NameDescriptionSubDocument(
+                name="Obsession",
+                description="Cannot resist beauty",
+            ),
+        )
+
+        # When: Updating the character's vampire attributes
+        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
+            "char123", vampire_attributes=vampire_attrs
+        )
+
+        # Then: The route was called and updated character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.vampire_attributes is not None
+        assert result.vampire_attributes.clan_name == "Toreador"
+        assert result.vampire_attributes.generation == 9
+        assert result.vampire_attributes.sire == "New Sire"
+
+        # Verify request body includes vampire_attributes
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert "vampire_attributes" in body
+        assert body["vampire_attributes"]["clan_id"] == "clan456"
+        assert body["vampire_attributes"]["generation"] == 9
+        assert body["vampire_attributes"]["sire"] == "New Sire"
+        assert body["vampire_attributes"]["compulsion"]["name"] == "Obsession"
+
+    @respx.mock
+    async def test_update_character_werewolf_attributes(
+        self, vclient, base_url, werewolf_character_response_data
+    ) -> None:
+        """Verify updating a character's werewolf attributes."""
+        # Given: A mocked update endpoint with updated werewolf attributes
+        updated_data = {
+            **werewolf_character_response_data,
+            "werewolf_attributes": {
+                "tribe_id": "tribe456",
+                "tribe_name": "Silver Fangs",
+                "auspice_id": "auspice456",
+                "auspice_name": "Galliard",
+                "pack_name": "Star Gazers",
+            },
+        }
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char456')}"
+        ).mock(return_value=Response(200, json=updated_data))
+
+        # Given: Werewolf attributes to update
+        werewolf_attrs = WerewolfAttributesUpdate(
+            tribe_id="tribe456",
+            auspice_id="auspice456",
+            pack_name="Star Gazers",
+        )
+
+        # When: Updating the character's werewolf attributes
+        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
+            "char456", werewolf_attributes=werewolf_attrs
+        )
+
+        # Then: The route was called and updated character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.werewolf_attributes is not None
+        assert result.werewolf_attributes.tribe_name == "Silver Fangs"
+        assert result.werewolf_attributes.auspice_name == "Galliard"
+        assert result.werewolf_attributes.pack_name == "Star Gazers"
+
+        # Verify request body includes werewolf_attributes
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert "werewolf_attributes" in body
+        assert body["werewolf_attributes"]["tribe_id"] == "tribe456"
+        assert body["werewolf_attributes"]["auspice_id"] == "auspice456"
+        assert body["werewolf_attributes"]["pack_name"] == "Star Gazers"
+
+    @respx.mock
+    async def test_update_character_hunter_attributes(
+        self, vclient, base_url, hunter_character_response_data
+    ) -> None:
+        """Verify updating a character's hunter attributes."""
+        # Given: A mocked update endpoint with updated hunter attributes
+        updated_data = {
+            **hunter_character_response_data,
+            "hunter_attributes": {
+                "creed": "Defender",
+                "edges": [
+                    {"edge_id": "edge456", "perk_ids": ["perk456", "perk789"]},
+                ],
+            },
+        }
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char789')}"
+        ).mock(return_value=Response(200, json=updated_data))
+
+        # Given: Hunter attributes to update
+        hunter_attrs = HunterAttributesUpdate(
+            creed="Defender",
+            edges=[HunterAttributesEdgeModel(edge_id="edge456", perk_ids=["perk456", "perk789"])],
+        )
+
+        # When: Updating the character's hunter attributes
+        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
+            "char789", hunter_attributes=hunter_attrs
+        )
+
+        # Then: The route was called and updated character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert result.hunter_attributes is not None
+        assert result.hunter_attributes.creed == "Defender"
+        assert len(result.hunter_attributes.edges) == 1
+
+        # Verify request body includes hunter_attributes
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert "hunter_attributes" in body
+        assert body["hunter_attributes"]["creed"] == "Defender"
+        assert body["hunter_attributes"]["edges"][0]["edge_id"] == "edge456"
+        assert body["hunter_attributes"]["edges"][0]["perk_ids"] == ["perk456", "perk789"]
 
 
 class TestCharactersServiceDelete:

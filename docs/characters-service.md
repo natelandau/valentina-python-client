@@ -31,80 +31,80 @@ all_characters = await characters.list_all()
 
 ### Character CRUD
 
-- `get(character_id)` - Retrieve a character by ID
-- `create(character_class, game_version, name_first, name_last, ...)` - Create a new character
-- `update(character_id, ...)` - Update a character
-- `delete(character_id)` - Delete a character
-- `get_page(limit?, offset?, user_player_id?, user_creator_id?, character_class?, character_type?, status?)` - Get a paginated page of characters with optional filters
-- `list_all(...)` - Get all characters (supports same filters as get_page)
-- `iter_all(limit?, ...)` - Iterate through all characters
+-   `get(character_id)` - Retrieve a character by ID
+-   `create(character_class, game_version, name_first, name_last, ...)` - Create a new character
+-   `update(character_id, ...)` - Update a character
+-   `delete(character_id)` - Delete a character
+-   `get_page(limit?, offset?, user_player_id?, user_creator_id?, character_class?, character_type?, status?)` - Get a paginated page of characters with optional filters
+-   `list_all(...)` - Get all characters (supports same filters as get_page)
+-   `iter_all(limit?, ...)` - Iterate through all characters
 
 ### Statistics
 
-- `get_statistics(character_id, num_top_traits?)` - Get roll statistics for a character
+-   `get_statistics(character_id, num_top_traits?)` - Get roll statistics for a character
 
 ### Assets
 
-- `list_assets(character_id, limit?, offset?)` - List character assets
-- `get_asset(character_id, asset_id)` - Get a specific asset
-- `upload_asset(character_id, filename, content, content_type?)` - Upload an asset
-- `delete_asset(character_id, asset_id)` - Delete an asset
+-   `list_assets(character_id, limit?, offset?)` - List character assets
+-   `get_asset(character_id, asset_id)` - Get a specific asset
+-   `upload_asset(character_id, filename, content, content_type?)` - Upload an asset
+-   `delete_asset(character_id, asset_id)` - Delete an asset
 
 ### Notes
 
-- `get_notes_page(character_id, limit?, offset?)` - Get a paginated page of notes
-- `list_all_notes(character_id)` - Get all notes
-- `iter_all_notes(character_id, limit?)` - Iterate through all notes
-- `get_note(character_id, note_id)` - Get a specific note
-- `create_note(character_id, title, content)` - Create a note
-- `update_note(character_id, note_id, title?, content?)` - Update a note
-- `delete_note(character_id, note_id)` - Delete a note
+-   `get_notes_page(character_id, limit?, offset?)` - Get a paginated page of notes
+-   `list_all_notes(character_id)` - Get all notes
+-   `iter_all_notes(character_id, limit?)` - Iterate through all notes
+-   `get_note(character_id, note_id)` - Get a specific note
+-   `create_note(character_id, title, content)` - Create a note
+-   `update_note(character_id, note_id, title?, content?)` - Update a note
+-   `delete_note(character_id, note_id)` - Delete a note
 
 ### Inventory
 
-- `get_inventory_page(character_id, limit?, offset?)` - Get a paginated page of inventory items
-- `list_all_inventory(character_id)` - Get all inventory items
-- `iter_all_inventory(character_id, limit?)` - Iterate through all inventory items
-- `get_inventory_item(character_id, item_id)` - Get a specific inventory item
-- `create_inventory_item(character_id, name, type, description)` - Create an inventory item
-- `update_inventory_item(character_id, item_id, name?, type?, description?)` - Update an inventory item
-- `delete_inventory_item(character_id, item_id)` - Delete an inventory item
+-   `get_inventory_page(character_id, limit?, offset?)` - Get a paginated page of inventory items
+-   `list_all_inventory(character_id)` - Get all inventory items
+-   `iter_all_inventory(character_id, limit?)` - Iterate through all inventory items
+-   `get_inventory_item(character_id, item_id)` - Get a specific inventory item
+-   `create_inventory_item(character_id, name, type, description)` - Create an inventory item
+-   `update_inventory_item(character_id, item_id, name?, type?, description?)` - Update an inventory item
+-   `delete_inventory_item(character_id, item_id)` - Delete an inventory item
 
 ### Werewolf Gifts
 
-- `get_gifts_page(character_id, limit?, offset?)` - Get a paginated page of werewolf gifts
-- `list_all_gifts(character_id)` - Get all werewolf gifts
-- `iter_all_gifts(character_id, limit?)` - Iterate through all werewolf gifts
-- `get_gift(character_id, werewolf_gift_id)` - Get a specific werewolf gift
-- `add_gift(character_id, werewolf_gift_id)` - Add a werewolf gift to a character
-- `remove_gift(character_id, werewolf_gift_id)` - Remove a werewolf gift from a character
+-   `get_gifts_page(character_id, limit?, offset?)` - Get a paginated page of werewolf gifts
+-   `list_all_gifts(character_id)` - Get all werewolf gifts
+-   `iter_all_gifts(character_id, limit?)` - Iterate through all werewolf gifts
+-   `get_gift(character_id, werewolf_gift_id)` - Get a specific werewolf gift
+-   `add_gift(character_id, werewolf_gift_id)` - Add a werewolf gift to a character
+-   `remove_gift(character_id, werewolf_gift_id)` - Remove a werewolf gift from a character
 
 ### Werewolf Rites
 
-- `get_rites_page(character_id, limit?, offset?)` - Get a paginated page of werewolf rites
-- `list_all_rites(character_id)` - Get all werewolf rites
-- `iter_all_rites(character_id, limit?)` - Iterate through all werewolf rites
-- `get_rite(character_id, werewolf_rite_id)` - Get a specific werewolf rite
-- `add_rite(character_id, werewolf_rite_id)` - Add a werewolf rite to a character
-- `remove_rite(character_id, werewolf_rite_id)` - Remove a werewolf rite from a character
+-   `get_rites_page(character_id, limit?, offset?)` - Get a paginated page of werewolf rites
+-   `list_all_rites(character_id)` - Get all werewolf rites
+-   `iter_all_rites(character_id, limit?)` - Iterate through all werewolf rites
+-   `get_rite(character_id, werewolf_rite_id)` - Get a specific werewolf rite
+-   `add_rite(character_id, werewolf_rite_id)` - Add a werewolf rite to a character
+-   `remove_rite(character_id, werewolf_rite_id)` - Remove a werewolf rite from a character
 
 ### Hunter Edges
 
-- `get_edges_page(character_id, limit?, offset?)` - Get a paginated page of hunter edges
-- `list_all_edges(character_id)` - Get all hunter edges
-- `iter_all_edges(character_id, limit?)` - Iterate through all hunter edges
-- `get_edge(character_id, hunter_edge_id)` - Get a specific hunter edge with its perks
-- `add_edge(character_id, hunter_edge_id)` - Add a hunter edge to a character
-- `remove_edge(character_id, hunter_edge_id)` - Remove a hunter edge from a character
+-   `get_edges_page(character_id, limit?, offset?)` - Get a paginated page of hunter edges
+-   `list_all_edges(character_id)` - Get all hunter edges
+-   `iter_all_edges(character_id, limit?)` - Iterate through all hunter edges
+-   `get_edge(character_id, hunter_edge_id)` - Get a specific hunter edge with its perks
+-   `add_edge(character_id, hunter_edge_id)` - Add a hunter edge to a character
+-   `remove_edge(character_id, hunter_edge_id)` - Remove a hunter edge from a character
 
 ### Hunter Edge Perks
 
-- `get_edge_perks_page(character_id, hunter_edge_id, limit?, offset?)` - Get a paginated page of perks for an edge
-- `list_all_edge_perks(character_id, hunter_edge_id)` - Get all perks for an edge
-- `iter_all_edge_perks(character_id, hunter_edge_id, limit?)` - Iterate through all perks for an edge
-- `get_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Get a specific perk
-- `add_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Add a perk to an edge
-- `remove_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Remove a perk from an edge
+-   `get_edge_perks_page(character_id, hunter_edge_id, limit?, offset?)` - Get a paginated page of perks for an edge
+-   `list_all_edge_perks(character_id, hunter_edge_id)` - Get all perks for an edge
+-   `iter_all_edge_perks(character_id, hunter_edge_id, limit?)` - Iterate through all perks for an edge
+-   `get_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Get a specific perk
+-   `add_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Add a perk to an edge
+-   `remove_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` - Remove a perk from an edge
 
 ## Response Models
 
@@ -246,24 +246,24 @@ Aggregated dice roll statistics.
 
 Represents a werewolf gift ability.
 
-| Field             | Type           | Description                              |
-| ----------------- | -------------- | ---------------------------------------- |
-| `id`              | `str`          | MongoDB document ObjectID                |
-| `name`            | `str`          | Gift name                                |
-| `description`     | `str \| None`  | Gift description                         |
-| `game_version`    | `GameVersion`  | Game version (V4 or V5)                  |
-| `date_created`    | `datetime`     | Timestamp when created                   |
-| `date_modified`   | `datetime`     | Timestamp when last modified             |
-| `renown`          | `WerewolfRenown` | Renown type (HONOR, GLORY, or WISDOM)  |
-| `cost`            | `str \| None`  | Cost to activate the gift                |
-| `duration`        | `str \| None`  | Duration of the gift effect              |
-| `dice_pool`       | `list[str]`    | Dice pool attributes for the gift        |
-| `opposing_pool`   | `list[str]`    | Opposing dice pool for contested rolls   |
-| `minimum_renown`  | `int \| None`  | Minimum renown level required            |
-| `is_native_gift`  | `bool`         | Whether this is a native tribe/auspice gift |
-| `notes`           | `str \| None`  | Additional notes about the gift          |
-| `tribe_id`        | `str \| None`  | Associated tribe ID (if tribal gift)     |
-| `auspice_id`      | `str \| None`  | Associated auspice ID (if auspice gift)  |
+| Field            | Type             | Description                                 |
+| ---------------- | ---------------- | ------------------------------------------- |
+| `id`             | `str`            | MongoDB document ObjectID                   |
+| `name`           | `str`            | Gift name                                   |
+| `description`    | `str \| None`    | Gift description                            |
+| `game_version`   | `GameVersion`    | Game version (V4 or V5)                     |
+| `date_created`   | `datetime`       | Timestamp when created                      |
+| `date_modified`  | `datetime`       | Timestamp when last modified                |
+| `renown`         | `WerewolfRenown` | Renown type (HONOR, GLORY, or WISDOM)       |
+| `cost`           | `str \| None`    | Cost to activate the gift                   |
+| `duration`       | `str \| None`    | Duration of the gift effect                 |
+| `dice_pool`      | `list[str]`      | Dice pool attributes for the gift           |
+| `opposing_pool`  | `list[str]`      | Opposing dice pool for contested rolls      |
+| `minimum_renown` | `int \| None`    | Minimum renown level required               |
+| `is_native_gift` | `bool`           | Whether this is a native tribe/auspice gift |
+| `notes`          | `str \| None`    | Additional notes about the gift             |
+| `tribe_id`       | `str \| None`    | Associated tribe ID (if tribal gift)        |
+| `auspice_id`     | `str \| None`    | Associated auspice ID (if auspice gift)     |
 
 ### `WerewolfRite`
 
@@ -283,15 +283,15 @@ Represents a werewolf rite ritual.
 
 Represents a hunter edge with its associated perks.
 
-| Field         | Type                     | Description                    |
-| ------------- | ------------------------ | ------------------------------ |
-| `id`          | `str`                    | MongoDB document ObjectID      |
-| `name`        | `str`                    | Edge name                      |
-| `description` | `str \| None`            | Edge description               |
-| `pool`        | `str \| None`            | Dice pool for the edge         |
-| `system`      | `str \| None`            | System rules for the edge      |
-| `type`        | `HunterEdgeType \| None` | Type of hunter edge            |
-| `perks`       | `list[CharacterPerkDTO]` | List of associated perks       |
+| Field         | Type                     | Description               |
+| ------------- | ------------------------ | ------------------------- |
+| `id`          | `str`                    | MongoDB document ObjectID |
+| `name`        | `str`                    | Edge name                 |
+| `description` | `str \| None`            | Edge description          |
+| `pool`        | `str \| None`            | Dice pool for the edge    |
+| `system`      | `str \| None`            | System rules for the edge |
+| `type`        | `HunterEdgeType \| None` | Type of hunter edge       |
+| `perks`       | `list[CharacterPerkDTO]` | List of associated perks  |
 
 ### `CharacterPerkDTO`
 
