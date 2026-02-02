@@ -14,6 +14,7 @@ from vclient.constants import (
     HunterEdgeType,
 )
 
+from .character_trait import AssignCharacterTraitRequest
 from .shared import CharacterSpecialty, NameDescriptionSubDocument
 
 # -----------------------------------------------------------------------------
@@ -233,7 +234,9 @@ class CreateCharacterRequest(BaseModel):
     user_player_id: str | None = Field(
         default=None, description="ID of the user who will play the character."
     )
-    asset_ids: list[str] | None = Field(default=None, description="List of asset IDs.")
+    traits: list[AssignCharacterTraitRequest] | None = Field(
+        default=None, description="List of traits to assign to the character."
+    )
     vampire_attributes: VampireAttributesCreate | None = Field(
         default=None, description="Vampire-specific attributes."
     )
@@ -279,7 +282,6 @@ class UpdateCharacterRequest(BaseModel):
     user_player_id: str | None = Field(
         default=None, description="ID of the user who plays the character."
     )
-    asset_ids: list[str] | None = Field(default=None, description="List of asset IDs.")
     date_killed: datetime | None = Field(
         default=None, description="Timestamp when the character was killed."
     )

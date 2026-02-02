@@ -544,6 +544,53 @@ class TestCharactersServiceCreate:
         assert body["hunter_attributes"]["edges"][0]["edge_id"] == "edge123"
         assert body["hunter_attributes"]["edges"][0]["perk_ids"] == ["perk123"]
 
+    @respx.mock
+    async def test_create_character_with_traits(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify creating a character with traits."""
+        # Given: A mocked create endpoint
+        response_data = {
+            **character_response_data,
+            "character_trait_ids": ["trait123", "trait456"],
+        }
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTERS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(201, json=response_data))
+
+        # Given: Traits to assign
+        from vclient.models import AssignCharacterTraitRequest
+
+        traits = [
+            AssignCharacterTraitRequest(trait_id="trait123", value=3),
+            AssignCharacterTraitRequest(trait_id="trait456", value=2),
+        ]
+
+        # When: Creating a character with traits
+        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            traits=traits,
+        )
+
+        # Then: The route was called and character is returned
+        assert route.called
+        assert isinstance(result, Character)
+        assert len(result.character_trait_ids) == 2
+
+        # Verify request body includes traits
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert "traits" in body
+        assert len(body["traits"]) == 2
+        assert body["traits"][0]["trait_id"] == "trait123"
+        assert body["traits"][0]["value"] == 3
+        assert body["traits"][1]["trait_id"] == "trait456"
+        assert body["traits"][1]["value"] == 2
+
 
 class TestCharactersServiceUpdate:
     """Tests for CharactersService.update method."""

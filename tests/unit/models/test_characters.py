@@ -205,6 +205,11 @@ class TestCreateCharacterRequest:
 
     def test_create_request_all_fields(self) -> None:
         """Verify CreateCharacterRequest with all fields."""
+        # Given: Traits to assign
+        from vclient.models import AssignCharacterTraitRequest
+
+        traits = [AssignCharacterTraitRequest(trait_id="trait123", value=3)]
+
         # When: Creating a request with all fields
         request = CreateCharacterRequest(
             character_class="WEREWOLF",
@@ -219,7 +224,7 @@ class TestCreateCharacterRequest:
             nature="Protector",
             concept_id="concept123",
             user_player_id="user456",
-            asset_ids=["asset1"],
+            traits=traits,
         )
 
         # Then: All fields are set correctly
@@ -227,7 +232,7 @@ class TestCreateCharacterRequest:
         assert request.type == "NPC"
         assert request.name_nick == "Wolf"
         assert request.age == 28
-        assert request.asset_ids == ["asset1"]
+        assert request.traits == traits
 
     def test_create_request_name_first_min_length(self) -> None:
         """Verify name_first requires minimum 3 characters."""
