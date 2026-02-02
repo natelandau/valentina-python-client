@@ -23,6 +23,7 @@ from vclient.models import (
     CreateNoteRequest,
     HunterAttributesCreate,
     HunterAttributesUpdate,
+    MageAttributes,
     Note,
     PaginatedResponse,
     RollStatistics,
@@ -253,6 +254,7 @@ class CharactersService(BaseService):
         traits: list[AssignCharacterTraitRequest] | None = None,
         vampire_attributes: VampireAttributesCreate | None = None,
         werewolf_attributes: WerewolfAttributesCreate | None = None,
+        mage_attributes: MageAttributes | None = None,
     ) -> Character:
         """Create a new character within the campaign.
 
@@ -277,6 +279,7 @@ class CharactersService(BaseService):
             traits: List of traits to assign to the character.
             vampire_attributes: Vampire-specific attributes.
             werewolf_attributes: Werewolf-specific attributes.
+            mage_attributes: Mage-specific attributes.
 
         Returns:
             The newly created Character object.
@@ -304,6 +307,7 @@ class CharactersService(BaseService):
             vampire_attributes=vampire_attributes,
             werewolf_attributes=werewolf_attributes,
             hunter_attributes=hunter_attributes,
+            mage_attributes=mage_attributes,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.CHARACTERS),
@@ -331,6 +335,7 @@ class CharactersService(BaseService):
         user_player_id: str | None = None,
         vampire_attributes: VampireAttributesUpdate | None = None,
         werewolf_attributes: WerewolfAttributesUpdate | None = None,
+        mage_attributes: MageAttributes | None = None,
     ) -> Character:
         """Modify a character's properties.
 
@@ -357,6 +362,7 @@ class CharactersService(BaseService):
             user_player_id: New player user ID.
             vampire_attributes: Vampire-specific attributes.
             werewolf_attributes: Werewolf-specific attributes.
+            mage_attributes: Mage-specific attributes.
 
         Returns:
             The updated Character object.
@@ -385,6 +391,7 @@ class CharactersService(BaseService):
             vampire_attributes=vampire_attributes,
             werewolf_attributes=werewolf_attributes,
             hunter_attributes=hunter_attributes,
+            mage_attributes=mage_attributes,
         )
         response = await self._patch(
             self._format_endpoint(Endpoints.CHARACTER, character_id=character_id),

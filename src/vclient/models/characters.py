@@ -89,6 +89,7 @@ class MageAttributes(BaseModel):
     """Mage-specific character attributes."""
 
     sphere: str | None = Field(default=None, description="Primary sphere of magic.")
+    tradition: str | None = Field(default=None, description="Mage tradition.")
 
 
 class HunterAttributesEdgeModel(BaseModel):
@@ -246,6 +247,9 @@ class CreateCharacterRequest(BaseModel):
     hunter_attributes: HunterAttributesCreate | None = Field(
         default=None, description="Hunter-specific attributes."
     )
+    mage_attributes: MageAttributes | None = Field(
+        default=None, description="Mage-specific attributes."
+    )
 
 
 class UpdateCharacterRequest(BaseModel):
@@ -293,6 +297,9 @@ class UpdateCharacterRequest(BaseModel):
     )
     hunter_attributes: HunterAttributesUpdate | None = Field(
         default=None, description="Hunter-specific attributes."
+    )
+    mage_attributes: MageAttributes | None = Field(
+        default=None, description="Mage-specific attributes."
     )
 
 
