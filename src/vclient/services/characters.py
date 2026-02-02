@@ -245,7 +245,6 @@ class CharactersService(BaseService):
         concept_id: str | None = None,
         demeanor: str | None = None,
         game_version: GameVersion,
-        hunter_attributes: HunterAttributesCreate | None = None,
         name_first: str,
         name_last: str,
         name_nick: str | None = None,
@@ -254,6 +253,7 @@ class CharactersService(BaseService):
         traits: list[AssignCharacterTraitRequest] | None = None,
         vampire_attributes: VampireAttributesCreate | None = None,
         werewolf_attributes: WerewolfAttributesCreate | None = None,
+        hunter_attributes: HunterAttributesCreate | None = None,
         mage_attributes: MageAttributes | None = None,
     ) -> Character:
         """Create a new character within the campaign.
@@ -322,7 +322,6 @@ class CharactersService(BaseService):
         character_class: CharacterClass | None = None,
         character_type: CharacterType | None = None,
         game_version: GameVersion | None = None,
-        hunter_attributes: HunterAttributesUpdate | None = None,
         status: CharacterStatus | None = None,
         name_first: str | None = None,
         name_last: str | None = None,
@@ -336,6 +335,7 @@ class CharactersService(BaseService):
         vampire_attributes: VampireAttributesUpdate | None = None,
         werewolf_attributes: WerewolfAttributesUpdate | None = None,
         mage_attributes: MageAttributes | None = None,
+        hunter_attributes: HunterAttributesUpdate | None = None,
     ) -> Character:
         """Modify a character's properties.
 
@@ -363,6 +363,7 @@ class CharactersService(BaseService):
             vampire_attributes: Vampire-specific attributes.
             werewolf_attributes: Werewolf-specific attributes.
             mage_attributes: Mage-specific attributes.
+            hunter_attributes: Hunter-specific attributes.
 
         Returns:
             The updated Character object.

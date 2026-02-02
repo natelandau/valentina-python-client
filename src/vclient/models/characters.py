@@ -258,12 +258,10 @@ class UpdateCharacterRequest(BaseModel):
     Only include fields that need to be changed; omitted fields remain unchanged.
     """
 
-    character_class: CharacterClass | None = Field(default=None, description="Character class.")
-    type: CharacterType | None = Field(default=None, description="Character type.")
-    game_version: GameVersion | None = Field(
-        default=None, description="Game version for character sheet."
-    )
-    status: CharacterStatus | None = Field(default=None, description="Character status.")
+    character_class: CharacterClass | None = None
+    type: CharacterType | None = None
+    game_version: GameVersion | None = None
+    status: CharacterStatus | None = None
 
     name_first: str | None = Field(
         default=None, min_length=3, description="Character's first name."
@@ -273,7 +271,7 @@ class UpdateCharacterRequest(BaseModel):
         default=None, min_length=3, max_length=50, description="Character's nickname."
     )
 
-    age: int | None = Field(default=None, description="Character's age.")
+    age: int | None = None
     biography: str | None = Field(default=None, min_length=3, description="Character biography.")
     demeanor: str | None = Field(
         default=None, min_length=3, max_length=50, description="Character's demeanor."
@@ -283,24 +281,12 @@ class UpdateCharacterRequest(BaseModel):
     )
     concept_id: str | None = Field(default=None, description="ID of the character concept.")
 
-    user_player_id: str | None = Field(
-        default=None, description="ID of the user who plays the character."
-    )
-    date_killed: datetime | None = Field(
-        default=None, description="Timestamp when the character was killed."
-    )
-    vampire_attributes: VampireAttributesUpdate | None = Field(
-        default=None, description="Vampire-specific attributes."
-    )
-    werewolf_attributes: WerewolfAttributesUpdate | None = Field(
-        default=None, description="Werewolf-specific attributes."
-    )
-    hunter_attributes: HunterAttributesUpdate | None = Field(
-        default=None, description="Hunter-specific attributes."
-    )
-    mage_attributes: MageAttributes | None = Field(
-        default=None, description="Mage-specific attributes."
-    )
+    user_player_id: str | None = None
+    date_killed: datetime | None = None
+    vampire_attributes: VampireAttributesUpdate | None = None
+    werewolf_attributes: WerewolfAttributesUpdate | None = None
+    hunter_attributes: HunterAttributesUpdate | None = None
+    mage_attributes: MageAttributes | None = None
 
 
 # -----------------------------------------------------------------------------

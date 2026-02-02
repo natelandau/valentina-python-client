@@ -188,7 +188,6 @@ class WerewolfRite(BaseModel):
 class CharacterSpecialty(BaseModel):
     """A character specialty for a trait."""
 
-    id: str
     name: str
     type: SpecialtyType
     description: str | None = None
