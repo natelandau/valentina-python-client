@@ -4,6 +4,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
+from vclient.constants import TraitModifyCurrency
+
 from .shared import Trait
 
 
@@ -40,7 +42,30 @@ class CreateCharacterTraitRequest(BaseModel):
     value: int | None = None
 
 
-class CharacterTraitValueChangeRequest(BaseModel):
-    """Request model for changing the value of a character trait."""
+class CharacterTraitModifyRequest(BaseModel):
+    """Request for PUT /value endpoint."""
 
-    num_dots: int
+    target_value: int
+    currency: TraitModifyCurrency
+
+
+class CharacterTraitValueOption(BaseModel):
+    """Response model for a value option for a character trait."""
+
+    direction: str
+    point_change: int
+    can_use_xp: bool
+    xp_after: int
+    can_use_starting_points: bool
+    starting_points_after: int
+
+
+class CharacterTraitValueOptionsResponse(BaseModel):
+    """Response model for the value options for a character trait."""
+
+    current_value: int
+    min_value: int
+    max_value: int
+    xp_current: int
+    starting_points_current: int
+    options: dict[str, CharacterTraitValueOption]

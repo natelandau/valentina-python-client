@@ -6,7 +6,7 @@ from httpx import Response
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
-from vclient.models import CharacterTrait, PaginatedResponse
+from vclient.models import CharacterTrait, CharacterTraitValueOptionsResponse, PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 
@@ -62,20 +62,48 @@ def paginated_character_trait_response(character_trait_response_data: dict) -> d
 
 
 @pytest.fixture
-def calculate_cost_to_upgrade_response_data() -> dict:
-    """Return a response data for calculating the cost to upgrade a character trait."""
+def character_trait_value_options_response_data() -> dict:
+    """Return a response data for the value options for a character trait."""
     return {
-        "1": 5,
-        "2": 10,
-    }
-
-
-@pytest.fixture
-def calculate_savings_from_downgrade_response_data() -> dict:
-    """Return a response data for calculating the savings from downgrading a character trait."""
-    return {
-        "1": 5,
-        "2": 10,
+        "current_value": 2,
+        "min_value": 1,
+        "max_value": 5,
+        "xp_current": 0,
+        "starting_points_current": 0,
+        "options": {
+            "1": {
+                "direction": "decrease",
+                "point_change": 10,
+                "can_use_xp": True,
+                "xp_after": 10,
+                "can_use_starting_points": True,
+                "starting_points_after": 10,
+            },
+            "3": {
+                "direction": "increase",
+                "point_change": 15,
+                "can_use_xp": False,
+                "xp_after": -15,
+                "can_use_starting_points": False,
+                "starting_points_after": -15,
+            },
+            "4": {
+                "direction": "increase",
+                "point_change": 35,
+                "can_use_xp": False,
+                "xp_after": -35,
+                "can_use_starting_points": False,
+                "starting_points_after": -35,
+            },
+            "5": {
+                "direction": "increase",
+                "point_change": 60,
+                "can_use_xp": False,
+                "xp_after": -60,
+                "can_use_starting_points": False,
+                "starting_points_after": -60,
+            },
+        },
     }
 
 
@@ -617,244 +645,6 @@ class TestCharacterTraitsServiceDelete:
         assert route.called
 
 
-class TestCharacterTraitsServiceIncrease:
-    """Tests for CharacterTraitsService.increase method."""
-
-    @respx.mock
-    async def test_increase_trait(self, vclient, base_url, character_trait_response_data) -> None:
-        """Verify increasing a character trait value."""
-        # Given: A mocked increase endpoint with updated value
-        response_data = {**character_trait_response_data, "value": 4}
-        route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_INCREASE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}"
-        ).mock(return_value=Response(200, json=response_data))
-
-        # When: Increasing the trait
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).increase("ct123", num_dots=1)
-
-        # Then: The route was called and updated trait is returned
-        assert route.called
-        assert isinstance(result, CharacterTrait)
-        assert result.value == 4
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls[0].request.content)
-        assert body["num_dots"] == 1
-
-    @respx.mock
-    async def test_increase_trait_multiple_dots(
-        self, vclient, base_url, character_trait_response_data
-    ) -> None:
-        """Verify increasing a trait by multiple dots."""
-        # Given: A mocked increase endpoint
-        response_data = {**character_trait_response_data, "value": 5}
-        route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_INCREASE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}"
-        ).mock(return_value=Response(200, json=response_data))
-
-        # When: Increasing by 2 dots
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).increase("ct123", num_dots=2)
-
-        # Then: Updated trait is returned
-        assert route.called
-        assert result.value == 5
-
-
-class TestCharacterTraitsServiceDecrease:
-    """Tests for CharacterTraitsService.decrease method."""
-
-    @respx.mock
-    async def test_decrease_trait(self, vclient, base_url, character_trait_response_data) -> None:
-        """Verify decreasing a character trait value."""
-        # Given: A mocked decrease endpoint with updated value
-        response_data = {**character_trait_response_data, "value": 2}
-        route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_DECREASE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}"
-        ).mock(return_value=Response(200, json=response_data))
-
-        # When: Decreasing the trait
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).decrease("ct123", num_dots=1)
-
-        # Then: The route was called and updated trait is returned
-        assert route.called
-        assert isinstance(result, CharacterTrait)
-        assert result.value == 2
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls[0].request.content)
-        assert body["num_dots"] == 1
-
-
-class TestCharacterTraitsServicePurchaseXp:
-    """Tests for CharacterTraitsService.purchase_xp method."""
-
-    @respx.mock
-    async def test_purchase_xp(self, vclient, base_url, character_trait_response_data) -> None:
-        """Verify purchasing trait dots with XP."""
-        # Given: A mocked purchase endpoint with updated value
-        response_data = {**character_trait_response_data, "value": 4}
-        route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_XP_PURCHASE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}"
-        ).mock(return_value=Response(200, json=response_data))
-
-        # When: Purchasing with XP
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).purchase_xp("ct123", num_dots=1)
-
-        # Then: The route was called and updated trait is returned
-        assert route.called
-        assert isinstance(result, CharacterTrait)
-        assert result.value == 4
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls[0].request.content)
-        assert body["num_dots"] == 1
-
-    @respx.mock
-    async def test_purchase_xp_not_found(self, vclient, base_url) -> None:
-        """Verify purchasing XP for non-existent trait raises NotFoundError."""
-        # Given: A mocked 404 response
-        route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_XP_PURCHASE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='nonexistent')}"
-        ).mock(return_value=Response(404, json={"detail": "Trait not found", "status_code": 404}))
-
-        # When/Then: Purchasing raises NotFoundError
-        with pytest.raises(NotFoundError):
-            await vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
-            ).purchase_xp("nonexistent", num_dots=1)
-
-        assert route.called
-
-
-class TestCharacterTraitsServiceRefundXp:
-    """Tests for CharacterTraitsService.refund_xp method."""
-
-    @respx.mock
-    async def test_refund_xp(self, vclient, base_url, character_trait_response_data) -> None:
-        """Verify refunding trait dots for XP."""
-        # Given: A mocked refund endpoint with updated value
-        response_data = {**character_trait_response_data, "value": 2}
-        route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_XP_REFUND.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}"
-        ).mock(return_value=Response(200, json=response_data))
-
-        # When: Refunding XP
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).refund_xp("ct123", num_dots=1)
-
-        # Then: The route was called and updated trait is returned
-        assert route.called
-        assert isinstance(result, CharacterTrait)
-        assert result.value == 2
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls[0].request.content)
-        assert body["num_dots"] == 1
-
-
-class TestCharacterTraitsServicePurchaseStartingPoints:
-    """Tests for CharacterTraitsService.purchase_starting_points method."""
-
-    @respx.mock
-    async def test_purchase_starting_points(
-        self, vclient, base_url, character_trait_response_data
-    ) -> None:
-        """Verify purchasing trait dots with starting points."""
-        # Given: A mocked purchase endpoint with updated value
-        response_data = {**character_trait_response_data, "value": 4}
-        route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_STARTINGPOINTS_PURCHASE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}"
-        ).mock(return_value=Response(200, json=response_data))
-
-        # When: Purchasing with starting points
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).purchase_starting_points("ct123", num_dots=1)
-
-        # Then: The route was called and updated trait is returned
-        assert route.called
-        assert isinstance(result, CharacterTrait)
-        assert result.value == 4
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls[0].request.content)
-        assert body["num_dots"] == 1
-
-
-class TestCharacterTraitsServiceRefundStartingPoints:
-    """Tests for CharacterTraitsService.refund_starting_points method."""
-
-    @respx.mock
-    async def test_refund_starting_points(
-        self, vclient, base_url, character_trait_response_data
-    ) -> None:
-        """Verify refunding trait dots for starting points."""
-        # Given: A mocked refund endpoint with updated value
-        response_data = {**character_trait_response_data, "value": 2}
-        route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_STARTINGPOINTS_REFUND.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}"
-        ).mock(return_value=Response(200, json=response_data))
-
-        # When: Refunding starting points
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).refund_starting_points("ct123", num_dots=1)
-
-        # Then: The route was called and updated trait is returned
-        assert route.called
-        assert isinstance(result, CharacterTrait)
-        assert result.value == 2
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls[0].request.content)
-        assert body["num_dots"] == 1
-
-
 class TestCharacterTraitsServiceMultiplePages:
     """Tests for CharacterTraitsService pagination across multiple pages."""
 
@@ -917,53 +707,54 @@ class TestCharacterTraitsServiceMultiplePages:
         assert traits[1].trait.name == "Dexterity"
 
 
-class TestCharacterTraitsServiceCalculateCostToUpgrade:
-    """Tests for CharacterTraitsService.calculate_cost_to_upgrade method."""
+class TestCharacterTraitsServiceGetValueOptions:
+    """Tests for CharacterTraitsService.get_value_options method."""
 
     @respx.mock
-    async def test_calculate_cost_to_upgrade(
-        self, vclient, base_url, calculate_cost_to_upgrade_response_data
+    async def test_get_value_options(
+        self, vclient, base_url, character_trait_value_options_response_data
     ) -> None:
-        """Verify calculating the cost to upgrade a character trait."""
-        # Given: A mocked calculate cost to upgrade endpoint
+        """Verify getting the value options for a character trait."""
+        # Given: A mocked get value options endpoint
         route = respx.get(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_COST_TO_UPGRADE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
-        ).mock(return_value=Response(200, json=calculate_cost_to_upgrade_response_data))
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_VALUE_OPTIONS.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
+        ).mock(return_value=Response(200, json=character_trait_value_options_response_data))
 
-        # When: Calculating the cost to upgrade
+        # When: Getting the value options for a character trait
         result = await vclient.character_traits(
             user_id="user123",
             campaign_id="campaign123",
             character_id="char123",
             company_id="company123",
-        ).calculate_cost_to_upgrade("ct123")
+        ).get_value_options("ct123")
 
-        # Then: The route was called and the cost to upgrade is returned
+        # Then: The route was called and the value options are returned
         assert route.called
-        assert result == calculate_cost_to_upgrade_response_data
+        assert result == CharacterTraitValueOptionsResponse.model_validate(
+            character_trait_value_options_response_data
+        )
 
 
-class TestCharacterTraitsServiceCalculateSavingsFromDowngrade:
-    """Tests for CharacterTraitsService.calculate_savings_from_downgrade method."""
+class TestCharacterTraitsServiceChangeValue:
+    """Tests for CharacterTraitsService.change_value method."""
 
     @respx.mock
-    async def test_calculate_savings_from_downgrade(
-        self, vclient, base_url, calculate_savings_from_downgrade_response_data
-    ) -> None:
-        """Verify calculating the savings from downgrading a character trait."""
-        # Given: A mocked calculate savings from downgrade endpoint
-        route = respx.get(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_SAVINGS_FROM_DOWNGRADE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
-        ).mock(return_value=Response(200, json=calculate_savings_from_downgrade_response_data))
+    async def test_change_value(self, vclient, base_url, character_trait_response_data) -> None:
+        """Verify changing the value of a character trait."""
+        # Given: A mocked change value endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_VALUE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
+        ).mock(return_value=Response(200, json=character_trait_response_data))
 
-        # When: Calculating the savings from downgrading
+        # When: Changing the value of a character trait
         result = await vclient.character_traits(
             user_id="user123",
             campaign_id="campaign123",
             character_id="char123",
             company_id="company123",
-        ).calculate_savings_from_downgrade("ct123")
+        ).change_value("ct123", new_value=4, currency="XP")
 
-        # Then: The route was called and the savings from downgrading is returned
+        # Then: The route was called and character trait is returned
         assert route.called
-        assert result == calculate_savings_from_downgrade_response_data
+        assert isinstance(result, CharacterTrait)
+        assert result.trait.name == "Strength"

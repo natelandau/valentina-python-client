@@ -31,28 +31,18 @@ all_traits = await character_traits.list_all()
 
 ### Character Trait CRUD
 
-- `get(character_trait_id)` - Retrieve a specific character trait by ID
-- `assign(trait_id, value)` - Assign an existing trait to the character with a specified value
-- `create(name, parent_category_id, ...)` - Create a new custom trait for the character
-- `delete(character_trait_id)` - Delete a character trait
-- `get_page(limit?, offset?, parent_category_id?)` - Get a paginated page of character traits with optional filter
-- `list_all(parent_category_id?)` - Get all character traits
-- `iter_all(limit?, parent_category_id?)` - Iterate through all character traits
+-   `get(character_trait_id)` - Retrieve a specific character trait by ID
+-   `assign(trait_id, value)` - Assign an existing trait to the character with a specified value
+-   `create(name, parent_category_id, ...)` - Create a new custom trait for the character
+-   `delete(character_trait_id)` - Delete a character trait
+-   `get_page(limit?, offset?, parent_category_id?)` - Get a paginated page of character traits with optional filter
+-   `list_all(parent_category_id?)` - Get all character traits
+-   `iter_all(limit?, parent_category_id?)` - Iterate through all character traits
 
 ### Trait Value Modification
 
-- `increase(character_trait_id, num_dots)` - Increase the trait value by the specified number of dots
-- `decrease(character_trait_id, num_dots)` - Decrease the trait value by the specified number of dots
-
-### XP Transactions
-
-- `purchase_xp(character_trait_id, num_dots)` - Purchase trait dots using XP (deducts XP from character)
-- `refund_xp(character_trait_id, num_dots)` - Refund trait dots for XP (returns XP to character)
-
-### Starting Points Transactions
-
-- `purchase_starting_points(character_trait_id, num_dots)` - Purchase trait dots using starting points
-- `refund_starting_points(character_trait_id, num_dots)` - Refund trait dots for starting points
+-   `get_value_options(character_trait_id)` - Get the value options for a character trait
+-   `change_value(character_trait_id, new_value)` - Change the value of a character trait
 
 ### Create Method Parameters
 
@@ -109,9 +99,27 @@ Represents a trait definition from the game system.
 | `character_classes`       | `list[CharacterClass]` | Applicable character classes       |
 | `game_versions`           | `list[GameVersion]`    | Applicable game versions           |
 
-### Type Aliases
+### `CharacterTraitValueOptionsResponse`
 
-| Type             | Values                                         | Description            |
-| ---------------- | ---------------------------------------------- | ---------------------- |
-| `CharacterClass` | VAMPIRE, WEREWOLF, MAGE, HUNTER, GHOUL, MORTAL | Character's class type |
-| `GameVersion`    | V4, V5                                         | Game ruleset version   |
+Represents the value options for a character trait.
+
+| Field                     | Type                                   | Description                                |
+| ------------------------- | -------------------------------------- | ------------------------------------------ |
+| `current_value`           | `int`                                  | Current value of the trait                 |
+| `min_value`               | `int`                                  | Minimum value for the trait                |
+| `max_value`               | `int`                                  | Maximum value for the trait                |
+| `xp_current`              | `int`                                  | Current XP cost for the trait              |
+| `starting_points_current` | `int`                                  | Current starting points cost for the trait |
+| `options`                 | `dict[str, CharacterTraitValueOption]` | Value options for the trait                |
+
+### `CharacterTraitValueOption`
+
+Represents a value option for a character trait.
+
+| Field                     | Type   | Description                                      |
+| ------------------------- | ------ | ------------------------------------------------ |
+| `direction`               | `str`  | Direction of the value option                    |
+| `point_change`            | `int`  | Number of points to change                       |
+| `can_use_xp`              | `bool` | Whether the value option can use XP              |
+| `xp_after`                | `int`  | XP cost after the value option                   |
+| `can_use_starting_points` | `bool` | Whether the value option can use starting points |

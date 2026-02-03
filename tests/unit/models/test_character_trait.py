@@ -5,7 +5,6 @@ from datetime import UTC, datetime
 from vclient.models.character_trait import (
     AssignCharacterTraitRequest,
     CharacterTrait,
-    CharacterTraitValueChangeRequest,
     CreateCharacterTraitRequest,
 )
 from vclient.models.shared import Trait
@@ -268,42 +267,3 @@ class TestCreateCharacterTraitRequest:
 
         # Then: Value is accepted
         assert request.min_value == 0
-
-
-class TestCharacterTraitValueChangeRequest:
-    """Tests for CharacterTraitValueChangeRequest model."""
-
-    def test_value_change_request_required_field(self) -> None:
-        """Verify CharacterTraitValueChangeRequest with required field."""
-        # When: Creating a request
-        request = CharacterTraitValueChangeRequest(num_dots=2)
-
-        # Then: Field is set correctly
-        assert request.num_dots == 2
-
-    def test_value_change_request_model_dump(self) -> None:
-        """Verify model_dump produces correct JSON payload."""
-        # Given: A value change request
-        request = CharacterTraitValueChangeRequest(num_dots=3)
-
-        # When: Dumping to JSON
-        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
-
-        # Then: Correct JSON structure is produced
-        assert data == {"num_dots": 3}
-
-    def test_value_change_request_single_dot(self) -> None:
-        """Verify CharacterTraitValueChangeRequest accepts single dot."""
-        # When: Creating a request with 1 dot
-        request = CharacterTraitValueChangeRequest(num_dots=1)
-
-        # Then: Value is set correctly
-        assert request.num_dots == 1
-
-    def test_value_change_request_negative_value(self) -> None:
-        """Verify CharacterTraitValueChangeRequest accepts negative values for decreases."""
-        # When: Creating a request with negative value
-        request = CharacterTraitValueChangeRequest(num_dots=-1)
-
-        # Then: Value is set correctly
-        assert request.num_dots == -1

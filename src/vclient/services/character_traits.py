@@ -3,12 +3,13 @@
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import DEFAULT_PAGE_LIMIT, TraitModifyCurrency
 from vclient.endpoints import Endpoints
 from vclient.models import (
     AssignCharacterTraitRequest,
     CharacterTrait,
-    CharacterTraitValueChangeRequest,
+    CharacterTraitModifyRequest,
+    CharacterTraitValueOptionsResponse,
     CreateCharacterTraitRequest,
     PaginatedResponse,
 )
@@ -226,187 +227,56 @@ class CharacterTraitsService(BaseService):
         )
         return CharacterTrait.model_validate(response.json())
 
-    async def increase(self, character_trait_id: str, num_dots: int) -> CharacterTrait:
-        """Increase the value of a character trait.
+    # -------------------------------------------------------------------------
+    # Trait Value Modification Methods
+    # -------------------------------------------------------------------------
+
+    async def get_value_options(
+        self, character_trait_id: str
+    ) -> CharacterTraitValueOptionsResponse:
+        """Get the value options for a character trait.
 
         Args:
-            character_trait_id: The ID of the trait to increase.
-            num_dots: The number of dots to increase the trait by.
+            character_trait_id: The ID of the trait to get the value options for.
 
         Returns:
-            The updated CharacterTrait object.
+            The CharacterTraitValueOptionsResponse object.
 
         Raises:
             NotFoundError: If the trait does not exist.
-        """
-        body = self._validate_request(
-            CharacterTraitValueChangeRequest,
-            num_dots=num_dots,
-        )
-        response = await self._post(
-            self._format_endpoint(
-                Endpoints.CHARACTER_TRAIT_INCREASE, character_trait_id=character_trait_id
-            ),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-        )
-        return CharacterTrait.model_validate(response.json())
-
-    async def decrease(self, character_trait_id: str, num_dots: int) -> CharacterTrait:
-        """Decrease the value of a character trait.
-
-        Args:
-            character_trait_id: The ID of the trait to decrease.
-            num_dots: The number of dots to decrease the trait by.
-
-        Returns:
-            The updated CharacterTrait object.
-        """
-        body = self._validate_request(
-            CharacterTraitValueChangeRequest,
-            num_dots=num_dots,
-        )
-        response = await self._post(
-            self._format_endpoint(
-                Endpoints.CHARACTER_TRAIT_DECREASE, character_trait_id=character_trait_id
-            ),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-        )
-        return CharacterTrait.model_validate(response.json())
-
-    async def purchase_xp(self, character_trait_id: str, num_dots: int) -> CharacterTrait:
-        """Purchase a character trait with XP.
-
-        Args:
-            character_trait_id: The ID of the trait to purchase XP for.
-            num_dots: The number of dots to purchase XP for.
-
-        Returns:
-            The updated CharacterTrait object.
-
-        Raises:
-            NotFoundError: If the trait does not exist.
-        """
-        body = self._validate_request(
-            CharacterTraitValueChangeRequest,
-            num_dots=num_dots,
-        )
-        response = await self._post(
-            self._format_endpoint(
-                Endpoints.CHARACTER_TRAIT_XP_PURCHASE, character_trait_id=character_trait_id
-            ),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-        )
-        return CharacterTrait.model_validate(response.json())
-
-    async def refund_xp(self, character_trait_id: str, num_dots: int) -> CharacterTrait:
-        """Refund a character trait with XP.
-
-        Args:
-            character_trait_id: The ID of the trait to refund XP for.
-            num_dots: The number of dots to refund XP for.
-
-        Returns:
-            The updated CharacterTrait object.
-        """
-        body = self._validate_request(
-            CharacterTraitValueChangeRequest,
-            num_dots=num_dots,
-        )
-        response = await self._post(
-            self._format_endpoint(
-                Endpoints.CHARACTER_TRAIT_XP_REFUND, character_trait_id=character_trait_id
-            ),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-        )
-        return CharacterTrait.model_validate(response.json())
-
-    async def purchase_starting_points(
-        self, character_trait_id: str, num_dots: int
-    ) -> CharacterTrait:
-        """Purchase a character trait with starting points.
-
-        Args:
-            character_trait_id: The ID of the trait to purchase starting points for.
-            num_dots: The number of dots to purchase starting points for.
-
-        Returns:
-            The updated CharacterTrait object.
-        """
-        body = self._validate_request(
-            CharacterTraitValueChangeRequest,
-            num_dots=num_dots,
-        )
-        response = await self._post(
-            self._format_endpoint(
-                Endpoints.CHARACTER_TRAIT_STARTINGPOINTS_PURCHASE,
-                character_trait_id=character_trait_id,
-            ),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-        )
-        return CharacterTrait.model_validate(response.json())
-
-    async def refund_starting_points(
-        self, character_trait_id: str, num_dots: int
-    ) -> CharacterTrait:
-        """Refund a character trait with starting points.
-
-        Args:
-            character_trait_id: The ID of the trait to refund starting points for.
-            num_dots: The number of dots to refund starting points for.
-
-        Returns:
-            The updated CharacterTrait object.
-        """
-        body = self._validate_request(
-            CharacterTraitValueChangeRequest,
-            num_dots=num_dots,
-        )
-        response = await self._post(
-            self._format_endpoint(
-                Endpoints.CHARACTER_TRAIT_STARTINGPOINTS_REFUND,
-                character_trait_id=character_trait_id,
-            ),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-        )
-        return CharacterTrait.model_validate(response.json())
-
-    async def calculate_cost_to_upgrade(self, character_trait_id: str) -> dict[str, int]:
-        """Calculate the experience cost to upgrade a trait by each possible number of dots. The key is the number of dots, the value is the cost.
-
-        Returns an empty dictionary if the trait is at the max value.
-
-        This is informational only and does not actually upgrade the trait.
-
-        Args:
-            character_trait_id: The ID of the trait to get the cost to upgrade for.
-
-        Returns:
-            The cost to upgrade the trait.
+            AuthorizationError: If you don't have access to the character.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the request data is invalid.
         """
         response = await self._get(
             self._format_endpoint(
-                Endpoints.CHARACTER_TRAIT_COST_TO_UPGRADE, character_trait_id=character_trait_id
+                Endpoints.CHARACTER_TRAIT_VALUE_OPTIONS, character_trait_id=character_trait_id
             ),
         )
-        return response.json()
+        return CharacterTraitValueOptionsResponse.model_validate(response.json())
 
-    async def calculate_savings_from_downgrade(self, character_trait_id: str) -> dict[str, int]:
-        """Calculate the savings from downgrading a trait by each possible number of dots. The key is the number of dots, the value is the savings.
-
-        Returns an empty dictionary if the trait is at the min value.
-
-        This is informational only and does not actually downgrade the trait.
+    async def change_value(
+        self,
+        character_trait_id: str,
+        new_value: int,
+        currency: TraitModifyCurrency,
+    ) -> CharacterTrait:
+        """Change the value of a character trait.
 
         Args:
-            character_trait_id: The ID of the trait to get the savings from downgrading for.
-
-        Returns:
-            The savings from downgrading the trait.
+            character_trait_id: The ID of the trait to change the value of.
+            new_value: The new value of the trait.
+            currency: The currency to use for the modification.
         """
-        response = await self._get(
-            self._format_endpoint(
-                Endpoints.CHARACTER_TRAIT_SAVINGS_FROM_DOWNGRADE,
-                character_trait_id=character_trait_id,
-            ),
+        body = self._validate_request(
+            CharacterTraitModifyRequest,
+            target_value=new_value,
+            currency=currency,
         )
-        return response.json()
+        response = await self._post(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_VALUE, character_trait_id=character_trait_id
+            ),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return CharacterTrait.model_validate(response.json())

@@ -35,7 +35,8 @@ from .character_blueprint import (
 from .character_trait import (
     AssignCharacterTraitRequest,
     CharacterTrait,
-    CharacterTraitValueChangeRequest,
+    CharacterTraitModifyRequest,
+    CharacterTraitValueOptionsResponse,
     CreateCharacterTraitRequest,
 )
 from .characters import (
@@ -126,7 +127,8 @@ __all__ = [
     "CharacterPerkDTO",
     "CharacterSpecialty",
     "CharacterTrait",
-    "CharacterTraitValueChangeRequest",
+    "CharacterTraitModifyRequest",
+    "CharacterTraitValueOptionsResponse",
     "ChargenSessionFinalizeDTO",
     "ChargenSessionResponse",
     "Company",
