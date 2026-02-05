@@ -8,9 +8,13 @@ from .books import (
 )
 from .campaigns import (
     Campaign,
-    CreateCampaignRequest,
-    UpdateCampaignRequest,
+    CampaignCreate,
+    CampaignUpdate,
 )
+
+# Backwards compatibility aliases for campaigns
+CreateCampaignRequest = CampaignCreate
+UpdateCampaignRequest = CampaignUpdate
 from .chapters import (
     CampaignChapter,
     CreateChapterRequest,
@@ -131,7 +135,9 @@ __all__ = [
     "Campaign",
     "CampaignBook",
     "CampaignChapter",
+    "CampaignCreate",
     "CampaignExperience",
+    "CampaignUpdate",
     "Character",
     "CharacterConcept",
     "CharacterCreate",

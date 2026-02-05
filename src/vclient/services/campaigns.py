@@ -7,13 +7,13 @@ from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Campaign,
-    CreateCampaignRequest,
+    CampaignCreate,
+    CampaignUpdate,
     CreateNoteRequest,
     Note,
     PaginatedResponse,
     RollStatistics,
     S3Asset,
-    UpdateCampaignRequest,
     UpdateNoteRequest,
 )
 from vclient.services.base import BaseService
@@ -166,7 +166,7 @@ class CampaignsService(BaseService):
             AuthorizationError: If you don't have campaign management privileges.
         """
         body = self._validate_request(
-            CreateCampaignRequest,
+            CampaignCreate,
             name=name,
             description=description,
             desperation=desperation,
@@ -208,7 +208,7 @@ class CampaignsService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateCampaignRequest,
+            CampaignUpdate,
             name=name,
             description=description,
             desperation=desperation,
