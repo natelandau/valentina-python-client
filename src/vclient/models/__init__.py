@@ -41,18 +41,17 @@ from .character_trait import (
 )
 from .characters import (
     Character,
-    CharacterEdgeAndPerksDTO,
-    CharacterInventoryItem,
-    CharacterPerkDTO,
-    CreateCharacterInventoryItemRequest,
-    CreateCharacterRequest,
+    CharacterCreate,
+    CharacterUpdate,
+    EdgeAndPerks,
     HunterAttributes,
     HunterAttributesCreate,
-    HunterAttributesEdgeModel,
     HunterAttributesUpdate,
+    InventoryItem,
+    InventoryItemCreate,
+    InventoryItemUpdate,
     MageAttributes,
-    UpdateCharacterInventoryItemRequest,
-    UpdateCharacterRequest,
+    Perk,
     VampireAttributes,
     VampireAttributesCreate,
     VampireAttributesUpdate,
@@ -60,6 +59,19 @@ from .characters import (
     WerewolfAttributesCreate,
     WerewolfAttributesUpdate,
 )
+from .characters import (
+    HunterEdge as CharacterHunterEdge,
+)
+
+# Backwards compatibility aliases for characters
+CharacterEdgeAndPerksDTO = EdgeAndPerks
+CharacterInventoryItem = InventoryItem
+CharacterPerkDTO = Perk
+CreateCharacterInventoryItemRequest = InventoryItemCreate
+CreateCharacterRequest = CharacterCreate
+HunterAttributesEdgeModel = CharacterHunterEdge
+UpdateCharacterInventoryItemRequest = InventoryItemUpdate
+UpdateCharacterRequest = CharacterUpdate
 from .companies import (
     Company,
     CompanyPermissions,
@@ -122,13 +134,15 @@ __all__ = [
     "CampaignExperience",
     "Character",
     "CharacterConcept",
-    "CharacterEdgeAndPerksDTO",
-    "CharacterInventoryItem",
-    "CharacterPerkDTO",
+    "CharacterCreate",
+    "CharacterEdgeAndPerksDTO",  # Backwards compat alias for EdgeAndPerks
+    "CharacterInventoryItem",  # Backwards compat alias for InventoryItem
+    "CharacterPerkDTO",  # Backwards compat alias for Perk
     "CharacterSpecialty",
     "CharacterTrait",
     "CharacterTraitModifyRequest",
     "CharacterTraitValueOptionsResponse",
+    "CharacterUpdate",
     "ChargenSessionFinalizeDTO",
     "ChargenSessionResponse",
     "Company",
@@ -138,8 +152,8 @@ __all__ = [
     "CreateBookRequest",
     "CreateCampaignRequest",
     "CreateChapterRequest",
-    "CreateCharacterInventoryItemRequest",
-    "CreateCharacterRequest",
+    "CreateCharacterInventoryItemRequest",  # Backwards compat alias for InventoryItemCreate
+    "CreateCharacterRequest",  # Backwards compat alias for CharacterCreate
     "CreateCharacterTraitRequest",
     "CreateCompanyRequest",
     "CreateDeveloperRequest",
@@ -155,14 +169,18 @@ __all__ = [
     "Dicreoll",
     "DictionaryTerm",
     "DiscordProfile",
+    "EdgeAndPerks",
     "ExperienceAddRemoveRequest",
     "GrantAccessRequest",
     "HunterAttributes",
     "HunterAttributesCreate",
-    "HunterAttributesEdgeModel",
+    "HunterAttributesEdgeModel",  # Backwards compat alias for HunterEdge
     "HunterAttributesUpdate",
     "HunterEdge",
     "HunterEdgePerk",
+    "InventoryItem",
+    "InventoryItemCreate",
+    "InventoryItemUpdate",
     "MageAttributes",
     "MeDeveloper",
     "MeDeveloperCompanyPermission",
@@ -171,6 +189,7 @@ __all__ = [
     "NewCompanyResponse",
     "Note",
     "PaginatedResponse",
+    "Perk",
     "Quickroll",
     "RenumberBookRequest",
     "RenumberChapterRequest",
@@ -183,8 +202,8 @@ __all__ = [
     "UpdateBookRequest",
     "UpdateCampaignRequest",
     "UpdateChapterRequest",
-    "UpdateCharacterInventoryItemRequest",
-    "UpdateCharacterRequest",
+    "UpdateCharacterInventoryItemRequest",  # Backwards compat alias for InventoryItemUpdate
+    "UpdateCharacterRequest",  # Backwards compat alias for CharacterUpdate
     "UpdateCompanyRequest",
     "UpdateDeveloperRequest",
     "UpdateDictionaryTermRequest",

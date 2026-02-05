@@ -92,7 +92,7 @@ class MageAttributes(BaseModel):
     tradition: str | None = Field(default=None, description="Mage tradition.")
 
 
-class HunterAttributesEdgeModel(BaseModel):
+class HunterEdge(BaseModel):
     """Hunter edge model."""
 
     edge_id: str
@@ -103,23 +103,21 @@ class HunterAttributes(BaseModel):
     """Hunter-specific character attributes."""
 
     creed: str | None = Field(default=None, description="Hunter creed.")
-    edges: list[HunterAttributesEdgeModel] = Field(
-        default_factory=list, description="Hunter edges."
-    )
+    edges: list[HunterEdge] = Field(default_factory=list, description="Hunter edges.")
 
 
 class HunterAttributesCreate(BaseModel):
     """Hunter-specific character attributes create request."""
 
     creed: str | None = None
-    edges: list[HunterAttributesEdgeModel] | None = None
+    edges: list[HunterEdge] | None = None
 
 
 class HunterAttributesUpdate(BaseModel):
     """Hunter-specific character attributes update request."""
 
     creed: str | None = None
-    edges: list[HunterAttributesEdgeModel] | None = None
+    edges: list[HunterEdge] | None = None
 
 
 # -----------------------------------------------------------------------------
@@ -207,7 +205,7 @@ class Character(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class CreateCharacterRequest(BaseModel):
+class CharacterCreate(BaseModel):
     """Request body for creating a new character.
 
     Used to construct the JSON payload for character creation.
@@ -252,7 +250,7 @@ class CreateCharacterRequest(BaseModel):
     )
 
 
-class UpdateCharacterRequest(BaseModel):
+class CharacterUpdate(BaseModel):
     """Request body for updating a character.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -294,7 +292,7 @@ class UpdateCharacterRequest(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class CharacterInventoryItem(BaseModel):
+class InventoryItem(BaseModel):
     """A character inventory item."""
 
     id: str = Field(..., description="MongoDB document ObjectID.")
@@ -306,7 +304,7 @@ class CharacterInventoryItem(BaseModel):
     date_modified: datetime = Field(..., description="Timestamp when the item was last modified.")
 
 
-class CreateCharacterInventoryItemRequest(BaseModel):
+class InventoryItemCreate(BaseModel):
     """Request body for creating a new character inventory item."""
 
     name: str = Field(..., description="Name of the item.")
@@ -314,7 +312,7 @@ class CreateCharacterInventoryItemRequest(BaseModel):
     description: str | None = Field(default=None, description="Description of the item.")
 
 
-class UpdateCharacterInventoryItemRequest(BaseModel):
+class InventoryItemUpdate(BaseModel):
     """Request body for updating a character inventory item."""
 
     name: str | None = Field(default=None, description="Name of the item.")
@@ -327,7 +325,7 @@ class UpdateCharacterInventoryItemRequest(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class CharacterPerkDTO(BaseModel):
+class Perk(BaseModel):
     """Character perk DTO."""
 
     id: str
@@ -335,7 +333,7 @@ class CharacterPerkDTO(BaseModel):
     description: str | None = None
 
 
-class CharacterEdgeAndPerksDTO(BaseModel):
+class EdgeAndPerks(BaseModel):
     """Character edge and perks DTO."""
 
     id: str
@@ -344,4 +342,27 @@ class CharacterEdgeAndPerksDTO(BaseModel):
     pool: str | None = None
     system: str | None = None
     type: HunterEdgeType | None = None
-    perks: list[CharacterPerkDTO] = Field(default_factory=list)
+    perks: list[Perk] = Field(default_factory=list)
+
+
+__all__ = [
+    "Character",
+    "CharacterCreate",
+    "CharacterUpdate",
+    "EdgeAndPerks",
+    "HunterAttributes",
+    "HunterAttributesCreate",
+    "HunterAttributesUpdate",
+    "HunterEdge",
+    "InventoryItem",
+    "InventoryItemCreate",
+    "InventoryItemUpdate",
+    "MageAttributes",
+    "Perk",
+    "VampireAttributes",
+    "VampireAttributesCreate",
+    "VampireAttributesUpdate",
+    "WerewolfAttributes",
+    "WerewolfAttributesCreate",
+    "WerewolfAttributesUpdate",
+]
