@@ -32,7 +32,7 @@ class Campaign(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class CreateCampaignRequest(BaseModel):
+class CampaignCreate(BaseModel):
     """Request body for creating a new campaign.
 
     Used to construct the JSON payload for campaign creation.
@@ -44,7 +44,7 @@ class CreateCampaignRequest(BaseModel):
     danger: int = Field(default=0, ge=0, le=5)
 
 
-class UpdateCampaignRequest(BaseModel):
+class CampaignUpdate(BaseModel):
     """Request body for updating a campaign.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -54,3 +54,10 @@ class UpdateCampaignRequest(BaseModel):
     description: str | None = Field(default=None, min_length=3)
     desperation: int | None = Field(default=None, ge=0, le=5)
     danger: int | None = Field(default=None, ge=0, le=5)
+
+
+__all__ = [
+    "Campaign",
+    "CampaignCreate",
+    "CampaignUpdate",
+]

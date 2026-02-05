@@ -17,7 +17,7 @@ class DictionaryTerm(BaseModel):
     date_modified: datetime
 
 
-class CreateDictionaryTermRequest(BaseModel):
+class DictionaryTermCreate(BaseModel):
     """Request body for creating a dictionary term."""
 
     term: str
@@ -26,10 +26,17 @@ class CreateDictionaryTermRequest(BaseModel):
     synonyms: list[str] = Field(default_factory=list)
 
 
-class UpdateDictionaryTermRequest(BaseModel):
+class DictionaryTermUpdate(BaseModel):
     """Request body for updating a dictionary term."""
 
     term: str | None = None
     definition: str | None = None
     link: str | None = None
     synonyms: list[str] | None = None
+
+
+__all__ = [
+    "DictionaryTerm",
+    "DictionaryTermCreate",
+    "DictionaryTermUpdate",
+]

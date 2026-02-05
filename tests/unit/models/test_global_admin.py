@@ -6,11 +6,11 @@ import pytest
 from pydantic import ValidationError
 
 from vclient.models.global_admin import (
-    CreateDeveloperRequest,
     Developer,
     DeveloperCompanyPermission,
+    DeveloperCreate,
+    DeveloperUpdate,
     DeveloperWithApiKey,
-    UpdateDeveloperRequest,
 )
 
 
@@ -215,13 +215,13 @@ class TestDeveloperWithApiKey:
         assert developer.api_key is None
 
 
-class TestCreateDeveloperRequest:
-    """Tests for CreateDeveloperRequest model."""
+class TestDeveloperCreate:
+    """Tests for DeveloperCreate model."""
 
     def test_create_with_required_fields(self):
         """Verify creating request with required fields only."""
         # When: Creating with required fields
-        request = CreateDeveloperRequest(
+        request = DeveloperCreate(
             username="testuser",
             email="test@example.com",
         )
@@ -234,7 +234,7 @@ class TestCreateDeveloperRequest:
     def test_create_with_all_fields(self):
         """Verify creating request with all fields."""
         # When: Creating with all fields
-        request = CreateDeveloperRequest(
+        request = DeveloperCreate(
             username="adminuser",
             email="admin@example.com",
             is_global_admin=True,
@@ -248,7 +248,7 @@ class TestCreateDeveloperRequest:
     def test_model_dump_excludes_unset(self):
         """Verify model_dump with exclude_unset works correctly."""
         # Given: Request with only required fields
-        request = CreateDeveloperRequest(
+        request = DeveloperCreate(
             username="testuser",
             email="test@example.com",
         )
@@ -263,13 +263,13 @@ class TestCreateDeveloperRequest:
         }
 
 
-class TestUpdateDeveloperRequest:
-    """Tests for UpdateDeveloperRequest model."""
+class TestDeveloperUpdate:
+    """Tests for DeveloperUpdate model."""
 
     def test_all_fields_optional(self):
         """Verify all fields are optional."""
         # When: Creating with no fields
-        request = UpdateDeveloperRequest()
+        request = DeveloperUpdate()
 
         # Then: All fields are None
         assert request.username is None
@@ -279,7 +279,7 @@ class TestUpdateDeveloperRequest:
     def test_partial_update(self):
         """Verify partial update with some fields."""
         # When: Creating with only username
-        request = UpdateDeveloperRequest(username="newusername")
+        request = DeveloperUpdate(username="newusername")
 
         # Then: Only username is set
         assert request.username == "newusername"
@@ -289,7 +289,7 @@ class TestUpdateDeveloperRequest:
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""
         # Given: Request with only email
-        request = UpdateDeveloperRequest(email="new@example.com")
+        request = DeveloperUpdate(email="new@example.com")
 
         # When: Dumping with exclude_none
         data = request.model_dump(exclude_none=True, mode="json")
@@ -300,7 +300,7 @@ class TestUpdateDeveloperRequest:
     def test_model_dump_full_update(self):
         """Verify model_dump includes all fields when set."""
         # Given: Request with all fields
-        request = UpdateDeveloperRequest(
+        request = DeveloperUpdate(
             username="newuser",
             email="new@example.com",
             is_global_admin=True,

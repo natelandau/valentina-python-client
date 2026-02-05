@@ -47,7 +47,7 @@ class MeDeveloperWithApiKey(MeDeveloper):
 # -----------------------------------------------------------------------------
 
 
-class UpdateMeDeveloperRequest(BaseModel):
+class MeDeveloperUpdate(BaseModel):
     """Request body for updating the current developer profile.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -55,3 +55,11 @@ class UpdateMeDeveloperRequest(BaseModel):
 
     username: str | None = None
     email: str | None = None
+
+
+__all__ = [
+    "MeDeveloper",
+    "MeDeveloperCompanyPermission",
+    "MeDeveloperUpdate",
+    "MeDeveloperWithApiKey",
+]

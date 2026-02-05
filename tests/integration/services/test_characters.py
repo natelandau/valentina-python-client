@@ -392,7 +392,7 @@ class TestCharactersServiceCreate:
             game_version="V5",
             name_first="John",
             name_last="Doe",
-            character_type="NPC",
+            type="NPC",
             name_nick="Johnny",
             age=35,
             biography="A mysterious vampire.",
@@ -410,7 +410,7 @@ class TestCharactersServiceCreate:
         import json
 
         body = json.loads(route.calls[0].request.content)
-        assert body["type"] == "NPC"
+        assert body["type"] == "NPC"  # explicitly set
         assert body["name_nick"] == "Johnny"
         assert body["age"] == 35
         assert body["biography"] == "A mysterious vampire."

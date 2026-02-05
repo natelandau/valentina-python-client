@@ -365,11 +365,10 @@ class TestTopLevelImports:
         # When: Importing from vclient
         from vclient import (
             companies_service,
-            configure_default_client,
-            default_client,
             global_admin_service,
             system_service,
         )
+        from vclient.registry import configure_default_client, default_client
 
         # Then: All functions are callable
         assert callable(configure_default_client)
@@ -379,9 +378,9 @@ class TestTopLevelImports:
         assert callable(system_service)
 
     def test_imports_from_vclient_api(self) -> None:
-        """Verify factory functions are importable from vclient package."""
-        # When: Importing from vclient
-        from vclient import (
+        """Verify factory functions are importable from vclient.registry."""
+        # When: Importing from vclient.registry
+        from vclient.registry import (
             companies_service,
             configure_default_client,
             default_client,

@@ -3,8 +3,8 @@
 from vclient.endpoints import Endpoints
 from vclient.models import (
     MeDeveloper,
+    MeDeveloperUpdate,
     MeDeveloperWithApiKey,
-    UpdateMeDeveloperRequest,
 )
 from vclient.services.base import BaseService
 
@@ -38,17 +38,18 @@ class DeveloperService(BaseService):
 
     async def update_me(
         self,
-        *,
-        username: str | None = None,
-        email: str | None = None,
+        request: MeDeveloperUpdate | None = None,
+        /,
+        **kwargs,
     ) -> MeDeveloper:
         """Update the current developer's profile.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
 
         Args:
-            username: New username for the developer.
-            email: New email address for the developer.
+            request: A MeDeveloperUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for MeDeveloperUpdate if request is not provided.
+                Accepts: username (str | None), email (str | None).
 
         Returns:
             The updated MeDeveloper object.
@@ -57,10 +58,8 @@ class DeveloperService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            UpdateMeDeveloperRequest,
-            username=username,
-            email=email,
+        body = (
+            request if request is not None else self._validate_request(MeDeveloperUpdate, **kwargs)
         )
         response = await self._patch(
             Endpoints.DEVELOPER_ME,

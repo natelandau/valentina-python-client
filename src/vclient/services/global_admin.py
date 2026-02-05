@@ -5,11 +5,11 @@ from collections.abc import AsyncIterator
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    CreateDeveloperRequest,
     Developer,
+    DeveloperCreate,
+    DeveloperUpdate,
     DeveloperWithApiKey,
     PaginatedResponse,
-    UpdateDeveloperRequest,
 )
 from vclient.services.base import BaseService
 
@@ -119,10 +119,9 @@ class GlobalAdminService(BaseService):
 
     async def create(
         self,
-        username: str,
-        email: str,
-        *,
-        is_global_admin: bool = False,
+        request: DeveloperCreate | None = None,
+        /,
+        **kwargs,
     ) -> Developer:
         """Create a new developer account.
 
@@ -130,9 +129,10 @@ class GlobalAdminService(BaseService):
         companies. Be certain to generate an API key after account creation.
 
         Args:
-            username: Developer username.
-            email: Developer email address.
-            is_global_admin: Whether the developer should have global admin privileges.
+            request: A DeveloperCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for DeveloperCreate if request is not provided.
+                Accepts: username (str, required), email (str, required),
+                is_global_admin (bool, default False).
 
         Returns:
             The newly created Developer object.
@@ -142,12 +142,7 @@ class GlobalAdminService(BaseService):
             ValidationError: If the request data is invalid.
             AuthorizationError: If you don't have global admin privileges.
         """
-        body = self._validate_request(
-            CreateDeveloperRequest,
-            username=username,
-            email=email,
-            is_global_admin=is_global_admin,
-        )
+        body = request if request is not None else self._validate_request(DeveloperCreate, **kwargs)
         response = await self._post(
             Endpoints.ADMIN_DEVELOPERS,
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -157,10 +152,9 @@ class GlobalAdminService(BaseService):
     async def update(
         self,
         developer_id: str,
-        *,
-        username: str | None = None,
-        email: str | None = None,
-        is_global_admin: bool | None = None,
+        request: DeveloperUpdate | None = None,
+        /,
+        **kwargs,
     ) -> Developer:
         """Modify a developer account's properties.
 
@@ -168,9 +162,10 @@ class GlobalAdminService(BaseService):
 
         Args:
             developer_id: The ID of the developer to update.
-            username: New developer username.
-            email: New developer email address.
-            is_global_admin: New global admin status.
+            request: A DeveloperUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for DeveloperUpdate if request is not provided.
+                Accepts: username (str | None), email (str | None),
+                is_global_admin (bool | None).
 
         Returns:
             The updated Developer object.
@@ -181,12 +176,7 @@ class GlobalAdminService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            UpdateDeveloperRequest,
-            username=username,
-            email=email,
-            is_global_admin=is_global_admin,
-        )
+        body = request if request is not None else self._validate_request(DeveloperUpdate, **kwargs)
         response = await self._patch(
             Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),

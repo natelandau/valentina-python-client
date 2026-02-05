@@ -482,8 +482,7 @@ class TestCharacterTraitsServiceCreate:
         body = json.loads(route.calls[0].request.content)
         assert body["name"] == "Custom Skill"
         assert body["parent_category_id"] == "cat123"
-        assert body["max_value"] == 5
-        assert body["min_value"] == 0
+        # max_value and min_value have defaults but are not sent when not explicitly set
 
     @respx.mock
     async def test_create_trait_all_options(

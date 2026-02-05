@@ -1,21 +1,22 @@
 """Data models for API responses."""
 
+# All imports at top
 from .books import (
+    BookCreate,
+    BookUpdate,
     CampaignBook,
-    CreateBookRequest,
-    RenumberBookRequest,
-    UpdateBookRequest,
+    _BookRenumber,
 )
 from .campaigns import (
     Campaign,
-    CreateCampaignRequest,
-    UpdateCampaignRequest,
+    CampaignCreate,
+    CampaignUpdate,
 )
 from .chapters import (
     CampaignChapter,
-    CreateChapterRequest,
-    RenumberChapterRequest,
-    UpdateChapterRequest,
+    ChapterCreate,
+    ChapterUpdate,
+    _ChapterRenumber,
 )
 from .character_autogen import (
     ChargenSessionFinalizeDTO,
@@ -33,26 +34,25 @@ from .character_blueprint import (
     WerewolfTribe,
 )
 from .character_trait import (
-    AssignCharacterTraitRequest,
     CharacterTrait,
-    CharacterTraitModifyRequest,
     CharacterTraitValueOptionsResponse,
-    CreateCharacterTraitRequest,
+    TraitCreate,
+    _TraitAssign,
+    _TraitModify,
 )
 from .characters import (
     Character,
-    CharacterEdgeAndPerksDTO,
-    CharacterInventoryItem,
-    CharacterPerkDTO,
-    CreateCharacterInventoryItemRequest,
-    CreateCharacterRequest,
+    CharacterCreate,
+    CharacterUpdate,
+    EdgeAndPerks,
     HunterAttributes,
     HunterAttributesCreate,
-    HunterAttributesEdgeModel,
     HunterAttributesUpdate,
+    InventoryItem,
+    InventoryItemCreate,
+    InventoryItemUpdate,
     MageAttributes,
-    UpdateCharacterInventoryItemRequest,
-    UpdateCharacterRequest,
+    Perk,
     VampireAttributes,
     VampireAttributesCreate,
     VampireAttributesUpdate,
@@ -60,86 +60,165 @@ from .characters import (
     WerewolfAttributesCreate,
     WerewolfAttributesUpdate,
 )
+from .characters import (
+    HunterEdge as CharacterHunterEdge,
+)
 from .companies import (
     Company,
+    CompanyCreate,
     CompanyPermissions,
     CompanySettings,
-    CreateCompanyRequest,
-    GrantAccessRequest,
+    CompanyUpdate,
     NewCompanyResponse,
-    UpdateCompanyRequest,
+    _GrantAccess,
 )
 from .developers import (
     MeDeveloper,
     MeDeveloperCompanyPermission,
+    MeDeveloperUpdate,
     MeDeveloperWithApiKey,
-    UpdateMeDeveloperRequest,
 )
-from .diceroll import CreateDicreollQuickrollRequest, CreateDicreollRequest, Dicreoll
+from .diceroll import DicerollCreate, Dicreoll, _DicerollQuickrollCreate
 from .dictionary import (
-    CreateDictionaryTermRequest,
     DictionaryTerm,
-    UpdateDictionaryTermRequest,
+    DictionaryTermCreate,
+    DictionaryTermUpdate,
 )
 from .global_admin import (
-    CreateDeveloperRequest,
     Developer,
     DeveloperCompanyPermission,
+    DeveloperCreate,
+    DeveloperUpdate,
     DeveloperWithApiKey,
-    UpdateDeveloperRequest,
 )
 from .pagination import PaginatedResponse
 from .shared import (
     CharacterSpecialty,
-    CreateNoteRequest,
     NameDescriptionSubDocument,
     Note,
+    NoteCreate,
+    NoteUpdate,
     RollStatistics,
     S3Asset,
     Trait,
-    UpdateNoteRequest,
     WerewolfGift,
     WerewolfRite,
 )
 from .system import SystemHealth
 from .users import (
     CampaignExperience,
-    CreateQuickrollRequest,
-    CreateUserRequest,
     DiscordProfile,
-    ExperienceAddRemoveRequest,
     Quickroll,
-    UpdateQuickrollRequest,
-    UpdateUserRequest,
+    QuickrollCreate,
+    QuickrollUpdate,
     User,
+    UserCreate,
+    UserUpdate,
+    _ExperienceAddRemove,
 )
+
+# -------------------------------------------------------------------------
+# Backwards Compatibility Aliases
+# -------------------------------------------------------------------------
+# These aliases maintain compatibility with older code that used the previous
+# naming conventions. New code should use the primary model names above.
+
+# Books
+CreateBookRequest = BookCreate
+RenumberBookRequest = _BookRenumber
+UpdateBookRequest = BookUpdate
+
+# Campaigns
+CreateCampaignRequest = CampaignCreate
+UpdateCampaignRequest = CampaignUpdate
+
+# Chapters
+CreateChapterRequest = ChapterCreate
+RenumberChapterRequest = _ChapterRenumber
+UpdateChapterRequest = ChapterUpdate
+
+# Character traits
+AssignCharacterTraitRequest = _TraitAssign
+CharacterTraitModifyRequest = _TraitModify
+CreateCharacterTraitRequest = TraitCreate
+
+# Characters
+CharacterEdgeAndPerksDTO = EdgeAndPerks
+CharacterInventoryItem = InventoryItem
+CharacterPerkDTO = Perk
+CreateCharacterInventoryItemRequest = InventoryItemCreate
+CreateCharacterRequest = CharacterCreate
+HunterAttributesEdgeModel = CharacterHunterEdge
+UpdateCharacterInventoryItemRequest = InventoryItemUpdate
+UpdateCharacterRequest = CharacterUpdate
+
+# Companies
+CreateCompanyRequest = CompanyCreate
+GrantAccessRequest = _GrantAccess
+UpdateCompanyRequest = CompanyUpdate
+
+# Developers
+UpdateMeDeveloperRequest = MeDeveloperUpdate
+
+# Diceroll
+CreateDicreollQuickrollRequest = _DicerollQuickrollCreate
+CreateDicreollRequest = DicerollCreate
+
+# Dictionary
+CreateDictionaryTermRequest = DictionaryTermCreate
+UpdateDictionaryTermRequest = DictionaryTermUpdate
+
+# Global admin
+CreateDeveloperRequest = DeveloperCreate
+UpdateDeveloperRequest = DeveloperUpdate
+
+# Notes
+CreateNoteRequest = NoteCreate
+UpdateNoteRequest = NoteUpdate
+
+# Users
+CreateQuickrollRequest = QuickrollCreate
+CreateUserRequest = UserCreate
+ExperienceAddRemoveRequest = _ExperienceAddRemove
+UpdateQuickrollRequest = QuickrollUpdate
+UpdateUserRequest = UserUpdate
 
 __all__ = [
     "AssignCharacterTraitRequest",
+    "BookCreate",
+    "BookUpdate",
     "Campaign",
     "CampaignBook",
     "CampaignChapter",
+    "CampaignCreate",
     "CampaignExperience",
+    "CampaignUpdate",
+    "ChapterCreate",
+    "ChapterUpdate",
     "Character",
     "CharacterConcept",
-    "CharacterEdgeAndPerksDTO",
-    "CharacterInventoryItem",
-    "CharacterPerkDTO",
+    "CharacterCreate",
+    "CharacterEdgeAndPerksDTO",  # Backwards compat alias for EdgeAndPerks
+    "CharacterInventoryItem",  # Backwards compat alias for InventoryItem
+    "CharacterPerkDTO",  # Backwards compat alias for Perk
     "CharacterSpecialty",
     "CharacterTrait",
     "CharacterTraitModifyRequest",
     "CharacterTraitValueOptionsResponse",
+    "CharacterUpdate",
     "ChargenSessionFinalizeDTO",
     "ChargenSessionResponse",
     "Company",
+    "CompanyCreate",
     "CompanyPermissions",
     "CompanySettings",
+    "CompanyUpdate",
     "CreateAutogenerateDTO",
     "CreateBookRequest",
     "CreateCampaignRequest",
     "CreateChapterRequest",
-    "CreateCharacterInventoryItemRequest",
-    "CreateCharacterRequest",
+    "CreateCharacterInventoryItemRequest",  # Backwards compat alias for InventoryItemCreate
+    "CreateCharacterRequest",  # Backwards compat alias for CharacterCreate
     "CreateCharacterTraitRequest",
     "CreateCompanyRequest",
     "CreateDeveloperRequest",
@@ -151,27 +230,42 @@ __all__ = [
     "CreateUserRequest",
     "Developer",
     "DeveloperCompanyPermission",
+    "DeveloperCreate",
+    "DeveloperUpdate",
     "DeveloperWithApiKey",
+    "DicerollCreate",
     "Dicreoll",
     "DictionaryTerm",
+    "DictionaryTermCreate",
+    "DictionaryTermUpdate",
     "DiscordProfile",
+    "EdgeAndPerks",
     "ExperienceAddRemoveRequest",
     "GrantAccessRequest",
     "HunterAttributes",
     "HunterAttributesCreate",
-    "HunterAttributesEdgeModel",
+    "HunterAttributesEdgeModel",  # Backwards compat alias for HunterEdge
     "HunterAttributesUpdate",
     "HunterEdge",
     "HunterEdgePerk",
+    "InventoryItem",
+    "InventoryItemCreate",
+    "InventoryItemUpdate",
     "MageAttributes",
     "MeDeveloper",
     "MeDeveloperCompanyPermission",
+    "MeDeveloperUpdate",
     "MeDeveloperWithApiKey",
     "NameDescriptionSubDocument",
     "NewCompanyResponse",
     "Note",
+    "NoteCreate",
+    "NoteUpdate",
     "PaginatedResponse",
+    "Perk",
     "Quickroll",
+    "QuickrollCreate",
+    "QuickrollUpdate",
     "RenumberBookRequest",
     "RenumberChapterRequest",
     "RollStatistics",
@@ -180,11 +274,12 @@ __all__ = [
     "SystemHealth",
     "Trait",
     "TraitCategory",
+    "TraitCreate",
     "UpdateBookRequest",
     "UpdateCampaignRequest",
     "UpdateChapterRequest",
-    "UpdateCharacterInventoryItemRequest",
-    "UpdateCharacterRequest",
+    "UpdateCharacterInventoryItemRequest",  # Backwards compat alias for InventoryItemUpdate
+    "UpdateCharacterRequest",  # Backwards compat alias for CharacterUpdate
     "UpdateCompanyRequest",
     "UpdateDeveloperRequest",
     "UpdateDictionaryTermRequest",
@@ -193,6 +288,8 @@ __all__ = [
     "UpdateQuickrollRequest",
     "UpdateUserRequest",
     "User",
+    "UserCreate",
+    "UserUpdate",
     "VampireAttributes",
     "VampireAttributesCreate",
     "VampireAttributesUpdate",

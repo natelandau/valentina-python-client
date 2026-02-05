@@ -48,7 +48,7 @@ class DeveloperWithApiKey(Developer):
 # -----------------------------------------------------------------------------
 
 
-class CreateDeveloperRequest(BaseModel):
+class DeveloperCreate(BaseModel):
     """Request body for creating a new developer.
 
     Used to construct the JSON payload for developer creation.
@@ -59,7 +59,7 @@ class CreateDeveloperRequest(BaseModel):
     is_global_admin: bool = False
 
 
-class UpdateDeveloperRequest(BaseModel):
+class DeveloperUpdate(BaseModel):
     """Request body for updating a developer.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -68,3 +68,12 @@ class UpdateDeveloperRequest(BaseModel):
     username: str | None = None
     email: str | None = None
     is_global_admin: bool | None = None
+
+
+__all__ = [
+    "Developer",
+    "DeveloperCompanyPermission",
+    "DeveloperCreate",
+    "DeveloperUpdate",
+    "DeveloperWithApiKey",
+]

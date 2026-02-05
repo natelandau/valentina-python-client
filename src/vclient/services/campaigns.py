@@ -7,14 +7,14 @@ from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Campaign,
-    CreateCampaignRequest,
-    CreateNoteRequest,
+    CampaignCreate,
+    CampaignUpdate,
     Note,
+    NoteCreate,
+    NoteUpdate,
     PaginatedResponse,
     RollStatistics,
     S3Asset,
-    UpdateCampaignRequest,
-    UpdateNoteRequest,
 )
 from vclient.services.base import BaseService
 
@@ -143,19 +143,17 @@ class CampaignsService(BaseService):
 
     async def create(
         self,
-        name: str,
-        *,
-        description: str | None = None,
-        desperation: int = 0,
-        danger: int = 0,
+        request: CampaignCreate | None = None,
+        /,
+        **kwargs,
     ) -> Campaign:
         """Create a new campaign.
 
         Args:
-            name: Campaign name (3-50 characters).
-            description: Optional campaign description (minimum 3 characters).
-            desperation: Desperation level (0-5, default 0).
-            danger: Danger level (0-5, default 0).
+            request: A CampaignCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for CampaignCreate if request is not provided.
+                Accepts: name (str, required), description (str | None),
+                desperation (int, default 0), danger (int, default 0).
 
         Returns:
             The newly created Campaign object.
@@ -165,13 +163,7 @@ class CampaignsService(BaseService):
             ValidationError: If the request data is invalid.
             AuthorizationError: If you don't have campaign management privileges.
         """
-        body = self._validate_request(
-            CreateCampaignRequest,
-            name=name,
-            description=description,
-            desperation=desperation,
-            danger=danger,
-        )
+        body = request if request is not None else self._validate_request(CampaignCreate, **kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.CAMPAIGNS),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -181,11 +173,9 @@ class CampaignsService(BaseService):
     async def update(
         self,
         campaign_id: str,
-        *,
-        name: str | None = None,
-        description: str | None = None,
-        desperation: int | None = None,
-        danger: int | None = None,
+        request: CampaignUpdate | None = None,
+        /,
+        **kwargs,
     ) -> Campaign:
         """Modify a campaign's properties.
 
@@ -193,10 +183,10 @@ class CampaignsService(BaseService):
 
         Args:
             campaign_id: The ID of the campaign to update.
-            name: New campaign name (3-50 characters).
-            description: New campaign description (minimum 3 characters).
-            desperation: New desperation level (0-5).
-            danger: New danger level (0-5).
+            request: A CampaignUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for CampaignUpdate if request is not provided.
+                Accepts: name (str | None), description (str | None),
+                desperation (int | None), danger (int | None).
 
         Returns:
             The updated Campaign object.
@@ -207,13 +197,7 @@ class CampaignsService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            UpdateCampaignRequest,
-            name=name,
-            description=description,
-            desperation=desperation,
-            danger=danger,
-        )
+        body = request if request is not None else self._validate_request(CampaignUpdate, **kwargs)
         response = await self._patch(
             self._format_endpoint(Endpoints.CAMPAIGN, campaign_id=campaign_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -480,8 +464,9 @@ class CampaignsService(BaseService):
     async def create_note(
         self,
         campaign_id: str,
-        title: str,
-        content: str,
+        request: NoteCreate | None = None,
+        /,
+        **kwargs,
     ) -> Note:
         """Create a new note for a campaign.
 
@@ -489,8 +474,9 @@ class CampaignsService(BaseService):
 
         Args:
             campaign_id: The ID of the campaign to create the note for.
-            title: The note title (3-50 characters).
-            content: The note content (minimum 3 characters, supports markdown).
+            request: A NoteCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for NoteCreate if request is not provided.
+                Accepts: title (str, required), content (str, required).
 
         Returns:
             The newly created Note object.
@@ -501,11 +487,7 @@ class CampaignsService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            CreateNoteRequest,
-            title=title,
-            content=content,
-        )
+        body = request if request is not None else self._validate_request(NoteCreate, **kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.CAMPAIGN_NOTES, campaign_id=campaign_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -516,9 +498,9 @@ class CampaignsService(BaseService):
         self,
         campaign_id: str,
         note_id: str,
-        *,
-        title: str | None = None,
-        content: str | None = None,
+        request: NoteUpdate | None = None,
+        /,
+        **kwargs,
     ) -> Note:
         """Modify a note's content.
 
@@ -527,8 +509,9 @@ class CampaignsService(BaseService):
         Args:
             campaign_id: The ID of the campaign that owns the note.
             note_id: The ID of the note to update.
-            title: New note title (3-50 characters).
-            content: New note content (minimum 3 characters, supports markdown).
+            request: A NoteUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for NoteUpdate if request is not provided.
+                Accepts: title (str | None), content (str | None).
 
         Returns:
             The updated Note object.
@@ -539,11 +522,7 @@ class CampaignsService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            UpdateNoteRequest,
-            title=title,
-            content=content,
-        )
+        body = request if request is not None else self._validate_request(NoteUpdate, **kwargs)
         response = await self._patch(
             self._format_endpoint(
                 Endpoints.CAMPAIGN_NOTE, campaign_id=campaign_id, note_id=note_id

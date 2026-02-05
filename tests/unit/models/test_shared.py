@@ -4,11 +4,11 @@ import pytest
 from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models.shared import (
-    CreateNoteRequest,
     Note,
+    NoteCreate,
+    NoteUpdate,
     RollStatistics,
     S3Asset,
-    UpdateNoteRequest,
 )
 
 
@@ -109,12 +109,12 @@ class TestNote:
         assert note.content == "This is a test note."
 
 
-class TestCreateNoteRequest:
-    """Tests for CreateNoteRequest model."""
+class TestNoteCreate:
+    """Tests for NoteCreate model."""
 
     def test_valid_request(self):
         """Verify valid request creation."""
-        request = CreateNoteRequest(
+        request = NoteCreate(
             title="Test Note",
             content="This is a test note.",
         )
@@ -125,39 +125,39 @@ class TestCreateNoteRequest:
     def test_title_min_length(self):
         """Verify title minimum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateNoteRequest(title="ab", content="Valid content")
+            NoteCreate(title="ab", content="Valid content")
 
     def test_title_max_length(self):
         """Verify title maximum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateNoteRequest(title="a" * 51, content="Valid content")
+            NoteCreate(title="a" * 51, content="Valid content")
 
     def test_content_min_length(self):
         """Verify content minimum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateNoteRequest(title="Valid title", content="ab")
+            NoteCreate(title="Valid title", content="ab")
 
 
-class TestUpdateNoteRequest:
-    """Tests for UpdateNoteRequest model."""
+class TestNoteUpdate:
+    """Tests for NoteUpdate model."""
 
     def test_all_fields_optional(self):
         """Verify all fields default to None."""
-        request = UpdateNoteRequest()
+        request = NoteUpdate()
 
         assert request.title is None
         assert request.content is None
 
     def test_partial_update(self):
         """Verify partial update works."""
-        request = UpdateNoteRequest(title="New Title")
+        request = NoteUpdate(title="New Title")
 
         assert request.title == "New Title"
         assert request.content is None
 
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""
-        request = UpdateNoteRequest(title="New Title")
+        request = NoteUpdate(title="New Title")
 
         data = request.model_dump(exclude_none=True)
 

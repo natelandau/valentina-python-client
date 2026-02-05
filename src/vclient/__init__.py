@@ -1,18 +1,19 @@
-"""API client for the vclient service."""
+"""API client for the vclient service.
+
+Primary exports:
+    VClient: The main API client class
+    APIConfig: Configuration for API connections
+
+Factory functions (primary access pattern):
+    books_service, campaigns_service, chapters_service, etc.
+
+For exceptions, use: from vclient.exceptions import APIError, NotFoundError, ...
+For models, use: from vclient.models import Character, Campaign, ...
+For service classes, use: from vclient.services import CharactersService, ...
+"""
 
 from vclient.client import VClient
 from vclient.config import APIConfig
-from vclient.exceptions import (
-    APIError,
-    AuthenticationError,
-    AuthorizationError,
-    ConflictError,
-    NotFoundError,
-    RateLimitError,
-    RequestValidationError,
-    ServerError,
-    ValidationError,
-)
 from vclient.registry import (
     books_service,
     campaigns_service,
@@ -22,8 +23,6 @@ from vclient.registry import (
     character_traits_service,
     characters_service,
     companies_service,
-    configure_default_client,
-    default_client,
     developer_service,
     dicreolls_service,
     dictionary_service,
@@ -32,51 +31,12 @@ from vclient.registry import (
     system_service,
     users_service,
 )
-from vclient.services import (
-    BooksService,
-    CampaignsService,
-    ChaptersService,
-    CharacterAutogenService,
-    CharacterBlueprintService,
-    CharactersService,
-    CharacterTraitsService,
-    CompaniesService,
-    DeveloperService,
-    DicreollService,
-    DictionaryService,
-    GlobalAdminService,
-    OptionsService,
-    SystemService,
-    UsersService,
-)
 
 __all__ = (
+    # Core
     "APIConfig",
-    "APIError",
-    "AuthenticationError",
-    "AuthorizationError",
-    "BooksService",
-    "CampaignsService",
-    "ChaptersService",
-    "CharacterAutogenService",
-    "CharacterBlueprintService",
-    "CharacterTraitsService",
-    "CharactersService",
-    "CompaniesService",
-    "ConflictError",
-    "DeveloperService",
-    "DicreollService",
-    "DictionaryService",
-    "GlobalAdminService",
-    "NotFoundError",
-    "OptionsService",
-    "RateLimitError",
-    "RequestValidationError",
-    "ServerError",
-    "SystemService",
-    "UsersService",
     "VClient",
-    "ValidationError",
+    # Factory functions
     "books_service",
     "campaigns_service",
     "chapters_service",
@@ -85,8 +45,6 @@ __all__ = (
     "character_traits_service",
     "characters_service",
     "companies_service",
-    "configure_default_client",
-    "default_client",
     "developer_service",
     "dicreolls_service",
     "dictionary_service",

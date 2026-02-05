@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT, TraitModifyCurrency
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    AssignCharacterTraitRequest,
     CharacterTrait,
-    CharacterTraitModifyRequest,
     CharacterTraitValueOptionsResponse,
-    CreateCharacterTraitRequest,
     PaginatedResponse,
+    TraitCreate,
+    _TraitAssign,
+    _TraitModify,
 )
 from vclient.services.base import BaseService
 
@@ -173,7 +173,7 @@ class CharacterTraitsService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            AssignCharacterTraitRequest,
+            _TraitAssign,
             trait_id=trait_id,
             value=value,
         )
@@ -185,42 +185,21 @@ class CharacterTraitsService(BaseService):
 
     async def create(
         self,
-        *,
-        name: str,
-        parent_category_id: str,
-        description: str | None = None,
-        max_value: int = 5,
-        min_value: int = 0,
-        show_when_zero: bool = True,
-        initial_cost: int | None = None,
-        upgrade_cost: int | None = None,
-        value: int | None = None,
+        request: TraitCreate | None = None,
+        /,
+        **kwargs,
     ) -> CharacterTrait:
         """Create a new character trait.
 
         Args:
-            name: The name of the trait.
-            parent_category_id: The ID of the parent category.
-            description: The description of the trait.
-            max_value: The maximum value of the trait.
-            min_value: The minimum value of the trait.
-            show_when_zero: Whether to show the trait when the value is zero.
-            initial_cost: The initial cost of the trait.
-            upgrade_cost: The upgrade cost of the trait.
-            value: The value of the trait.
+            request: A TraitCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for TraitCreate if request is not provided.
+                Required: name (str), parent_category_id (str).
+                Optional: description (str | None), max_value (int), min_value (int),
+                show_when_zero (bool), initial_cost (int | None),
+                upgrade_cost (int | None), value (int | None).
         """
-        body = self._validate_request(
-            CreateCharacterTraitRequest,
-            name=name,
-            description=description,
-            max_value=max_value,
-            min_value=min_value,
-            show_when_zero=show_when_zero,
-            parent_category_id=parent_category_id,
-            initial_cost=initial_cost,
-            upgrade_cost=upgrade_cost,
-            value=value,
-        )
+        body = request if request is not None else self._validate_request(TraitCreate, **kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.CHARACTER_TRAIT_CREATE),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -269,7 +248,7 @@ class CharacterTraitsService(BaseService):
             currency: The currency to use for the modification.
         """
         body = self._validate_request(
-            CharacterTraitModifyRequest,
+            _TraitModify,
             target_value=new_value,
             currency=currency,
         )

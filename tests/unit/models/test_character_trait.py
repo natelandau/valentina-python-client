@@ -3,9 +3,9 @@
 from datetime import UTC, datetime
 
 from vclient.models.character_trait import (
-    AssignCharacterTraitRequest,
     CharacterTrait,
-    CreateCharacterTraitRequest,
+    TraitCreate,
+    _TraitAssign,
 )
 from vclient.models.shared import Trait
 
@@ -113,13 +113,13 @@ class TestCharacterTrait:
         assert character_trait.trait.game_versions == ["V5"]
 
 
-class TestAssignCharacterTraitRequest:
-    """Tests for AssignCharacterTraitRequest model."""
+class TestTraitAssign:
+    """Tests for _TraitAssign model."""
 
     def test_assign_request_required_fields(self) -> None:
-        """Verify AssignCharacterTraitRequest with required fields."""
+        """Verify _TraitAssign with required fields."""
         # When: Creating a request
-        request = AssignCharacterTraitRequest(
+        request = _TraitAssign(
             trait_id="trait123",
             value=3,
         )
@@ -131,7 +131,7 @@ class TestAssignCharacterTraitRequest:
     def test_assign_request_model_dump(self) -> None:
         """Verify model_dump produces correct JSON payload."""
         # Given: An assign request
-        request = AssignCharacterTraitRequest(
+        request = _TraitAssign(
             trait_id="trait456",
             value=5,
         )
@@ -146,9 +146,9 @@ class TestAssignCharacterTraitRequest:
         }
 
     def test_assign_request_zero_value(self) -> None:
-        """Verify AssignCharacterTraitRequest accepts zero value."""
+        """Verify _TraitAssign accepts zero value."""
         # When: Creating a request with value 0
-        request = AssignCharacterTraitRequest(
+        request = _TraitAssign(
             trait_id="trait789",
             value=0,
         )
@@ -157,13 +157,13 @@ class TestAssignCharacterTraitRequest:
         assert request.value == 0
 
 
-class TestCreateCharacterTraitRequest:
-    """Tests for CreateCharacterTraitRequest model."""
+class TestTraitCreate:
+    """Tests for TraitCreate model."""
 
     def test_create_request_required_fields(self) -> None:
-        """Verify CreateCharacterTraitRequest with required fields only."""
+        """Verify TraitCreate with required fields only."""
         # When: Creating a request with required fields
-        request = CreateCharacterTraitRequest(
+        request = TraitCreate(
             name="Custom Skill",
             parent_category_id="cat123",
         )
@@ -180,9 +180,9 @@ class TestCreateCharacterTraitRequest:
         assert request.value is None
 
     def test_create_request_all_fields(self) -> None:
-        """Verify CreateCharacterTraitRequest with all fields."""
+        """Verify TraitCreate with all fields."""
         # When: Creating a request with all fields
-        request = CreateCharacterTraitRequest(
+        request = TraitCreate(
             name="Custom Background",
             parent_category_id="backgrounds_cat",
             description="A custom background trait",
@@ -208,7 +208,7 @@ class TestCreateCharacterTraitRequest:
     def test_create_request_model_dump(self) -> None:
         """Verify model_dump produces correct JSON payload."""
         # Given: A create request with required fields only
-        request = CreateCharacterTraitRequest(
+        request = TraitCreate(
             name="Stealth",
             parent_category_id="skills_cat",
         )
@@ -227,7 +227,7 @@ class TestCreateCharacterTraitRequest:
     def test_create_request_model_dump_with_optionals(self) -> None:
         """Verify model_dump includes optional fields when set."""
         # Given: A create request with optional fields
-        request = CreateCharacterTraitRequest(
+        request = TraitCreate(
             name="Lore",
             parent_category_id="knowledge_cat",
             description="Knowledge of ancient texts",
@@ -247,7 +247,7 @@ class TestCreateCharacterTraitRequest:
     def test_create_request_max_value_validation(self) -> None:
         """Verify max_value has valid range constraint."""
         # When: Creating a request with valid max_value
-        request = CreateCharacterTraitRequest(
+        request = TraitCreate(
             name="Test Trait",
             parent_category_id="cat123",
             max_value=100,
@@ -259,7 +259,7 @@ class TestCreateCharacterTraitRequest:
     def test_create_request_min_value_validation(self) -> None:
         """Verify min_value has valid range constraint."""
         # When: Creating a request with valid min_value
-        request = CreateCharacterTraitRequest(
+        request = TraitCreate(
             name="Test Trait",
             parent_category_id="cat123",
             min_value=0,

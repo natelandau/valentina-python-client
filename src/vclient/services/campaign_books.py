@@ -6,15 +6,15 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    BookCreate,
+    BookUpdate,
     CampaignBook,
-    CreateBookRequest,
-    CreateNoteRequest,
     Note,
+    NoteCreate,
+    NoteUpdate,
     PaginatedResponse,
-    RenumberBookRequest,
     S3Asset,
-    UpdateBookRequest,
-    UpdateNoteRequest,
+    _BookRenumber,
 )
 from vclient.services.base import BaseService
 
@@ -144,15 +144,16 @@ class BooksService(BaseService):
 
     async def create(
         self,
-        name: str,
-        *,
-        description: str | None = None,
+        request: BookCreate | None = None,
+        /,
+        **kwargs,
     ) -> CampaignBook:
         """Create a new campaign book.
 
         Args:
-            name: Book name (3-50 characters).
-            description: Optional book description (minimum 3 characters).
+            request: A BookCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for BookCreate if request is not provided.
+                Accepts: name (str, required), description (str | None).
 
         Returns:
             The newly created CampaignBook object.
@@ -162,11 +163,7 @@ class BooksService(BaseService):
             ValidationError: If the request data is invalid.
             AuthorizationError: If you don't have book management privileges.
         """
-        body = self._validate_request(
-            CreateBookRequest,
-            name=name,
-            description=description,
-        )
+        body = request if request is not None else self._validate_request(BookCreate, **kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.CAMPAIGN_BOOKS),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -176,9 +173,9 @@ class BooksService(BaseService):
     async def update(
         self,
         book_id: str,
-        *,
-        name: str | None = None,
-        description: str | None = None,
+        request: BookUpdate | None = None,
+        /,
+        **kwargs,
     ) -> CampaignBook:
         """Modify a campaign book's properties.
 
@@ -186,8 +183,9 @@ class BooksService(BaseService):
 
         Args:
             book_id: The ID of the book to update.
-            name: New book name (3-50 characters).
-            description: New book description (minimum 3 characters).
+            request: A BookUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for BookUpdate if request is not provided.
+                Accepts: name (str | None), description (str | None).
 
         Returns:
             The updated CampaignBook object.
@@ -198,11 +196,7 @@ class BooksService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            UpdateBookRequest,
-            name=name,
-            description=description,
-        )
+        body = request if request is not None else self._validate_request(BookUpdate, **kwargs)
         response = await self._patch(
             self._format_endpoint(Endpoints.CAMPAIGN_BOOK, book_id=book_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -243,7 +237,7 @@ class BooksService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(RenumberBookRequest, number=number)
+        body = self._validate_request(_BookRenumber, number=number)
         response = await self._put(
             self._format_endpoint(Endpoints.CAMPAIGN_BOOK_NUMBER, book_id=book_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -357,8 +351,9 @@ class BooksService(BaseService):
     async def create_note(
         self,
         book_id: str,
-        title: str,
-        content: str,
+        request: NoteCreate | None = None,
+        /,
+        **kwargs,
     ) -> Note:
         """Create a new note for a book.
 
@@ -366,8 +361,9 @@ class BooksService(BaseService):
 
         Args:
             book_id: The ID of the book to create the note for.
-            title: The note title (3-50 characters).
-            content: The note content (minimum 3 characters, supports markdown).
+            request: A NoteCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for NoteCreate if request is not provided.
+                Accepts: title (str, required), content (str, required).
 
         Returns:
             The newly created Note object.
@@ -378,11 +374,7 @@ class BooksService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            CreateNoteRequest,
-            title=title,
-            content=content,
-        )
+        body = request if request is not None else self._validate_request(NoteCreate, **kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.BOOK_NOTES, book_id=book_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -393,9 +385,9 @@ class BooksService(BaseService):
         self,
         book_id: str,
         note_id: str,
-        *,
-        title: str | None = None,
-        content: str | None = None,
+        request: NoteUpdate | None = None,
+        /,
+        **kwargs,
     ) -> Note:
         """Modify a note's content.
 
@@ -404,8 +396,9 @@ class BooksService(BaseService):
         Args:
             book_id: The ID of the book that owns the note.
             note_id: The ID of the note to update.
-            title: New note title (3-50 characters).
-            content: New note content (minimum 3 characters, supports markdown).
+            request: A NoteUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for NoteUpdate if request is not provided.
+                Accepts: title (str | None), content (str | None).
 
         Returns:
             The updated Note object.
@@ -416,11 +409,7 @@ class BooksService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            UpdateNoteRequest,
-            title=title,
-            content=content,
-        )
+        body = request if request is not None else self._validate_request(NoteUpdate, **kwargs)
         response = await self._patch(
             self._format_endpoint(Endpoints.BOOK_NOTE, book_id=book_id, note_id=note_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
