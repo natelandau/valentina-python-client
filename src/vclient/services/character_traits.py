@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT, TraitModifyCurrency
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    AssignCharacterTraitRequest,
     CharacterTrait,
-    CharacterTraitModifyRequest,
     CharacterTraitValueOptionsResponse,
-    CreateCharacterTraitRequest,
     PaginatedResponse,
+    TraitCreate,
+    _TraitAssign,
+    _TraitModify,
 )
 from vclient.services.base import BaseService
 
@@ -173,7 +173,7 @@ class CharacterTraitsService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            AssignCharacterTraitRequest,
+            _TraitAssign,
             trait_id=trait_id,
             value=value,
         )
@@ -210,7 +210,7 @@ class CharacterTraitsService(BaseService):
             value: The value of the trait.
         """
         body = self._validate_request(
-            CreateCharacterTraitRequest,
+            TraitCreate,
             name=name,
             description=description,
             max_value=max_value,
@@ -269,7 +269,7 @@ class CharacterTraitsService(BaseService):
             currency: The currency to use for the modification.
         """
         body = self._validate_request(
-            CharacterTraitModifyRequest,
+            _TraitModify,
             target_value=new_value,
             currency=currency,
         )

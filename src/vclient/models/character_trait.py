@@ -18,14 +18,14 @@ class CharacterTrait(BaseModel):
     trait: Trait
 
 
-class AssignCharacterTraitRequest(BaseModel):
-    """Request model for assigning a character trait."""
+class _TraitAssign(BaseModel):
+    """Internal request model for assigning a character trait."""
 
     trait_id: str
     value: int
 
 
-class CreateCharacterTraitRequest(BaseModel):
+class TraitCreate(BaseModel):
     """Request model for creating a character trait.
 
     Used to construct the JSON payload for character trait creation.
@@ -42,8 +42,8 @@ class CreateCharacterTraitRequest(BaseModel):
     value: int | None = None
 
 
-class CharacterTraitModifyRequest(BaseModel):
-    """Request for PUT /value endpoint."""
+class _TraitModify(BaseModel):
+    """Internal request for PUT /value endpoint."""
 
     target_value: int
     currency: TraitModifyCurrency
@@ -69,3 +69,13 @@ class CharacterTraitValueOptionsResponse(BaseModel):
     xp_current: int
     starting_points_current: int
     options: dict[str, CharacterTraitValueOption]
+
+
+__all__ = [
+    "CharacterTrait",
+    "CharacterTraitValueOption",
+    "CharacterTraitValueOptionsResponse",
+    "TraitCreate",
+    "_TraitAssign",
+    "_TraitModify",
+]

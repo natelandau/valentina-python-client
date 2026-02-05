@@ -13,7 +13,6 @@ from vclient.constants import (
 )
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    AssignCharacterTraitRequest,
     Character,
     CharacterCreate,
     CharacterUpdate,
@@ -37,6 +36,7 @@ from vclient.models import (
     WerewolfAttributesUpdate,
     WerewolfGift,
     WerewolfRite,
+    _TraitAssign,
 )
 from vclient.services.base import BaseService
 
@@ -250,7 +250,7 @@ class CharactersService(BaseService):
         name_nick: str | None = None,
         nature: str | None = None,
         user_player_id: str | None = None,
-        traits: list[AssignCharacterTraitRequest] | None = None,
+        traits: list[_TraitAssign] | None = None,
         vampire_attributes: VampireAttributesCreate | None = None,
         werewolf_attributes: WerewolfAttributesCreate | None = None,
         hunter_attributes: HunterAttributesCreate | None = None,

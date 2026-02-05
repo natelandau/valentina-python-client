@@ -47,12 +47,17 @@ from .character_blueprint import (
     WerewolfTribe,
 )
 from .character_trait import (
-    AssignCharacterTraitRequest,
     CharacterTrait,
-    CharacterTraitModifyRequest,
     CharacterTraitValueOptionsResponse,
-    CreateCharacterTraitRequest,
+    TraitCreate,
+    _TraitAssign,
+    _TraitModify,
 )
+
+# Backwards compatibility aliases for character traits
+AssignCharacterTraitRequest = _TraitAssign
+CharacterTraitModifyRequest = _TraitModify
+CreateCharacterTraitRequest = TraitCreate
 from .characters import (
     Character,
     CharacterCreate,
@@ -241,6 +246,7 @@ __all__ = [
     "SystemHealth",
     "Trait",
     "TraitCategory",
+    "TraitCreate",
     "UpdateBookRequest",
     "UpdateCampaignRequest",
     "UpdateChapterRequest",
