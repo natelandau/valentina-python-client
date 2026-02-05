@@ -2,10 +2,6 @@
 
 Async Python client for the Valentina API. Python 3.13+ required.
 
-## SPRINT.md
-
-**Always check SPRINT.md at the start of a session.** This file tracks the current sprint backlog, in-progress work, and prioritized tasks. Update it when starting or completing tasks.
-
 ## Commands
 
 ```bash
@@ -62,6 +58,28 @@ Services extend `BaseService` and provide:
 -   RESPX mocking is used for integration tests. No HTTP requests.
 -   Integration tests: service methods with respx mocking
 -   Shared fixtures in `tests/shared_response_fixtures.py`
+
+## Documentation
+
+**IMPORTANT:** The public-facing documentation for this client library is maintained in a separate repository.
+
+-   **Location:** `../valentina-noir/docs/python-api-client/`
+-   **Published URL:** https://docs.valentina-noir.com/python-api-client/
+
+When making changes to this client that affect the public API, you MUST review and update the corresponding documentation:
+
+| Change Type                    | Documentation to Update                  |
+| ------------------------------ | ---------------------------------------- |
+| New service                    | Create new service doc                   |
+| New method on existing service | Update the relevant service doc          |
+| Changed method signature       | Update the relevant service doc          |
+| New/changed model              | Update `models.md`                       |
+| New/changed exception          | Update `index.md` Error Handling section |
+| Configuration option changes   | Update `index.md` Configuration section  |
+
+Documentation files follow the pattern `{service_name}.md` (e.g., `campaigns.md`, `users.md`).
+
+The documentation is managed by zensical and navigation is managed in `../valentina-noir/zensical.toml.`.
 
 <!-- agent-glue-rules -->
 
