@@ -135,15 +135,22 @@ from .shared import (
 from .system import SystemHealth
 from .users import (
     CampaignExperience,
-    CreateQuickrollRequest,
-    CreateUserRequest,
     DiscordProfile,
-    ExperienceAddRemoveRequest,
     Quickroll,
-    UpdateQuickrollRequest,
-    UpdateUserRequest,
+    QuickrollCreate,
+    QuickrollUpdate,
     User,
+    UserCreate,
+    UserUpdate,
+    _ExperienceAddRemove,
 )
+
+# Backwards compatibility aliases for users
+CreateQuickrollRequest = QuickrollCreate
+CreateUserRequest = UserCreate
+ExperienceAddRemoveRequest = _ExperienceAddRemove
+UpdateQuickrollRequest = QuickrollUpdate
+UpdateUserRequest = UserUpdate
 
 __all__ = [
     "AssignCharacterTraitRequest",
@@ -218,6 +225,8 @@ __all__ = [
     "PaginatedResponse",
     "Perk",
     "Quickroll",
+    "QuickrollCreate",
+    "QuickrollUpdate",
     "RenumberBookRequest",
     "RenumberChapterRequest",
     "RollStatistics",
@@ -239,6 +248,8 @@ __all__ = [
     "UpdateQuickrollRequest",
     "UpdateUserRequest",
     "User",
+    "UserCreate",
+    "UserUpdate",
     "VampireAttributes",
     "VampireAttributesCreate",
     "VampireAttributesUpdate",

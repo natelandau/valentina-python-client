@@ -8,19 +8,19 @@ from vclient.endpoints import Endpoints
 from vclient.models import (
     CampaignExperience,
     CreateNoteRequest,
-    CreateQuickrollRequest,
-    CreateUserRequest,
     DiscordProfile,
-    ExperienceAddRemoveRequest,
     Note,
     PaginatedResponse,
     Quickroll,
+    QuickrollCreate,
+    QuickrollUpdate,
     RollStatistics,
     S3Asset,
     UpdateNoteRequest,
-    UpdateQuickrollRequest,
-    UpdateUserRequest,
     User,
+    UserCreate,
+    UserUpdate,
+    _ExperienceAddRemove,
 )
 from vclient.services.base import BaseService
 
@@ -194,7 +194,7 @@ class UsersService(BaseService):
             AuthorizationError: If you don't have admin-level access to the company.
         """
         body = self._validate_request(
-            CreateUserRequest,
+            UserCreate,
             name=name,
             email=email,
             role=role,
@@ -239,7 +239,7 @@ class UsersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateUserRequest,
+            UserUpdate,
             name=name,
             email=email,
             role=role,
@@ -464,7 +464,7 @@ class UsersService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
         """
         body = self._validate_request(
-            ExperienceAddRemoveRequest,
+            _ExperienceAddRemove,
             amount=amount,
             user_id=user_id,
             campaign_id=campaign_id,
@@ -500,7 +500,7 @@ class UsersService(BaseService):
             ValidationError: If the user has insufficient XP.
         """
         body = self._validate_request(
-            ExperienceAddRemoveRequest,
+            _ExperienceAddRemove,
             amount=amount,
             user_id=user_id,
             campaign_id=campaign_id,
@@ -536,7 +536,7 @@ class UsersService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
         """
         body = self._validate_request(
-            ExperienceAddRemoveRequest,
+            _ExperienceAddRemove,
             amount=amount,
             user_id=user_id,
             campaign_id=campaign_id,
@@ -883,7 +883,7 @@ class UsersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CreateQuickrollRequest,
+            QuickrollCreate,
             name=name,
             description=description,
             trait_ids=trait_ids if trait_ids is not None else [],
@@ -924,7 +924,7 @@ class UsersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateQuickrollRequest,
+            QuickrollUpdate,
             name=name,
             description=description,
             trait_ids=trait_ids,

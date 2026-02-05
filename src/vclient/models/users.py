@@ -70,7 +70,7 @@ class User(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class CreateUserRequest(BaseModel):
+class UserCreate(BaseModel):
     """Request body for creating a new user.
 
     Used to construct the JSON payload for user creation.
@@ -83,7 +83,7 @@ class CreateUserRequest(BaseModel):
     requesting_user_id: str
 
 
-class UpdateUserRequest(BaseModel):
+class UserUpdate(BaseModel):
     """Request body for updating a user.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -117,7 +117,7 @@ class Quickroll(BaseModel):
     trait_ids: list[str] = Field(default_factory=list)
 
 
-class CreateQuickrollRequest(BaseModel):
+class QuickrollCreate(BaseModel):
     """Request body for creating a new quickroll.
 
     Used to construct the JSON payload for quickroll creation.
@@ -128,7 +128,7 @@ class CreateQuickrollRequest(BaseModel):
     trait_ids: list[str] = Field(default_factory=list)
 
 
-class UpdateQuickrollRequest(BaseModel):
+class QuickrollUpdate(BaseModel):
     """Request body for updating a quickroll.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -144,8 +144,8 @@ class UpdateQuickrollRequest(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class ExperienceAddRemoveRequest(BaseModel):
-    """Request body for adding or removing experience points.
+class _ExperienceAddRemove(BaseModel):
+    """Internal request body for adding or removing experience points.
 
     Used to construct the JSON payload for XP/CP modifications.
     """
@@ -153,3 +153,16 @@ class ExperienceAddRemoveRequest(BaseModel):
     amount: int
     user_id: str
     campaign_id: str
+
+
+__all__ = [
+    "CampaignExperience",
+    "DiscordProfile",
+    "Quickroll",
+    "QuickrollCreate",
+    "QuickrollUpdate",
+    "User",
+    "UserCreate",
+    "UserUpdate",
+    "_ExperienceAddRemove",
+]
