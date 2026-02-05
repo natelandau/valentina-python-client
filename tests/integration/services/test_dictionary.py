@@ -264,7 +264,7 @@ class TestDictionaryServiceUpdate:
 
         # When: Updating a dictionary term
         result = await vclient.dictionary("company123").update(
-            term_id=term_id,
+            term_id,  # positional argument
             term="Updated Term",
             definition="An updated definition",
             link="https://example.com",

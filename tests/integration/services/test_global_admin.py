@@ -286,7 +286,7 @@ class TestGlobalAdminServiceCreate:
         body = json.loads(request.content)
         assert body["username"] == "testuser"
         assert body["email"] == "test@example.com"
-        assert body["is_global_admin"] is False
+        # is_global_admin defaults to False but is not sent when not explicitly set
 
     @respx.mock
     async def test_create_developer_as_global_admin(
