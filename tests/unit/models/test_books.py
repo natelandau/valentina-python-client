@@ -4,10 +4,10 @@ import pytest
 from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models.books import (
+    BookCreate,
+    BookUpdate,
     CampaignBook,
-    CreateBookRequest,
-    RenumberBookRequest,
-    UpdateBookRequest,
+    _BookRenumber,
 )
 
 
@@ -49,12 +49,12 @@ class TestCampaignBook:
         assert book.asset_ids == []
 
 
-class TestCreateBookRequest:
-    """Tests for CreateBookRequest model."""
+class TestBookCreate:
+    """Tests for BookCreate model."""
 
     def test_valid_request(self):
         """Verify valid request creation."""
-        request = CreateBookRequest(
+        request = BookCreate(
             name="Test Book",
             description="A test book",
         )
@@ -64,7 +64,7 @@ class TestCreateBookRequest:
 
     def test_minimal_request(self):
         """Verify minimal valid request with defaults."""
-        request = CreateBookRequest(name="Test")
+        request = BookCreate(name="Test")
 
         assert request.name == "Test"
         assert request.description is None
@@ -72,39 +72,39 @@ class TestCreateBookRequest:
     def test_name_min_length(self):
         """Verify name minimum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateBookRequest(name="ab")
+            BookCreate(name="ab")
 
     def test_name_max_length(self):
         """Verify name maximum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateBookRequest(name="a" * 51)
+            BookCreate(name="a" * 51)
 
     def test_description_min_length(self):
         """Verify description minimum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateBookRequest(name="Valid", description="ab")
+            BookCreate(name="Valid", description="ab")
 
 
-class TestUpdateBookRequest:
-    """Tests for UpdateBookRequest model."""
+class TestBookUpdate:
+    """Tests for BookUpdate model."""
 
     def test_all_fields_optional(self):
         """Verify all fields default to None."""
-        request = UpdateBookRequest()
+        request = BookUpdate()
 
         assert request.name is None
         assert request.description is None
 
     def test_partial_update(self):
         """Verify partial update works."""
-        request = UpdateBookRequest(name="New Name")
+        request = BookUpdate(name="New Name")
 
         assert request.name == "New Name"
         assert request.description is None
 
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""
-        request = UpdateBookRequest(name="New Name")
+        request = BookUpdate(name="New Name")
 
         data = request.model_dump(exclude_none=True)
 
@@ -113,34 +113,34 @@ class TestUpdateBookRequest:
     def test_name_validation_when_provided(self):
         """Verify name validation still applies when value is provided."""
         with pytest.raises(PydanticValidationError):
-            UpdateBookRequest(name="ab")
+            BookUpdate(name="ab")
 
     def test_description_validation_when_provided(self):
         """Verify description validation still applies when value is provided."""
         with pytest.raises(PydanticValidationError):
-            UpdateBookRequest(description="ab")
+            BookUpdate(description="ab")
 
 
-class TestRenumberBookRequest:
-    """Tests for RenumberBookRequest model."""
+class TestBookRenumber:
+    """Tests for _BookRenumber model."""
 
     def test_valid_request(self):
         """Verify valid request creation."""
-        request = RenumberBookRequest(number=5)
+        request = _BookRenumber(number=5)
 
         assert request.number == 5
 
     def test_number_min_value(self):
         """Verify number minimum value validation."""
         with pytest.raises(PydanticValidationError):
-            RenumberBookRequest(number=0)
+            _BookRenumber(number=0)
 
     def test_number_negative_value(self):
         """Verify negative number validation."""
         with pytest.raises(PydanticValidationError):
-            RenumberBookRequest(number=-1)
+            _BookRenumber(number=-1)
 
     def test_number_required(self):
         """Verify number is required."""
         with pytest.raises(PydanticValidationError):
-            RenumberBookRequest()
+            _BookRenumber()

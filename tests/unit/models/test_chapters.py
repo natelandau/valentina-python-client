@@ -5,9 +5,9 @@ from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models.chapters import (
     CampaignChapter,
-    CreateChapterRequest,
-    RenumberChapterRequest,
-    UpdateChapterRequest,
+    ChapterCreate,
+    ChapterUpdate,
+    _ChapterRenumber,
 )
 
 
@@ -60,12 +60,12 @@ class TestCampaignChapter:
             )
 
 
-class TestCreateChapterRequest:
-    """Tests for CreateChapterRequest model."""
+class TestChapterCreate:
+    """Tests for ChapterCreate model."""
 
     def test_valid_request(self):
         """Verify valid request creation."""
-        request = CreateChapterRequest(
+        request = ChapterCreate(
             name="Test Chapter",
             description="A test chapter",
         )
@@ -75,7 +75,7 @@ class TestCreateChapterRequest:
 
     def test_minimal_request(self):
         """Verify minimal valid request with defaults."""
-        request = CreateChapterRequest(name="Test")
+        request = ChapterCreate(name="Test")
 
         assert request.name == "Test"
         assert request.description is None
@@ -83,29 +83,29 @@ class TestCreateChapterRequest:
     def test_name_required(self):
         """Verify name is required."""
         with pytest.raises(PydanticValidationError):
-            CreateChapterRequest()
+            ChapterCreate()
 
 
-class TestUpdateChapterRequest:
-    """Tests for UpdateChapterRequest model."""
+class TestChapterUpdate:
+    """Tests for ChapterUpdate model."""
 
     def test_all_fields_optional(self):
         """Verify all fields default to None."""
-        request = UpdateChapterRequest()
+        request = ChapterUpdate()
 
         assert request.name is None
         assert request.description is None
 
     def test_partial_update(self):
         """Verify partial update works."""
-        request = UpdateChapterRequest(name="New Name")
+        request = ChapterUpdate(name="New Name")
 
         assert request.name == "New Name"
         assert request.description is None
 
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""
-        request = UpdateChapterRequest(name="New Name")
+        request = ChapterUpdate(name="New Name")
 
         data = request.model_dump(exclude_none=True)
 
@@ -113,32 +113,32 @@ class TestUpdateChapterRequest:
 
     def test_full_update(self):
         """Verify full update with all fields."""
-        request = UpdateChapterRequest(name="New Name", description="New Description")
+        request = ChapterUpdate(name="New Name", description="New Description")
 
         assert request.name == "New Name"
         assert request.description == "New Description"
 
 
-class TestRenumberChapterRequest:
-    """Tests for RenumberChapterRequest model."""
+class TestChapterRenumber:
+    """Tests for _ChapterRenumber model."""
 
     def test_valid_request(self):
         """Verify valid request creation."""
-        request = RenumberChapterRequest(number=5)
+        request = _ChapterRenumber(number=5)
 
         assert request.number == 5
 
     def test_number_min_value(self):
         """Verify number minimum value validation."""
         with pytest.raises(PydanticValidationError):
-            RenumberChapterRequest(number=0)
+            _ChapterRenumber(number=0)
 
     def test_number_negative_value(self):
         """Verify negative number validation."""
         with pytest.raises(PydanticValidationError):
-            RenumberChapterRequest(number=-1)
+            _ChapterRenumber(number=-1)
 
     def test_number_required(self):
         """Verify number is required."""
         with pytest.raises(PydanticValidationError):
-            RenumberChapterRequest()
+            _ChapterRenumber()

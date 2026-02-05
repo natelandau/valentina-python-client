@@ -5,11 +5,11 @@ from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models.companies import (
     Company,
+    CompanyCreate,
     CompanyPermissions,
     CompanySettings,
-    CreateCompanyRequest,
-    GrantAccessRequest,
-    UpdateCompanyRequest,
+    CompanyUpdate,
+    _GrantAccess,
 )
 
 
@@ -220,13 +220,13 @@ class TestCompanyPermissions:
             CompanyPermissions(company_id="company123", permission="INVALID")
 
 
-class TestCreateCompanyRequest:
-    """Tests for CreateCompanyRequest model."""
+class TestCompanyCreate:
+    """Tests for CompanyCreate model."""
 
     def test_minimal_request(self):
         """Verify creating request with minimal fields."""
         # When: Creating request with required fields only
-        request = CreateCompanyRequest(name="Test", email="test@example.com")
+        request = CompanyCreate(name="Test", email="test@example.com")
 
         # Then: Request is created with correct values
         assert request.name == "Test"
@@ -240,7 +240,7 @@ class TestCreateCompanyRequest:
         settings = CompanySettings(character_autogen_xp_cost=20)
 
         # When: Creating request with all fields
-        request = CreateCompanyRequest(
+        request = CompanyCreate(
             name="Full Company",
             email="full@example.com",
             description="A complete company",
@@ -257,7 +257,7 @@ class TestCreateCompanyRequest:
     def test_model_dump_excludes_unset(self):
         """Verify model_dump with exclude_unset excludes unset fields."""
         # Given: Request with only required fields
-        request = CreateCompanyRequest(name="Test", email="test@example.com")
+        request = CompanyCreate(name="Test", email="test@example.com")
 
         # When: Dumping with exclude_none and exclude_unset
         data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
@@ -272,7 +272,7 @@ class TestCreateCompanyRequest:
             character_autogen_xp_cost=15,
             permission_manage_campaign="STORYTELLER",
         )
-        request = CreateCompanyRequest(
+        request = CompanyCreate(
             name="Test",
             email="test@example.com",
             settings=settings,
@@ -289,16 +289,16 @@ class TestCreateCompanyRequest:
         """Verify name validation is enforced."""
         # When/Then: Creating request with invalid name raises error
         with pytest.raises(PydanticValidationError):
-            CreateCompanyRequest(name="AB", email="test@example.com")
+            CompanyCreate(name="AB", email="test@example.com")
 
 
-class TestUpdateCompanyRequest:
-    """Tests for UpdateCompanyRequest model."""
+class TestCompanyUpdate:
+    """Tests for CompanyUpdate model."""
 
     def test_empty_request(self):
         """Verify creating empty update request."""
         # When: Creating request with no fields
-        request = UpdateCompanyRequest()
+        request = CompanyUpdate()
 
         # Then: All fields are None
         assert request.name is None
@@ -309,7 +309,7 @@ class TestUpdateCompanyRequest:
     def test_partial_update(self):
         """Verify creating request with only some fields."""
         # When: Creating request with only name
-        request = UpdateCompanyRequest(name="Updated Name")
+        request = CompanyUpdate(name="Updated Name")
 
         # Then: Only name is set
         assert request.name == "Updated Name"
@@ -318,7 +318,7 @@ class TestUpdateCompanyRequest:
     def test_model_dump_excludes_unset(self):
         """Verify model_dump with exclude_unset only includes set fields."""
         # Given: Request with only name set
-        request = UpdateCompanyRequest(name="Updated Name")
+        request = CompanyUpdate(name="Updated Name")
 
         # When: Dumping with exclude_none and exclude_unset
         data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
@@ -327,13 +327,13 @@ class TestUpdateCompanyRequest:
         assert data == {"name": "Updated Name"}
 
 
-class TestGrantAccessRequest:
-    """Tests for GrantAccessRequest model."""
+class TestGrantAccess:
+    """Tests for _GrantAccess model."""
 
     def test_create_request(self):
         """Verify creating grant access request."""
         # When: Creating request
-        request = GrantAccessRequest(
+        request = _GrantAccess(
             developer_id="dev123",
             permission="ADMIN",
         )
@@ -345,7 +345,7 @@ class TestGrantAccessRequest:
     def test_model_dump_serializes_correctly(self):
         """Verify model_dump serializes permission to string."""
         # Given: Request with permission
-        request = GrantAccessRequest(
+        request = _GrantAccess(
             developer_id="dev123",
             permission="OWNER",
         )
@@ -360,4 +360,4 @@ class TestGrantAccessRequest:
         """Verify invalid permission values are rejected by Pydantic."""
         # When/Then: Creating request with invalid permission raises error
         with pytest.raises(PydanticValidationError):
-            GrantAccessRequest(developer_id="dev123", permission="INVALID")
+            _GrantAccess(developer_id="dev123", permission="INVALID")

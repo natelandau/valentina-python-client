@@ -5,8 +5,8 @@ from datetime import UTC, datetime
 from vclient.models.developers import (
     MeDeveloper,
     MeDeveloperCompanyPermission,
+    MeDeveloperUpdate,
     MeDeveloperWithApiKey,
-    UpdateMeDeveloperRequest,
 )
 
 
@@ -157,13 +157,13 @@ class TestMeDeveloperWithApiKey:
         assert developer.api_key == "vapi_abc123xyz"  # gitleaks:allow
 
 
-class TestUpdateMeDeveloperRequest:
-    """Tests for UpdateMeDeveloperRequest model."""
+class TestMeDeveloperUpdate:
+    """Tests for MeDeveloperUpdate model."""
 
     def test_all_fields_optional(self):
         """Verify all fields are optional."""
         # When: Creating with no fields
-        request = UpdateMeDeveloperRequest()
+        request = MeDeveloperUpdate()
 
         # Then: All fields are None
         assert request.username is None
@@ -172,7 +172,7 @@ class TestUpdateMeDeveloperRequest:
     def test_partial_update(self):
         """Verify partial update with some fields."""
         # When: Creating with only username
-        request = UpdateMeDeveloperRequest(username="newusername")
+        request = MeDeveloperUpdate(username="newusername")
 
         # Then: Only username is set
         assert request.username == "newusername"
@@ -181,7 +181,7 @@ class TestUpdateMeDeveloperRequest:
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""
         # Given: Request with only email
-        request = UpdateMeDeveloperRequest(email="new@example.com")
+        request = MeDeveloperUpdate(email="new@example.com")
 
         # When: Dumping with exclude_none
         data = request.model_dump(exclude_none=True, mode="json")
@@ -192,7 +192,7 @@ class TestUpdateMeDeveloperRequest:
     def test_model_dump_full_update(self):
         """Verify model_dump includes all fields when set."""
         # Given: Request with all fields
-        request = UpdateMeDeveloperRequest(
+        request = MeDeveloperUpdate(
             username="newuser",
             email="new@example.com",
         )

@@ -5,8 +5,8 @@ from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models.campaigns import (
     Campaign,
-    CreateCampaignRequest,
-    UpdateCampaignRequest,
+    CampaignCreate,
+    CampaignUpdate,
 )
 
 
@@ -51,12 +51,12 @@ class TestCampaign:
         assert campaign.danger == 0
 
 
-class TestCreateCampaignRequest:
-    """Tests for CreateCampaignRequest model."""
+class TestCampaignCreate:
+    """Tests for CampaignCreate model."""
 
     def test_valid_request(self):
         """Verify valid request creation."""
-        request = CreateCampaignRequest(
+        request = CampaignCreate(
             name="Test Campaign",
             description="A test campaign",
             desperation=2,
@@ -70,7 +70,7 @@ class TestCreateCampaignRequest:
 
     def test_minimal_request(self):
         """Verify minimal valid request with defaults."""
-        request = CreateCampaignRequest(name="Test")
+        request = CampaignCreate(name="Test")
 
         assert request.name == "Test"
         assert request.description is None
@@ -80,45 +80,45 @@ class TestCreateCampaignRequest:
     def test_name_min_length(self):
         """Verify name minimum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateCampaignRequest(name="ab")
+            CampaignCreate(name="ab")
 
     def test_name_max_length(self):
         """Verify name maximum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateCampaignRequest(name="a" * 51)
+            CampaignCreate(name="a" * 51)
 
     def test_description_min_length(self):
         """Verify description minimum length validation."""
         with pytest.raises(PydanticValidationError):
-            CreateCampaignRequest(name="Valid", description="ab")
+            CampaignCreate(name="Valid", description="ab")
 
     def test_desperation_max_value(self):
         """Verify desperation maximum value validation."""
         with pytest.raises(PydanticValidationError):
-            CreateCampaignRequest(name="Valid", desperation=6)
+            CampaignCreate(name="Valid", desperation=6)
 
     def test_desperation_min_value(self):
         """Verify desperation minimum value validation."""
         with pytest.raises(PydanticValidationError):
-            CreateCampaignRequest(name="Valid", desperation=-1)
+            CampaignCreate(name="Valid", desperation=-1)
 
     def test_danger_max_value(self):
         """Verify danger maximum value validation."""
         with pytest.raises(PydanticValidationError):
-            CreateCampaignRequest(name="Valid", danger=6)
+            CampaignCreate(name="Valid", danger=6)
 
     def test_danger_min_value(self):
         """Verify danger minimum value validation."""
         with pytest.raises(PydanticValidationError):
-            CreateCampaignRequest(name="Valid", danger=-1)
+            CampaignCreate(name="Valid", danger=-1)
 
 
-class TestUpdateCampaignRequest:
-    """Tests for UpdateCampaignRequest model."""
+class TestCampaignUpdate:
+    """Tests for CampaignUpdate model."""
 
     def test_all_fields_optional(self):
         """Verify all fields default to None."""
-        request = UpdateCampaignRequest()
+        request = CampaignUpdate()
 
         assert request.name is None
         assert request.description is None
@@ -127,7 +127,7 @@ class TestUpdateCampaignRequest:
 
     def test_partial_update(self):
         """Verify partial update works."""
-        request = UpdateCampaignRequest(name="New Name", desperation=3)
+        request = CampaignUpdate(name="New Name", desperation=3)
 
         assert request.name == "New Name"
         assert request.description is None
@@ -136,7 +136,7 @@ class TestUpdateCampaignRequest:
 
     def test_model_dump_excludes_none(self):
         """Verify model_dump with exclude_none works correctly."""
-        request = UpdateCampaignRequest(name="New Name", danger=4)
+        request = CampaignUpdate(name="New Name", danger=4)
 
         data = request.model_dump(exclude_none=True)
 
@@ -145,14 +145,14 @@ class TestUpdateCampaignRequest:
     def test_name_validation_when_provided(self):
         """Verify name validation still applies when value is provided."""
         with pytest.raises(PydanticValidationError):
-            UpdateCampaignRequest(name="ab")
+            CampaignUpdate(name="ab")
 
     def test_desperation_validation_when_provided(self):
         """Verify desperation validation still applies when value is provided."""
         with pytest.raises(PydanticValidationError):
-            UpdateCampaignRequest(desperation=6)
+            CampaignUpdate(desperation=6)
 
     def test_danger_validation_when_provided(self):
         """Verify danger validation still applies when value is provided."""
         with pytest.raises(PydanticValidationError):
-            UpdateCampaignRequest(danger=6)
+            CampaignUpdate(danger=6)
