@@ -69,7 +69,7 @@ class NewCompanyResponse(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class CreateCompanyRequest(BaseModel):
+class CompanyCreate(BaseModel):
     """Request body for creating a new company.
 
     Used to construct the JSON payload for company creation.
@@ -81,7 +81,7 @@ class CreateCompanyRequest(BaseModel):
     settings: CompanySettings | None = None
 
 
-class UpdateCompanyRequest(BaseModel):
+class CompanyUpdate(BaseModel):
     """Request body for updating a company.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -93,8 +93,19 @@ class UpdateCompanyRequest(BaseModel):
     settings: CompanySettings | None = None
 
 
-class GrantAccessRequest(BaseModel):
-    """Request body for granting developer access to a company."""
+class _GrantAccess(BaseModel):
+    """Internal request body for granting developer access to a company."""
 
     developer_id: str
     permission: PermissionLevel
+
+
+__all__ = [
+    "Company",
+    "CompanyCreate",
+    "CompanyPermissions",
+    "CompanySettings",
+    "CompanyUpdate",
+    "NewCompanyResponse",
+    "_GrantAccess",
+]

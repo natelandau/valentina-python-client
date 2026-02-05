@@ -8,13 +8,13 @@ from vclient.constants import DEFAULT_PAGE_LIMIT, PermissionLevel
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Company,
+    CompanyCreate,
     CompanyPermissions,
     CompanySettings,
-    CreateCompanyRequest,
-    GrantAccessRequest,
+    CompanyUpdate,
     NewCompanyResponse,
     PaginatedResponse,
-    UpdateCompanyRequest,
+    _GrantAccess,
 )
 from vclient.services.base import BaseService
 
@@ -133,7 +133,7 @@ class CompaniesService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CreateCompanyRequest,
+            CompanyCreate,
             name=name,
             email=email,
             description=description,
@@ -175,7 +175,7 @@ class CompaniesService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateCompanyRequest,
+            CompanyUpdate,
             name=name,
             email=email,
             description=description,
@@ -227,7 +227,7 @@ class CompaniesService(BaseService):
             ValidationError: If trying to remove the last owner.
         """
         body = self._validate_request(
-            GrantAccessRequest,
+            _GrantAccess,
             developer_id=developer_id,
             permission=permission,
         )
