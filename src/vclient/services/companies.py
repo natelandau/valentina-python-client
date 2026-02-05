@@ -107,11 +107,9 @@ class CompaniesService(BaseService):
 
     async def create(
         self,
-        name: str,
-        email: str,
-        *,
-        description: str | None = None,
-        settings: CompanySettings | None = None,
+        request: CompanyCreate | None = None,
+        /,
+        **kwargs,
     ) -> NewCompanyResponse:
         """Create a new company in the system.
 
@@ -120,10 +118,10 @@ class CompaniesService(BaseService):
         other developers.
 
         Args:
-            name: Company name (3-50 characters).
-            email: Company contact email.
-            description: Optional company description (min 3 characters).
-            settings: Optional company settings configuration.
+            request: A CompanyCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for CompanyCreate if request is not provided.
+                Accepts: name (str, required), email (str, required),
+                description (str | None), settings (CompanySettings | None).
 
         Returns:
             The newly created NewCompanyResponse object containing the company and admin user.
@@ -132,13 +130,7 @@ class CompaniesService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            CompanyCreate,
-            name=name,
-            email=email,
-            description=description,
-            settings=settings,
-        )
+        body = request if request is not None else self._validate_request(CompanyCreate, **kwargs)
         response = await self._post(
             Endpoints.COMPANIES,
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -148,11 +140,9 @@ class CompaniesService(BaseService):
     async def update(
         self,
         company_id: str,
-        *,
-        name: str | None = None,
-        email: str | None = None,
-        description: str | None = None,
-        settings: CompanySettings | None = None,
+        request: CompanyUpdate | None = None,
+        /,
+        **kwargs,
     ) -> Company:
         """Modify a company's properties.
 
@@ -160,10 +150,10 @@ class CompaniesService(BaseService):
 
         Args:
             company_id: The ID of the company to update.
-            name: New company name (3-50 characters).
-            email: New company contact email.
-            description: New company description (min 3 characters).
-            settings: New company settings configuration.
+            request: A CompanyUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for CompanyUpdate if request is not provided.
+                Accepts: name (str | None), email (str | None),
+                description (str | None), settings (CompanySettings | None).
 
         Returns:
             The updated Company object.
@@ -174,13 +164,7 @@ class CompaniesService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            CompanyUpdate,
-            name=name,
-            email=email,
-            description=description,
-            settings=settings,
-        )
+        body = request if request is not None else self._validate_request(CompanyUpdate, **kwargs)
         response = await self._patch(
             Endpoints.COMPANY.format(company_id=company_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),

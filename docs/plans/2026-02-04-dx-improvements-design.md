@@ -120,6 +120,7 @@ vclient/models/
 #### Internal Model Handling
 
 Internal models stay in their domain files but are:
+
 1. Prefixed with `_` (e.g., `_RenumberChapterRequest`)
 2. Excluded from `__all__`
 
@@ -136,10 +137,11 @@ __all__ = ["Chapter", "ChapterCreate", "ChapterUpdate"]
 ```
 
 This approach:
-- Keeps related models together in one file
-- Uses standard Python conventions (`__all__` + `_` prefix)
-- Modern IDEs respect `__all__` for autocomplete
-- Developers who explicitly import `_`-prefixed models are intentionally reaching for internals
+
+-   Keeps related models together in one file
+-   Uses standard Python conventions (`__all__` + `_` prefix)
+-   Modern IDEs respect `__all__` for autocomplete
+-   Developers who explicitly import `_`-prefixed models are intentionally reaching for internals
 
 #### Usage Patterns
 
@@ -257,62 +259,62 @@ These are importable but not in top-level `__all__`.
 
 ### companies.py
 
-| Current                | New                 |
-| ---------------------- | ------------------- |
-| `Company`              | `Company`           |
-| `CreateCompanyRequest` | `CompanyCreate`     |
-| `UpdateCompanyRequest` | `CompanyUpdate`     |
-| `CompanyPermissions`   | `Permissions`       |
-| `CompanySettings`      | `Settings`          |
-| `NewCompanyResponse`   | `CompanyWithApiKey` |
+| Current                | New                   |
+| ---------------------- | --------------------- |
+| `Company`              | `Company`             |
+| `CreateCompanyRequest` | `CompanyCreate`       |
+| `UpdateCompanyRequest` | `CompanyUpdate`       |
+| `CompanyPermissions`   | `Permissions`         |
+| `CompanySettings`      | `Settings`            |
+| `NewCompanyResponse`   | `CompanyWithApiKey`   |
 | `GrantAccessRequest`   | `_GrantAccessRequest` |
 
 ### users.py
 
-| Current                      | New                  |
-| ---------------------------- | -------------------- |
-| `User`                       | `User`               |
-| `CreateUserRequest`          | `UserCreate`         |
-| `UpdateUserRequest`          | `UserUpdate`         |
-| `DiscordProfile`             | `DiscordProfile`     |
-| `CampaignExperience`         | `CampaignExperience` |
-| `Quickroll`                  | `Quickroll`          |
-| `CreateQuickrollRequest`     | `QuickrollCreate`    |
-| `UpdateQuickrollRequest`     | `QuickrollUpdate`    |
+| Current                      | New                           |
+| ---------------------------- | ----------------------------- |
+| `User`                       | `User`                        |
+| `CreateUserRequest`          | `UserCreate`                  |
+| `UpdateUserRequest`          | `UserUpdate`                  |
+| `DiscordProfile`             | `DiscordProfile`              |
+| `CampaignExperience`         | `CampaignExperience`          |
+| `Quickroll`                  | `Quickroll`                   |
+| `CreateQuickrollRequest`     | `QuickrollCreate`             |
+| `UpdateQuickrollRequest`     | `QuickrollUpdate`             |
 | `ExperienceAddRemoveRequest` | `_ExperienceAddRemoveRequest` |
 
 ### shared.py
 
-| Current                      | New                 |
-| ---------------------------- | ------------------- |
-| `Note`                       | `Note`              |
-| `CreateNoteRequest`          | `NoteCreate`        |
-| `UpdateNoteRequest`          | `NoteUpdate`        |
-| `S3Asset`                    | `S3Asset`           |
-| `PaginatedResponse`          | `PaginatedResponse` |
-| `Trait`                      | `Trait`             |
-| `CharacterSpecialty`         | `Specialty`         |
-| `RollStatistics`             | `RollStatistics`    |
+| Current                      | New                           |
+| ---------------------------- | ----------------------------- |
+| `Note`                       | `Note`                        |
+| `CreateNoteRequest`          | `NoteCreate`                  |
+| `UpdateNoteRequest`          | `NoteUpdate`                  |
+| `S3Asset`                    | `S3Asset`                     |
+| `PaginatedResponse`          | `PaginatedResponse`           |
+| `Trait`                      | `Trait`                       |
+| `CharacterSpecialty`         | `Specialty`                   |
+| `RollStatistics`             | `RollStatistics`              |
 | `NameDescriptionSubDocument` | `_NameDescriptionSubDocument` |
-| `WerewolfGift`               | `WerewolfGift`      |
-| `WerewolfRite`               | `WerewolfRite`      |
+| `WerewolfGift`               | `WerewolfGift`                |
+| `WerewolfRite`               | `WerewolfRite`                |
 
 ### books.py
 
-| Current               | New          |
-| --------------------- | ------------ |
-| `CampaignBook`        | `Book`       |
-| `CreateBookRequest`   | `BookCreate` |
-| `UpdateBookRequest`   | `BookUpdate` |
+| Current               | New                    |
+| --------------------- | ---------------------- |
+| `CampaignBook`        | `Book`                 |
+| `CreateBookRequest`   | `BookCreate`           |
+| `UpdateBookRequest`   | `BookUpdate`           |
 | `RenumberBookRequest` | `_RenumberBookRequest` |
 
 ### chapters.py
 
-| Current                  | New             |
-| ------------------------ | --------------- |
-| `CampaignChapter`        | `Chapter`       |
-| `CreateChapterRequest`   | `ChapterCreate` |
-| `UpdateChapterRequest`   | `ChapterUpdate` |
+| Current                  | New                       |
+| ------------------------ | ------------------------- |
+| `CampaignChapter`        | `Chapter`                 |
+| `CreateChapterRequest`   | `ChapterCreate`           |
+| `UpdateChapterRequest`   | `ChapterUpdate`           |
 | `RenumberChapterRequest` | `_RenumberChapterRequest` |
 
 ### traits.py (character_trait.py)
@@ -365,10 +367,10 @@ These are importable but not in top-level `__all__`.
 
 ### diceroll.py → dicerolls.py
 
-| Current                          | New              |
-| -------------------------------- | ---------------- |
-| `Dicreoll`                       | `Diceroll`       |
-| `CreateDicreollRequest`          | `DicerollCreate` |
+| Current                          | New                |
+| -------------------------------- | ------------------ |
+| `Dicreoll`                       | `Diceroll`         |
+| `CreateDicreollRequest`          | `DicerollCreate`   |
 | `CreateDicreollQuickrollRequest` | `_QuickrollCreate` |
 
 ### dictionary.py
@@ -396,11 +398,3 @@ These are importable but not in top-level `__all__`.
 5. Update all internal imports in services
 6. Update tests
 7. Update documentation
-
-## Migration Notes
-
-This is a breaking change. Users upgrading must:
-
-1. Update imports from `vclient` to `vclient.exceptions` for exceptions
-2. Update imports from `vclient` or `vclient.models` using new names
-3. Service method signatures unchanged (kwargs still work)

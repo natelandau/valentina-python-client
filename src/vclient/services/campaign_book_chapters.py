@@ -86,25 +86,45 @@ class ChaptersService(BaseService):
         )
         return CampaignChapter.model_validate(response.json())
 
-    async def create(self, name: str, description: str | None = None) -> CampaignChapter:
-        """Create a new campaign book chapter."""
+    async def create(
+        self,
+        request: ChapterCreate | None = None,
+        /,
+        **kwargs,
+    ) -> CampaignChapter:
+        """Create a new campaign book chapter.
+
+        Args:
+            request: A ChapterCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for ChapterCreate if request is not provided.
+                Accepts: name (str, required), description (str | None).
+        """
+        body = request if request is not None else ChapterCreate(**kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.BOOK_CHAPTERS),
-            json=ChapterCreate(name=name, description=description).model_dump(
-                exclude_none=True, exclude_unset=True, mode="json"
-            ),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return CampaignChapter.model_validate(response.json())
 
     async def update(
-        self, chapter_id: str, name: str | None = None, description: str | None = None
+        self,
+        chapter_id: str,
+        request: ChapterUpdate | None = None,
+        /,
+        **kwargs,
     ) -> CampaignChapter:
-        """Update a campaign book chapter."""
+        """Update a campaign book chapter.
+
+        Args:
+            chapter_id: The ID of the chapter to update.
+            request: A ChapterUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for ChapterUpdate if request is not provided.
+                Accepts: name (str | None), description (str | None).
+        """
+        body = request if request is not None else ChapterUpdate(**kwargs)
         response = await self._patch(
             self._format_endpoint(Endpoints.BOOK_CHAPTER, chapter_id=chapter_id),
-            json=ChapterUpdate(name=name, description=description).model_dump(
-                exclude_none=True, exclude_unset=True, mode="json"
-            ),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return CampaignChapter.model_validate(response.json())
 
@@ -231,8 +251,9 @@ class ChaptersService(BaseService):
     async def create_note(
         self,
         chapter_id: str,
-        title: str,
-        content: str,
+        request: NoteCreate | None = None,
+        /,
+        **kwargs,
     ) -> Note:
         """Create a new note for a chapter.
 
@@ -240,8 +261,9 @@ class ChaptersService(BaseService):
 
         Args:
             chapter_id: The ID of the chapter to create the note for.
-            title: The note title (3-50 characters).
-            content: The note content (minimum 3 characters, supports markdown).
+            request: A NoteCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for NoteCreate if request is not provided.
+                Accepts: title (str, required), content (str, required).
 
         Returns:
             The newly created Note object.
@@ -252,11 +274,7 @@ class ChaptersService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            NoteCreate,
-            title=title,
-            content=content,
-        )
+        body = request if request is not None else self._validate_request(NoteCreate, **kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.BOOK_CHAPTER_NOTES, chapter_id=chapter_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -267,9 +285,9 @@ class ChaptersService(BaseService):
         self,
         chapter_id: str,
         note_id: str,
-        *,
-        title: str | None = None,
-        content: str | None = None,
+        request: NoteUpdate | None = None,
+        /,
+        **kwargs,
     ) -> Note:
         """Modify a note's content.
 
@@ -278,8 +296,9 @@ class ChaptersService(BaseService):
         Args:
             chapter_id: The ID of the chapter that owns the note.
             note_id: The ID of the note to update.
-            title: New note title (3-50 characters).
-            content: New note content (minimum 3 characters, supports markdown).
+            request: A NoteUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for NoteUpdate if request is not provided.
+                Accepts: title (str | None), content (str | None).
 
         Returns:
             The updated Note object.
@@ -290,11 +309,7 @@ class ChaptersService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(
-            NoteUpdate,
-            title=title,
-            content=content,
-        )
+        body = request if request is not None else self._validate_request(NoteUpdate, **kwargs)
         response = await self._patch(
             self._format_endpoint(
                 Endpoints.BOOK_CHAPTER_NOTE, chapter_id=chapter_id, note_id=note_id

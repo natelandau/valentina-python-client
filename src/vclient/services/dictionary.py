@@ -85,42 +85,45 @@ class DictionaryService(BaseService):
 
     async def create(
         self,
-        *,
-        term: str,
-        definition: str | None = None,
-        link: str | None = None,
-        synonyms: list[str] = [],
+        request: DictionaryTermCreate | None = None,
+        /,
+        **kwargs,
     ) -> DictionaryTerm:
-        """Create a new dictionary term."""
+        """Create a new dictionary term.
+
+        Args:
+            request: A DictionaryTermCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for DictionaryTermCreate if request is not provided.
+                Accepts: term (str, required), definition (str | None),
+                link (str | None), synonyms (list[str]).
+        """
+        body = request if request is not None else DictionaryTermCreate(**kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.DICTIONARY_TERMS),
-            json=DictionaryTermCreate(
-                term=term,
-                definition=definition,
-                link=link,
-                synonyms=synonyms,
-            ).model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return DictionaryTerm.model_validate(response.json())
 
     async def update(
         self,
-        *,
         term_id: str,
-        term: str | None = None,
-        definition: str | None = None,
-        link: str | None = None,
-        synonyms: list[str] | None = None,
+        request: DictionaryTermUpdate | None = None,
+        /,
+        **kwargs,
     ) -> DictionaryTerm:
-        """Update a specific dictionary term."""
+        """Update a specific dictionary term.
+
+        Args:
+            term_id: The ID of the term to update.
+            request: A DictionaryTermUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for DictionaryTermUpdate if request is not provided.
+                Accepts: term (str | None), definition (str | None),
+                link (str | None), synonyms (list[str] | None).
+        """
+        body = request if request is not None else DictionaryTermUpdate(**kwargs)
         response = await self._put(
             self._format_endpoint(Endpoints.DICTIONARY_TERM, term_id=term_id),
-            json=DictionaryTermUpdate(
-                term=term,
-                definition=definition,
-                link=link,
-                synonyms=synonyms,
-            ).model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return DictionaryTerm.model_validate(response.json())
 

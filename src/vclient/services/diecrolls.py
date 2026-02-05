@@ -113,29 +113,24 @@ class DicreollService(BaseService):
 
     async def create(
         self,
-        *,
-        dice_size: DiceSize,
-        difficulty: int | None = None,
-        num_dice: int,
-        num_desperation_dice: int = 0,
-        comment: str | None = None,
-        trait_ids: list[str] = [],
-        character_id: str | None = None,
-        campaign_id: str | None = None,
+        request: DicerollCreate | None = None,
+        /,
+        **kwargs,
     ) -> Dicreoll:
-        """Create a new dicreoll."""
+        """Create a new dicreoll.
+
+        Args:
+            request: A DicerollCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for DicerollCreate if request is not provided.
+                Accepts: dice_size (DiceSize, required), num_dice (int, required),
+                difficulty (int | None), num_desperation_dice (int, default 0),
+                comment (str | None), trait_ids (list[str]),
+                character_id (str | None), campaign_id (str | None).
+        """
+        body = request if request is not None else DicerollCreate(**kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.DICREOLLS),
-            json=DicerollCreate(
-                dice_size=dice_size,
-                difficulty=difficulty,
-                num_dice=num_dice,
-                num_desperation_dice=num_desperation_dice,
-                comment=comment,
-                trait_ids=trait_ids,
-                character_id=character_id,
-                campaign_id=campaign_id,
-            ).model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return Dicreoll.model_validate(response.json())
 
