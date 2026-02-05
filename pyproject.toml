@@ -108,7 +108,7 @@
 
 [tool.ruff] # https://github.com/charliermarsh/ruff
 
-    exclude        = [".cache", ".dev", ".git", ".venv", "_build", "_site", "build", "dist"]
+    exclude        = [".cache", ".dev", ".git", ".venv", ".worktrees", "_build", "_site", "build", "dist"]
     fix            = true
     line-length    = 100
     output-format  = "grouped"
