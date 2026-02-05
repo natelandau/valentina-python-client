@@ -1,0 +1,51 @@
+## v1.0.0 (2026-02-05)
+
+### Feat
+
+- improve developer experience (#1)
+- **character-trait**: consolidate value endpoints
+- **character-trait**: add cost preview endpoints
+- **character**: add mage attributes to create/update
+- **characters**: add class attributes to create/update
+- **company**: support updated response from create company
+- add character autogeneration service
+- add options service
+- add diecroll service
+- add dictionary
+- add character blueprint service
+- **character**: add hunter support
+- **character**: add werewolf specials
+- **character**: add character service
+- **chapters**: add chapter service
+- add campaign_book_service
+- **campaigns**: add CampaignsService with factory pattern
+- **users**: add quickroll CRUD endpoints
+- **users**: add notes endpoints
+- **client**: add auto idempotency key generation
+- **users**: add asset upload endpoint
+- **users**: add experience management methods
+- **user**: add user_service
+- **developers**: add developer service for self-service operations
+- **exceptions**: include full API error context in exception strings
+- **exceptions**: add RequestValidationError for client-side validation
+- **registry**: add factory functions for individual service imports
+- create package
+- **exceptions**: add RFC 9457 Problem Details support
+- **companies**: add Companies service with Pydantic DTOs
+- **api**: add initial Valentina API client scaffold
+
+### Fix
+
+- **diceroll**: fix typo in public facing api
+- **character**: remove id from specialties in response
+- **characters**: add traits to create request, remove asset_ids
+- correct method for book renumber
+- export chapters_service
+- remove enum from system health
+
+### Refactor
+
+- improve package imports
+- **models**: simplify DTOs by removing bloat
+- **models**: replace StrEnum classes with Literal type aliases
+- **tests**: improve code standards compliance
