@@ -215,36 +215,55 @@ class Company(BaseModel):
 - Create separate request models for create/update operations
 - Request models should NOT include server-generated fields (id, date_created, etc.)
 - Use `exclude_none=True, exclude_unset=True` when serializing
+- Internal request models (only used by service methods) should be prefixed with `_`
 
 ```python
-class CreateCompanyRequest(BaseModel):
+class CompanyCreate(BaseModel):
     """Request body for creating a new company."""
     name: str = Field(..., min_length=3, max_length=50)
     email: str = Field(...)
     description: str | None = Field(default=None)
 
-class UpdateCompanyRequest(BaseModel):
+class CompanyUpdate(BaseModel):
     """Request body for updating a company. All fields optional for partial updates."""
     name: str | None = Field(default=None, min_length=3, max_length=50)
     email: str | None = Field(default=None)
 ```
 
-### Service Method Pattern
+### Service Method Pattern (Hybrid API)
+
+Service methods accept either a request model OR keyword arguments for flexibility:
 
 ```python
 async def create(
     self,
-    name: str,
-    email: str,
-    *,
-    description: str | None = None,
+    request: CompanyCreate | None = None,
+    /,
+    **kwargs,
 ) -> Company:
-    body = CreateCompanyRequest(name=name, email=email, description=description)
+    """Create a new company.
+
+    Args:
+        request: A CompanyCreate model, OR pass fields as keyword arguments.
+        **kwargs: Fields for CompanyCreate if request is not provided.
+            Accepts: name (str, required), email (str, required),
+            description (str | None).
+    """
+    body = request if request is not None else CompanyCreate(**kwargs)
     response = await self._post(
         Endpoints.COMPANIES,
         json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
     )
     return Company.model_validate(response.json())
+```
+
+This allows both usage patterns:
+```python
+# With request model (explicit)
+company = await service.create(CompanyCreate(name="Acme", email="a@b.com"))
+
+# With kwargs (convenient)
+company = await service.create(name="Acme", email="a@b.com")
 ```
 
 ### Literal Type Aliases (Preferred over Enums)
@@ -264,8 +283,9 @@ class CompanyPermissions(BaseModel):
 ### Naming Conventions
 
 - Response models: Entity name (e.g., `Company`, `Developer`)
-- Create request: `Create{Entity}Request`
-- Update request: `Update{Entity}Request`
+- Create request: `{Entity}Create` (e.g., `CompanyCreate`, `CharacterCreate`)
+- Update request: `{Entity}Update` (e.g., `CompanyUpdate`, `CharacterUpdate`)
+- Internal models: `_{Entity}` prefix (e.g., `_BookRenumber`, `_TraitAssign`)
 - Settings/nested: `{Entity}Settings`
 
 ## Git Commit Messages
