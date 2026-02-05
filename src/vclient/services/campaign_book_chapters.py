@@ -9,11 +9,11 @@ from vclient.models import (
     CampaignChapter,
     ChapterCreate,
     ChapterUpdate,
-    CreateNoteRequest,
     Note,
+    NoteCreate,
+    NoteUpdate,
     PaginatedResponse,
     S3Asset,
-    UpdateNoteRequest,
     _ChapterRenumber,
 )
 from vclient.services.base import BaseService
@@ -253,7 +253,7 @@ class ChaptersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CreateNoteRequest,
+            NoteCreate,
             title=title,
             content=content,
         )
@@ -291,7 +291,7 @@ class ChaptersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateNoteRequest,
+            NoteUpdate,
             title=title,
             content=content,
         )

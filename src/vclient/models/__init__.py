@@ -122,16 +122,20 @@ from .global_admin import (
 from .pagination import PaginatedResponse
 from .shared import (
     CharacterSpecialty,
-    CreateNoteRequest,
     NameDescriptionSubDocument,
     Note,
+    NoteCreate,
+    NoteUpdate,
     RollStatistics,
     S3Asset,
     Trait,
-    UpdateNoteRequest,
     WerewolfGift,
     WerewolfRite,
 )
+
+# Backwards compatibility aliases for notes
+CreateNoteRequest = NoteCreate
+UpdateNoteRequest = NoteUpdate
 from .system import SystemHealth
 from .users import (
     CampaignExperience,
@@ -222,6 +226,8 @@ __all__ = [
     "NameDescriptionSubDocument",
     "NewCompanyResponse",
     "Note",
+    "NoteCreate",
+    "NoteUpdate",
     "PaginatedResponse",
     "Perk",
     "Quickroll",

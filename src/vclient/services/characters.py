@@ -17,7 +17,6 @@ from vclient.models import (
     Character,
     CharacterCreate,
     CharacterUpdate,
-    CreateNoteRequest,
     EdgeAndPerks,
     HunterAttributesCreate,
     HunterAttributesUpdate,
@@ -26,11 +25,12 @@ from vclient.models import (
     InventoryItemUpdate,
     MageAttributes,
     Note,
+    NoteCreate,
+    NoteUpdate,
     PaginatedResponse,
     Perk,
     RollStatistics,
     S3Asset,
-    UpdateNoteRequest,
     VampireAttributesCreate,
     VampireAttributesUpdate,
     WerewolfAttributesCreate,
@@ -685,7 +685,7 @@ class CharactersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CreateNoteRequest,
+            NoteCreate,
             title=title,
             content=content,
         )
@@ -723,7 +723,7 @@ class CharactersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateNoteRequest,
+            NoteUpdate,
             title=title,
             content=content,
         )

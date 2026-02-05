@@ -7,16 +7,16 @@ from vclient.constants import DEFAULT_PAGE_LIMIT, UserRole
 from vclient.endpoints import Endpoints
 from vclient.models import (
     CampaignExperience,
-    CreateNoteRequest,
     DiscordProfile,
     Note,
+    NoteCreate,
+    NoteUpdate,
     PaginatedResponse,
     Quickroll,
     QuickrollCreate,
     QuickrollUpdate,
     RollStatistics,
     S3Asset,
-    UpdateNoteRequest,
     User,
     UserCreate,
     UserUpdate,
@@ -676,7 +676,7 @@ class UsersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CreateNoteRequest,
+            NoteCreate,
             title=title,
             content=content,
         )
@@ -714,7 +714,7 @@ class UsersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateNoteRequest,
+            NoteUpdate,
             title=title,
             content=content,
         )

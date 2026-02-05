@@ -65,7 +65,7 @@ class Note(BaseModel):
     content: str
 
 
-class CreateNoteRequest(BaseModel):
+class NoteCreate(BaseModel):
     """Request body for creating a new note.
 
     Used to construct the JSON payload for note creation.
@@ -75,7 +75,7 @@ class CreateNoteRequest(BaseModel):
     content: str = Field(min_length=3)
 
 
-class UpdateNoteRequest(BaseModel):
+class NoteUpdate(BaseModel):
     """Request body for updating a note.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -191,3 +191,17 @@ class CharacterSpecialty(BaseModel):
     name: str
     type: SpecialtyType
     description: str | None = None
+
+
+__all__ = [
+    "CharacterSpecialty",
+    "NameDescriptionSubDocument",
+    "Note",
+    "NoteCreate",
+    "NoteUpdate",
+    "RollStatistics",
+    "S3Asset",
+    "Trait",
+    "WerewolfGift",
+    "WerewolfRite",
+]

@@ -9,12 +9,12 @@ from vclient.models import (
     Campaign,
     CampaignCreate,
     CampaignUpdate,
-    CreateNoteRequest,
     Note,
+    NoteCreate,
+    NoteUpdate,
     PaginatedResponse,
     RollStatistics,
     S3Asset,
-    UpdateNoteRequest,
 )
 from vclient.services.base import BaseService
 
@@ -502,7 +502,7 @@ class CampaignsService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CreateNoteRequest,
+            NoteCreate,
             title=title,
             content=content,
         )
@@ -540,7 +540,7 @@ class CampaignsService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateNoteRequest,
+            NoteUpdate,
             title=title,
             content=content,
         )

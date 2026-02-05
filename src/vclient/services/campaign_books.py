@@ -9,11 +9,11 @@ from vclient.models import (
     BookCreate,
     BookUpdate,
     CampaignBook,
-    CreateNoteRequest,
     Note,
+    NoteCreate,
+    NoteUpdate,
     PaginatedResponse,
     S3Asset,
-    UpdateNoteRequest,
     _BookRenumber,
 )
 from vclient.services.base import BaseService
@@ -379,7 +379,7 @@ class BooksService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CreateNoteRequest,
+            NoteCreate,
             title=title,
             content=content,
         )
@@ -417,7 +417,7 @@ class BooksService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateNoteRequest,
+            NoteUpdate,
             title=title,
             content=content,
         )
