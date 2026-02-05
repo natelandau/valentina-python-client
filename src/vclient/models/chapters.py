@@ -23,21 +23,29 @@ class CampaignChapter(BaseModel):
     book_id: str = Field(..., description="ID of the parent book.")
 
 
-class CreateChapterRequest(BaseModel):
+class ChapterCreate(BaseModel):
     """Request body for creating a new campaign chapter."""
 
     name: str = Field(..., description="Chapter name (3-50 characters).")
     description: str | None = Field(default=None, description="Chapter description.")
 
 
-class UpdateChapterRequest(BaseModel):
+class ChapterUpdate(BaseModel):
     """Request body for updating a campaign chapter."""
 
     name: str | None = Field(default=None, description="Chapter name (3-50 characters).")
     description: str | None = Field(default=None, description="Chapter description.")
 
 
-class RenumberChapterRequest(BaseModel):
-    """Request body for renumbering a campaign chapter."""
+class _ChapterRenumber(BaseModel):
+    """Internal request body for renumbering a campaign chapter."""
 
-    number: int = Field(..., ge=1, description="New book number (must be >= 1).")
+    number: int = Field(..., ge=1, description="New chapter number (must be >= 1).")
+
+
+__all__ = [
+    "CampaignChapter",
+    "ChapterCreate",
+    "ChapterUpdate",
+    "_ChapterRenumber",
+]

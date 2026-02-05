@@ -22,10 +22,15 @@ CreateCampaignRequest = CampaignCreate
 UpdateCampaignRequest = CampaignUpdate
 from .chapters import (
     CampaignChapter,
-    CreateChapterRequest,
-    RenumberChapterRequest,
-    UpdateChapterRequest,
+    ChapterCreate,
+    ChapterUpdate,
+    _ChapterRenumber,
 )
+
+# Backwards compatibility aliases for chapters
+CreateChapterRequest = ChapterCreate
+RenumberChapterRequest = _ChapterRenumber
+UpdateChapterRequest = ChapterUpdate
 from .character_autogen import (
     ChargenSessionFinalizeDTO,
     ChargenSessionResponse,
@@ -145,6 +150,8 @@ __all__ = [
     "CampaignCreate",
     "CampaignExperience",
     "CampaignUpdate",
+    "ChapterCreate",
+    "ChapterUpdate",
     "Character",
     "CharacterConcept",
     "CharacterCreate",

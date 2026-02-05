@@ -7,14 +7,14 @@ from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
     CampaignChapter,
-    CreateChapterRequest,
+    ChapterCreate,
+    ChapterUpdate,
     CreateNoteRequest,
     Note,
     PaginatedResponse,
-    RenumberChapterRequest,
     S3Asset,
-    UpdateChapterRequest,
     UpdateNoteRequest,
+    _ChapterRenumber,
 )
 from vclient.services.base import BaseService
 
@@ -90,7 +90,7 @@ class ChaptersService(BaseService):
         """Create a new campaign book chapter."""
         response = await self._post(
             self._format_endpoint(Endpoints.BOOK_CHAPTERS),
-            json=CreateChapterRequest(name=name, description=description).model_dump(
+            json=ChapterCreate(name=name, description=description).model_dump(
                 exclude_none=True, exclude_unset=True, mode="json"
             ),
         )
@@ -102,7 +102,7 @@ class ChaptersService(BaseService):
         """Update a campaign book chapter."""
         response = await self._patch(
             self._format_endpoint(Endpoints.BOOK_CHAPTER, chapter_id=chapter_id),
-            json=UpdateChapterRequest(name=name, description=description).model_dump(
+            json=ChapterUpdate(name=name, description=description).model_dump(
                 exclude_none=True, exclude_unset=True, mode="json"
             ),
         )
@@ -116,7 +116,7 @@ class ChaptersService(BaseService):
         """Renumber a campaign book chapter."""
         response = await self._put(
             self._format_endpoint(Endpoints.BOOK_CHAPTER_NUMBER, chapter_id=chapter_id),
-            json=RenumberChapterRequest(number=number).model_dump(
+            json=_ChapterRenumber(number=number).model_dump(
                 exclude_none=True, exclude_unset=True, mode="json"
             ),
         )
