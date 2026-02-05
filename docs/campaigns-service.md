@@ -1,126 +1,92 @@
 # Campaigns Service
 
-The Campaigns Service provides methods to create, retrieve, update, and delete campaigns within a company, as well as access campaign statistics, assets, and notes.
+Manage campaigns within a company, including their statistics, assets, and notes.
 
 ## Usage
-
-The campaigns service is scoped to a specific company and user context at creation time:
-
-```python
-from vclient import VClient
-
-async with VClient(base_url="...", api_key="...") as client:
-    # Get a campaigns service scoped to a company and user
-    campaigns = client.campaigns("company_id", "user_id")
-
-    # All operations use this context
-    all_campaigns = await campaigns.list_all()
-    campaign = await campaigns.get("campaign_id")
-```
-
-Or using the factory function:
 
 ```python
 from vclient import campaigns_service
 
-# Requires a default client to be configured
-campaigns = campaigns_service("company_id", "user_id")
-all_campaigns = await campaigns.list_all()
+campaigns = campaigns_service(user_id="USER_ID", company_id="COMPANY_ID")
 ```
 
-## Available Methods
+## Methods
 
-### Campaign CRUD
+### CRUD Operations
 
-- `get(campaign_id)` - Retrieve a campaign by ID
-- `create(name, description?, desperation?, danger?)` - Create a new campaign
-- `update(campaign_id, name?, description?, desperation?, danger?)` - Update a campaign
-- `delete(campaign_id)` - Delete a campaign
-- `get_page(limit?, offset?)` - Get a paginated page of campaigns
-- `list_all()` - Get all campaigns
-- `iter_all(limit?)` - Iterate through all campaigns
+| Method                                          | Returns    | Description           |
+| ----------------------------------------------- | ---------- | --------------------- |
+| `get(campaign_id)`                              | `Campaign` | Get a campaign by ID  |
+| `create(CampaignCreate, **kwargs)`              | `Campaign` | Create a new campaign |
+| `update(campaign_id, CampaignUpdate, **kwargs)` | `Campaign` | Update a campaign     |
+| `delete(campaign_id)`                           | `None`     | Delete a campaign     |
+
+### Pagination
+
+| Method                      | Returns                       | Description                   |
+| --------------------------- | ----------------------------- | ----------------------------- |
+| `get_page(limit?, offset?)` | `PaginatedResponse[Campaign]` | Get a page of campaigns       |
+| `list_all()`                | `list[Campaign]`              | Get all campaigns             |
+| `iter_all(limit?)`          | `AsyncIterator[Campaign]`     | Iterate through all campaigns |
 
 ### Statistics
 
-- `get_statistics(campaign_id, num_top_traits?)` - Get roll statistics for a campaign
+| Method                                         | Returns          | Description              |
+| ---------------------------------------------- | ---------------- | ------------------------ |
+| `get_statistics(campaign_id, num_top_traits?)` | `RollStatistics` | Get dice roll statistics |
 
 ### Assets
 
-- `list_assets(campaign_id, limit?, offset?)` - List campaign assets
-- `get_asset(campaign_id, asset_id)` - Get a specific asset
-- `upload_asset(campaign_id, filename, content, content_type?)` - Upload an asset
-- `delete_asset(campaign_id, asset_id)` - Delete an asset
+| Method                                                        | Returns                      | Description          |
+| ------------------------------------------------------------- | ---------------------------- | -------------------- |
+| `list_assets(campaign_id, limit?, offset?)`                   | `PaginatedResponse[S3Asset]` | List campaign assets |
+| `get_asset(campaign_id, asset_id)`                            | `S3Asset`                    | Get an asset         |
+| `upload_asset(campaign_id, filename, content, content_type?)` | `S3Asset`                    | Upload an asset      |
+| `delete_asset(campaign_id, asset_id)`                         | `None`                       | Delete an asset      |
 
 ### Notes
 
-- `get_notes_page(campaign_id, limit?, offset?)` - Get a paginated page of notes
-- `list_all_notes(campaign_id)` - Get all notes
-- `iter_all_notes(campaign_id, limit?)` - Iterate through all notes
-- `get_note(campaign_id, note_id)` - Get a specific note
-- `create_note(campaign_id, title, content)` - Create a note
-- `update_note(campaign_id, note_id, title?, content?)` - Update a note
-- `delete_note(campaign_id, note_id)` - Delete a note
+| Method                                                    | Returns                   | Description           |
+| --------------------------------------------------------- | ------------------------- | --------------------- |
+| `get_notes_page(campaign_id, limit?, offset?)`            | `PaginatedResponse[Note]` | Get a page of notes   |
+| `list_all_notes(campaign_id)`                             | `list[Note]`              | Get all notes         |
+| `iter_all_notes(campaign_id, limit?)`                     | `AsyncIterator[Note]`     | Iterate through notes |
+| `get_note(campaign_id, note_id)`                          | `Note`                    | Get a note            |
+| `create_note(campaign_id, NoteCreate, **kwargs)`          | `Note`                    | Create a note         |
+| `update_note(campaign_id, note_id, NoteUpdate, **kwargs)` | `Note`                    | Update a note         |
+| `delete_note(campaign_id, note_id)`                       | `None`                    | Delete a note         |
 
-## Response Models
+## Example
 
-### `Campaign`
+```python
+from vclient.models import CampaignCreate, CampaignUpdate, NoteCreate
 
-Represents a campaign entity returned from the API.
+# Create a campaign (preferred: use model object)
+request = CampaignCreate(
+    name="Dark Metropolis",
+    description="A noir vampire chronicle",
+    desperation=2,
+    danger=3
+)
+campaign = await campaigns.create(request)
 
-| Field           | Type          | Description                              |
-| --------------- | ------------- | ---------------------------------------- |
-| `id`            | `str`         | MongoDB document ObjectID                |
-| `date_created`  | `datetime`    | Timestamp when the campaign was created  |
-| `date_modified` | `datetime`    | Timestamp when the campaign was modified |
-| `name`          | `str`         | Campaign name (3-50 characters)          |
-| `description`   | `str \| None` | Campaign description                     |
-| `asset_ids`     | `list[str]`   | List of associated asset IDs             |
-| `desperation`   | `int`         | Desperation level (0-5)                  |
-| `danger`        | `int`         | Danger level (0-5)                       |
-| `company_id`    | `str`         | ID of the company                        |
+# Alternative: pass fields as kwargs
+campaign = await campaigns.create(
+    name="Dark Metropolis",
+    description="A noir vampire chronicle"
+)
 
-### `RollStatistics`
+# Update a campaign
+update = CampaignUpdate(danger=4)
+updated = await campaigns.update(campaign.id, update)
 
-Aggregated dice roll statistics.
+# Get statistics
+stats = await campaigns.get_statistics(campaign.id)
+print(f"Total rolls: {stats.total_rolls}")
 
-| Field                  | Type                   | Description                    |
-| ---------------------- | ---------------------- | ------------------------------ |
-| `botches`              | `int`                  | Total botched rolls            |
-| `successes`            | `int`                  | Total successful rolls         |
-| `failures`             | `int`                  | Total failed rolls             |
-| `criticals`            | `int`                  | Total critical successes       |
-| `total_rolls`          | `int`                  | Total number of rolls          |
-| `average_difficulty`   | `float \| None`        | Average difficulty of rolls    |
-| `average_pool`         | `float \| None`        | Average dice pool size         |
-| `top_traits`           | `list[dict[str, Any]]` | Most frequently used traits    |
-| `criticals_percentage` | `float`                | Percentage of critical rolls   |
-| `success_percentage`   | `float`                | Percentage of successful rolls |
-| `failure_percentage`   | `float`                | Percentage of failed rolls     |
-| `botch_percentage`     | `float`                | Percentage of botched rolls    |
+# Create a note
+note_request = NoteCreate(title="Session 1", content="...")
+note = await campaigns.create_note(campaign.id, note_request)
+```
 
-### `S3Asset`
-
-Represents a file asset stored in S3.
-
-| Field               | Type                        | Description                      |
-| ------------------- | --------------------------- | -------------------------------- |
-| `id`                | `str`                       | MongoDB document ObjectID        |
-| `date_created`      | `datetime`                  | Timestamp when created           |
-| `date_modified`     | `datetime`                  | Timestamp when modified          |
-| `file_type`         | `S3AssetType`               | Type of file (image, text, etc.) |
-| `original_filename` | `str`                       | Original filename when uploaded  |
-| `public_url`        | `str`                       | Public URL to access the file    |
-| `uploaded_by`       | `str`                       | ID of user who uploaded          |
-| `parent_type`       | `S3AssetParentType \| None` | Type of parent entity            |
-
-### `Note`
-
-Represents a note attached to a campaign.
-
-| Field           | Type       | Description                      |
-| --------------- | ---------- | -------------------------------- |
-| `id`            | `str`      | MongoDB document ObjectID        |
-| `date_created`  | `datetime` | Timestamp when created           |
-| `date_modified` | `datetime` | Timestamp when modified          |
-| `title`         | `str`      | Note title (3-50 characters)     |
-| `content`       | `str`      | Note content (supports markdown) |
+See [Response Models](models.md) for `Campaign`, `RollStatistics`, `S3Asset`, `Note`, and related types.

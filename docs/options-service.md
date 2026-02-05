@@ -1,33 +1,30 @@
 # Options Service
 
-The Options Service provides methods to retrieve all options and enumerations for the api.
+Retrieve all available options and enumerations for the API.
 
 ## Usage
 
 ```python
 from vclient import options_service
 
-options = options_service("company123")
-
-# Get all options and enumerations
-options = await options.get_options()
+options = options_service(company_id="COMPANY_ID")
 ```
 
-## Available Methods
+## Methods
 
-- `get_options()` - Retrieve all options and enumerations for the api.
+| Method          | Returns | Description                      |
+| --------------- | ------- | -------------------------------- |
+| `get_options()` | `dict`  | Get all options and enumerations |
 
-## Response
+## Example
 
-A dictionary of options and enumerations for the api.
+```python
+options_data = await options.get_options()
 
-```json
-{
-    "companies": {
-        "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
-        "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
-        "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"]
-    },
-    ...
-}
+# Access company permission options
+print(options_data["companies"]["PermissionManageCampaign"])
+# Output: ["UNRESTRICTED", "STORYTELLER"]
+
+print(options_data["companies"]["PermissionsGrantXP"])
+# Output: ["UNRESTRICTED", "PLAYER", "STORYTELLER"]
 ```

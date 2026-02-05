@@ -1,6 +1,6 @@
 # Developers Service
 
-The Developers Service provides methods to manage your own developer profile. Use this service to view your account details, update your profile, and regenerate your API key.
+Manage your own developer profile, including viewing account details, updating your profile, and regenerating your API key.
 
 ## Usage
 
@@ -12,90 +12,34 @@ developer = developer_service()
 
 ## Methods
 
-### `get_me()`
+| Method                                   | Returns                 | Description                |
+| ---------------------------------------- | ----------------------- | -------------------------- |
+| `get_me()`                               | `MeDeveloper`           | Get your developer profile |
+| `update_me(MeDeveloperUpdate, **kwargs)` | `MeDeveloper`           | Update your profile        |
+| `regenerate_api_key()`                   | `MeDeveloperWithApiKey` | Generate a new API key     |
 
-Retrieve the current developer's profile associated with the API key.
-
-**Returns:** `MeDeveloper`
-
-**Example:**
+## Example
 
 ```python
+from vclient.models import MeDeveloperUpdate
+
+# Get your profile
 me = await developer.get_me()
 print(f"Username: {me.username}")
-print(f"Email: {me.email}")
 print(f"Companies: {len(me.companies)}")
-```
 
----
+# Update profile (preferred: use model object)
+update = MeDeveloperUpdate(username="new_username")
+updated = await developer.update_me(update)
 
-### `update_me()`
+# Alternative: pass fields as kwargs
+updated = await developer.update_me(username="new_username")
 
-Update the current developer's profile. Only include fields that need to be changed.
-
-**Parameters:**
-
-| Parameter  | Type          | Description       |
-| ---------- | ------------- | ----------------- |
-| `username` | `str \| None` | New username      |
-| `email`    | `str \| None` | New email address |
-
-**Returns:** `MeDeveloper`
-
-**Example:**
-
-```python
-updated = await developer.update_me(username="newusername")
-```
-
----
-
-### `regenerate_api_key()`
-
-Generate a new API key for your account. The current key will be immediately invalidated.
-
-**Be certain to save the API key from the response. It will not be displayed again.**
-
-**Returns:** `MeDeveloperWithApiKey`
-
-**Example:**
-
-```python
+# Regenerate API key (save immediately - only shown once)
 result = await developer.regenerate_api_key()
-print(f"New API Key: {result.api_key}")  # Save this immediately!
+print(f"New API Key: {result.api_key}")
 ```
 
-## Response Models
+> **Warning:** Regenerating your API key immediately invalidates the current key. Save the new key from the response - it won't be displayed again.
 
-### `MeDeveloper`
-
-Represents the current developer's account returned from the API.
-
-| Field           | Type                                 | Description                                    |
-| --------------- | ------------------------------------ | ---------------------------------------------- |
-| `id`            | `str`                                | MongoDB document ObjectID                      |
-| `date_created`  | `datetime`                           | Timestamp when the developer was created       |
-| `date_modified` | `datetime`                           | Timestamp when the developer was last modified |
-| `username`      | `str`                                | Developer username                             |
-| `email`         | `str`                                | Developer email address                        |
-| `key_generated` | `datetime \| None`                   | Timestamp when the API key was last generated  |
-| `companies`     | `list[MeDeveloperCompanyPermission]` | List of company permissions for this developer |
-
-### `MeDeveloperWithApiKey`
-
-Developer response that includes the generated API key. Only returned when regenerating the API key.
-
-| Field                                      | Type  | Description                                    |
-| ------------------------------------------ | ----- | ---------------------------------------------- |
-| _(inherits all fields from `MeDeveloper`)_ |       |                                                |
-| `api_key`                                  | `str` | The newly generated API key (save immediately) |
-
-### `MeDeveloperCompanyPermission`
-
-Company permission entry for the developer.
-
-| Field        | Type              | Description                                        |
-| ------------ | ----------------- | -------------------------------------------------- |
-| `company_id` | `str`             | The company ID                                     |
-| `name`       | `str \| None`     | The company name                                   |
-| `permission` | `PermissionLevel` | The permission level (`USER`, `ADMIN`, or `OWNER`) |
+See [Response Models](models.md) for `MeDeveloper` and related types.

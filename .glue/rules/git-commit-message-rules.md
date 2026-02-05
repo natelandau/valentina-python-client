@@ -1,24 +1,18 @@
-# Generate possible git commit messages
+---
+name: git-commit-message-rules
+description: Git commit message rules
+---
+## Commit Rules
 
-## Overview
+**IMPORTANT:** Before completing any task, you MUST run `/commit` to commit your changes.
 
-Generate possible git commit messages based on the changes made to the codebase.
+-   Only commit files YOU modified in this session - never commit unrelated changes
+-   Use atomic commits with descriptive messages
+-   If there are no changes to commit, skip this step
+-   Do not push unless explicitly asked
 
-## Steps
+## Git commit message rules
 
-1. **Prepare branch**
-    - Review all staged changes made to the codebase
-2. **Generate commit messages**
-    - Provide a clear, concise summary of what this PR accomplishes
-    - Generate possible git commit messages based on the summary
-3. **Review commit messages**
-    - Review the list of possible git commit messages
-    - Select the best 3 to 5 commit messages for the changes made to the codebase
-    - Provide the commit messages to the user
-
-## Commit Message Rules
-
--   When you finish applying changes, the last line of the message should be "Don't forget to commit!" and give me a commit command as well.
 -   Always use angular style conventional commits style. No Exceptions!
 -   The first line of the commit should never be more than 50 characters
 -   Each commit message consists of a header, and a body. The header has a special format that includes a type, a scope and a subject: `(<scope>): <subject>`
@@ -40,7 +34,7 @@ Generate possible git commit messages based on the changes made to the codebase.
 -   In the body, just as in the summary, use the imperative, present tense: "fix" not "fixed" nor "fixes".
 -   The body will explain the motivation for the change in the commit message body. This commit message should explain WHY you are making the change. You can include a comparison of the previous behavior with the new behavior in order to illustrate the impact of the change.
 
-## Commit Message Examples
+### Commit Message Examples
 
 -   feat: add email notifications on new direct messages
 -   feat(shopping cart): add the amazing button

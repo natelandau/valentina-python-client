@@ -1,18 +1,17 @@
 ---
-description: Inline comments standards
-globs: **/*.py
-alwaysApply: false
+description: How to write inline comments
+alwaysApply: true
 ---
-## Inline comments standards
+## How to write inline comments
 
-Always follow these standards for writing inline comments within the codebase to enhance understanding and avoid clutter.
+**Always** follow these standards for writing inline comments within the codebase to enhance understanding and avoid clutter.
 
 1. Use comments sparingly, and when you do write comments, make them meaningful.
 2. Don't comment on obvious things. Excessive or unclear comments can clutter the codebase and become outdated.
 3. Only use comments to convey the "why" behind specific actions or to explain unusual behavior and potential pitfalls.
 4. In python use `#` for single-line comments and `"""` for multi-line comments.
-5. Never change or remove 'noqa' or 'type: ignore' comments
-6. Never describe the code. Assume the person reading the code knows Python (though not what you are trying to do) better than you do.
+5. Never change or remove 'noqa' or 'type: ignore' comments unless the user explicitly asks you to do so or they are incorrect.
+6. Never describe the code in a comment. Assume the person reading the code knows how to read the code better than you do.
 
 ### Examples of good inline comment usage:
 

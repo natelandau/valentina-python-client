@@ -1,103 +1,84 @@
 # Campaign Books Service
 
-The Campaign Books Service provides methods to create, retrieve, update, and delete campaign books within a campaign, as well as access book notes and assets.
+Manage books within a campaign, including their notes and assets.
 
 ## Usage
-
-The campaign books service is scoped to a specific company, user, and campaign context at creation time:
-
-```python
-from vclient import VClient
-
-async with VClient(base_url="...", api_key="...") as client:
-    # Get a campaign books service scoped to a company, user, and campaign
-    books = client.books("company_id", "user_id", "campaign_id")
-
-    # All operations use this context
-    all_books = await books.list_all()
-    book = await books.get("book_id")
-```
-
-Or using the factory function:
 
 ```python
 from vclient import books_service
 
-# Requires a default client to be configured
-books = books_service("company_id", "user_id", "campaign_id")
-all_books = await books.list_all()
+books = books_service(user_id="USER_ID", campaign_id="CAMPAIGN_ID", company_id="COMPANY_ID")
 ```
 
-## Available Methods
+## Methods
 
-### Book CRUD
+### CRUD Operations
 
-- `get(book_id)` - Retrieve a book by ID
-- `create(name, description?)` - Create a new book
-- `update(book_id, name?, description?)` - Update a book
-- `delete(book_id)` - Delete a book
-- `renumber(book_id, number)` - Change a book's position number
-- `get_page(limit?, offset?)` - Get a paginated page of books
-- `list_all()` - Get all books
-- `iter_all(limit?)` - Iterate through all books
+| Method                                  | Returns        | Description              |
+| --------------------------------------- | -------------- | ------------------------ |
+| `get(book_id)`                          | `CampaignBook` | Get a book by ID         |
+| `create(BookCreate, **kwargs)`          | `CampaignBook` | Create a new book        |
+| `update(book_id, BookUpdate, **kwargs)` | `CampaignBook` | Update a book            |
+| `delete(book_id)`                       | `None`         | Delete a book            |
+| `renumber(book_id, number)`             | `CampaignBook` | Change a book's position |
 
-### Notes
+### Pagination
 
-- `get_notes_page(book_id, limit?, offset?)` - Get a paginated page of notes
-- `list_all_notes(book_id)` - Get all notes
-- `iter_all_notes(book_id, limit?)` - Iterate through all notes
-- `get_note(book_id, note_id)` - Get a specific note
-- `create_note(book_id, title, content)` - Create a note
-- `update_note(book_id, note_id, title?, content?)` - Update a note
-- `delete_note(book_id, note_id)` - Delete a note
+| Method                      | Returns                           | Description               |
+| --------------------------- | --------------------------------- | ------------------------- |
+| `get_page(limit?, offset?)` | `PaginatedResponse[CampaignBook]` | Get a page of books       |
+| `list_all()`                | `list[CampaignBook]`              | Get all books             |
+| `iter_all(limit?)`          | `AsyncIterator[CampaignBook]`     | Iterate through all books |
 
 ### Assets
 
-- `list_assets(book_id, limit?, offset?)` - List book assets
-- `get_asset(book_id, asset_id)` - Get a specific asset
-- `upload_asset(book_id, filename, content, content_type?)` - Upload an asset
-- `delete_asset(book_id, asset_id)` - Delete an asset
+| Method                                                    | Returns                      | Description      |
+| --------------------------------------------------------- | ---------------------------- | ---------------- |
+| `list_assets(book_id, limit?, offset?)`                   | `PaginatedResponse[S3Asset]` | List book assets |
+| `get_asset(book_id, asset_id)`                            | `S3Asset`                    | Get an asset     |
+| `upload_asset(book_id, filename, content, content_type?)` | `S3Asset`                    | Upload an asset  |
+| `delete_asset(book_id, asset_id)`                         | `None`                       | Delete an asset  |
 
-## Response Models
+### Notes
 
-### `CampaignBook`
+| Method                                                | Returns                   | Description           |
+| ----------------------------------------------------- | ------------------------- | --------------------- |
+| `get_notes_page(book_id, limit?, offset?)`            | `PaginatedResponse[Note]` | Get a page of notes   |
+| `list_all_notes(book_id)`                             | `list[Note]`              | Get all notes         |
+| `iter_all_notes(book_id, limit?)`                     | `AsyncIterator[Note]`     | Iterate through notes |
+| `get_note(book_id, note_id)`                          | `Note`                    | Get a note            |
+| `create_note(book_id, NoteCreate, **kwargs)`          | `Note`                    | Create a note         |
+| `update_note(book_id, note_id, NoteUpdate, **kwargs)` | `Note`                    | Update a note         |
+| `delete_note(book_id, note_id)`                       | `None`                    | Delete a note         |
 
-Represents a campaign book entity returned from the API.
+## Example
 
-| Field           | Type          | Description                          |
-| --------------- | ------------- | ------------------------------------ |
-| `id`            | `str \| None` | MongoDB document ObjectID            |
-| `date_created`  | `datetime`    | Timestamp when the book was created  |
-| `date_modified` | `datetime`    | Timestamp when the book was modified |
-| `name`          | `str`         | Book name (3-50 characters)          |
-| `description`   | `str \| None` | Book description                     |
-| `asset_ids`     | `list[str]`   | List of associated asset IDs         |
-| `number`        | `int`         | Book number within the campaign      |
-| `campaign_id`   | `str`         | ID of the parent campaign            |
+```python
+from vclient.models import BookCreate, BookUpdate, NoteCreate
 
-### `S3Asset`
+# Create a book (preferred: use model object)
+request = BookCreate(
+    name="Act One",
+    description="The beginning of the story"
+)
+book = await books.create(request)
 
-Represents a file asset stored in S3.
+# Alternative: pass fields as kwargs
+book = await books.create(
+    name="Act One",
+    description="The beginning of the story"
+)
 
-| Field               | Type                        | Description                      |
-| ------------------- | --------------------------- | -------------------------------- |
-| `id`                | `str`                       | MongoDB document ObjectID        |
-| `date_created`      | `datetime`                  | Timestamp when created           |
-| `date_modified`     | `datetime`                  | Timestamp when modified          |
-| `file_type`         | `S3AssetType`               | Type of file (image, text, etc.) |
-| `original_filename` | `str`                       | Original filename when uploaded  |
-| `public_url`        | `str`                       | Public URL to access the file    |
-| `uploaded_by`       | `str`                       | ID of user who uploaded          |
-| `parent_type`       | `S3AssetParentType \| None` | Type of parent entity            |
+# Update a book
+update = BookUpdate(name="Act One: Origins")
+updated = await books.update(book.id, update)
 
-### `Note`
+# Reorder the book
+await books.renumber(book.id, number=2)
 
-Represents a note attached to a book.
+# Create a note
+note_request = NoteCreate(title="Chapter Summary", content="...")
+note = await books.create_note(book.id, note_request)
+```
 
-| Field           | Type       | Description                      |
-| --------------- | ---------- | -------------------------------- |
-| `id`            | `str`      | MongoDB document ObjectID        |
-| `date_created`  | `datetime` | Timestamp when created           |
-| `date_modified` | `datetime` | Timestamp when modified          |
-| `title`         | `str`      | Note title (3-50 characters)     |
-| `content`       | `str`      | Note content (supports markdown) |
+See [Response Models](models.md) for `CampaignBook`, `S3Asset`, `Note`, and related types.

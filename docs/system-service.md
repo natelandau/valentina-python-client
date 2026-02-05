@@ -1,6 +1,6 @@
 # System Service
 
-The System Service provides health checks and system status operations. This service does not require authentication.
+Check API health and system status. This service doesn't require authentication.
 
 ## Usage
 
@@ -12,29 +12,15 @@ system = system_service()
 
 ## Methods
 
-### `health()`
+| Method     | Returns        | Description                     |
+| ---------- | -------------- | ------------------------------- |
+| `health()` | `SystemHealth` | Check API and dependency health |
 
-Check the health status of the API and its dependencies.
-
-**Returns:** `SystemHealth`
-
-**Example:**
+## Example
 
 ```python
 health = await system.health()
+print(f"API Version: {health.version}")
 print(f"Database: {health.database_status}")
 print(f"Cache: {health.cache_status}")
-print(f"API Version: {health.version}")
 ```
-
-## Response Models
-
-### `SystemHealth`
-
-Represents the health status of the API and its dependencies.
-
-| Field             | Type  | Description                               |
-| ----------------- | ----- | ----------------------------------------- |
-| `database_status` | `str` | Current status of the database connection |
-| `cache_status`    | `str` | Current status of the cache connection    |
-| `version`         | `str` | Current API version                       |

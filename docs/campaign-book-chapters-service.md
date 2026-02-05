@@ -1,103 +1,89 @@
-# Campaign Books Service
+# Campaign Chapters Service
 
-The Chapter service provides methods to create, retrieve, update, and delete campaign book chapters within a campaign book, as well as access chapter notes and assets.
+Manage chapters within a campaign book, including their notes and assets.
 
 ## Usage
-
-The chapter service is scoped to a specific company, user, campaign, and book context at creation time:
-
-```python
-from vclient import VClient
-
-async with VClient(base_url="...", api_key="...") as client:
-    # Get a campaign books service scoped to a company, user, and campaign
-    books = client.chapters("company_id", "user_id", "campaign_id", "book_id")
-
-    # All operations use this context
-    all_chapters = await chapters.list_all()
-    chapter = await chapters.get("chapter_id")
-```
-
-Or using the factory function:
 
 ```python
 from vclient import chapters_service
 
-# Requires a default client to be configured
-chapters = chapters_service("company_id", "user_id", "campaign_id", "book_id")
-all_chapters = await chapters.list_all()
+chapters = chapters_service(
+    user_id="USER_ID",
+    campaign_id="CAMPAIGN_ID",
+    book_id="BOOK_ID",
+    company_id="COMPANY_ID"
+)
 ```
 
-## Available Methods
+## Methods
 
-### Book CRUD
+### CRUD Operations
 
-- `get(chapter_id)` - Retrieve a chapter by ID
-- `create(name, description?)` - Create a new book
-- `update(chapter_id, name?, description?)` - Update a chapter
-- `delete(chapter_id)` - Delete a chapter
-- `renumber(chapter_id, number)` - Change a chapter's position number
-- `get_page(limit?, offset?)` - Get a paginated page of chapters
-- `list_all()` - Get all chapters
-- `iter_all(limit?)` - Iterate through all chapters
+| Method                                        | Returns           | Description                 |
+| --------------------------------------------- | ----------------- | --------------------------- |
+| `get(chapter_id)`                             | `CampaignChapter` | Get a chapter by ID         |
+| `create(ChapterCreate, **kwargs)`             | `CampaignChapter` | Create a new chapter        |
+| `update(chapter_id, ChapterUpdate, **kwargs)` | `CampaignChapter` | Update a chapter            |
+| `delete(chapter_id)`                          | `None`            | Delete a chapter            |
+| `renumber(chapter_id, number)`                | `CampaignChapter` | Change a chapter's position |
 
-### Notes
+### Pagination
 
-- `get_notes_page(chapter_id, limit?, offset?)` - Get a paginated page of notes
-- `list_all_notes(chapter_id)` - Get all notes
-- `iter_all_notes(chapter_id, limit?)` - Iterate through all notes
-- `get_note(chapter_id, note_id)` - Get a specific note
-- `create_note(chapter_id, title, content)` - Create a note
-- `update_note(chapter_id, note_id, title?, content?)` - Update a note
-- `delete_note(chapter_id, note_id)` - Delete a note
+| Method                      | Returns                              | Description                  |
+| --------------------------- | ------------------------------------ | ---------------------------- |
+| `get_page(limit?, offset?)` | `PaginatedResponse[CampaignChapter]` | Get a page of chapters       |
+| `list_all()`                | `list[CampaignChapter]`              | Get all chapters             |
+| `iter_all(limit?)`          | `AsyncIterator[CampaignChapter]`     | Iterate through all chapters |
 
 ### Assets
 
-- `list_assets(chapter_id, limit?, offset?)` - List chapter assets
-- `get_asset(chapter_id, asset_id)` - Get a specific asset
-- `upload_asset(chapter_id, filename, content, content_type?)` - Upload an asset
-- `delete_asset(chapter_id, asset_id)` - Delete an asset
+| Method                                                       | Returns                      | Description         |
+| ------------------------------------------------------------ | ---------------------------- | ------------------- |
+| `list_assets(chapter_id, limit?, offset?)`                   | `PaginatedResponse[S3Asset]` | List chapter assets |
+| `get_asset(chapter_id, asset_id)`                            | `S3Asset`                    | Get an asset        |
+| `upload_asset(chapter_id, filename, content, content_type?)` | `S3Asset`                    | Upload an asset     |
+| `delete_asset(chapter_id, asset_id)`                         | `None`                       | Delete an asset     |
 
-## Response Models
+### Notes
 
-### `CampaignChapter`
+| Method                                                   | Returns                   | Description           |
+| -------------------------------------------------------- | ------------------------- | --------------------- |
+| `get_notes_page(chapter_id, limit?, offset?)`            | `PaginatedResponse[Note]` | Get a page of notes   |
+| `list_all_notes(chapter_id)`                             | `list[Note]`              | Get all notes         |
+| `iter_all_notes(chapter_id, limit?)`                     | `AsyncIterator[Note]`     | Iterate through notes |
+| `get_note(chapter_id, note_id)`                          | `Note`                    | Get a note            |
+| `create_note(chapter_id, NoteCreate, **kwargs)`          | `Note`                    | Create a note         |
+| `update_note(chapter_id, note_id, NoteUpdate, **kwargs)` | `Note`                    | Update a note         |
+| `delete_note(chapter_id, note_id)`                       | `None`                    | Delete a note         |
 
-Represents a campaign chapter entity returned from the API.
+## Example
 
-| Field           | Type          | Description                             |
-| --------------- | ------------- | --------------------------------------- |
-| `id`            | `str \| None` | MongoDB document ObjectID               |
-| `date_created`  | `datetime`    | Timestamp when the chapter was created  |
-| `date_modified` | `datetime`    | Timestamp when the chapter was modified |
-| `name`          | `str`         | Chapter name (3-50 characters)          |
-| `description`   | `str \| None` | Chapter description                     |
-| `asset_ids`     | `list[str]`   | List of associated asset IDs            |
-| `number`        | `int`         | Chapter number within the campaign      |
-| `book_id`       | `str`         | ID of the parent book                   |
+```python
+from vclient.models import ChapterCreate, ChapterUpdate, NoteCreate
 
-### `S3Asset`
+# Create a chapter (preferred: use model object)
+request = ChapterCreate(
+    name="The First Night",
+    description="Characters meet for the first time"
+)
+chapter = await chapters.create(request)
 
-Represents a file asset stored in S3.
+# Alternative: pass fields as kwargs
+chapter = await chapters.create(
+    name="The First Night",
+    description="Characters meet for the first time"
+)
 
-| Field               | Type                        | Description                      |
-| ------------------- | --------------------------- | -------------------------------- |
-| `id`                | `str`                       | MongoDB document ObjectID        |
-| `date_created`      | `datetime`                  | Timestamp when created           |
-| `date_modified`     | `datetime`                  | Timestamp when modified          |
-| `file_type`         | `S3AssetType`               | Type of file (image, text, etc.) |
-| `original_filename` | `str`                       | Original filename when uploaded  |
-| `public_url`        | `str`                       | Public URL to access the file    |
-| `uploaded_by`       | `str`                       | ID of user who uploaded          |
-| `parent_type`       | `S3AssetParentType \| None` | Type of parent entity            |
+# Update a chapter
+update = ChapterUpdate(name="The First Night: Introductions")
+updated = await chapters.update(chapter.id, update)
 
-### `Note`
+# Reorder the chapter
+await chapters.renumber(chapter.id, number=3)
 
-Represents a note attached to a chapter.
+# Create a note
+note_request = NoteCreate(title="Scene Notes", content="...")
+note = await chapters.create_note(chapter.id, note_request)
+```
 
-| Field           | Type       | Description                      |
-| --------------- | ---------- | -------------------------------- |
-| `id`            | `str`      | MongoDB document ObjectID        |
-| `date_created`  | `datetime` | Timestamp when created           |
-| `date_modified` | `datetime` | Timestamp when modified          |
-| `title`         | `str`      | Note title (3-50 characters)     |
-| `content`       | `str`      | Note content (supports markdown) |
+See [Response Models](models.md) for `CampaignChapter`, `S3Asset`, `Note`, and related types.

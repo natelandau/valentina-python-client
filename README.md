@@ -1,17 +1,27 @@
 # Valentina Python Client
 
-Async Python client library for accessing the Valentina Noir API. Documentation can be found at [https://docs.valentina-noir.com](https://docs.valentina-noir.com) and full API reference can be found at [https://api.valentina-noir.com/docs](https://api.valentina-noir.com/docs).
+Async Python client library for accessing the Valentina Noir API.
+
+## Features
+
+-   **Async-first design** - Built on httpx for efficient async HTTP operations
+-   **Type-safe** - Full type hints with Pydantic models for request/response validation
+-   **Convenient factory pattern** - Create a client once, access services from anywhere
+-   **Automatic pagination** - Stream through large datasets with `iter_all()` or fetch everything with `list_all()`
+-   **Robust error handling** - Specific exception types for different error conditions
+-   **Idempotency support** - Optional automatic idempotency keys for safe retries
+-   **Rate limit handling** - Built-in support for automatic rate limit retries
+
+## Requirements
+
+-   Python 3.13+
+-   [Valentina API key](https://docs.valentina-noir.com)
 
 ## Installation
-
-### From Git
 
 ```bash
 # Using uv
 uv add git+https://github.com/natelandau/valentina-python-client.git
-
-# Using pip
-pip install git+https://github.com/natelandau/valentina-python-client.git
 ```
 
 ## Quick Start
@@ -85,16 +95,16 @@ client = VClient(config=config)
 
 ### Configuration Options
 
-| Option                  | Type           | Default  | Description                                       |
-| ----------------------- | -------------- | -------- | ------------------------------------------------- |
-| `base_url`              | `str`          | Required | Base URL for the API                              |
-| `api_key`               | `str`          | Required | API key for authentication                        |
-| `timeout`               | `float`        | `30.0`   | Request timeout in seconds                        |
-| `max_retries`           | `int`          | `3`      | Maximum retry attempts for failed requests        |
-| `retry_delay`           | `float`        | `1.0`    | Base delay between retries in seconds             |
-| `auto_retry_rate_limit` | `bool`         | `True`   | Automatically retry rate-limited requests         |
-| `auto_idempotency_keys` | `bool`         | `False`  | Auto-generate idempotency keys for POST/PUT/PATCH |
-| `default_company_id`    | `str` or `None`| `None`   | Default company ID for service factory methods    |
+| Option                  | Type            | Default  | Description                                       |
+| ----------------------- | --------------- | -------- | ------------------------------------------------- |
+| `base_url`              | `str`           | Required | Base URL for the API                              |
+| `api_key`               | `str`           | Required | API key for authentication                        |
+| `timeout`               | `float`         | `30.0`   | Request timeout in seconds                        |
+| `max_retries`           | `int`           | `3`      | Maximum retry attempts for failed requests        |
+| `retry_delay`           | `float`         | `1.0`    | Base delay between retries in seconds             |
+| `auto_retry_rate_limit` | `bool`          | `True`   | Automatically retry rate-limited requests         |
+| `auto_idempotency_keys` | `bool`          | `False`  | Auto-generate idempotency keys for POST/PUT/PATCH |
+| `default_company_id`    | `str` or `None` | `None`   | Default company ID for service factory methods    |
 
 ### Idempotency Keys
 
@@ -146,21 +156,21 @@ Services that require a `company_id` accept it as an optional keyword argument. 
 
 | Service | Factory Function | Description |
 | --- | --- | --- |
-| [Campaigns Service](docs/campaigns-service.md) | `campaigns_service(user_id, company_id=...)` | Manage campaigns, assets, and notes |
-| [Campaigns Books Service](docs/campaign-books-service.md) | `books_service(user_id, campaign_id, company_id=...)` | Manage campaign books, notes, and assets |
-| [Campaigns Chapters Service](docs/campaign-book-chapters-service.md) | `chapters_service(user_id, campaign_id, book_id, company_id=...)` | Manage campaign book chapters, notes, and assets |
-| [Character Autogen Service](docs/character-autogen.md) | `character_autogen_service(user_id, campaign_id, company_id=...)` | Manage character autogen |
-| [Character Blueprint Service](docs/character-blueprint-service.md) | `character_blueprint_service(company_id=...)` | Manage character blueprints |
-| [Character Traits Service](docs/character-traits-service.md) | `character_traits_service(user_id, campaign_id, character_id, company_id=...)` | Manage character traits |
-| [Characters Service](docs/characters-service.md) | `characters_service(user_id, campaign_id, company_id=...)` | Manage characters, assets, and notes |
-| [Companies Service](docs/companies-service.md) | `companies_service()` | Manage companies and permissions |
-| [Developers Service](docs/developers-service.md) | `developer_service()` | Manage your own developer profile |
-| [Dicreoll Service](docs/dicerolls.md) | `dicreolls_service(user_id, company_id=...)` | Manage dicreolls |
-| [Dictionary Service](docs/dictionary-service.md) | `dictionary_service(company_id=...)` | Manage dictionary terms |
-| [Global Admin Service](docs/global-admin-service.md) | `global_admin_service()` | Manage developer accounts (requires admin) |
-| [Options Service](docs/options-service.md) | `options_service(company_id=...)` | Retrieve all options and enumerations for the api |
-| [Users Service](docs/users-service.md) | `users_service(company_id=...)` | Manage users and permissions |
-| [System Service](docs/system-service.md) | `system_service()` | Health checks and system status |
+| [Campaigns](docs/campaigns-service.md) | `campaigns_service(user_id, company_id=...)` | Manage campaigns, assets, and notes |
+| [Campaign Books](docs/campaign-books-service.md) | `books_service(user_id, campaign_id, company_id=...)` | Manage campaign books, notes, and assets |
+| [Campaign Chapters](docs/campaign-book-chapters-service.md) | `chapters_service(user_id, campaign_id, book_id, company_id=...)` | Manage campaign book chapters |
+| [Character Autogen](docs/character-autogen-service.md) | `character_autogen_service(user_id, campaign_id, company_id=...)` | Auto-generate characters |
+| [Character Blueprint](docs/character-blueprint-service.md) | `character_blueprint_service(company_id=...)` | Manage character blueprints |
+| [Character Traits](docs/character-traits-service.md) | `character_traits_service(user_id, campaign_id, character_id, company_id=...)` | Manage character traits |
+| [Characters](docs/characters-service.md) | `characters_service(user_id, campaign_id, company_id=...)` | Manage characters, assets, and notes |
+| [Companies](docs/companies-service.md) | `companies_service()` | Manage companies and permissions |
+| [Developers](docs/developers-service.md) | `developer_service()` | Manage your developer profile |
+| [Dice Rolls](docs/dicerolls-service.md) | `dicreolls_service(user_id, company_id=...)` | Manage dice rolls |
+| [Dictionary](docs/dictionary-service.md) | `dictionary_service(company_id=...)` | Manage dictionary terms |
+| [Global Admin](docs/global-admin-service.md) | `global_admin_service()` | Manage developer accounts (admin only) |
+| [Options](docs/options-service.md) | `options_service(company_id=...)` | Retrieve API options and enumerations |
+| [System](docs/system-service.md) | `system_service()` | Health checks and system status |
+| [Users](docs/users-service.md) | `users_service(company_id=...)` | Manage users and permissions |
 
 ## Common Service Methods
 
@@ -244,16 +254,17 @@ async for company in companies.iter_all():
 The client provides specific exception types for different error conditions:
 
 ```python
-from vclient import (
-    companies_service,
+from vclient import companies_service
+from vclient.exceptions import (
     APIError,
     AuthenticationError,
     AuthorizationError,
-    NotFoundError,
-    ValidationError,
     ConflictError,
+    NotFoundError,
     RateLimitError,
+    RequestValidationError,
     ServerError,
+    ValidationError,
 )
 
 companies = companies_service()
@@ -267,9 +278,13 @@ except AuthorizationError:
 except AuthenticationError:
     print("Invalid API key")
 except ValidationError as e:
-    print(f"Invalid request: {e}")
-except RateLimitError:
-    print("Rate limit exceeded, try again later")
+    print(f"Server validation failed: {e}")
+except RequestValidationError as e:
+    print(f"Client validation failed: {e}")
+except ConflictError:
+    print("Resource conflict (check idempotency key)")
+except RateLimitError as e:
+    print(f"Rate limited, retry after {e.retry_after}s")
 except ServerError:
     print("Server error, try again later")
 except APIError as e:
@@ -278,16 +293,17 @@ except APIError as e:
 
 ### Exception Hierarchy
 
-| Exception             | HTTP Status | Description                   |
-| --------------------- | ----------- | ----------------------------- |
-| `APIError`            | -           | Base class for all API errors |
-| `AuthenticationError` | 401         | Invalid or missing API key    |
-| `AuthorizationError`  | 403         | Insufficient permissions      |
-| `NotFoundError`       | 404         | Resource not found            |
-| `ValidationError`     | 422         | Invalid request data          |
-| `ConflictError`       | 409         | Resource conflict             |
-| `RateLimitError`      | 429         | Rate limit exceeded           |
-| `ServerError`         | 5xx         | Server-side error             |
+| Exception                | HTTP Status | Description                            |
+| ------------------------ | ----------- | -------------------------------------- |
+| `APIError`               | -           | Base class for all API errors          |
+| `AuthenticationError`    | 401         | Invalid or missing API key             |
+| `AuthorizationError`     | 403         | Insufficient permissions               |
+| `NotFoundError`          | 404         | Resource not found                     |
+| `ValidationError`        | 400         | Server-side validation failed          |
+| `RequestValidationError` | -           | Client-side validation failed          |
+| `ConflictError`          | 409         | Resource conflict (e.g., duplicate ID) |
+| `RateLimitError`         | 429         | Rate limit exceeded                    |
+| `ServerError`            | 5xx         | Server-side error                      |
 
 ## Response Models
 
@@ -296,3 +312,25 @@ All API responses are returned as [Pydantic](https://docs.pydantic.dev/) models,
 Import models from `vclient.models` for use in your code.
 
 See individual service documentation for detailed response model specifications.
+
+## Context Manager Usage
+
+For applications that need explicit resource management, use the async context manager pattern:
+
+```python
+from vclient import VClient
+
+async with VClient(
+    base_url="https://api.valentina-noir.com",
+    api_key="your-api-key",
+    set_as_default=False,  # Don't register as default
+) as client:
+    companies = client.companies
+    all_companies = await companies.list_all()
+    # HTTP client is automatically closed when exiting the context
+```
+
+## Resources
+
+-   [API Documentation](https://docs.valentina-noir.com)
+-   [API Reference](https://api.valentina-noir.com/docs)
