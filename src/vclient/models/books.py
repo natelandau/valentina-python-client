@@ -21,7 +21,7 @@ class CampaignBook(BaseModel):
     campaign_id: str = Field(..., description="ID of the parent campaign.")
 
 
-class CreateBookRequest(BaseModel):
+class BookCreate(BaseModel):
     """Request body for creating a new campaign book.
 
     Used to construct the JSON payload for book creation.
@@ -33,7 +33,7 @@ class CreateBookRequest(BaseModel):
     )
 
 
-class UpdateBookRequest(BaseModel):
+class BookUpdate(BaseModel):
     """Request body for updating a campaign book.
 
     Only include fields that need to be changed; omitted fields remain unchanged.
@@ -47,10 +47,18 @@ class UpdateBookRequest(BaseModel):
     )
 
 
-class RenumberBookRequest(BaseModel):
-    """Request body for renumbering a campaign book.
+class _BookRenumber(BaseModel):
+    """Internal request body for renumbering a campaign book.
 
     Changes the book's position number within the campaign.
     """
 
     number: int = Field(..., ge=1, description="New book number (must be >= 1).")
+
+
+__all__ = [
+    "BookCreate",
+    "BookUpdate",
+    "CampaignBook",
+    "_BookRenumber",
+]

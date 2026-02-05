@@ -6,15 +6,15 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    BookCreate,
+    BookUpdate,
     CampaignBook,
-    CreateBookRequest,
     CreateNoteRequest,
     Note,
     PaginatedResponse,
-    RenumberBookRequest,
     S3Asset,
-    UpdateBookRequest,
     UpdateNoteRequest,
+    _BookRenumber,
 )
 from vclient.services.base import BaseService
 
@@ -163,7 +163,7 @@ class BooksService(BaseService):
             AuthorizationError: If you don't have book management privileges.
         """
         body = self._validate_request(
-            CreateBookRequest,
+            BookCreate,
             name=name,
             description=description,
         )
@@ -199,7 +199,7 @@ class BooksService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateBookRequest,
+            BookUpdate,
             name=name,
             description=description,
         )
@@ -243,7 +243,7 @@ class BooksService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(RenumberBookRequest, number=number)
+        body = self._validate_request(_BookRenumber, number=number)
         response = await self._put(
             self._format_endpoint(Endpoints.CAMPAIGN_BOOK_NUMBER, book_id=book_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),

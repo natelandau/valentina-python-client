@@ -1,11 +1,16 @@
 """Data models for API responses."""
 
 from .books import (
+    BookCreate,
+    BookUpdate,
     CampaignBook,
-    CreateBookRequest,
-    RenumberBookRequest,
-    UpdateBookRequest,
+    _BookRenumber,
 )
+
+# Backwards compatibility aliases for books
+CreateBookRequest = BookCreate
+RenumberBookRequest = _BookRenumber
+UpdateBookRequest = BookUpdate
 from .campaigns import (
     Campaign,
     CampaignCreate,
@@ -132,6 +137,8 @@ from .users import (
 
 __all__ = [
     "AssignCharacterTraitRequest",
+    "BookCreate",
+    "BookUpdate",
     "Campaign",
     "CampaignBook",
     "CampaignChapter",
