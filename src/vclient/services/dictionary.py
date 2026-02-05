@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    CreateDictionaryTermRequest,
     DictionaryTerm,
+    DictionaryTermCreate,
+    DictionaryTermUpdate,
     PaginatedResponse,
-    UpdateDictionaryTermRequest,
 )
 from vclient.services.base import BaseService
 
@@ -94,7 +94,7 @@ class DictionaryService(BaseService):
         """Create a new dictionary term."""
         response = await self._post(
             self._format_endpoint(Endpoints.DICTIONARY_TERMS),
-            json=CreateDictionaryTermRequest(
+            json=DictionaryTermCreate(
                 term=term,
                 definition=definition,
                 link=link,
@@ -115,7 +115,7 @@ class DictionaryService(BaseService):
         """Update a specific dictionary term."""
         response = await self._put(
             self._format_endpoint(Endpoints.DICTIONARY_TERM, term_id=term_id),
-            json=UpdateDictionaryTermRequest(
+            json=DictionaryTermUpdate(
                 term=term,
                 definition=definition,
                 link=link,

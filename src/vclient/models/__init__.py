@@ -114,12 +114,20 @@ from .developers import (
 
 # Backwards compatibility alias for developers
 UpdateMeDeveloperRequest = MeDeveloperUpdate
-from .diceroll import CreateDicreollQuickrollRequest, CreateDicreollRequest, Dicreoll
+from .diceroll import DicerollCreate, Dicreoll, _DicerollQuickrollCreate
+
+# Backwards compatibility aliases for diceroll
+CreateDicreollQuickrollRequest = _DicerollQuickrollCreate
+CreateDicreollRequest = DicerollCreate
 from .dictionary import (
-    CreateDictionaryTermRequest,
     DictionaryTerm,
-    UpdateDictionaryTermRequest,
+    DictionaryTermCreate,
+    DictionaryTermUpdate,
 )
+
+# Backwards compatibility aliases for dictionary
+CreateDictionaryTermRequest = DictionaryTermCreate
+UpdateDictionaryTermRequest = DictionaryTermUpdate
 from .global_admin import (
     Developer,
     DeveloperCompanyPermission,
@@ -218,8 +226,11 @@ __all__ = [
     "DeveloperCreate",
     "DeveloperUpdate",
     "DeveloperWithApiKey",
+    "DicerollCreate",
     "Dicreoll",
     "DictionaryTerm",
+    "DictionaryTermCreate",
+    "DictionaryTermUpdate",
     "DiscordProfile",
     "EdgeAndPerks",
     "ExperienceAddRemoveRequest",

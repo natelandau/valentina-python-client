@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT, DiceSize
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    CreateDicreollQuickrollRequest,
-    CreateDicreollRequest,
+    DicerollCreate,
     Dicreoll,
     PaginatedResponse,
+    _DicerollQuickrollCreate,
 )
 from vclient.services.base import BaseService
 
@@ -126,7 +126,7 @@ class DicreollService(BaseService):
         """Create a new dicreoll."""
         response = await self._post(
             self._format_endpoint(Endpoints.DICREOLLS),
-            json=CreateDicreollRequest(
+            json=DicerollCreate(
                 dice_size=dice_size,
                 difficulty=difficulty,
                 num_dice=num_dice,
@@ -151,7 +151,7 @@ class DicreollService(BaseService):
         """Create a new dicreoll quickroll."""
         response = await self._post(
             self._format_endpoint(Endpoints.DICEROLL_QUICKROLL),
-            json=CreateDicreollQuickrollRequest(
+            json=_DicerollQuickrollCreate(
                 quickroll_id=quickroll_id,
                 character_id=character_id,
                 comment=comment,

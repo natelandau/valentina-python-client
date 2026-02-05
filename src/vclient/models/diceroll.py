@@ -43,7 +43,7 @@ class Dicreoll(BaseModel):
     result: DiceRollResultSchema | None = None
 
 
-class CreateDicreollRequest(BaseModel):
+class DicerollCreate(BaseModel):
     """Request body for creating a dicreoll."""
 
     dice_size: DiceSize
@@ -56,11 +56,18 @@ class CreateDicreollRequest(BaseModel):
     campaign_id: str | None = None
 
 
-class CreateDicreollQuickrollRequest(BaseModel):
-    """Request body for creating a dicreoll quickroll."""
+class _DicerollQuickrollCreate(BaseModel):
+    """Internal request body for creating a dicreoll quickroll."""
 
     quickroll_id: str
     character_id: str
     comment: str | None = None
     difficulty: int = 6
     num_desperation_dice: int = 0
+
+
+__all__ = [
+    "DicerollCreate",
+    "Dicreoll",
+    "_DicerollQuickrollCreate",
+]
