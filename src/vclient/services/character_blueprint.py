@@ -200,7 +200,7 @@ class CharacterBlueprintService(BaseService):
             Trait,
             limit=limit,
             offset=offset,
-            params=params if params else None,
+            params=params or None,
         )
 
     async def list_all_category_traits(
@@ -247,7 +247,7 @@ class CharacterBlueprintService(BaseService):
                 section_id=section_id,
                 category_id=category_id,
             ),
-            params=params if params else None,
+            params=params or None,
         ):
             yield Trait.model_validate(trait)
 
@@ -280,7 +280,7 @@ class CharacterBlueprintService(BaseService):
             Trait,
             limit=limit,
             offset=offset,
-            params=params if params else None,
+            params=params or None,
         )
 
     async def list_all_traits(
@@ -323,7 +323,7 @@ class CharacterBlueprintService(BaseService):
 
         async for trait in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
-            params=params if params else None,
+            params=params or None,
         ):
             yield Trait.model_validate(trait)
 

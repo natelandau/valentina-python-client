@@ -90,7 +90,7 @@ class UsersService(BaseService):
             User,
             limit=limit,
             offset=offset,
-            params=params if params else None,
+            params=params or None,
         )
 
     async def list_all(
@@ -140,7 +140,7 @@ class UsersService(BaseService):
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.USERS),
             limit=limit,
-            params=params if params else None,
+            params=params or None,
         ):
             yield User.model_validate(item)
 
