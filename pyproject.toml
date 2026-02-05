@@ -1,5 +1,9 @@
 [project]
-    authors = [{ name = "Nathaniel Landau", email = "nate@natelandau.com" }]
+    authors = [{ name = "Nate Landau", email = "github@natenate.org" }]
+    classifiers = [
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
     dependencies = [
         "anyio>=4.12.1",
         "cashews>=7.4.4",
@@ -7,25 +11,32 @@
         "loguru>=0.7.3",
         "pydantic[email]>=2.12.5",
     ]
-    description = "Async Python client library for the Valentina API"
-    name = "vclient"
+    description = "Async Python client library for the Valentina Noir API"
+    name = "valentina-python-client"
     readme = "README.md"
     requires-python = ">=3.13"
     version = "1.0.0"
+
+    [project.urls]
+        Homepage   = "https://docs.valentina-noir.com/python-api-client/"
+        Repository = "https://github.com/natelandau/valentina-python-client"
 
 [build-system]
     build-backend = "uv_build"
     requires      = ["uv_build>=0.9.26,<0.10.0"]
 
+[tool.uv.build-backend]
+    module-name = "vclient"
+
 [dependency-groups]
     dev = [
-        "commitizen>=4.12.0",
-        "coverage>=7.13.1",
+        "commitizen>=4.13.5",
+        "coverage>=7.13.3",
         "djlint>=1.36.4",
         "docker>=7.1.0",
-        "duty>=1.6.3",
+        "duty>=1.8.0",
         "nclutils>=2.1.0",
-        "prek>=0.2.30",
+        "prek>=0.3.1",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.0.0",
@@ -35,10 +46,10 @@
         "pytest-xdist>=3.8.0",
         "pytest>=9.0.2",
         "respx>=0.22.0",
-        "ruff>=0.14.13",
+        "ruff>=0.15.0",
         "shellcheck-py>=0.11.0.1",
-        "ty>=0.0.13",
-        "typos>=1.42.1",
+        "ty>=0.0.15",
+        "typos>=1.43.2",
         "vulture>=2.14",
         "yamllint>=1.38.0",
     ]

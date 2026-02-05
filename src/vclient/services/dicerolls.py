@@ -63,7 +63,7 @@ class DicerollService(BaseService):
             Diceroll,
             limit=limit,
             offset=offset,
-            params=params if params else None,
+            params=params or None,
         )
 
     async def list_all(
@@ -100,7 +100,7 @@ class DicerollService(BaseService):
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.DICEROLLS),
             limit=limit,
-            params=params if params else None,
+            params=params or None,
         ):
             yield Diceroll.model_validate(item)
 

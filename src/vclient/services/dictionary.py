@@ -55,7 +55,7 @@ class DictionaryService(BaseService):
             DictionaryTerm,
             limit=limit,
             offset=offset,
-            params=params if params else None,
+            params=params or None,
         )
 
     async def list_all(self, *, term: str | None = None) -> list[DictionaryTerm]:
@@ -72,7 +72,7 @@ class DictionaryService(BaseService):
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.DICTIONARY_TERMS),
             limit=limit,
-            params=params if params else None,
+            params=params or None,
         ):
             yield DictionaryTerm.model_validate(item)
 

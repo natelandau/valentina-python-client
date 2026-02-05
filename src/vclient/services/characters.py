@@ -118,7 +118,7 @@ class CharactersService(BaseService):
             Character,
             limit=limit,
             offset=offset,
-            params=params if params else None,
+            params=params or None,
         )
 
     async def list_all(
@@ -201,7 +201,7 @@ class CharactersService(BaseService):
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.CHARACTERS),
             limit=limit,
-            params=params if params else None,
+            params=params or None,
         ):
             yield Character.model_validate(item)
 

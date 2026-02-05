@@ -97,7 +97,7 @@ class GlobalAdminService(BaseService):
         async for item in self._iter_all_pages(
             Endpoints.ADMIN_DEVELOPERS,
             limit=limit,
-            params=params if params else None,
+            params=params or None,
         ):
             yield Developer.model_validate(item)
 

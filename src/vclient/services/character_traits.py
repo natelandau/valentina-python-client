@@ -80,7 +80,7 @@ class CharacterTraitsService(BaseService):
             CharacterTrait,
             limit=limit,
             offset=offset,
-            params=params if params else None,
+            params=params or None,
         )
 
     async def list_all(
@@ -124,7 +124,7 @@ class CharacterTraitsService(BaseService):
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.CHARACTER_TRAITS),
             limit=limit,
-            params=params if params else None,
+            params=params or None,
         ):
             yield CharacterTrait.model_validate(item)
 
