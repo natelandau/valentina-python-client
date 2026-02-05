@@ -58,7 +58,9 @@ class DeveloperService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = request if request is not None else self._validate_request(MeDeveloperUpdate, **kwargs)
+        body = (
+            request if request is not None else self._validate_request(MeDeveloperUpdate, **kwargs)
+        )
         response = await self._patch(
             Endpoints.DEVELOPER_ME,
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),

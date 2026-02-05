@@ -7,7 +7,6 @@ from vclient.constants import DEFAULT_PAGE_LIMIT, UserRole
 from vclient.endpoints import Endpoints
 from vclient.models import (
     CampaignExperience,
-    DiscordProfile,
     Note,
     NoteCreate,
     NoteUpdate,

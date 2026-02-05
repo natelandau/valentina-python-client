@@ -10,7 +10,6 @@ from vclient.models import (
     Company,
     CompanyCreate,
     CompanyPermissions,
-    CompanySettings,
     CompanyUpdate,
     NewCompanyResponse,
     PaginatedResponse,

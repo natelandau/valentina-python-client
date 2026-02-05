@@ -3,7 +3,7 @@
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT, DiceSize
+from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
     DicerollCreate,

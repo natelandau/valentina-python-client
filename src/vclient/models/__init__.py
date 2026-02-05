@@ -1,36 +1,23 @@
 """Data models for API responses."""
 
+# All imports at top
 from .books import (
     BookCreate,
     BookUpdate,
     CampaignBook,
     _BookRenumber,
 )
-
-# Backwards compatibility aliases for books
-CreateBookRequest = BookCreate
-RenumberBookRequest = _BookRenumber
-UpdateBookRequest = BookUpdate
 from .campaigns import (
     Campaign,
     CampaignCreate,
     CampaignUpdate,
 )
-
-# Backwards compatibility aliases for campaigns
-CreateCampaignRequest = CampaignCreate
-UpdateCampaignRequest = CampaignUpdate
 from .chapters import (
     CampaignChapter,
     ChapterCreate,
     ChapterUpdate,
     _ChapterRenumber,
 )
-
-# Backwards compatibility aliases for chapters
-CreateChapterRequest = ChapterCreate
-RenumberChapterRequest = _ChapterRenumber
-UpdateChapterRequest = ChapterUpdate
 from .character_autogen import (
     ChargenSessionFinalizeDTO,
     ChargenSessionResponse,
@@ -53,11 +40,6 @@ from .character_trait import (
     _TraitAssign,
     _TraitModify,
 )
-
-# Backwards compatibility aliases for character traits
-AssignCharacterTraitRequest = _TraitAssign
-CharacterTraitModifyRequest = _TraitModify
-CreateCharacterTraitRequest = TraitCreate
 from .characters import (
     Character,
     CharacterCreate,
@@ -81,16 +63,6 @@ from .characters import (
 from .characters import (
     HunterEdge as CharacterHunterEdge,
 )
-
-# Backwards compatibility aliases for characters
-CharacterEdgeAndPerksDTO = EdgeAndPerks
-CharacterInventoryItem = InventoryItem
-CharacterPerkDTO = Perk
-CreateCharacterInventoryItemRequest = InventoryItemCreate
-CreateCharacterRequest = CharacterCreate
-HunterAttributesEdgeModel = CharacterHunterEdge
-UpdateCharacterInventoryItemRequest = InventoryItemUpdate
-UpdateCharacterRequest = CharacterUpdate
 from .companies import (
     Company,
     CompanyCreate,
@@ -100,34 +72,18 @@ from .companies import (
     NewCompanyResponse,
     _GrantAccess,
 )
-
-# Backwards compatibility aliases for companies
-CreateCompanyRequest = CompanyCreate
-GrantAccessRequest = _GrantAccess
-UpdateCompanyRequest = CompanyUpdate
 from .developers import (
     MeDeveloper,
     MeDeveloperCompanyPermission,
     MeDeveloperUpdate,
     MeDeveloperWithApiKey,
 )
-
-# Backwards compatibility alias for developers
-UpdateMeDeveloperRequest = MeDeveloperUpdate
 from .diceroll import DicerollCreate, Dicreoll, _DicerollQuickrollCreate
-
-# Backwards compatibility aliases for diceroll
-CreateDicreollQuickrollRequest = _DicerollQuickrollCreate
-CreateDicreollRequest = DicerollCreate
 from .dictionary import (
     DictionaryTerm,
     DictionaryTermCreate,
     DictionaryTermUpdate,
 )
-
-# Backwards compatibility aliases for dictionary
-CreateDictionaryTermRequest = DictionaryTermCreate
-UpdateDictionaryTermRequest = DictionaryTermUpdate
 from .global_admin import (
     Developer,
     DeveloperCompanyPermission,
@@ -135,10 +91,6 @@ from .global_admin import (
     DeveloperUpdate,
     DeveloperWithApiKey,
 )
-
-# Backwards compatibility aliases for global_admin
-CreateDeveloperRequest = DeveloperCreate
-UpdateDeveloperRequest = DeveloperUpdate
 from .pagination import PaginatedResponse
 from .shared import (
     CharacterSpecialty,
@@ -152,10 +104,6 @@ from .shared import (
     WerewolfGift,
     WerewolfRite,
 )
-
-# Backwards compatibility aliases for notes
-CreateNoteRequest = NoteCreate
-UpdateNoteRequest = NoteUpdate
 from .system import SystemHealth
 from .users import (
     CampaignExperience,
@@ -169,7 +117,66 @@ from .users import (
     _ExperienceAddRemove,
 )
 
-# Backwards compatibility aliases for users
+# -------------------------------------------------------------------------
+# Backwards Compatibility Aliases
+# -------------------------------------------------------------------------
+# These aliases maintain compatibility with older code that used the previous
+# naming conventions. New code should use the primary model names above.
+
+# Books
+CreateBookRequest = BookCreate
+RenumberBookRequest = _BookRenumber
+UpdateBookRequest = BookUpdate
+
+# Campaigns
+CreateCampaignRequest = CampaignCreate
+UpdateCampaignRequest = CampaignUpdate
+
+# Chapters
+CreateChapterRequest = ChapterCreate
+RenumberChapterRequest = _ChapterRenumber
+UpdateChapterRequest = ChapterUpdate
+
+# Character traits
+AssignCharacterTraitRequest = _TraitAssign
+CharacterTraitModifyRequest = _TraitModify
+CreateCharacterTraitRequest = TraitCreate
+
+# Characters
+CharacterEdgeAndPerksDTO = EdgeAndPerks
+CharacterInventoryItem = InventoryItem
+CharacterPerkDTO = Perk
+CreateCharacterInventoryItemRequest = InventoryItemCreate
+CreateCharacterRequest = CharacterCreate
+HunterAttributesEdgeModel = CharacterHunterEdge
+UpdateCharacterInventoryItemRequest = InventoryItemUpdate
+UpdateCharacterRequest = CharacterUpdate
+
+# Companies
+CreateCompanyRequest = CompanyCreate
+GrantAccessRequest = _GrantAccess
+UpdateCompanyRequest = CompanyUpdate
+
+# Developers
+UpdateMeDeveloperRequest = MeDeveloperUpdate
+
+# Diceroll
+CreateDicreollQuickrollRequest = _DicerollQuickrollCreate
+CreateDicreollRequest = DicerollCreate
+
+# Dictionary
+CreateDictionaryTermRequest = DictionaryTermCreate
+UpdateDictionaryTermRequest = DictionaryTermUpdate
+
+# Global admin
+CreateDeveloperRequest = DeveloperCreate
+UpdateDeveloperRequest = DeveloperUpdate
+
+# Notes
+CreateNoteRequest = NoteCreate
+UpdateNoteRequest = NoteUpdate
+
+# Users
 CreateQuickrollRequest = QuickrollCreate
 CreateUserRequest = UserCreate
 ExperienceAddRemoveRequest = _ExperienceAddRemove

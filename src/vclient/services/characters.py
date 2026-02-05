@@ -6,10 +6,8 @@ from typing import TYPE_CHECKING
 from vclient.constants import (
     DEFAULT_PAGE_LIMIT,
     CharacterClass,
-    CharacterInventoryType,
     CharacterStatus,
     CharacterType,
-    GameVersion,
 )
 from vclient.endpoints import Endpoints
 from vclient.models import (
@@ -17,12 +15,9 @@ from vclient.models import (
     CharacterCreate,
     CharacterUpdate,
     EdgeAndPerks,
-    HunterAttributesCreate,
-    HunterAttributesUpdate,
     InventoryItem,
     InventoryItemCreate,
     InventoryItemUpdate,
-    MageAttributes,
     Note,
     NoteCreate,
     NoteUpdate,
@@ -30,13 +25,8 @@ from vclient.models import (
     Perk,
     RollStatistics,
     S3Asset,
-    VampireAttributesCreate,
-    VampireAttributesUpdate,
-    WerewolfAttributesCreate,
-    WerewolfAttributesUpdate,
     WerewolfGift,
     WerewolfRite,
-    _TraitAssign,
 )
 from vclient.services.base import BaseService
 
@@ -793,7 +783,11 @@ class CharactersService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = request if request is not None else self._validate_request(InventoryItemCreate, **kwargs)
+        body = (
+            request
+            if request is not None
+            else self._validate_request(InventoryItemCreate, **kwargs)
+        )
         response = await self._post(
             self._format_endpoint(Endpoints.CHARACTER_INVENTORY, character_id=character_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -829,7 +823,11 @@ class CharactersService(BaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = request if request is not None else self._validate_request(InventoryItemUpdate, **kwargs)
+        body = (
+            request
+            if request is not None
+            else self._validate_request(InventoryItemUpdate, **kwargs)
+        )
         response = await self._patch(
             self._format_endpoint(
                 Endpoints.CHARACTER_INVENTORY_ITEM, character_id=character_id, item_id=item_id
