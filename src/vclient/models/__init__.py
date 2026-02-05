@@ -78,7 +78,7 @@ from .developers import (
     MeDeveloperUpdate,
     MeDeveloperWithApiKey,
 )
-from .diceroll import DicerollCreate, Dicreoll, _DicerollQuickrollCreate
+from .diceroll import Diceroll, DicerollCreate, _DicerollQuickrollCreate
 from .dictionary import (
     DictionaryTerm,
     DictionaryTermCreate,
@@ -161,6 +161,11 @@ UpdateCompanyRequest = CompanyUpdate
 UpdateMeDeveloperRequest = MeDeveloperUpdate
 
 # Diceroll
+CreateDicerollQuickrollRequest = _DicerollQuickrollCreate
+CreateDicerollRequest = DicerollCreate
+
+# Backwards compatibility aliases for old typo
+Dicreoll = Diceroll
 CreateDicreollQuickrollRequest = _DicerollQuickrollCreate
 CreateDicreollRequest = DicerollCreate
 
@@ -233,8 +238,9 @@ __all__ = [
     "DeveloperCreate",
     "DeveloperUpdate",
     "DeveloperWithApiKey",
+    "Diceroll",
     "DicerollCreate",
-    "Dicreoll",
+    "Dicreoll",  # Backwards compatibility alias
     "DictionaryTerm",
     "DictionaryTermCreate",
     "DictionaryTermUpdate",

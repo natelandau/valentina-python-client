@@ -143,10 +143,10 @@ class Endpoints:
     DICTIONARY_TERMS = f"{COMPANY}/dictionary"
     DICTIONARY_TERM = f"{DICTIONARY_TERMS}/{{term_id}}"
 
-    # Dicrerolls
-    DICREOLLS = f"{USER}/dicreolls"
-    DICREOLL = f"{DICREOLLS}/{{dicreoll_id}}"
-    DICEROLL_QUICKROLL = f"{DICREOLLS}/quickroll"
+    # Dice Rolls
+    DICEROLLS = f"{USER}/dicerolls"
+    DICEROLL = f"{DICEROLLS}/{{diceroll_id}}"
+    DICEROLL_QUICKROLL = f"{DICEROLLS}/quickroll"
 
     # Options and enumerations
     OPTIONS = f"{COMPANY}/options"

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         CharacterTraitsService,
         CompaniesService,
         DeveloperService,
-        DicreollService,
+        DicerollService,
         DictionaryService,
         GlobalAdminService,
         OptionsService,
@@ -443,10 +443,10 @@ class VClient:
 
         return DictionaryService(self, self._resolve_company_id(company_id))
 
-    def dicreolls(self, user_id: str, company_id: str | None = None) -> "DicreollService":
-        """Get a DicreollService scoped to a specific company and user.
+    def dicerolls(self, user_id: str, company_id: str | None = None) -> "DicerollService":
+        """Get a DicerollService scoped to a specific company and user.
 
-        Provides methods to create, retrieve, update, and delete dicreolls.
+        Provides methods to create, retrieve, and list dice rolls.
 
         Args:
             user_id: The ID of the user to operate as.
@@ -456,9 +456,9 @@ class VClient:
         Raises:
             ValueError: If no company_id provided and no default configured.
         """
-        from vclient.services.diecrolls import DicreollService
+        from vclient.services.dicerolls import DicerollService
 
-        return DicreollService(self, self._resolve_company_id(company_id), user_id)
+        return DicerollService(self, self._resolve_company_id(company_id), user_id)
 
     def options(self, company_id: str | None = None) -> "OptionsService":
         """Get a OptionsService scoped to a specific company.

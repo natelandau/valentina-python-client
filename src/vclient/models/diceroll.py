@@ -1,4 +1,4 @@
-"""Pydantic models for Dicreoll API responses and requests."""
+"""Pydantic models for Diceroll API responses and requests."""
 
 from datetime import datetime
 
@@ -24,8 +24,8 @@ class DiceRollResultSchema(BaseModel):
     desperation_roll_shortcode: str | None = None
 
 
-class Dicreoll(BaseModel):
-    """Response model for a dicreoll."""
+class Diceroll(BaseModel):
+    """Response model for a dice roll."""
 
     id: str
     date_created: datetime
@@ -44,7 +44,7 @@ class Dicreoll(BaseModel):
 
 
 class DicerollCreate(BaseModel):
-    """Request body for creating a dicreoll."""
+    """Request body for creating a dice roll."""
 
     dice_size: DiceSize
     difficulty: int | None = None
@@ -57,7 +57,7 @@ class DicerollCreate(BaseModel):
 
 
 class _DicerollQuickrollCreate(BaseModel):
-    """Internal request body for creating a dicreoll quickroll."""
+    """Internal request body for creating a dice roll using a quickroll template."""
 
     quickroll_id: str
     character_id: str
@@ -67,7 +67,7 @@ class _DicerollQuickrollCreate(BaseModel):
 
 
 __all__ = [
+    "Diceroll",
     "DicerollCreate",
-    "Dicreoll",
     "_DicerollQuickrollCreate",
 ]

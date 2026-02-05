@@ -15,7 +15,7 @@ from vclient.registry import (
     configure_default_client,
     default_client,
     developer_service,
-    dicreolls_service,
+    dicerolls_service,
     dictionary_service,
     global_admin_service,
     options_service,
@@ -32,7 +32,7 @@ from vclient.services import (
     CharacterTraitsService,
     CompaniesService,
     DeveloperService,
-    DicreollService,
+    DicerollService,
     DictionaryService,
     GlobalAdminService,
     OptionsService,
@@ -471,28 +471,28 @@ class TestDictionaryService:
         assert service._client is client
 
 
-class TestDicreollService:
-    """Tests for dicreolls_service factory function."""
+class TestDicerollService:
+    """Tests for dicerolls_service factory function."""
 
-    def test_dicreolls_service_raises_when_not_configured(self) -> None:
-        """Verify dicreolls_service raises RuntimeError when no client is configured."""
+    def test_dicerolls_service_raises_when_not_configured(self) -> None:
+        """Verify dicerolls_service raises RuntimeError when no client is configured."""
         # Given: No default client configured
 
-        # When/Then: Calling dicreolls_service raises RuntimeError
+        # When/Then: Calling dicerolls_service raises RuntimeError
         with pytest.raises(RuntimeError, match="No default client configured"):
-            dicreolls_service(user_id="user_id", company_id="company_id")
+            dicerolls_service(user_id="user_id", company_id="company_id")
 
-    def test_dicreolls_service_returns_service_instance(self, api_config) -> None:
-        """Verify dicreolls_service returns a DicreollService with the default client."""
+    def test_dicerolls_service_returns_service_instance(self, api_config) -> None:
+        """Verify dicerolls_service returns a DicerollService with the default client."""
         # Given: A configured default client
         client = VClient(config=api_config)
         configure_default_client(client)
 
-        # When: Getting the dicreolls service
-        service = dicreolls_service(user_id="user_id", company_id="company_id")
+        # When: Getting the dicerolls service
+        service = dicerolls_service(user_id="user_id", company_id="company_id")
 
-        # Then: A DicreollService is returned with the correct client
-        assert isinstance(service, DicreollService)
+        # Then: A DicerollService is returned with the correct client
+        assert isinstance(service, DicerollService)
         assert service._client is client
 
 

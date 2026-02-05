@@ -10,8 +10,8 @@ from .character_traits import CharacterTraitsService
 from .characters import CharactersService
 from .companies import CompaniesService
 from .developers import DeveloperService
+from .dicerolls import DicerollService
 from .dictionary import DictionaryService
-from .diecrolls import DicreollService
 from .global_admin import GlobalAdminService
 from .options import OptionsService
 from .system import SystemService
@@ -28,7 +28,7 @@ __all__ = [
     "CharactersService",
     "CompaniesService",
     "DeveloperService",
-    "DicreollService",
+    "DicerollService",
     "DictionaryService",
     "GlobalAdminService",
     "OptionsService",

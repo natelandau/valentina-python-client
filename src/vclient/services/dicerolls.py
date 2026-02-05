@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    Diceroll,
     DicerollCreate,
-    Dicreoll,
     PaginatedResponse,
     _DicerollQuickrollCreate,
 )
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from vclient.client import VClient
 
 
-class DicreollService(BaseService):
+class DicerollService(BaseService):
     """Service for interacting with the Dice Rolls API."""
 
     def __init__(self, client: "VClient", company_id: str, user_id: str) -> None:
@@ -37,7 +37,7 @@ class DicreollService(BaseService):
         return endpoint.format(company_id=self._company_id, user_id=self._user_id, **kwargs)
 
     # -------------------------------------------------------------------------
-    # Dicreoll CRUD Methods
+    # Diceroll CRUD Methods
     # -------------------------------------------------------------------------
 
     async def get_page(
@@ -48,8 +48,8 @@ class DicreollService(BaseService):
         userid: str | None = None,
         characterid: str | None = None,
         campaignid: str | None = None,
-    ) -> PaginatedResponse[Dicreoll]:
-        """Retrieve a paginated page of dicreolls."""
+    ) -> PaginatedResponse[Diceroll]:
+        """Retrieve a paginated page of dice rolls."""
         params = {}
         if userid is not None:
             params["userid"] = userid
@@ -59,8 +59,8 @@ class DicreollService(BaseService):
             params["campaignid"] = campaignid
 
         return await self._get_paginated_as(
-            self._format_endpoint(Endpoints.DICREOLLS),
-            Dicreoll,
+            self._format_endpoint(Endpoints.DICEROLLS),
+            Diceroll,
             limit=limit,
             offset=offset,
             params=params if params else None,
@@ -72,11 +72,11 @@ class DicreollService(BaseService):
         userid: str | None = None,
         characterid: str | None = None,
         campaignid: str | None = None,
-    ) -> list[Dicreoll]:
-        """Retrieve all dicreolls."""
+    ) -> list[Diceroll]:
+        """Retrieve all dice rolls."""
         return [
-            dicreoll
-            async for dicreoll in self.iter_all(
+            diceroll
+            async for diceroll in self.iter_all(
                 userid=userid, characterid=characterid, campaignid=campaignid
             )
         ]
@@ -88,8 +88,8 @@ class DicreollService(BaseService):
         characterid: str | None = None,
         campaignid: str | None = None,
         limit: int = 100,
-    ) -> AsyncIterator[Dicreoll]:
-        """Iterate through all dicreolls."""
+    ) -> AsyncIterator[Diceroll]:
+        """Iterate through all dice rolls."""
         params = {}
         if userid is not None:
             params["userid"] = userid
@@ -98,26 +98,26 @@ class DicreollService(BaseService):
         if campaignid is not None:
             params["campaignid"] = campaignid
         async for item in self._iter_all_pages(
-            self._format_endpoint(Endpoints.DICREOLLS),
+            self._format_endpoint(Endpoints.DICEROLLS),
             limit=limit,
             params=params if params else None,
         ):
-            yield Dicreoll.model_validate(item)
+            yield Diceroll.model_validate(item)
 
-    async def get(self, dicreoll_id: str) -> Dicreoll:
-        """Retrieve a specific dicreoll."""
+    async def get(self, diceroll_id: str) -> Diceroll:
+        """Retrieve a specific dice roll."""
         response = await self._get(
-            self._format_endpoint(Endpoints.DICREOLL, dicreoll_id=dicreoll_id)
+            self._format_endpoint(Endpoints.DICEROLL, diceroll_id=diceroll_id)
         )
-        return Dicreoll.model_validate(response.json())
+        return Diceroll.model_validate(response.json())
 
     async def create(
         self,
         request: DicerollCreate | None = None,
         /,
         **kwargs,
-    ) -> Dicreoll:
-        """Create a new dicreoll.
+    ) -> Diceroll:
+        """Create a new dice roll.
 
         Args:
             request: A DicerollCreate model, OR pass fields as keyword arguments.
@@ -129,10 +129,10 @@ class DicreollService(BaseService):
         """
         body = request if request is not None else DicerollCreate(**kwargs)
         response = await self._post(
-            self._format_endpoint(Endpoints.DICREOLLS),
+            self._format_endpoint(Endpoints.DICEROLLS),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
-        return Dicreoll.model_validate(response.json())
+        return Diceroll.model_validate(response.json())
 
     async def create_quickroll(
         self,
@@ -142,8 +142,8 @@ class DicreollService(BaseService):
         comment: str | None = None,
         difficulty: int = 6,
         num_desperation_dice: int = 0,
-    ) -> Dicreoll:
-        """Create a new dicreoll quickroll."""
+    ) -> Diceroll:
+        """Create a new dice roll using a quickroll template."""
         response = await self._post(
             self._format_endpoint(Endpoints.DICEROLL_QUICKROLL),
             json=_DicerollQuickrollCreate(
@@ -154,4 +154,4 @@ class DicreollService(BaseService):
                 num_desperation_dice=num_desperation_dice,
             ).model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
-        return Dicreoll.model_validate(response.json())
+        return Diceroll.model_validate(response.json())

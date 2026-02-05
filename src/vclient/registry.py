@@ -32,7 +32,7 @@ if TYPE_CHECKING:
         CharacterTraitsService,
         CompaniesService,
         DeveloperService,
-        DicreollService,
+        DicerollService,
         DictionaryService,
         GlobalAdminService,
         OptionsService,
@@ -361,10 +361,10 @@ def dictionary_service(company_id: str | None = None) -> "DictionaryService":
     return default_client().dictionary(company_id)
 
 
-def dicreolls_service(user_id: str, company_id: str | None = None) -> "DicreollService":
-    """Create a DicreollService scoped to a specific company and user.
+def dicerolls_service(user_id: str, company_id: str | None = None) -> "DicerollService":
+    """Create a DicerollService scoped to a specific company and user.
 
-    Provides access to dicreoll management operations (list, get, create, update, delete)
+    Provides access to dice roll management operations (list, get, create)
     within a specific company and user context without needing to pass a client instance.
 
     Args:
@@ -376,7 +376,7 @@ def dicreolls_service(user_id: str, company_id: str | None = None) -> "DicreollS
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().dicreolls(user_id, company_id)
+    return default_client().dicerolls(user_id, company_id)
 
 
 def options_service(company_id: str | None = None) -> "OptionsService":

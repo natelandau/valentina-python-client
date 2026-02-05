@@ -1,4 +1,4 @@
-"""Integration tests for DicreollService."""
+"""Integration tests for DicerollService."""
 
 import json
 
@@ -7,16 +7,16 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
-from vclient.models import Dicreoll, PaginatedResponse
+from vclient.models import Diceroll, PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 
 
 @pytest.fixture
-def dicreoll_response_data() -> dict:
-    """Return sample dicreoll response data."""
+def diceroll_response_data() -> dict:
+    """Return sample diceroll response data."""
     return {
-        "id": "dicreoll123",
+        "id": "diceroll123",
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
         "dice_size": 10,
@@ -50,37 +50,37 @@ def dicreoll_response_data() -> dict:
 
 
 @pytest.fixture
-def paginated_dicreolls_response(dicreoll_response_data) -> dict:
-    """Return sample paginated dicreolls response."""
+def paginated_dicerolls_response(diceroll_response_data) -> dict:
+    """Return sample paginated dicerolls response."""
     return {
-        "items": [dicreoll_response_data],
+        "items": [diceroll_response_data],
         "limit": 10,
         "offset": 0,
         "total": 1,
     }
 
 
-class TestDicreollServiceGetPage:
-    """Tests for DicreollService.get_page method."""
+class TestDicerollServiceGetPage:
+    """Tests for DicerollService.get_page method."""
 
     @respx.mock
-    async def test_get_page(self, vclient, base_url, paginated_dicreolls_response):
-        """Verify getting a page of dicreolls."""
-        # Given: A mocked dicreoll endpoint
+    async def test_get_page(self, vclient, base_url, paginated_dicerolls_response):
+        """Verify getting a page of dicerolls."""
+        # Given: A mocked diceroll endpoint
         route = respx.get(
-            f"{base_url}{Endpoints.DICREOLLS.format(company_id='company123', user_id='user123')}",
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
             params={"limit": "10", "offset": "0"},
-        ).respond(200, json=paginated_dicreolls_response)
+        ).respond(200, json=paginated_dicerolls_response)
 
-        # When: Getting a page of dicreolls
-        result = await vclient.dicreolls(user_id="user123", company_id="company123").get_page()
+        # When: Getting a page of dicerolls
+        result = await vclient.dicerolls(user_id="user123", company_id="company123").get_page()
 
-        # Then: Returns paginated Dicreoll objects
+        # Then: Returns paginated Diceroll objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], Dicreoll)
-        assert result.items[0].id == "dicreoll123"
+        assert isinstance(result.items[0], Diceroll)
+        assert result.items[0].id == "diceroll123"
         assert result.total == 1
         assert result.items[0].result is not None
         assert result.items[0].result.total_result == 1
@@ -94,11 +94,11 @@ class TestDicreollServiceGetPage:
         assert result.items[0].result.desperation_roll_emoji == "💥"
 
     @respx.mock
-    async def test_get_page_with_filters(self, vclient, base_url, paginated_dicreolls_response):
+    async def test_get_page_with_filters(self, vclient, base_url, paginated_dicerolls_response):
         """Verify get_page accepts filter parameters."""
-        # Given: A mocked dicreoll endpoint
+        # Given: A mocked diceroll endpoint
         route = respx.get(
-            f"{base_url}{Endpoints.DICREOLLS.format(company_id='company123', user_id='user123')}",
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
             params={
                 "limit": "10",
                 "offset": "0",
@@ -106,19 +106,19 @@ class TestDicreollServiceGetPage:
                 "characterid": "character123",
                 "campaignid": "campaign123",
             },
-        ).respond(200, json=paginated_dicreolls_response)
+        ).respond(200, json=paginated_dicerolls_response)
 
-        # When: Getting a page of dicreolls with filters
-        result = await vclient.dicreolls(user_id="user123", company_id="company123").get_page(
+        # When: Getting a page of dicerolls with filters
+        result = await vclient.dicerolls(user_id="user123", company_id="company123").get_page(
             userid="user123", characterid="character123", campaignid="campaign123"
         )
 
-        # Then: Returns paginated Dicreoll objects
+        # Then: Returns paginated Diceroll objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], Dicreoll)
-        assert result.items[0].id == "dicreoll123"
+        assert isinstance(result.items[0], Diceroll)
+        assert result.items[0].id == "diceroll123"
         assert result.total == 1
         assert result.items[0].result is not None
         assert result.items[0].result.total_result == 1
@@ -126,25 +126,25 @@ class TestDicreollServiceGetPage:
         assert result.items[0].result.total_result_humanized == "Success"
 
     @respx.mock
-    async def test_get_page_with_pagination(self, vclient, base_url, paginated_dicreolls_response):
+    async def test_get_page_with_pagination(self, vclient, base_url, paginated_dicerolls_response):
         """Verify get_page accepts pagination parameters."""
-        # Given: A mocked dicreoll endpoint
+        # Given: A mocked diceroll endpoint
         route = respx.get(
-            f"{base_url}{Endpoints.DICREOLLS.format(company_id='company123', user_id='user123')}",
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
             params={"limit": "25", "offset": "50"},
-        ).respond(200, json=paginated_dicreolls_response)
+        ).respond(200, json=paginated_dicerolls_response)
 
-        # When: Getting a page of dicreolls with pagination
-        result = await vclient.dicreolls(user_id="user123", company_id="company123").get_page(
+        # When: Getting a page of dicerolls with pagination
+        result = await vclient.dicerolls(user_id="user123", company_id="company123").get_page(
             limit=25, offset=50
         )
 
-        # Then: Returns paginated Dicreoll objects
+        # Then: Returns paginated Diceroll objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], Dicreoll)
-        assert result.items[0].id == "dicreoll123"
+        assert isinstance(result.items[0], Diceroll)
+        assert result.items[0].id == "diceroll123"
         assert result.total == 1
         assert result.items[0].result is not None
         assert result.items[0].result.total_result == 1
@@ -152,106 +152,106 @@ class TestDicreollServiceGetPage:
         assert result.items[0].result.total_result_humanized == "Success"
 
 
-class TestDicreollServiceListAll:
-    """Tests for DicreollService.list_all method."""
+class TestDicerollServiceListAll:
+    """Tests for DicerollService.list_all method."""
 
     @respx.mock
-    async def test_list_all(self, vclient, base_url, paginated_dicreolls_response):
-        """Verify getting all dicreolls."""
-        # Given: A mocked dicreoll endpoint
+    async def test_list_all(self, vclient, base_url, paginated_dicerolls_response):
+        """Verify getting all dicerolls."""
+        # Given: A mocked diceroll endpoint
         route = respx.get(
-            f"{base_url}{Endpoints.DICREOLLS.format(company_id='company123', user_id='user123')}",
-        ).respond(200, json=paginated_dicreolls_response)
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
+        ).respond(200, json=paginated_dicerolls_response)
 
-        # When: Getting all dicreolls
-        result = await vclient.dicreolls(user_id="user123", company_id="company123").list_all()
+        # When: Getting all dicerolls
+        result = await vclient.dicerolls(user_id="user123", company_id="company123").list_all()
 
-        # Then: Returns list of Dicreoll objects
+        # Then: Returns list of Diceroll objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], Dicreoll)
-        assert result[0].id == "dicreoll123"
+        assert isinstance(result[0], Diceroll)
+        assert result[0].id == "diceroll123"
         assert result[0].result is not None
         assert result[0].result.total_result == 1
 
     @respx.mock
-    async def test_list_all_with_filters(self, vclient, base_url, paginated_dicreolls_response):
+    async def test_list_all_with_filters(self, vclient, base_url, paginated_dicerolls_response):
         """Verify list_all accepts filter parameters."""
-        # Given: A mocked dicreoll endpoint
+        # Given: A mocked diceroll endpoint
         route = respx.get(
-            f"{base_url}{Endpoints.DICREOLLS.format(company_id='company123', user_id='user123')}",
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
             params={
                 "userid": "user123",
                 "characterid": "character123",
                 "campaignid": "campaign123",
             },
-        ).respond(200, json=paginated_dicreolls_response)
+        ).respond(200, json=paginated_dicerolls_response)
 
-        # When: Getting all dicreolls with filters
-        result = await vclient.dicreolls(user_id="user123", company_id="company123").list_all(
+        # When: Getting all dicerolls with filters
+        result = await vclient.dicerolls(user_id="user123", company_id="company123").list_all(
             userid="user123", characterid="character123", campaignid="campaign123"
         )
 
-        # Then: Returns list of Dicreoll objects
+        # Then: Returns list of Diceroll objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], Dicreoll)
-        assert result[0].id == "dicreoll123"
+        assert isinstance(result[0], Diceroll)
+        assert result[0].id == "diceroll123"
         assert result[0].result is not None
         assert result[0].result.total_result == 1
 
 
-class TestDicreollServiceIterAll:
-    """Tests for DicreollService.iter_all method."""
+class TestDicerollServiceIterAll:
+    """Tests for DicerollService.iter_all method."""
 
     @respx.mock
-    async def test_iter_all(self, vclient, base_url, paginated_dicreolls_response):
-        """Verify iterating through all dicreolls."""
-        # Given: A mocked dicreoll endpoint
+    async def test_iter_all(self, vclient, base_url, paginated_dicerolls_response):
+        """Verify iterating through all dicerolls."""
+        # Given: A mocked diceroll endpoint
         route = respx.get(
-            f"{base_url}{Endpoints.DICREOLLS.format(company_id='company123', user_id='user123')}",
-        ).respond(200, json=paginated_dicreolls_response)
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
+        ).respond(200, json=paginated_dicerolls_response)
 
-        # When: Iterating through all dicreolls
+        # When: Iterating through all dicerolls
         result = [
-            dicreoll
-            async for dicreoll in vclient.dicreolls(
+            diceroll
+            async for diceroll in vclient.dicerolls(
                 company_id="company123", user_id="user123"
             ).iter_all()
         ]
 
-        # Then: Returns list of Dicreoll objects
+        # Then: Returns list of Diceroll objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], Dicreoll)
-        assert result[0].id == "dicreoll123"
+        assert isinstance(result[0], Diceroll)
+        assert result[0].id == "diceroll123"
         assert result[0].result is not None
         assert result[0].result.total_result == 1
 
 
-class TestDicreollServiceGet:
-    """Tests for DicreollService.get method."""
+class TestDicerollServiceGet:
+    """Tests for DicerollService.get method."""
 
     @respx.mock
-    async def test_get(self, vclient, base_url, dicreoll_response_data):
-        """Verify getting a dicreoll."""
-        # Given: A mocked dicreoll endpoint
+    async def test_get(self, vclient, base_url, diceroll_response_data):
+        """Verify getting a diceroll."""
+        # Given: A mocked diceroll endpoint
         route = respx.get(
-            f"{base_url}{Endpoints.DICREOLL.format(company_id='company123', user_id='user123', dicreoll_id='dicreoll123')}",
-        ).respond(200, json=dicreoll_response_data)
+            f"{base_url}{Endpoints.DICEROLL.format(company_id='company123', user_id='user123', diceroll_id='diceroll123')}",
+        ).respond(200, json=diceroll_response_data)
 
-        # When: Getting a dicreoll
-        result = await vclient.dicreolls(user_id="user123", company_id="company123").get(
-            "dicreoll123"
+        # When: Getting a diceroll
+        result = await vclient.dicerolls(user_id="user123", company_id="company123").get(
+            "diceroll123"
         )
 
-        # Then: Returns Dicreoll object
+        # Then: Returns Diceroll object
         assert route.called
-        assert isinstance(result, Dicreoll)
-        assert result.id == "dicreoll123"
+        assert isinstance(result, Diceroll)
+        assert result.id == "diceroll123"
         assert result.result is not None
         assert result.result.total_result == 1
         assert result.result.total_result_type == "SUCCESS"
@@ -262,32 +262,32 @@ class TestDicreollServiceGet:
 
     @respx.mock
     async def test_get_not_found(self, vclient, base_url):
-        """Verify getting a non-existent dicreoll raises NotFoundError."""
+        """Verify getting a non-existent diceroll raises NotFoundError."""
         # Given: A mocked endpoint returning 404
         route = respx.get(
-            f"{base_url}{Endpoints.DICREOLL.format(company_id='company123', user_id='user123', dicreoll_id='nonexistent')}",
-        ).respond(404, json={"detail": "Dicreoll not found"})
+            f"{base_url}{Endpoints.DICEROLL.format(company_id='company123', user_id='user123', diceroll_id='nonexistent')}",
+        ).respond(404, json={"detail": "Diceroll not found"})
 
-        # When/Then: Getting the dicreoll raises NotFoundError
+        # When/Then: Getting the diceroll raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.dicreolls(user_id="user123", company_id="company123").get("nonexistent")
+            await vclient.dicerolls(user_id="user123", company_id="company123").get("nonexistent")
 
         assert route.called
 
 
-class TestDicreollServiceCreate:
-    """Tests for DicreollService.create method."""
+class TestDicerollServiceCreate:
+    """Tests for DicerollService.create method."""
 
     @respx.mock
-    async def test_create(self, vclient, base_url, dicreoll_response_data):
-        """Verify creating a dicreoll."""
-        # Given: A mocked dicreoll endpoint
+    async def test_create(self, vclient, base_url, diceroll_response_data):
+        """Verify creating a diceroll."""
+        # Given: A mocked diceroll endpoint
         route = respx.post(
-            f"{base_url}{Endpoints.DICREOLLS.format(company_id='company123', user_id='user123')}",
-        ).respond(200, json=dicreoll_response_data)
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
+        ).respond(200, json=diceroll_response_data)
 
-        # When: Creating a dicreoll
-        result = await vclient.dicreolls(user_id="user123", company_id="company123").create(
+        # When: Creating a diceroll
+        result = await vclient.dicerolls(user_id="user123", company_id="company123").create(
             dice_size=10,
             difficulty=6,
             num_dice=1,
@@ -298,10 +298,10 @@ class TestDicreollServiceCreate:
             campaign_id="campaign123",
         )
 
-        # Then: Returns Dicreoll object
+        # Then: Returns Diceroll object
         assert route.called
-        assert isinstance(result, Dicreoll)
-        assert result.id == "dicreoll123"
+        assert isinstance(result, Diceroll)
+        assert result.id == "diceroll123"
         assert result.result is not None
         assert result.result.total_result == 1
         assert result.result.total_result_type == "SUCCESS"
@@ -322,19 +322,19 @@ class TestDicreollServiceCreate:
         }
 
 
-class TestDicreollServiceCreateQuickroll:
-    """Tests for DicreollService.create_quickroll method."""
+class TestDicerollServiceCreateQuickroll:
+    """Tests for DicerollService.create_quickroll method."""
 
     @respx.mock
-    async def test_create_quickroll(self, vclient, base_url, dicreoll_response_data):
-        """Verify creating a dicreoll quickroll."""
-        # Given: A mocked dicreoll endpoint
+    async def test_create_quickroll(self, vclient, base_url, diceroll_response_data):
+        """Verify creating a diceroll quickroll."""
+        # Given: A mocked diceroll endpoint
         route = respx.post(
             f"{base_url}{Endpoints.DICEROLL_QUICKROLL.format(company_id='company123', user_id='user123')}",
-        ).respond(200, json=dicreoll_response_data)
+        ).respond(200, json=diceroll_response_data)
 
-        # When: Creating a dicreoll quickroll
-        result = await vclient.dicreolls(
+        # When: Creating a diceroll quickroll
+        result = await vclient.dicerolls(
             company_id="company123", user_id="user123"
         ).create_quickroll(
             quickroll_id="quickroll123",
@@ -344,9 +344,9 @@ class TestDicreollServiceCreateQuickroll:
             num_desperation_dice=0,
         )
 
-        # Then: Returns Dicreoll object
+        # Then: Returns Diceroll object
         assert route.called
-        assert isinstance(result, Dicreoll)
+        assert isinstance(result, Diceroll)
 
         # Verify request body
         request = route.calls.last.request
