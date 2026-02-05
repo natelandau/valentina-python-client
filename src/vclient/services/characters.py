@@ -15,21 +15,21 @@ from vclient.endpoints import Endpoints
 from vclient.models import (
     AssignCharacterTraitRequest,
     Character,
-    CharacterEdgeAndPerksDTO,
-    CharacterInventoryItem,
-    CharacterPerkDTO,
-    CreateCharacterInventoryItemRequest,
-    CreateCharacterRequest,
+    CharacterCreate,
+    CharacterUpdate,
     CreateNoteRequest,
+    EdgeAndPerks,
     HunterAttributesCreate,
     HunterAttributesUpdate,
+    InventoryItem,
+    InventoryItemCreate,
+    InventoryItemUpdate,
     MageAttributes,
     Note,
     PaginatedResponse,
+    Perk,
     RollStatistics,
     S3Asset,
-    UpdateCharacterInventoryItemRequest,
-    UpdateCharacterRequest,
     UpdateNoteRequest,
     VampireAttributesCreate,
     VampireAttributesUpdate,
@@ -290,7 +290,7 @@ class CharactersService(BaseService):
             AuthorizationError: If you don't have appropriate access.
         """
         body = self._validate_request(
-            CreateCharacterRequest,
+            CharacterCreate,
             character_class=character_class,
             game_version=game_version,
             name_first=name_first,
@@ -375,7 +375,7 @@ class CharactersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateCharacterRequest,
+            CharacterUpdate,
             character_class=character_class,
             type=character_type,
             game_version=game_version,
@@ -768,7 +768,7 @@ class CharactersService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
-    ) -> PaginatedResponse[CharacterInventoryItem]:
+    ) -> PaginatedResponse[InventoryItem]:
         """Retrieve a paginated page of inventory items for a character.
 
         Args:
@@ -777,7 +777,7 @@ class CharactersService(BaseService):
             offset: Number of items to skip from the beginning (default 0).
 
         Returns:
-            A PaginatedResponse containing CharacterInventoryItem objects and pagination metadata.
+            A PaginatedResponse containing InventoryItem objects and pagination metadata.
 
         Raises:
             NotFoundError: If the character does not exist.
@@ -785,7 +785,7 @@ class CharactersService(BaseService):
         """
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.CHARACTER_INVENTORY, character_id=character_id),
-            CharacterInventoryItem,
+            InventoryItem,
             limit=limit,
             offset=offset,
         )
@@ -793,7 +793,7 @@ class CharactersService(BaseService):
     async def list_all_inventory(
         self,
         character_id: str,
-    ) -> list[CharacterInventoryItem]:
+    ) -> list[InventoryItem]:
         """Retrieve all notes for a character.
 
         Automatically paginates through all results. Use `get_inventory_page()` for paginated
@@ -803,7 +803,7 @@ class CharactersService(BaseService):
             character_id: The ID of the character whose inventory items to list.
 
         Returns:
-            A list of all CharacterInventoryItem objects.
+            A list of all InventoryItem objects.
 
         Raises:
             NotFoundError: If the character does not exist.
@@ -816,7 +816,7 @@ class CharactersService(BaseService):
         character_id: str,
         *,
         limit: int = 100,
-    ) -> AsyncIterator[CharacterInventoryItem]:
+    ) -> AsyncIterator[InventoryItem]:
         """Iterate through all inventory items for a character.
 
         Yields individual inventory items, automatically fetching subsequent pages until
@@ -827,7 +827,7 @@ class CharactersService(BaseService):
             limit: Items per page (default 100 for efficiency).
 
         Yields:
-            Individual CharacterInventoryItem objects.
+            Individual InventoryItem objects.
 
         Example:
             >>> async for item in characters.iter_all_inventory("character_id"):
@@ -837,13 +837,13 @@ class CharactersService(BaseService):
             self._format_endpoint(Endpoints.CHARACTER_INVENTORY, character_id=character_id),
             limit=limit,
         ):
-            yield CharacterInventoryItem.model_validate(item)
+            yield InventoryItem.model_validate(item)
 
     async def get_inventory_item(
         self,
         character_id: str,
         item_id: str,
-    ) -> CharacterInventoryItem:
+    ) -> InventoryItem:
         """Retrieve a specific inventory item including its content and metadata.
 
         Args:
@@ -851,7 +851,7 @@ class CharactersService(BaseService):
             item_id: The ID of the inventory item to retrieve.
 
         Returns:
-            The CharacterInventoryItem object with full details.
+            The InventoryItem object with full details.
 
         Raises:
             NotFoundError: If the inventory item does not exist.
@@ -862,7 +862,7 @@ class CharactersService(BaseService):
                 Endpoints.CHARACTER_INVENTORY_ITEM, character_id=character_id, item_id=item_id
             )
         )
-        return CharacterInventoryItem.model_validate(response.json())
+        return InventoryItem.model_validate(response.json())
 
     async def create_inventory_item(
         self,
@@ -870,7 +870,7 @@ class CharactersService(BaseService):
         name: str,
         type: CharacterInventoryType,  # noqa: A002
         description: str | None = None,
-    ) -> CharacterInventoryItem:
+    ) -> InventoryItem:
         """Create a new inventory item for a character.
 
         Args:
@@ -880,7 +880,7 @@ class CharactersService(BaseService):
             description: The description of the inventory item (minimum 3 characters, supports markdown).
 
         Returns:
-            The newly created CharacterInventoryItem object.
+            The newly created InventoryItem object.
 
         Raises:
             NotFoundError: If the character does not exist.
@@ -889,7 +889,7 @@ class CharactersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CreateCharacterInventoryItemRequest,
+            InventoryItemCreate,
             name=name,
             type=type,
             description=description,
@@ -898,7 +898,7 @@ class CharactersService(BaseService):
             self._format_endpoint(Endpoints.CHARACTER_INVENTORY, character_id=character_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
-        return CharacterInventoryItem.model_validate(response.json())
+        return InventoryItem.model_validate(response.json())
 
     async def update_inventory_item(
         self,
@@ -908,7 +908,7 @@ class CharactersService(BaseService):
         name: str | None = None,
         type: CharacterInventoryType | None = None,  # noqa: A002
         description: str | None = None,
-    ) -> CharacterInventoryItem:
+    ) -> InventoryItem:
         """Modify an inventory item's content.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -921,7 +921,7 @@ class CharactersService(BaseService):
             description: New inventory item description (minimum 3 characters, supports markdown).
 
         Returns:
-            The updated CharacterInventoryItem object.
+            The updated InventoryItem object.
 
         Raises:
             NotFoundError: If the inventory item does not exist.
@@ -930,7 +930,7 @@ class CharactersService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateCharacterInventoryItemRequest,
+            InventoryItemUpdate,
             name=name,
             type=type,
             description=description,
@@ -941,7 +941,7 @@ class CharactersService(BaseService):
             ),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
-        return CharacterInventoryItem.model_validate(response.json())
+        return InventoryItem.model_validate(response.json())
 
     async def delete_inventory_item(
         self,
@@ -1243,7 +1243,7 @@ class CharactersService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
-    ) -> PaginatedResponse[CharacterEdgeAndPerksDTO]:
+    ) -> PaginatedResponse[EdgeAndPerks]:
         """Retrieve a paginated page of hunter edges for a character.
 
         Args:
@@ -1252,11 +1252,11 @@ class CharactersService(BaseService):
             offset: Number of items to skip from the beginning (default 0).
 
         Returns:
-            A PaginatedResponse containing CharacterEdgeAndPerksDTO objects and pagination metadata.
+            A PaginatedResponse containing EdgeAndPerks objects and pagination metadata.
         """
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.CHARACTER_HUNTER_EDGES, character_id=character_id),
-            CharacterEdgeAndPerksDTO,
+            EdgeAndPerks,
             limit=limit,
             offset=offset,
         )
@@ -1264,7 +1264,7 @@ class CharactersService(BaseService):
     async def list_all_edges(
         self,
         character_id: str,
-    ) -> list[CharacterEdgeAndPerksDTO]:
+    ) -> list[EdgeAndPerks]:
         """Retrieve all hunter edges for a character.
 
         Automatically paginates through all results. Use `get_edges_page()` for paginated
@@ -1277,7 +1277,7 @@ class CharactersService(BaseService):
         character_id: str,
         *,
         limit: int = 100,
-    ) -> AsyncIterator[CharacterEdgeAndPerksDTO]:
+    ) -> AsyncIterator[EdgeAndPerks]:
         """Iterate through all hunter edges for a character.
 
         Yields individual hunter edges, automatically fetching subsequent pages until
@@ -1288,19 +1288,19 @@ class CharactersService(BaseService):
             limit: Items per page (default 100 for efficiency).
 
         Yields:
-            Individual CharacterEdgeAndPerksDTO objects.
+            Individual EdgeAndPerks objects.
         """
         async for edge in self._iter_all_pages(
             self._format_endpoint(Endpoints.CHARACTER_HUNTER_EDGES, character_id=character_id),
             limit=limit,
         ):
-            yield CharacterEdgeAndPerksDTO.model_validate(edge)
+            yield EdgeAndPerks.model_validate(edge)
 
     async def get_edge(
         self,
         character_id: str,
         hunter_edge_id: str,
-    ) -> CharacterEdgeAndPerksDTO:
+    ) -> EdgeAndPerks:
         """Retrieve a specific hunter edge including its perks.
 
         Args:
@@ -1314,13 +1314,13 @@ class CharactersService(BaseService):
                 hunter_edge_id=hunter_edge_id,
             )
         )
-        return CharacterEdgeAndPerksDTO.model_validate(response.json())
+        return EdgeAndPerks.model_validate(response.json())
 
     async def add_edge(
         self,
         character_id: str,
         hunter_edge_id: str,
-    ) -> CharacterEdgeAndPerksDTO:
+    ) -> EdgeAndPerks:
         """Add a hunter edge to a character.
 
         Args:
@@ -1334,13 +1334,13 @@ class CharactersService(BaseService):
                 hunter_edge_id=hunter_edge_id,
             )
         )
-        return CharacterEdgeAndPerksDTO.model_validate(response.json())
+        return EdgeAndPerks.model_validate(response.json())
 
     async def remove_edge(
         self,
         character_id: str,
         hunter_edge_id: str,
-    ) -> CharacterEdgeAndPerksDTO:
+    ) -> EdgeAndPerks:
         """Remove a hunter edge from a character.
 
         Args:
@@ -1354,7 +1354,7 @@ class CharactersService(BaseService):
                 hunter_edge_id=hunter_edge_id,
             )
         )
-        return CharacterEdgeAndPerksDTO.model_validate(response.json())
+        return EdgeAndPerks.model_validate(response.json())
 
     async def get_edge_perks_page(
         self,
@@ -1363,7 +1363,7 @@ class CharactersService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
-    ) -> PaginatedResponse[CharacterPerkDTO]:
+    ) -> PaginatedResponse[Perk]:
         """Retrieve the perks for a specific hunter edge.
 
         Args:
@@ -1378,7 +1378,7 @@ class CharactersService(BaseService):
                 character_id=character_id,
                 hunter_edge_id=hunter_edge_id,
             ),
-            CharacterPerkDTO,
+            Perk,
             limit=limit,
             offset=offset,
         )
@@ -1387,7 +1387,7 @@ class CharactersService(BaseService):
         self,
         character_id: str,
         hunter_edge_id: str,
-    ) -> list[CharacterPerkDTO]:
+    ) -> list[Perk]:
         """Retrieve all perks for a specific hunter edge.
 
         Automatically paginates through all results. Use `get_edge_perks_page()` for paginated
@@ -1405,7 +1405,7 @@ class CharactersService(BaseService):
         hunter_edge_id: str,
         *,
         limit: int = 100,
-    ) -> AsyncIterator[CharacterPerkDTO]:
+    ) -> AsyncIterator[Perk]:
         """Iterate through all perks for a specific hunter edge.
 
         Yields individual perks, automatically fetching subsequent pages until
@@ -1417,7 +1417,7 @@ class CharactersService(BaseService):
             limit: Items per page (default 100 for efficiency).
 
         Yields:
-            Individual CharacterPerkDTO objects.
+            Individual Perk objects.
         """
         async for perk in self._iter_all_pages(
             self._format_endpoint(
@@ -1427,14 +1427,14 @@ class CharactersService(BaseService):
             ),
             limit=limit,
         ):
-            yield CharacterPerkDTO.model_validate(perk)
+            yield Perk.model_validate(perk)
 
     async def get_edge_perk(
         self,
         character_id: str,
         hunter_edge_id: str,
         hunter_edge_perk_id: str,
-    ) -> CharacterPerkDTO:
+    ) -> Perk:
         """Retrieve a specific perk for a hunter edge.
 
         Args:
@@ -1450,14 +1450,14 @@ class CharactersService(BaseService):
                 hunter_edge_perk_id=hunter_edge_perk_id,
             )
         )
-        return CharacterPerkDTO.model_validate(response.json())
+        return Perk.model_validate(response.json())
 
     async def add_edge_perk(
         self,
         character_id: str,
         hunter_edge_id: str,
         hunter_edge_perk_id: str,
-    ) -> CharacterPerkDTO:
+    ) -> Perk:
         """Add a perk to a hunter edge.
 
         Args:
@@ -1466,7 +1466,7 @@ class CharactersService(BaseService):
             hunter_edge_perk_id: The ID of the hunter edge perk to add.
 
         Returns:
-            The added CharacterPerkDTO object.
+            The added Perk object.
         """
         response = await self._post(
             self._format_endpoint(
@@ -1476,14 +1476,14 @@ class CharactersService(BaseService):
                 hunter_edge_perk_id=hunter_edge_perk_id,
             )
         )
-        return CharacterPerkDTO.model_validate(response.json())
+        return Perk.model_validate(response.json())
 
     async def remove_edge_perk(
         self,
         character_id: str,
         hunter_edge_id: str,
         hunter_edge_perk_id: str,
-    ) -> CharacterPerkDTO:
+    ) -> Perk:
         """Remove a perk from a hunter edge.
 
         Args:
@@ -1492,7 +1492,7 @@ class CharactersService(BaseService):
             hunter_edge_perk_id: The ID of the hunter edge perk to remove.
 
         Returns:
-            The removed CharacterPerkDTO object.
+            The removed Perk object.
         """
         response = await self._delete(
             self._format_endpoint(
@@ -1502,4 +1502,4 @@ class CharactersService(BaseService):
                 hunter_edge_perk_id=hunter_edge_perk_id,
             )
         )
-        return CharacterPerkDTO.model_validate(response.json())
+        return Perk.model_validate(response.json())
