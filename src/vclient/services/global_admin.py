@@ -5,11 +5,11 @@ from collections.abc import AsyncIterator
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    CreateDeveloperRequest,
     Developer,
+    DeveloperCreate,
+    DeveloperUpdate,
     DeveloperWithApiKey,
     PaginatedResponse,
-    UpdateDeveloperRequest,
 )
 from vclient.services.base import BaseService
 
@@ -143,7 +143,7 @@ class GlobalAdminService(BaseService):
             AuthorizationError: If you don't have global admin privileges.
         """
         body = self._validate_request(
-            CreateDeveloperRequest,
+            DeveloperCreate,
             username=username,
             email=email,
             is_global_admin=is_global_admin,
@@ -182,7 +182,7 @@ class GlobalAdminService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateDeveloperRequest,
+            DeveloperUpdate,
             username=username,
             email=email,
             is_global_admin=is_global_admin,

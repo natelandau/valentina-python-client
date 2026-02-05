@@ -3,8 +3,8 @@
 from vclient.endpoints import Endpoints
 from vclient.models import (
     MeDeveloper,
+    MeDeveloperUpdate,
     MeDeveloperWithApiKey,
-    UpdateMeDeveloperRequest,
 )
 from vclient.services.base import BaseService
 
@@ -58,7 +58,7 @@ class DeveloperService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            UpdateMeDeveloperRequest,
+            MeDeveloperUpdate,
             username=username,
             email=email,
         )

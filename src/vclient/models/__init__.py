@@ -108,9 +108,12 @@ UpdateCompanyRequest = CompanyUpdate
 from .developers import (
     MeDeveloper,
     MeDeveloperCompanyPermission,
+    MeDeveloperUpdate,
     MeDeveloperWithApiKey,
-    UpdateMeDeveloperRequest,
 )
+
+# Backwards compatibility alias for developers
+UpdateMeDeveloperRequest = MeDeveloperUpdate
 from .diceroll import CreateDicreollQuickrollRequest, CreateDicreollRequest, Dicreoll
 from .dictionary import (
     CreateDictionaryTermRequest,
@@ -118,12 +121,16 @@ from .dictionary import (
     UpdateDictionaryTermRequest,
 )
 from .global_admin import (
-    CreateDeveloperRequest,
     Developer,
     DeveloperCompanyPermission,
+    DeveloperCreate,
+    DeveloperUpdate,
     DeveloperWithApiKey,
-    UpdateDeveloperRequest,
 )
+
+# Backwards compatibility aliases for global_admin
+CreateDeveloperRequest = DeveloperCreate
+UpdateDeveloperRequest = DeveloperUpdate
 from .pagination import PaginatedResponse
 from .shared import (
     CharacterSpecialty,
@@ -208,6 +215,8 @@ __all__ = [
     "CreateUserRequest",
     "Developer",
     "DeveloperCompanyPermission",
+    "DeveloperCreate",
+    "DeveloperUpdate",
     "DeveloperWithApiKey",
     "Dicreoll",
     "DictionaryTerm",
@@ -227,6 +236,7 @@ __all__ = [
     "MageAttributes",
     "MeDeveloper",
     "MeDeveloperCompanyPermission",
+    "MeDeveloperUpdate",
     "MeDeveloperWithApiKey",
     "NameDescriptionSubDocument",
     "NewCompanyResponse",
