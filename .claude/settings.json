@@ -10,6 +10,18 @@
                     }
                 ]
             }
+        ],
+        "PreToolUse": [
+            {
+                "matcher": "Bash(git commit*)",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run pytest -x -q --tb=short 2>&1 | head -30",
+                        "statusMessage": "Running tests before commit..."
+                    }
+                ]
+            }
         ]
     }
 }

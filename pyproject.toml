@@ -30,13 +30,13 @@
 
 [dependency-groups]
     dev = [
-        "commitizen>=4.13.5",
-        "coverage>=7.13.3",
+        "commitizen>=4.13.7",
+        "coverage>=7.13.4",
         "djlint>=1.36.4",
         "docker>=7.1.0",
-        "duty>=1.8.0",
+        "duty>=1.9.0",
         "nclutils>=2.1.0",
-        "prek>=0.3.1",
+        "prek>=0.3.2",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.0.0",
@@ -48,8 +48,8 @@
         "respx>=0.22.0",
         "ruff>=0.15.0",
         "shellcheck-py>=0.11.0.1",
-        "ty>=0.0.15",
-        "typos>=1.43.2",
+        "ty>=0.0.16",
+        "typos>=1.43.4",
         "vulture>=2.14",
         "yamllint>=1.38.0",
     ]
