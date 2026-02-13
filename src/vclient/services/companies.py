@@ -2,8 +2,6 @@
 
 from collections.abc import AsyncIterator
 
-from rich.console import Console
-
 from vclient.constants import DEFAULT_PAGE_LIMIT, PermissionLevel
 from vclient.endpoints import Endpoints
 from vclient.models import (
@@ -16,8 +14,6 @@ from vclient.models import (
     _GrantAccess,
 )
 from vclient.services.base import BaseService
-
-console = Console()
 
 
 class CompaniesService(BaseService):

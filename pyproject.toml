@@ -6,11 +6,9 @@
     ]
     dependencies = [
         "anyio>=4.12.1",
-        "cashews>=7.4.4",
         "httpx>=0.28.1",
-        "loguru>=0.7.3",
         "pydantic[email]>=2.12.5",
-    ]
+]
     description = "Async Python client library for the Valentina Noir API"
     name = "valentina-python-client"
     readme = "README.md"
@@ -59,8 +57,7 @@
     changelog_merge_prerelease = true
     tag_format                 = "v$version"
     update_changelog_on_bump   = true
-    version                    = "0.1.0"
-    version_files              = ["src/vapi/__init__.py:__version__"]
+    version                    = "1.0.0"
     version_provider           = "uv"
 
 [tool.coverage.report] # https://coverage.readthedocs.io/en/latest/config.html#report

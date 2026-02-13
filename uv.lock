@@ -45,15 +45,6 @@ wheels = [
 ]
 
 [[package]]
-name = "cashews"
-version = "7.4.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8c/5d/26eb556824a7ac9e24f751645961d2078b7b15be105f7fc39eda5308896f/cashews-7.4.4.tar.gz", hash = "sha256:dca761c60192bfe354abd6e9eb98d6f62c817e675df3fbe7d1bdfaa4303d1320", size = 92948, upload-time = "2025-12-06T22:31:56.187Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bf/65/29d94c27dfa3cdb213ae62a328c6efe6cd37b888d334e90ecaa22eadafe9/cashews-7.4.4-py3-none-any.whl", hash = "sha256:d5b8fc3cb590ed388823388b972947fd5659e2a94109af107cb508a3240f5ef0", size = 79893, upload-time = "2025-12-06T22:31:53.918Z" },
-]
-
-[[package]]
 name = "certifi"
 version = "2026.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1146,9 +1137,7 @@ version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
-    { name = "cashews" },
     { name = "httpx" },
-    { name = "loguru" },
     { name = "pydantic", extra = ["email"] },
 ]
 
@@ -1181,9 +1170,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "anyio", specifier = ">=4.12.1" },
-    { name = "cashews", specifier = ">=7.4.4" },
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "loguru", specifier = ">=0.7.3" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.12.5" },
 ]
 
