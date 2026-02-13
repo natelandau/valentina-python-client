@@ -101,24 +101,18 @@ class CharactersService(BaseService):
         Returns:
             A PaginatedResponse containing Character objects and pagination metadata.
         """
-        params: dict[str, str | int] = {}
-        if user_player_id is not None:
-            params["user_player_id"] = user_player_id
-        if user_creator_id is not None:
-            params["user_creator_id"] = user_creator_id
-        if character_class is not None:
-            params["character_class"] = character_class
-        if character_type is not None:
-            params["character_type"] = character_type
-        if status is not None:
-            params["status"] = status
-
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.CHARACTERS),
             Character,
             limit=limit,
             offset=offset,
-            params=params or None,
+            params=self._build_params(
+                user_player_id=user_player_id,
+                user_creator_id=user_creator_id,
+                character_class=character_class,
+                character_type=character_type,
+                status=status,
+            ),
         )
 
     async def list_all(
@@ -186,22 +180,16 @@ class CharactersService(BaseService):
             >>> async for character in characters.iter_all():
             ...     print(character.name)
         """
-        params: dict[str, str | int] = {}
-        if user_player_id is not None:
-            params["user_player_id"] = user_player_id
-        if user_creator_id is not None:
-            params["user_creator_id"] = user_creator_id
-        if character_class is not None:
-            params["character_class"] = character_class
-        if character_type is not None:
-            params["character_type"] = character_type
-        if status is not None:
-            params["status"] = status
-
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.CHARACTERS),
             limit=limit,
-            params=params or None,
+            params=self._build_params(
+                user_player_id=user_player_id,
+                user_creator_id=user_creator_id,
+                character_class=character_class,
+                character_type=character_type,
+                status=status,
+            ),
         ):
             yield Character.model_validate(item)
 

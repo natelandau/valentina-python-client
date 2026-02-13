@@ -81,16 +81,12 @@ class UsersService(BaseService):
         Returns:
             A PaginatedResponse containing User objects and pagination metadata.
         """
-        params = {}
-        if user_role is not None:
-            params["user_role"] = user_role
-
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.USERS),
             User,
             limit=limit,
             offset=offset,
-            params=params or None,
+            params=self._build_params(user_role=user_role),
         )
 
     async def list_all(
@@ -133,14 +129,10 @@ class UsersService(BaseService):
             >>> async for user in users.iter_all():
             ...     print(user.name)
         """
-        params = {}
-        if user_role is not None:
-            params["user_role"] = user_role
-
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.USERS),
             limit=limit,
-            params=params or None,
+            params=self._build_params(user_role=user_role),
         ):
             yield User.model_validate(item)
 

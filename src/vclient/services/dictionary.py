@@ -46,16 +46,12 @@ class DictionaryService(BaseService):
         term: str | None = None,
     ) -> PaginatedResponse[DictionaryTerm]:
         """Retrieve a paginated page of dictionary terms."""
-        params = {}
-        if term is not None:
-            params["term"] = term
-
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.DICTIONARY_TERMS),
             DictionaryTerm,
             limit=limit,
             offset=offset,
-            params=params or None,
+            params=self._build_params(term=term),
         )
 
     async def list_all(self, *, term: str | None = None) -> list[DictionaryTerm]:
@@ -66,13 +62,10 @@ class DictionaryService(BaseService):
         self, *, term: str | None = None, limit: int = 100
     ) -> AsyncIterator[DictionaryTerm]:
         """Iterate through all dictionary terms."""
-        params = {}
-        if term is not None:
-            params["term"] = term
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.DICTIONARY_TERMS),
             limit=limit,
-            params=params or None,
+            params=self._build_params(term=term),
         ):
             yield DictionaryTerm.model_validate(item)
 

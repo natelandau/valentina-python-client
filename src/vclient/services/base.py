@@ -334,6 +334,19 @@ class BaseService:
             return None
         return {IDEMPOTENCY_KEY_HEADER: idempotency_key}
 
+    @staticmethod
+    def _build_params(**kwargs: Any) -> dict[str, Any] | None:
+        """Build query params dict, filtering out None values.
+
+        Args:
+            **kwargs: Key-value pairs for query parameters.
+
+        Returns:
+            Dict with non-None values, or None if all values are None.
+        """
+        params = {k: v for k, v in kwargs.items() if v is not None}
+        return params or None
+
     async def _post(
         self,
         path: str,
