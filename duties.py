@@ -135,22 +135,7 @@ def lint(ctx: Context) -> None:
     """Run all linting duties."""
 
 
-@duty()
-def update_dockerfile(ctx: Context) -> None:
-    """Update the Dockerfile with the uv version."""
-    dockerfile = PROJECT_ROOT / "Dockerfile"
-    version = ctx.run(["uv", "--version"], title="uv version", capture=True)
-    version = re.search(r"(\d+\.\d+\.\d+)", version).group(1)
-    dockerfile_content = dockerfile.read_text(encoding="utf-8")
-    if not re.search(rf"uv:{version}", dockerfile_content):
-        dockerfile_content = re.sub(r"uv:\d+\.\d+\.\d+", f"uv:{version}", dockerfile_content)
-        dockerfile.write_text(dockerfile_content, encoding="utf-8")
-        console.print(
-            f"[green]✓[/green] [bold]Dockerfile updated with uv version: {version}[/bold]"
-        )
-
-
-@duty(capture=CI, post=[update_dockerfile])
+@duty(capture=CI)
 def update(ctx: Context) -> None:
     """Update the project."""
     ctx.run(["uv", "lock", "--upgrade"], title="update uv lock")
