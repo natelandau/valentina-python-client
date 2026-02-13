@@ -5,8 +5,13 @@ from typing import TYPE_CHECKING, Self
 
 import httpx
 
-from vclient.config import APIConfig
-from vclient.constants import API_KEY_HEADER
+from vclient.config import _APIConfig
+from vclient.constants import (
+    API_KEY_HEADER,
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_RETRY_DELAY,
+    DEFAULT_TIMEOUT,
+)
 
 if TYPE_CHECKING:
     from vclient.services import (
@@ -59,13 +64,16 @@ class VClient:
 
     def __init__(  # noqa: PLR0913
         self,
-        base_url: str | None = None,
-        api_key: str | None = None,
+        base_url: str,
+        api_key: str,
         *,
-        timeout: float = 30.0,
+        timeout: float = DEFAULT_TIMEOUT,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        retry_delay: float = DEFAULT_RETRY_DELAY,
+        auto_retry_rate_limit: bool = True,
         auto_idempotency_keys: bool = False,
         default_company_id: str | None = None,
-        config: APIConfig | None = None,
+        headers: dict[str, str] | None = None,
         set_as_default: bool = True,
     ) -> None:
         """Initialize the API client.
@@ -74,32 +82,29 @@ class VClient:
             base_url: Base URL for the API.
             api_key: API key for authentication.
             timeout: Request timeout in seconds.
+            max_retries: Maximum number of retry attempts for failed requests.
+            retry_delay: Base delay between retries in seconds.
+            auto_retry_rate_limit: Automatically retry requests that hit rate limits.
             auto_idempotency_keys: Automatically generate idempotency keys for
-                POST/PUT/PATCH requests. Defaults to False.
+                POST/PUT/PATCH requests.
             default_company_id: Default company ID to use when not explicitly provided
                 to service factory methods.
-            config: Optional APIConfig instance (overrides other parameters).
+            headers: Additional headers to include with all requests.
             set_as_default: If True, register this client as the default for factory
                 functions. Set to False when creating multiple clients or when using
                 the context manager pattern exclusively.
         """
-        if config is not None:
-            self._config = config
-        else:
-            if base_url is None:
-                msg = "base_url is required"
-                raise ValueError(msg)
-            if api_key is None:
-                msg = "api_key is required"
-                raise ValueError(msg)
-
-            self._config = APIConfig(
-                base_url=base_url,
-                api_key=api_key,
-                timeout=timeout,
-                auto_idempotency_keys=auto_idempotency_keys,
-                default_company_id=default_company_id,
-            )
+        self._config = _APIConfig(
+            base_url=base_url,
+            api_key=api_key,
+            timeout=timeout,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            auto_retry_rate_limit=auto_retry_rate_limit,
+            auto_idempotency_keys=auto_idempotency_keys,
+            default_company_id=default_company_id,
+            headers=headers or {},
+        )
 
         self._http: httpx.AsyncClient = self._create_http_client()
         self._companies: CompaniesService | None = None

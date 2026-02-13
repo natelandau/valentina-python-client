@@ -17,7 +17,7 @@ src/vclient/
 ├── services/      # API service classes (companies, campaigns, characters, etc.)
 ├── models/        # Pydantic v2 models
 ├── client.py      # VClient
-├── config.py      # APIConfig
+├── config.py      # Internal configuration (_APIConfig)
 ├── constants.py   # Shared constants
 ├── endpoints.py   # API endpoint paths
 ├── exceptions.py  # RFC 9457 exception classes

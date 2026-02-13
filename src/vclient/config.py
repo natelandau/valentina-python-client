@@ -10,8 +10,10 @@ from vclient.constants import (
 
 
 @dataclass
-class APIConfig:
-    """Configuration settings for the API client.
+class _APIConfig:
+    """Internal configuration settings for the API client.
+
+    This is an implementation detail. Use VClient constructor arguments instead.
 
     Attributes:
         base_url: Base URL for the API.

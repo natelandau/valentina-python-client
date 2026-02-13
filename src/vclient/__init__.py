@@ -2,7 +2,6 @@
 
 Primary exports:
     VClient: The main API client class
-    APIConfig: Configuration for API connections
 
 Factory functions (primary access pattern):
     books_service, campaigns_service, chapters_service, etc.
@@ -13,7 +12,6 @@ For service classes, use: from vclient.services import CharactersService, ...
 """
 
 from vclient.client import VClient
-from vclient.config import APIConfig
 from vclient.registry import (
     books_service,
     campaigns_service,
@@ -34,7 +32,6 @@ from vclient.registry import (
 
 __all__ = (
     # Core
-    "APIConfig",
     "VClient",
     # Factory functions
     "books_service",

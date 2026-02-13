@@ -2,8 +2,13 @@
 
 import pytest
 
-from vclient import APIConfig, VClient
-from vclient.constants import API_KEY_HEADER
+from vclient import VClient
+from vclient.constants import (
+    API_KEY_HEADER,
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_RETRY_DELAY,
+    DEFAULT_TIMEOUT,
+)
 
 pytestmark = pytest.mark.anyio
 
@@ -20,46 +25,43 @@ class TestVClientInit:
         assert client._config.base_url == "https://custom.api.com"
         assert client._config.api_key == "my-key"
 
-    def test_init_with_config(self):
-        """Verify client initialization with APIConfig."""
-        # Given: A custom API configuration
-        config = APIConfig(
-            base_url="https://config.api.com",
-            api_key="config-key",
-            timeout=60.0,
-        )
-
-        # When: Creating a client with the config
-        client = VClient(config=config)
-
-        # Then: Config values are used
-        assert client._config.base_url == "https://config.api.com"
-        assert client._config.api_key == "config-key"
-        assert client._config.timeout == 60.0
-
-    def test_config_overrides_other_params(self):
-        """Verify config parameter takes precedence over other parameters."""
-        # Given: A custom API configuration
-        config = APIConfig(base_url="https://config.api.com", api_key="config-key")
-
-        # When: Creating a client with both config and explicit params
+    def test_init_with_all_parameters(self):
+        """Verify client initialization with all configuration parameters."""
+        # When: Creating a client with all config options
         client = VClient(
-            base_url="https://ignored.com",
-            api_key="ignored-key",
-            config=config,
+            base_url="https://test.api.com",
+            api_key="my-key",
+            timeout=60.0,
+            max_retries=5,
+            retry_delay=2.0,
+            auto_retry_rate_limit=False,
+            auto_idempotency_keys=True,
+            default_company_id="company-123",
+            headers={"X-Custom": "value"},
         )
 
-        # Then: Config values take precedence
-        assert client._config.base_url == "https://config.api.com"
-        assert client._config.api_key == "config-key"
+        # Then: All values are stored correctly
+        assert client._config.timeout == 60.0
+        assert client._config.max_retries == 5
+        assert client._config.retry_delay == 2.0
+        assert client._config.auto_retry_rate_limit is False
+        assert client._config.auto_idempotency_keys is True
+        assert client._config.default_company_id == "company-123"
+        assert client._config.headers == {"X-Custom": "value"}
 
-    def test_auto_idempotency_keys_default_false(self):
-        """Verify auto_idempotency_keys defaults to False."""
-        # When: Creating a client without specifying auto_idempotency_keys
+    def test_default_values(self):
+        """Verify default values are applied when not specified."""
+        # When: Creating a client with only required values
         client = VClient(base_url="https://test.api.com", api_key="my-key")
 
-        # Then: auto_idempotency_keys defaults to False
+        # Then: Default values are used
+        assert client._config.timeout == DEFAULT_TIMEOUT
+        assert client._config.max_retries == DEFAULT_MAX_RETRIES
+        assert client._config.retry_delay == DEFAULT_RETRY_DELAY
+        assert client._config.auto_retry_rate_limit is True
         assert client._config.auto_idempotency_keys is False
+        assert client._config.default_company_id is None
+        assert client._config.headers == {}
 
     def test_auto_idempotency_keys_passed_to_config(self):
         """Verify auto_idempotency_keys parameter is passed to config."""
@@ -72,6 +74,22 @@ class TestVClientInit:
 
         # Then: Config has auto_idempotency_keys enabled
         assert client._config.auto_idempotency_keys is True
+
+    @pytest.mark.parametrize(
+        ("input_url", "expected"),
+        [
+            ("https://api.example.com/", "https://api.example.com"),
+            ("https://api.example.com///", "https://api.example.com"),
+            ("https://api.example.com", "https://api.example.com"),
+        ],
+    )
+    def test_trailing_slash_normalization(self, input_url, expected):
+        """Verify trailing slashes are normalized in base_url."""
+        # When: Creating a client with the input URL
+        client = VClient(base_url=input_url, api_key="my-key")
+
+        # Then: URL is normalized correctly
+        assert client._config.base_url == expected
 
 
 class TestVClientHTTPClient:
@@ -92,11 +110,21 @@ class TestVClientHTTPClient:
         assert client._http.headers.get("Accept") == "application/json"
         assert client._http.headers.get("Content-Type") == "application/json"
 
-    def test_http_client_requires_api_key(self):
-        """Verify creating a client without an API key raises ValueError."""
-        # When: Creating a client without an API key
-        with pytest.raises(ValueError):
-            VClient(base_url="https://test.api.com", api_key=None)
+    def test_http_client_includes_custom_headers(self):
+        """Verify custom headers are included in HTTP client."""
+        # When: Creating a client with custom headers
+        client = VClient(
+            base_url="https://test.api.com",
+            api_key="my-key",
+            headers={"X-Custom": "custom-value"},
+        )
+
+        # Then: HTTP client includes custom headers
+        assert client._http.headers.get("X-Custom") == "custom-value"
+
+        # And: Default headers are still present
+        assert client._http.headers.get("Accept") == "application/json"
+        assert client._http.headers.get(API_KEY_HEADER) == "my-key"
 
 
 class TestVClientContextManager:
