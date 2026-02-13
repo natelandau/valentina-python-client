@@ -3,20 +3,10 @@
 import pytest
 import respx
 
-from vclient import APIConfig, VClient
+from vclient import VClient
 from vclient.services.base import BaseService
 
 pytestmark = pytest.mark.anyio
-
-
-@pytest.fixture
-def api_config(base_url, api_key) -> APIConfig:
-    """Return a test API configuration."""
-    return APIConfig(
-        base_url=base_url,
-        api_key=api_key,
-        timeout=10.0,
-    )
 
 
 @pytest.fixture
@@ -27,9 +17,9 @@ def mock_api(base_url) -> respx.Router:
 
 
 @pytest.fixture
-async def vclient(api_config) -> VClient:
+async def vclient(base_url, api_key) -> VClient:
     """Return a VClient for testing."""
-    client = VClient(config=api_config)
+    client = VClient(base_url=base_url, api_key=api_key, timeout=10.0)
     yield client
     await client.close()
 

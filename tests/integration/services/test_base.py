@@ -657,11 +657,8 @@ class TestBaseServiceRateLimitRetry:
         assert route.call_count == 4
 
     @respx.mock
-    async def test_auto_retry_disabled_via_config(self, api_config, base_url):
+    async def test_auto_retry_disabled_via_config(self, base_url, api_key):
         """Verify no retry when auto_retry_rate_limit is disabled."""
-        # Given: A config with auto_retry disabled
-        api_config.auto_retry_rate_limit = False
-
         # Given: An endpoint that returns 429
         route = respx.get(f"{base_url}/test").respond(
             429,
@@ -673,7 +670,9 @@ class TestBaseServiceRateLimitRetry:
         from vclient import VClient
         from vclient.services.base import BaseService
 
-        async with VClient(config=api_config) as client:
+        async with VClient(
+            base_url=base_url, api_key=api_key, auto_retry_rate_limit=False
+        ) as client:
             service = BaseService(client)
             with pytest.raises(RateLimitError):
                 await service._get("/test")
