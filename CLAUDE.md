@@ -14,15 +14,18 @@ uv run duty clean   # Clean build artifacts
 
 ```
 src/vclient/
-├── services/     # API service classes (companies, campaigns, characters, etc.)
-├── models/       # Pydantic v2 models
-├── config.py     # APIConfig
-├── client.py     # VClient
-└── endpoints.py  # API endpoint paths
+├── services/      # API service classes (companies, campaigns, characters, etc.)
+├── models/        # Pydantic v2 models
+├── client.py      # VClient
+├── config.py      # APIConfig
+├── constants.py   # Shared constants
+├── endpoints.py   # API endpoint paths
+├── exceptions.py  # RFC 9457 exception classes
+└── registry.py    # Service factory functions
 
 tests/
-├── unit/         # Model validation tests
-└── integration/  # Service tests with respx HTTP mocking
+├── unit/          # Model validation tests
+└── integration/   # Service tests with respx HTTP mocking
 ```
 
 ## Model Naming Conventions
@@ -45,12 +48,40 @@ Services extend `BaseService` and provide:
 - `iter_all()` - async iterator for large datasets
 - `get(id)`, `create()`, `update(id)`, `delete(id)`
 
+**Primary access via factory functions** (preferred over direct instantiation):
+
+```python
+from vclient import campaigns_service, users_service
+
+async with campaigns_service(api_key="...") as svc:
+    campaigns = await svc.list_all()
+```
+
+Available: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `users_service`, etc.
+
 ## Code Style
 
 - Google-style docstrings
 - Type hints required
 - Pydantic v2 models with field validation
 - Async/await throughout (httpx for HTTP)
+
+## Exceptions
+
+All exceptions inherit from `APIError` and follow RFC 9457 Problem Details format.
+
+| Exception                | HTTP Status | Use Case                                                  |
+| ------------------------ | ----------- | --------------------------------------------------------- |
+| `AuthenticationError`    | 401         | Invalid/missing API key                                   |
+| `AuthorizationError`     | 403         | Valid key, insufficient permissions                       |
+| `NotFoundError`          | 404         | Resource not found                                        |
+| `ValidationError`        | 400         | Server-side validation failed (has `.invalid_parameters`) |
+| `RequestValidationError` | -           | Client-side Pydantic validation (pre-request)             |
+| `ConflictError`          | 409         | Idempotency key reuse                                     |
+| `RateLimitError`         | 429         | Rate limited (has `.retry_after`, `.remaining`)           |
+| `ServerError`            | 5xx         | Server errors                                             |
+
+All have `.status_code`, `.title`, `.detail`, `.instance` properties from RFC 9457.
 
 ## Testing
 
