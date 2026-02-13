@@ -5,8 +5,6 @@ from .books import (
     BookCreate,
     BookUpdate,
     CampaignBook,
-)
-from .books import (
     _BookRenumber as _BookRenumber,
 )
 from .campaigns import (
@@ -18,8 +16,6 @@ from .chapters import (
     CampaignChapter,
     ChapterCreate,
     ChapterUpdate,
-)
-from .chapters import (
     _ChapterRenumber as _ChapterRenumber,
 )
 from .character_autogen import (
@@ -41,11 +37,7 @@ from .character_trait import (
     CharacterTrait,
     CharacterTraitValueOptionsResponse,
     TraitCreate,
-)
-from .character_trait import (
     _TraitAssign as _TraitAssign,
-)
-from .character_trait import (
     _TraitModify as _TraitModify,
 )
 from .characters import (
@@ -56,6 +48,7 @@ from .characters import (
     HunterAttributes,
     HunterAttributesCreate,
     HunterAttributesUpdate,
+    HunterEdge as CharacterHunterEdge,
     InventoryItem,
     InventoryItemCreate,
     InventoryItemUpdate,
@@ -68,9 +61,6 @@ from .characters import (
     WerewolfAttributesCreate,
     WerewolfAttributesUpdate,
 )
-from .characters import (
-    HunterEdge as CharacterHunterEdge,
-)
 from .companies import (
     Company,
     CompanyCreate,
@@ -78,8 +68,6 @@ from .companies import (
     CompanySettings,
     CompanyUpdate,
     NewCompanyResponse,
-)
-from .companies import (
     _GrantAccess as _GrantAccess,
 )
 from .developers import (
@@ -88,8 +76,11 @@ from .developers import (
     MeDeveloperUpdate,
     MeDeveloperWithApiKey,
 )
-from .diceroll import Diceroll, DicerollCreate
-from .diceroll import _DicerollQuickrollCreate as _DicerollQuickrollCreate
+from .diceroll import (
+    Diceroll,
+    DicerollCreate,
+    _DicerollQuickrollCreate as _DicerollQuickrollCreate,
+)
 from .dictionary import (
     DictionaryTerm,
     DictionaryTermCreate,
@@ -125,8 +116,6 @@ from .users import (
     User,
     UserCreate,
     UserUpdate,
-)
-from .users import (
     _ExperienceAddRemove as _ExperienceAddRemove,
 )
 

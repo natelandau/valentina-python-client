@@ -18,7 +18,6 @@ from vclient.models import (
     UserCreate,
     UserUpdate,
 )
-from vclient.models.users import _ExperienceAddRemove
 
 
 class TestDiscordProfile:
@@ -607,40 +606,3 @@ class TestQuickrollUpdate:
         assert request.name == "Updated Name"
         assert request.description is None
         assert request.trait_ids is None
-
-
-class TestExperienceAddRemove:
-    """Tests for _ExperienceAddRemove model."""
-
-    def test_all_fields(self):
-        """Verify creating request with all fields."""
-        # When: Creating request
-        request = _ExperienceAddRemove(
-            amount=100,
-            user_id="user123",
-            campaign_id="campaign123",
-        )
-
-        # Then: All fields are set correctly
-        assert request.amount == 100
-        assert request.user_id == "user123"
-        assert request.campaign_id == "campaign123"
-
-    def test_model_dump(self):
-        """Verify model_dump works correctly."""
-        # Given: Request
-        request = _ExperienceAddRemove(
-            amount=50,
-            user_id="user123",
-            campaign_id="campaign123",
-        )
-
-        # When: Dumping
-        data = request.model_dump(mode="json")
-
-        # Then: All fields are in the output
-        assert data == {
-            "amount": 50,
-            "user_id": "user123",
-            "campaign_id": "campaign123",
-        }
