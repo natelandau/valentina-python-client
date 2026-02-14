@@ -1,3 +1,11 @@
+## v1.0.1 (2026-02-14)
+
+### Refactor
+
+- **services**: add _build_params helper and cleanup (#5)
+- remove unused code
+- **client**: use argument-only configuration (#4)
+
 ## v1.0.0 (2026-02-05)
 
 ### Feat
