@@ -6,7 +6,7 @@ Async Python client for the Valentina API. Python 3.13+ required.
 
 ```bash
 uv run duty lint    # Run all linting (ruff, ty, typos, format)
-uv run duty test    # Run tests with coverage (requires Docker)
+uv run duty test    # Run tests with coverage
 uv run duty clean   # Clean build artifacts
 ```
 

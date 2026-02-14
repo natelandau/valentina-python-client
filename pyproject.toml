@@ -4,12 +4,9 @@
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
     ]
-    dependencies = [
-        "anyio>=4.12.1",
-        "httpx>=0.28.1",
-        "pydantic[email]>=2.12.5",
-]
+    dependencies = ["anyio>=4.12.1", "httpx>=0.28.1", "pydantic[email]>=2.12.5"]
     description = "Async Python client library for the Valentina Noir API"
+    license = { file = "LICENSE" }
     name = "valentina-python-client"
     readme = "README.md"
     requires-python = ">=3.13"
@@ -30,14 +27,12 @@
     dev = [
         "commitizen>=4.13.7",
         "coverage>=7.13.4",
-        "djlint>=1.36.4",
-        "docker>=7.1.0",
         "duty>=1.9.0",
-        "nclutils>=2.1.0",
         "prek>=0.3.2",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.0.0",
+        "pytest-devtools>=1.0.0",
         "pytest-mock>=3.15.1",
         "pytest-repeat>=0.9.4",
         "pytest-sugar>=1.1.1",

@@ -147,8 +147,6 @@ def update(ctx: Context) -> None:
 @duty()
 def test(ctx: Context, *cli_args: str) -> None:
     """Test package and generate coverage reports."""
-    ctx.run("docker info", title="Run `docker info` to check if docker is running")
-
     ctx.run(
         tools.pytest(
             "tests/",
