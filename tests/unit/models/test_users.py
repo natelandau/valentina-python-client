@@ -5,19 +5,18 @@ from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models import (
     CampaignExperience,
-    CreateNoteRequest,
-    CreateQuickrollRequest,
-    CreateUserRequest,
     DiscordProfile,
-    ExperienceAddRemoveRequest,
     Note,
+    NoteCreate,
+    NoteUpdate,
     Quickroll,
+    QuickrollCreate,
+    QuickrollUpdate,
     RollStatistics,
     S3Asset,
-    UpdateNoteRequest,
-    UpdateQuickrollRequest,
-    UpdateUserRequest,
     User,
+    UserCreate,
+    UserUpdate,
 )
 
 
@@ -201,13 +200,13 @@ class TestUser:
             )
 
 
-class TestCreateUserRequest:
-    """Tests for CreateUserRequest model."""
+class TestUserCreate:
+    """Tests for UserCreate model."""
 
     def test_minimal_request(self):
         """Verify creating request with required fields only."""
         # When: Creating request with required fields
-        request = CreateUserRequest(
+        request = UserCreate(
             name="Test User",
             email="test@example.com",
             role="PLAYER",
@@ -227,7 +226,7 @@ class TestCreateUserRequest:
         discord = DiscordProfile(id="discord123", username="testuser")
 
         # When: Creating request with all fields
-        request = CreateUserRequest(
+        request = UserCreate(
             name="Full User",
             email="full@example.com",
             role="ADMIN",
@@ -243,7 +242,7 @@ class TestCreateUserRequest:
         """Verify name minimum length validation."""
         # When/Then: Creating request with name too short raises error
         with pytest.raises(PydanticValidationError):
-            CreateUserRequest(
+            UserCreate(
                 name="AB",
                 email="test@example.com",
                 role="PLAYER",
@@ -254,7 +253,7 @@ class TestCreateUserRequest:
         """Verify name maximum length validation."""
         # When/Then: Creating request with name too long raises error
         with pytest.raises(PydanticValidationError):
-            CreateUserRequest(
+            UserCreate(
                 name="A" * 51,
                 email="test@example.com",
                 role="PLAYER",
@@ -264,7 +263,7 @@ class TestCreateUserRequest:
     def test_model_dump_excludes_unset(self):
         """Verify model_dump with exclude_unset excludes unset fields."""
         # Given: Request with required fields only
-        request = CreateUserRequest(
+        request = UserCreate(
             name="Test",
             email="test@example.com",
             role="PLAYER",
@@ -283,13 +282,13 @@ class TestCreateUserRequest:
         }
 
 
-class TestUpdateUserRequest:
-    """Tests for UpdateUserRequest model."""
+class TestUserUpdate:
+    """Tests for UserUpdate model."""
 
     def test_only_requesting_user_id_required(self):
         """Verify only requesting_user_id is required."""
         # When: Creating request with only requesting_user_id
-        request = UpdateUserRequest(requesting_user_id="requester123")
+        request = UserUpdate(requesting_user_id="requester123")
 
         # Then: All other fields are None
         assert request.requesting_user_id == "requester123"
@@ -301,7 +300,7 @@ class TestUpdateUserRequest:
     def test_partial_update(self):
         """Verify creating request with some fields."""
         # When: Creating request with name and role
-        request = UpdateUserRequest(
+        request = UserUpdate(
             name="Updated Name",
             role="STORYTELLER",
             requesting_user_id="requester123",
@@ -315,7 +314,7 @@ class TestUpdateUserRequest:
     def test_model_dump_excludes_unset(self):
         """Verify model_dump with exclude_unset only includes set fields."""
         # Given: Request with only some fields set
-        request = UpdateUserRequest(
+        request = UserUpdate(
             name="Updated Name",
             requesting_user_id="requester123",
         )
@@ -451,13 +450,13 @@ class TestNote:
         assert note.content == "This is the content of my note."
 
 
-class TestCreateNoteRequest:
-    """Tests for CreateNoteRequest model."""
+class TestNoteCreate:
+    """Tests for NoteCreate model."""
 
     def test_required_fields(self):
         """Verify creating request with required fields."""
         # When: Creating request
-        request = CreateNoteRequest(
+        request = NoteCreate(
             title="Note Title",
             content="Note content here",
         )
@@ -470,22 +469,22 @@ class TestCreateNoteRequest:
         """Verify title minimum length validation."""
         # When/Then: Creating request with title too short raises error
         with pytest.raises(PydanticValidationError):
-            CreateNoteRequest(title="AB", content="Valid content")
+            NoteCreate(title="AB", content="Valid content")
 
     def test_content_min_length_validation(self):
         """Verify content minimum length validation."""
         # When/Then: Creating request with content too short raises error
         with pytest.raises(PydanticValidationError):
-            CreateNoteRequest(title="Valid Title", content="AB")
+            NoteCreate(title="Valid Title", content="AB")
 
 
-class TestUpdateNoteRequest:
-    """Tests for UpdateNoteRequest model."""
+class TestNoteUpdate:
+    """Tests for NoteUpdate model."""
 
     def test_empty_request(self):
         """Verify creating empty update request."""
         # When: Creating request with no fields
-        request = UpdateNoteRequest()
+        request = NoteUpdate()
 
         # Then: All fields are None
         assert request.title is None
@@ -494,7 +493,7 @@ class TestUpdateNoteRequest:
     def test_partial_update(self):
         """Verify creating request with some fields."""
         # When: Creating request with only title
-        request = UpdateNoteRequest(title="Updated Title")
+        request = NoteUpdate(title="Updated Title")
 
         # Then: Only title is set
         assert request.title == "Updated Title"
@@ -503,7 +502,7 @@ class TestUpdateNoteRequest:
     def test_model_dump_excludes_unset(self):
         """Verify model_dump with exclude_unset only includes set fields."""
         # Given: Request with only title set
-        request = UpdateNoteRequest(title="Updated Title")
+        request = NoteUpdate(title="Updated Title")
 
         # When: Dumping with exclude_none and exclude_unset
         data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
@@ -551,13 +550,13 @@ class TestQuickroll:
         assert quickroll.trait_ids == ["trait1", "trait2"]
 
 
-class TestCreateQuickrollRequest:
-    """Tests for CreateQuickrollRequest model."""
+class TestQuickrollCreate:
+    """Tests for QuickrollCreate model."""
 
     def test_minimal_request(self):
         """Verify creating request with required fields only."""
         # When: Creating request with name only
-        request = CreateQuickrollRequest(name="Quick Roll")
+        request = QuickrollCreate(name="Quick Roll")
 
         # Then: Request is created with defaults
         assert request.name == "Quick Roll"
@@ -567,7 +566,7 @@ class TestCreateQuickrollRequest:
     def test_full_request(self):
         """Verify creating request with all fields."""
         # When: Creating request with all fields
-        request = CreateQuickrollRequest(
+        request = QuickrollCreate(
             name="Full Roll",
             description="A complete roll",
             trait_ids=["trait1", "trait2"],
@@ -582,16 +581,16 @@ class TestCreateQuickrollRequest:
         """Verify name minimum length validation."""
         # When/Then: Creating request with name too short raises error
         with pytest.raises(PydanticValidationError):
-            CreateQuickrollRequest(name="AB")
+            QuickrollCreate(name="AB")
 
 
-class TestUpdateQuickrollRequest:
-    """Tests for UpdateQuickrollRequest model."""
+class TestQuickrollUpdate:
+    """Tests for QuickrollUpdate model."""
 
     def test_empty_request(self):
         """Verify creating empty update request."""
         # When: Creating request with no fields
-        request = UpdateQuickrollRequest()
+        request = QuickrollUpdate()
 
         # Then: All fields are None
         assert request.name is None
@@ -601,46 +600,9 @@ class TestUpdateQuickrollRequest:
     def test_partial_update(self):
         """Verify creating request with some fields."""
         # When: Creating request with name only
-        request = UpdateQuickrollRequest(name="Updated Name")
+        request = QuickrollUpdate(name="Updated Name")
 
         # Then: Only name is set
         assert request.name == "Updated Name"
         assert request.description is None
         assert request.trait_ids is None
-
-
-class TestExperienceAddRemoveRequest:
-    """Tests for ExperienceAddRemoveRequest model."""
-
-    def test_all_fields(self):
-        """Verify creating request with all fields."""
-        # When: Creating request
-        request = ExperienceAddRemoveRequest(
-            amount=100,
-            user_id="user123",
-            campaign_id="campaign123",
-        )
-
-        # Then: All fields are set correctly
-        assert request.amount == 100
-        assert request.user_id == "user123"
-        assert request.campaign_id == "campaign123"
-
-    def test_model_dump(self):
-        """Verify model_dump works correctly."""
-        # Given: Request
-        request = ExperienceAddRemoveRequest(
-            amount=50,
-            user_id="user123",
-            campaign_id="campaign123",
-        )
-
-        # When: Dumping
-        data = request.model_dump(mode="json")
-
-        # Then: All fields are in the output
-        assert data == {
-            "amount": 50,
-            "user_id": "user123",
-            "campaign_id": "campaign123",
-        }

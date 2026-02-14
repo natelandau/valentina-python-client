@@ -10,15 +10,15 @@ from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
 from vclient.models import (
     Character,
-    CharacterEdgeAndPerksDTO,
-    CharacterInventoryItem,
-    CharacterPerkDTO,
+    CharacterHunterEdge,
+    EdgeAndPerks,
     HunterAttributesCreate,
-    HunterAttributesEdgeModel,
     HunterAttributesUpdate,
+    InventoryItem,
     NameDescriptionSubDocument,
     Note,
     PaginatedResponse,
+    Perk,
     RollStatistics,
     S3Asset,
     VampireAttributesCreate,
@@ -516,7 +516,7 @@ class TestCharactersServiceCreate:
         # Given: Hunter attributes to create
         hunter_attrs = HunterAttributesCreate(
             creed="Avenger",
-            edges=[HunterAttributesEdgeModel(edge_id="edge123", perk_ids=["perk123"])],
+            edges=[CharacterHunterEdge(edge_id="edge123", perk_ids=["perk123"])],
         )
 
         # When: Creating a character with hunter attributes
@@ -559,11 +559,11 @@ class TestCharactersServiceCreate:
         ).mock(return_value=Response(201, json=response_data))
 
         # Given: Traits to assign
-        from vclient.models import AssignCharacterTraitRequest
+        from vclient.models.character_trait import _TraitAssign
 
         traits = [
-            AssignCharacterTraitRequest(trait_id="trait123", value=3),
-            AssignCharacterTraitRequest(trait_id="trait456", value=2),
+            _TraitAssign(trait_id="trait123", value=3),
+            _TraitAssign(trait_id="trait456", value=2),
         ]
 
         # When: Creating a character with traits
@@ -788,7 +788,7 @@ class TestCharactersServiceUpdate:
         # Given: Hunter attributes to update
         hunter_attrs = HunterAttributesUpdate(
             creed="Defender",
-            edges=[HunterAttributesEdgeModel(edge_id="edge456", perk_ids=["perk456", "perk789"])],
+            edges=[CharacterHunterEdge(edge_id="edge456", perk_ids=["perk456", "perk789"])],
         )
 
         # When: Updating the character's hunter attributes
@@ -1220,11 +1220,11 @@ class TestCharactersServiceInventory:
             user_id, campaign_id, company_id=company_id
         ).get_inventory_page(character_id)
 
-        # Then: Returns paginated CharacterInventoryItem objects
+        # Then: Returns paginated InventoryItem objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], CharacterInventoryItem)
+        assert isinstance(result.items[0], InventoryItem)
         assert result.items[0].name == "Test Item"
         assert result.items[0].type == "BOOK"
         assert result.items[0].description == "This is test content"
@@ -1252,11 +1252,11 @@ class TestCharactersServiceInventory:
             user_id, campaign_id, company_id=company_id
         ).list_all_inventory(character_id)
 
-        # Then: Returns list of CharacterInventoryItem objects
+        # Then: Returns list of InventoryItem objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], CharacterInventoryItem)
+        assert isinstance(result[0], InventoryItem)
         assert result[0].name == "Test Item"
 
     @respx.mock
@@ -1281,11 +1281,11 @@ class TestCharactersServiceInventory:
             ).iter_all_inventory(character_id)
         ]
 
-        # Then: Returns list of CharacterInventoryItem objects
+        # Then: Returns list of InventoryItem objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], CharacterInventoryItem)
+        assert isinstance(result[0], InventoryItem)
         assert result[0].name == "Test Item"
 
     @respx.mock
@@ -1305,9 +1305,9 @@ class TestCharactersServiceInventory:
             user_id, campaign_id, company_id=company_id
         ).get_inventory_item(character_id, item_id)
 
-        # Then: Returns CharacterInventoryItem object
+        # Then: Returns InventoryItem object
         assert route.called
-        assert isinstance(result, CharacterInventoryItem)
+        assert isinstance(result, InventoryItem)
         assert result.name == "Test Item"
         assert result.type == "BOOK"
         assert result.description == "This is test content"
@@ -1331,9 +1331,9 @@ class TestCharactersServiceInventory:
             character_id, name="Test Item", type="BOOK", description="This is test content"
         )
 
-        # Then: Returns CharacterInventoryItem object
+        # Then: Returns InventoryItem object
         assert route.called
-        assert isinstance(result, CharacterInventoryItem)
+        assert isinstance(result, InventoryItem)
         assert result.name == "Test Item"
         assert result.type == "BOOK"
         assert result.description == "This is test content"
@@ -1358,9 +1358,9 @@ class TestCharactersServiceInventory:
             user_id, campaign_id, company_id=company_id
         ).update_inventory_item(character_id, item_id, name="Updated Item")
 
-        # Then: Returns CharacterInventoryItem object
+        # Then: Returns InventoryItem object
         assert route.called
-        assert isinstance(result, CharacterInventoryItem)
+        assert isinstance(result, InventoryItem)
         assert result.name == "Updated Item"
         assert result.type == "BOOK"
         assert result.description == "This is test content"
@@ -1752,11 +1752,11 @@ class TestCharactersServiceHunterEdges:
             user_id, campaign_id, company_id=company_id
         ).get_edges_page(character_id)
 
-        # Then: Returns paginated CharacterEdgeAndPerksDTO objects
+        # Then: Returns paginated EdgeAndPerks objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], CharacterEdgeAndPerksDTO)
+        assert isinstance(result.items[0], EdgeAndPerks)
         assert result.items[0].name == "Beast Hunter"
         assert result.items[0].type == "APTITUDES"
 
@@ -1780,11 +1780,11 @@ class TestCharactersServiceHunterEdges:
             user_id, campaign_id, company_id=company_id
         ).list_all_edges(character_id)
 
-        # Then: Returns list of CharacterEdgeAndPerksDTO objects
+        # Then: Returns list of EdgeAndPerks objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], CharacterEdgeAndPerksDTO)
+        assert isinstance(result[0], EdgeAndPerks)
         assert result[0].name == "Beast Hunter"
 
     @respx.mock
@@ -1810,11 +1810,11 @@ class TestCharactersServiceHunterEdges:
             ).iter_all_edges(character_id)
         ]
 
-        # Then: Returns list of CharacterEdgeAndPerksDTO objects
+        # Then: Returns list of EdgeAndPerks objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], CharacterEdgeAndPerksDTO)
+        assert isinstance(result[0], EdgeAndPerks)
         assert result[0].name == "Beast Hunter"
 
     @respx.mock
@@ -1835,9 +1835,9 @@ class TestCharactersServiceHunterEdges:
             character_id, hunter_edge_id
         )
 
-        # Then: Returns CharacterEdgeAndPerksDTO object
+        # Then: Returns EdgeAndPerks object
         assert route.called
-        assert isinstance(result, CharacterEdgeAndPerksDTO)
+        assert isinstance(result, EdgeAndPerks)
         assert result.id == "edge123"
         assert result.name == "Beast Hunter"
         assert result.pool == "Wits + Investigation"
@@ -1862,9 +1862,9 @@ class TestCharactersServiceHunterEdges:
             character_id, hunter_edge_id
         )
 
-        # Then: Returns CharacterEdgeAndPerksDTO object
+        # Then: Returns EdgeAndPerks object
         assert route.called
-        assert isinstance(result, CharacterEdgeAndPerksDTO)
+        assert isinstance(result, EdgeAndPerks)
         assert result.id == "edge123"
         assert result.name == "Beast Hunter"
 
@@ -1886,9 +1886,9 @@ class TestCharactersServiceHunterEdges:
             character_id, hunter_edge_id
         )
 
-        # Then: Returns CharacterEdgeAndPerksDTO object
+        # Then: Returns EdgeAndPerks object
         assert route.called
-        assert isinstance(result, CharacterEdgeAndPerksDTO)
+        assert isinstance(result, EdgeAndPerks)
         assert result.id == "edge123"
 
 
@@ -1922,11 +1922,11 @@ class TestCharactersServiceHunterEdgePerks:
             user_id, campaign_id, company_id=company_id
         ).get_edge_perks_page(character_id, hunter_edge_id)
 
-        # Then: Returns paginated CharacterPerkDTO objects
+        # Then: Returns paginated Perk objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], CharacterPerkDTO)
+        assert isinstance(result.items[0], Perk)
         assert result.items[0].name == "Advanced Tracking"
 
     @respx.mock
@@ -1955,11 +1955,11 @@ class TestCharactersServiceHunterEdgePerks:
             user_id, campaign_id, company_id=company_id
         ).list_all_edge_perks(character_id, hunter_edge_id)
 
-        # Then: Returns list of CharacterPerkDTO objects
+        # Then: Returns list of Perk objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], CharacterPerkDTO)
+        assert isinstance(result[0], Perk)
         assert result[0].name == "Advanced Tracking"
 
     @respx.mock
@@ -1991,11 +1991,11 @@ class TestCharactersServiceHunterEdgePerks:
             ).iter_all_edge_perks(character_id, hunter_edge_id)
         ]
 
-        # Then: Returns list of CharacterPerkDTO objects
+        # Then: Returns list of Perk objects
         assert route.called
         assert isinstance(result, list)
         assert len(result) == 1
-        assert isinstance(result[0], CharacterPerkDTO)
+        assert isinstance(result[0], Perk)
         assert result[0].name == "Advanced Tracking"
 
     @respx.mock
@@ -2017,9 +2017,9 @@ class TestCharactersServiceHunterEdgePerks:
             user_id, campaign_id, company_id=company_id
         ).get_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)
 
-        # Then: Returns CharacterPerkDTO object
+        # Then: Returns Perk object
         assert route.called
-        assert isinstance(result, CharacterPerkDTO)
+        assert isinstance(result, Perk)
         assert result.id == "perk123"
         assert result.name == "Advanced Tracking"
         assert result.description == "Enhanced ability to track supernatural prey."
@@ -2043,9 +2043,9 @@ class TestCharactersServiceHunterEdgePerks:
             user_id, campaign_id, company_id=company_id
         ).add_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)
 
-        # Then: Returns CharacterPerkDTO object
+        # Then: Returns Perk object
         assert route.called
-        assert isinstance(result, CharacterPerkDTO)
+        assert isinstance(result, Perk)
         assert result.id == "perk123"
         assert result.name == "Advanced Tracking"
 
@@ -2068,7 +2068,7 @@ class TestCharactersServiceHunterEdgePerks:
             user_id, campaign_id, company_id=company_id
         ).remove_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)
 
-        # Then: Returns CharacterPerkDTO object
+        # Then: Returns Perk object
         assert route.called
-        assert isinstance(result, CharacterPerkDTO)
+        assert isinstance(result, Perk)
         assert result.id == "perk123"

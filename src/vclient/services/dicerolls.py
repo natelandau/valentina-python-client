@@ -50,20 +50,16 @@ class DicerollService(BaseService):
         campaignid: str | None = None,
     ) -> PaginatedResponse[Diceroll]:
         """Retrieve a paginated page of dice rolls."""
-        params = {}
-        if userid is not None:
-            params["userid"] = userid
-        if characterid is not None:
-            params["characterid"] = characterid
-        if campaignid is not None:
-            params["campaignid"] = campaignid
-
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.DICEROLLS),
             Diceroll,
             limit=limit,
             offset=offset,
-            params=params or None,
+            params=self._build_params(
+                userid=userid,
+                characterid=characterid,
+                campaignid=campaignid,
+            ),
         )
 
     async def list_all(
@@ -90,17 +86,14 @@ class DicerollService(BaseService):
         limit: int = 100,
     ) -> AsyncIterator[Diceroll]:
         """Iterate through all dice rolls."""
-        params = {}
-        if userid is not None:
-            params["userid"] = userid
-        if characterid is not None:
-            params["characterid"] = characterid
-        if campaignid is not None:
-            params["campaignid"] = campaignid
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.DICEROLLS),
             limit=limit,
-            params=params or None,
+            params=self._build_params(
+                userid=userid,
+                characterid=characterid,
+                campaignid=campaignid,
+            ),
         ):
             yield Diceroll.model_validate(item)
 

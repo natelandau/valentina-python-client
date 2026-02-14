@@ -5,11 +5,11 @@ from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models import (
     Character,
-    CreateCharacterRequest,
+    CharacterCreate,
+    CharacterHunterEdge,
+    CharacterUpdate,
     HunterAttributes,
-    HunterAttributesEdgeModel,
     MageAttributes,
-    UpdateCharacterRequest,
     VampireAttributes,
     WerewolfAttributes,
 )
@@ -182,13 +182,13 @@ class TestCharacter:
         assert "status" in str(exc_info.value)
 
 
-class TestCreateCharacterRequest:
-    """Tests for CreateCharacterRequest model."""
+class TestCharacterCreate:
+    """Tests for CharacterCreate model."""
 
     def test_create_request_minimal(self) -> None:
-        """Verify CreateCharacterRequest with required fields only."""
+        """Verify CharacterCreate with required fields only."""
         # When: Creating a request with required fields
-        request = CreateCharacterRequest(
+        request = CharacterCreate(
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -204,14 +204,14 @@ class TestCreateCharacterRequest:
         assert request.age is None
 
     def test_create_request_all_fields(self) -> None:
-        """Verify CreateCharacterRequest with all fields."""
+        """Verify CharacterCreate with all fields."""
         # Given: Traits to assign
-        from vclient.models import AssignCharacterTraitRequest
+        from vclient.models.character_trait import _TraitAssign
 
-        traits = [AssignCharacterTraitRequest(trait_id="trait123", value=3)]
+        traits = [_TraitAssign(trait_id="trait123", value=3)]
 
         # When: Creating a request with all fields
-        request = CreateCharacterRequest(
+        request = CharacterCreate(
             character_class="WEREWOLF",
             game_version="V4",
             name_first="Jane",
@@ -238,7 +238,7 @@ class TestCreateCharacterRequest:
         """Verify name_first requires minimum 3 characters."""
         # When/Then: Short first name is rejected
         with pytest.raises(PydanticValidationError) as exc_info:
-            CreateCharacterRequest(
+            CharacterCreate(
                 character_class="VAMPIRE",
                 game_version="V5",
                 name_first="Jo",  # Too short
@@ -251,7 +251,7 @@ class TestCreateCharacterRequest:
         """Verify name_last requires minimum 3 characters."""
         # When/Then: Short last name is rejected
         with pytest.raises(PydanticValidationError) as exc_info:
-            CreateCharacterRequest(
+            CharacterCreate(
                 character_class="VAMPIRE",
                 game_version="V5",
                 name_first="John",
@@ -263,7 +263,7 @@ class TestCreateCharacterRequest:
     def test_create_request_model_dump_excludes_none(self) -> None:
         """Verify model_dump with exclude_none excludes unset optional fields."""
         # Given: A request with only required fields
-        request = CreateCharacterRequest(
+        request = CharacterCreate(
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -282,13 +282,13 @@ class TestCreateCharacterRequest:
         }
 
 
-class TestUpdateCharacterRequest:
-    """Tests for UpdateCharacterRequest model."""
+class TestCharacterUpdate:
+    """Tests for CharacterUpdate model."""
 
     def test_update_request_empty(self) -> None:
-        """Verify UpdateCharacterRequest with no fields."""
+        """Verify CharacterUpdate with no fields."""
         # When: Creating an empty update request
-        request = UpdateCharacterRequest()
+        request = CharacterUpdate()
 
         # Then: All fields are None
         assert request.character_class is None
@@ -296,9 +296,9 @@ class TestUpdateCharacterRequest:
         assert request.status is None
 
     def test_update_request_partial(self) -> None:
-        """Verify UpdateCharacterRequest with partial fields."""
+        """Verify CharacterUpdate with partial fields."""
         # When: Creating an update request with some fields
-        request = UpdateCharacterRequest(
+        request = CharacterUpdate(
             name_first="Jane",
             status="DEAD",
         )
@@ -312,7 +312,7 @@ class TestUpdateCharacterRequest:
     def test_update_request_model_dump_excludes_unset(self) -> None:
         """Verify model_dump with exclude_unset only includes set fields."""
         # Given: An update request with partial fields
-        request = UpdateCharacterRequest(
+        request = CharacterUpdate(
             name_first="Jane",
         )
 
@@ -326,7 +326,7 @@ class TestUpdateCharacterRequest:
         """Verify name_first requires minimum 3 characters when provided."""
         # When/Then: Short first name is rejected
         with pytest.raises(PydanticValidationError) as exc_info:
-            UpdateCharacterRequest(name_first="Jo")  # Too short
+            CharacterUpdate(name_first="Jo")  # Too short
 
         assert "name_first" in str(exc_info.value)
 
@@ -392,7 +392,7 @@ class TestHunterAttributes:
         # When: Creating hunter attributes with edges
         attrs = HunterAttributes(
             creed="Defender",
-            edges=[HunterAttributesEdgeModel(edge_id="edge123", perk_ids=["perk123"])],
+            edges=[CharacterHunterEdge(edge_id="edge123", perk_ids=["perk123"])],
         )
 
         # Then: All fields are set correctly
