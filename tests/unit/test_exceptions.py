@@ -1,8 +1,7 @@
 """Tests for vclient.api.exceptions."""
 
 import pytest
-from pydantic import BaseModel, Field
-from pydantic import ValidationError as PydanticValidationError
+from pydantic import BaseModel, Field, ValidationError as PydanticValidationError
 
 from vclient.exceptions import (
     APIError,

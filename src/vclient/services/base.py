@@ -7,8 +7,7 @@ from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any, TypeVar
 
 import httpx
-from pydantic import BaseModel
-from pydantic import ValidationError as PydanticValidationError
+from pydantic import BaseModel, ValidationError as PydanticValidationError
 
 from vclient.constants import (
     DEFAULT_PAGE_LIMIT,
