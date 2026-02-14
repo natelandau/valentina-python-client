@@ -78,10 +78,10 @@ repos:
         args: ["--force-exclude"]
         stages: [commit-msg, pre-commit]
 
-  # - repo: "https://github.com/gitleaks/gitleaks"
-  #   rev: v8.30.0
-  #   hooks:
-  #     - id: gitleaks
+  - repo: "https://github.com/gitleaks/gitleaks"
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
 
   - repo: "https://github.com/python-jsonschema/check-jsonschema"
     rev: 0.36.1
