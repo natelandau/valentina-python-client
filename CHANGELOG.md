@@ -1,3 +1,9 @@
+## v1.1.1 (2026-02-15)
+
+### Fix
+
+- **models**: expose _TraitAssign as public API (#12)
+
 ## v1.1.0 (2026-02-15)
 
 ### Feat
