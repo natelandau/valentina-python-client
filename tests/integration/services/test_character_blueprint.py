@@ -1356,6 +1356,27 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         assert result.items[0].name == "Auspice Name"
 
     @respx.mock
+    async def test_get_werewolf_auspices_page_with_game_version_filter(
+        self, vclient, base_url, paginated_werewolf_auspice_response
+    ) -> None:
+        """Verify get_werewolf_auspices_page passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.WEREWOLF_AUSPICES.format(company_id=company_id)}",
+            params={"limit": "10", "offset": "0", "game_version": "V5"},
+        ).mock(return_value=Response(200, json=paginated_werewolf_auspice_response))
+
+        # When: Requesting with game_version filter
+        result = await vclient.character_blueprint(company_id).get_werewolf_auspices_page(
+            game_version="V5"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
     async def test_list_all_werewolf_auspices(
         self, vclient, base_url, werewolf_auspice_response_data
     ) -> None:
@@ -1407,6 +1428,67 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         ]
 
         # Then: All werewolf auspices are yielded
+        assert route.called
+        assert len(auspices) == 1
+        assert isinstance(auspices[0], WerewolfAuspice)
+
+    @respx.mock
+    async def test_list_all_werewolf_auspices_with_game_version_filter(
+        self, vclient, base_url, werewolf_auspice_response_data
+    ) -> None:
+        """Verify list_all_werewolf_auspices passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [werewolf_auspice_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.WEREWOLF_AUSPICES.format(company_id=company_id)}",
+            params__contains={"game_version": "V5"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting all werewolf auspices with game_version filter
+        result = await vclient.character_blueprint(company_id).list_all_werewolf_auspices(
+            game_version="V5"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result) == 1
+        assert isinstance(result[0], WerewolfAuspice)
+
+    @respx.mock
+    async def test_iter_all_werewolf_auspices_with_game_version_filter(
+        self, vclient, base_url, werewolf_auspice_response_data
+    ) -> None:
+        """Verify iter_all_werewolf_auspices passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [werewolf_auspice_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.WEREWOLF_AUSPICES.format(company_id=company_id)}",
+            params__contains={"game_version": "V5"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating with game_version filter
+        auspices = [
+            auspice
+            async for auspice in vclient.character_blueprint(company_id).iter_all_werewolf_auspices(
+                game_version="V5"
+            )
+        ]
+
+        # Then: The route was called with correct params
         assert route.called
         assert len(auspices) == 1
         assert isinstance(auspices[0], WerewolfAuspice)
@@ -1480,6 +1562,27 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         assert isinstance(result.items[0], WerewolfTribe)
 
     @respx.mock
+    async def test_get_werewolf_tribes_page_with_game_version_filter(
+        self, vclient, base_url, paginated_werewolf_tribe_response
+    ) -> None:
+        """Verify get_werewolf_tribes_page passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.WEREWOLF_TRIBES.format(company_id=company_id)}",
+            params={"limit": "10", "offset": "0", "game_version": "V5"},
+        ).mock(return_value=Response(200, json=paginated_werewolf_tribe_response))
+
+        # When: Requesting with game_version filter
+        result = await vclient.character_blueprint(company_id).get_werewolf_tribes_page(
+            game_version="V5"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
     async def test_list_all_werewolf_tribes(
         self, vclient, base_url, werewolf_tribe_response_data
     ) -> None:
@@ -1507,6 +1610,35 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         assert result[0].name == "Tribe Name"
 
     @respx.mock
+    async def test_list_all_werewolf_tribes_with_game_version_filter(
+        self, vclient, base_url, werewolf_tribe_response_data
+    ) -> None:
+        """Verify list_all_werewolf_tribes passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [werewolf_tribe_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.WEREWOLF_TRIBES.format(company_id=company_id)}",
+            params__contains={"game_version": "V5"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting all werewolf tribes with game_version filter
+        result = await vclient.character_blueprint(company_id).list_all_werewolf_tribes(
+            game_version="V5"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result) == 1
+        assert isinstance(result[0], WerewolfTribe)
+
+    @respx.mock
     async def test_iter_all_werewolf_tribes(
         self, vclient, base_url, werewolf_tribe_response_data
     ) -> None:
@@ -1524,17 +1656,23 @@ class TestCharacterBlueprintServiceWerewolfTribes:
             f"{base_url}{Endpoints.WEREWOLF_TRIBES.format(company_id=company_id)}"
         ).mock(return_value=Response(200, json=paginated_response))
 
-        # When: Requesting all werewolf tribes
-        result = await vclient.character_blueprint(company_id).list_all_werewolf_tribes()
+        # When: Iterating through all werewolf tribes
+        tribes = [
+            tribe
+            async for tribe in vclient.character_blueprint(company_id).iter_all_werewolf_tribes()
+        ]
 
-        # Then: All werewolf tribes are returned as a list
+        # Then: All werewolf tribes are yielded
         assert route.called
-        assert len(result) == 1
-        assert isinstance(result[0], WerewolfTribe)
-        assert result[0].name == "Tribe Name"
+        assert len(tribes) == 1
+        assert isinstance(tribes[0], WerewolfTribe)
 
-        """Verify iter_all_werewolf_tribes yields werewolf tribes across pages."""
-        # Given: A mocked endpoint
+    @respx.mock
+    async def test_iter_all_werewolf_tribes_with_game_version_filter(
+        self, vclient, base_url, werewolf_tribe_response_data
+    ) -> None:
+        """Verify iter_all_werewolf_tribes passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
         company_id = "company123"
         paginated_response = {
             "items": [werewolf_tribe_response_data],
@@ -1544,17 +1682,22 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         }
 
         route = respx.get(
-            f"{base_url}{Endpoints.WEREWOLF_TRIBES.format(company_id=company_id)}"
+            f"{base_url}{Endpoints.WEREWOLF_TRIBES.format(company_id=company_id)}",
+            params__contains={"game_version": "V5"},
         ).mock(return_value=Response(200, json=paginated_response))
 
-        # When: Requesting all werewolf tribes
-        result = await vclient.character_blueprint(company_id).list_all_werewolf_tribes()
+        # When: Iterating with game_version filter
+        tribes = [
+            tribe
+            async for tribe in vclient.character_blueprint(company_id).iter_all_werewolf_tribes(
+                game_version="V5"
+            )
+        ]
 
-        # Then: All werewolf tribes are returned as a list
+        # Then: The route was called with correct params
         assert route.called
-        assert len(result) == 1
-        assert isinstance(result[0], WerewolfTribe)
-        assert result[0].name == "Tribe Name"
+        assert len(tribes) == 1
+        assert isinstance(tribes[0], WerewolfTribe)
 
     @respx.mock
     async def test_get_werewolf_tribe(

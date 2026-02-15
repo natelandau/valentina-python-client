@@ -397,6 +397,7 @@ class CharacterBlueprintService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
+        game_version: GameVersion | None = None,
     ) -> PaginatedResponse[WerewolfAuspice]:
         """Get a paginated page of werewolf auspices."""
         return await self._get_paginated_as(
@@ -404,16 +405,24 @@ class CharacterBlueprintService(BaseService):
             WerewolfAuspice,
             limit=limit,
             offset=offset,
+            params=self._build_params(game_version=game_version),
         )
 
-    async def list_all_werewolf_auspices(self) -> list[WerewolfAuspice]:
+    async def list_all_werewolf_auspices(
+        self, *, game_version: GameVersion | None = None
+    ) -> list[WerewolfAuspice]:
         """List all werewolf auspices."""
-        return [auspice async for auspice in self.iter_all_werewolf_auspices()]
+        return [
+            auspice async for auspice in self.iter_all_werewolf_auspices(game_version=game_version)
+        ]
 
-    async def iter_all_werewolf_auspices(self) -> AsyncIterator[WerewolfAuspice]:
+    async def iter_all_werewolf_auspices(
+        self, *, game_version: GameVersion | None = None
+    ) -> AsyncIterator[WerewolfAuspice]:
         """Iterate through all werewolf auspices."""
         async for auspice in self._iter_all_pages(
             self._format_endpoint(Endpoints.WEREWOLF_AUSPICES),
+            params=self._build_params(game_version=game_version),
         ):
             yield WerewolfAuspice.model_validate(auspice)
 
@@ -434,6 +443,7 @@ class CharacterBlueprintService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
+        game_version: GameVersion | None = None,
     ) -> PaginatedResponse[WerewolfTribe]:
         """Get a paginated page of werewolf tribes."""
         return await self._get_paginated_as(
@@ -441,16 +451,22 @@ class CharacterBlueprintService(BaseService):
             WerewolfTribe,
             limit=limit,
             offset=offset,
+            params=self._build_params(game_version=game_version),
         )
 
-    async def list_all_werewolf_tribes(self) -> list[WerewolfTribe]:
+    async def list_all_werewolf_tribes(
+        self, *, game_version: GameVersion | None = None
+    ) -> list[WerewolfTribe]:
         """List all werewolf tribes."""
-        return [tribe async for tribe in self.iter_all_werewolf_tribes()]
+        return [tribe async for tribe in self.iter_all_werewolf_tribes(game_version=game_version)]
 
-    async def iter_all_werewolf_tribes(self) -> AsyncIterator[WerewolfTribe]:
+    async def iter_all_werewolf_tribes(
+        self, *, game_version: GameVersion | None = None
+    ) -> AsyncIterator[WerewolfTribe]:
         """Iterate through all werewolf tribes."""
         async for tribe in self._iter_all_pages(
             self._format_endpoint(Endpoints.WEREWOLF_TRIBES),
+            params=self._build_params(game_version=game_version),
         ):
             yield WerewolfTribe.model_validate(tribe)
 
