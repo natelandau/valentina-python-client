@@ -126,7 +126,7 @@ class DicerollService(BaseService):
         )
         return Diceroll.model_validate(response.json())
 
-    async def create_quickroll(
+    async def create_from_quickroll(
         self,
         *,
         quickroll_id: str,

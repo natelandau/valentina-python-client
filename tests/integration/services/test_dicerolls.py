@@ -323,10 +323,10 @@ class TestDicerollServiceCreate:
 
 
 class TestDicerollServiceCreateQuickroll:
-    """Tests for DicerollService.create_quickroll method."""
+    """Tests for DicerollService.create_from_quickroll method."""
 
     @respx.mock
-    async def test_create_quickroll(self, vclient, base_url, diceroll_response_data):
+    async def test_create_from_quickroll(self, vclient, base_url, diceroll_response_data):
         """Verify creating a diceroll quickroll."""
         # Given: A mocked diceroll endpoint
         route = respx.post(
@@ -336,7 +336,7 @@ class TestDicerollServiceCreateQuickroll:
         # When: Creating a diceroll quickroll
         result = await vclient.dicerolls(
             company_id="company123", user_id="user123"
-        ).create_quickroll(
+        ).create_from_quickroll(
             quickroll_id="quickroll123",
             character_id="character123",
             comment="A test comment",
