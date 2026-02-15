@@ -34,10 +34,10 @@ from .character_blueprint import (
     WerewolfTribe,
 )
 from .character_trait import (
+    CharacterCreateTraitAssign,
     CharacterTrait,
     CharacterTraitValueOptionsResponse,
     TraitCreate,
-    _TraitAssign as _TraitAssign,
     _TraitModify as _TraitModify,
 )
 from .characters import (
@@ -133,6 +133,7 @@ __all__ = [
     "Character",
     "CharacterConcept",
     "CharacterCreate",
+    "CharacterCreateTraitAssign",
     "CharacterHunterEdge",
     "CharacterSpecialty",
     "CharacterTrait",

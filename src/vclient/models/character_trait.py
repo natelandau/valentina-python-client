@@ -18,8 +18,8 @@ class CharacterTrait(BaseModel):
     trait: Trait
 
 
-class _TraitAssign(BaseModel):
-    """Internal request model for assigning a character trait."""
+class CharacterCreateTraitAssign(BaseModel):
+    """Request model for assigning a character trait to a new character."""
 
     trait_id: str
     value: int
@@ -72,10 +72,10 @@ class CharacterTraitValueOptionsResponse(BaseModel):
 
 
 __all__ = [
+    "CharacterCreateTraitAssign",
     "CharacterTrait",
     "CharacterTraitValueOption",
     "CharacterTraitValueOptionsResponse",
     "TraitCreate",
-    "_TraitAssign",
     "_TraitModify",
 ]

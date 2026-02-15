@@ -206,9 +206,9 @@ class TestCharacterCreate:
     def test_create_request_all_fields(self) -> None:
         """Verify CharacterCreate with all fields."""
         # Given: Traits to assign
-        from vclient.models.character_trait import _TraitAssign
+        from vclient.models.character_trait import CharacterCreateTraitAssign
 
-        traits = [_TraitAssign(trait_id="trait123", value=3)]
+        traits = [CharacterCreateTraitAssign(trait_id="trait123", value=3)]
 
         # When: Creating a request with all fields
         request = CharacterCreate(

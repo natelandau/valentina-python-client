@@ -3,9 +3,9 @@
 from datetime import UTC, datetime
 
 from vclient.models.character_trait import (
+    CharacterCreateTraitAssign,
     CharacterTrait,
     TraitCreate,
-    _TraitAssign,
 )
 from vclient.models.shared import Trait
 
@@ -114,12 +114,12 @@ class TestCharacterTrait:
 
 
 class TestTraitAssign:
-    """Tests for _TraitAssign model."""
+    """Tests for CharacterCreateTraitAssign model."""
 
     def test_assign_request_required_fields(self) -> None:
-        """Verify _TraitAssign with required fields."""
+        """Verify CharacterCreateTraitAssign with required fields."""
         # When: Creating a request
-        request = _TraitAssign(
+        request = CharacterCreateTraitAssign(
             trait_id="trait123",
             value=3,
         )
@@ -131,7 +131,7 @@ class TestTraitAssign:
     def test_assign_request_model_dump(self) -> None:
         """Verify model_dump produces correct JSON payload."""
         # Given: An assign request
-        request = _TraitAssign(
+        request = CharacterCreateTraitAssign(
             trait_id="trait456",
             value=5,
         )
@@ -146,9 +146,9 @@ class TestTraitAssign:
         }
 
     def test_assign_request_zero_value(self) -> None:
-        """Verify _TraitAssign accepts zero value."""
+        """Verify CharacterCreateTraitAssign accepts zero value."""
         # When: Creating a request with value 0
-        request = _TraitAssign(
+        request = CharacterCreateTraitAssign(
             trait_id="trait789",
             value=0,
         )
