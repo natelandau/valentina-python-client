@@ -151,8 +151,8 @@ class _ExperienceAddRemove(BaseModel):
     """
 
     amount: int
-    user_id: str
     campaign_id: str
+    requesting_user_id: str
 
 
 __all__ = [

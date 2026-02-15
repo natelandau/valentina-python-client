@@ -413,6 +413,7 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
+        requesting_user_id: str,
     ) -> CampaignExperience:
         """Award experience points to a user for a specific campaign.
 
@@ -423,6 +424,7 @@ class UsersService(BaseService):
             user_id: The ID of the user to award XP to.
             campaign_id: The ID of the campaign to add XP for.
             amount: The amount of XP to add.
+            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -435,8 +437,8 @@ class UsersService(BaseService):
         body = self._validate_request(
             _ExperienceAddRemove,
             amount=amount,
-            user_id=user_id,
             campaign_id=campaign_id,
+            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_ADD, user_id=user_id),
@@ -449,6 +451,7 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
+        requesting_user_id: str,
     ) -> CampaignExperience:
         """Deduct experience points from a user's current XP pool.
 
@@ -458,6 +461,7 @@ class UsersService(BaseService):
             user_id: The ID of the user to remove XP from.
             campaign_id: The ID of the campaign to remove XP for.
             amount: The amount of XP to remove.
+            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -471,8 +475,8 @@ class UsersService(BaseService):
         body = self._validate_request(
             _ExperienceAddRemove,
             amount=amount,
-            user_id=user_id,
             campaign_id=campaign_id,
+            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_REMOVE, user_id=user_id),
@@ -485,6 +489,7 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
+        requesting_user_id: str,
     ) -> CampaignExperience:
         """Award cool points to a user for a specific campaign.
 
@@ -495,6 +500,7 @@ class UsersService(BaseService):
             user_id: The ID of the user to award cool points to.
             campaign_id: The ID of the campaign to add cool points for.
             amount: The amount of cool points to add.
+            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -507,8 +513,8 @@ class UsersService(BaseService):
         body = self._validate_request(
             _ExperienceAddRemove,
             amount=amount,
-            user_id=user_id,
             campaign_id=campaign_id,
+            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_CP_ADD, user_id=user_id),

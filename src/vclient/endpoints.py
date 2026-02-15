@@ -124,7 +124,7 @@ class Endpoints:
     BLUEPRINT_TRAIT_DETAIL = f"{BLUEPRINT_TRAITS}/{{trait_id}}"
     CONCEPTS = f"{BLUEPRINT_BASE}/concepts"
     CONCEPT_DETAIL = f"{CONCEPTS}/{{concept_id}}"
-    VAMPIRE_CLANS = f"{BLUEPRINT_BASE}/vampireclans"
+    VAMPIRE_CLANS = f"{BLUEPRINT_BASE}/vampire-clans"
     VAMPIRE_CLAN_DETAIL = f"{VAMPIRE_CLANS}/{{vampire_clan_id}}"
     WEREWOLF_TRIBES = f"{BLUEPRINT_BASE}/werewolf-tribes"
     WEREWOLF_TRIBE_DETAIL = f"{WEREWOLF_TRIBES}/{{werewolf_tribe_id}}"
