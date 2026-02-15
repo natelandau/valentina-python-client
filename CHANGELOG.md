@@ -1,3 +1,10 @@
+## v1.1.2 (2026-02-15)
+
+### Fix
+
+- **endpoints**: correct dictionary path and auspice typo (#14)
+- **experience**: use requesting_user_id in body (#13)
+
 ## v1.1.1 (2026-02-15)
 
 ### Fix
