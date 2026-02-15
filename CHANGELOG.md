@@ -1,3 +1,9 @@
+## v1.0.2 (2026-02-15)
+
+### Refactor
+
+- **services**: remove positional-only markers (#7)
+
 ## v1.0.1 (2026-02-14)
 
 ### Refactor
