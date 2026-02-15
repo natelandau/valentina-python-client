@@ -2090,6 +2090,27 @@ class TestCharacterBlueprintServiceHunterEdges:
         assert isinstance(result.items[0], HunterEdge)
 
     @respx.mock
+    async def test_get_hunter_edges_page_with_edge_type_filter(
+        self, vclient, base_url, paginated_hunter_edge_response
+    ) -> None:
+        """Verify get_hunter_edges_page passes edge_type filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.HUNTER_EDGES.format(company_id=company_id)}",
+            params={"limit": "10", "offset": "0", "edge_type": "ASSETS"},
+        ).mock(return_value=Response(200, json=paginated_hunter_edge_response))
+
+        # When: Requesting with edge_type filter
+        result = await vclient.character_blueprint(company_id).get_hunter_edges_page(
+            edge_type="ASSETS"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
     async def test_list_all_hunter_edges(
         self, vclient, base_url, hunter_edge_response_data
     ) -> None:
@@ -2142,6 +2163,67 @@ class TestCharacterBlueprintServiceHunterEdges:
         assert len(result) == 1
         assert isinstance(result[0], HunterEdge)
         assert result[0].name == "Hunter Edge Name"
+
+    @respx.mock
+    async def test_list_all_hunter_edges_with_edge_type_filter(
+        self, vclient, base_url, hunter_edge_response_data
+    ) -> None:
+        """Verify list_all_hunter_edges passes edge_type filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [hunter_edge_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.HUNTER_EDGES.format(company_id=company_id)}",
+            params__contains={"edge_type": "ASSETS"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting all hunter edges with edge_type filter
+        result = await vclient.character_blueprint(company_id).list_all_hunter_edges(
+            edge_type="ASSETS"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result) == 1
+        assert isinstance(result[0], HunterEdge)
+
+    @respx.mock
+    async def test_iter_all_hunter_edges_with_edge_type_filter(
+        self, vclient, base_url, hunter_edge_response_data
+    ) -> None:
+        """Verify iter_all_hunter_edges passes edge_type filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [hunter_edge_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.HUNTER_EDGES.format(company_id=company_id)}",
+            params__contains={"edge_type": "ASSETS"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating with edge_type filter
+        edges = [
+            edge
+            async for edge in vclient.character_blueprint(company_id).iter_all_hunter_edges(
+                edge_type="ASSETS"
+            )
+        ]
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(edges) == 1
+        assert isinstance(edges[0], HunterEdge)
 
     @respx.mock
     async def test_get_hunter_edge(self, vclient, base_url, hunter_edge_response_data) -> None:
