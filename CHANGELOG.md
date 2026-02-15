@@ -1,3 +1,11 @@
+## v1.1.0 (2026-02-15)
+
+### Feat
+
+- **blueprint**: add edge_type filter to hunter edge methods (#11)
+- **blueprint**: add filters to werewolf methods (#10)
+- **blueprint**: add game_version filter to vampire clan methods (#9)
+
 ## v1.0.3 (2026-02-15)
 
 ### Fix
