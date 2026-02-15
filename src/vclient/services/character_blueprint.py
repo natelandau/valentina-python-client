@@ -436,7 +436,7 @@ class CharacterBlueprintService(BaseService):
         """Get a werewolf auspice by ID."""
         response = await self._get(
             self._format_endpoint(
-                Endpoints.WEREWOLF_AUSPIE_DETAIL, werewolf_auspice_id=werewolf_auspice_id
+                Endpoints.WEREWOLF_AUSPICE_DETAIL, werewolf_auspice_id=werewolf_auspice_id
             ),
         )
         return WerewolfAuspice.model_validate(response.json())

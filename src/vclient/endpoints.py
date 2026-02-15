@@ -129,7 +129,7 @@ class Endpoints:
     WEREWOLF_TRIBES = f"{BLUEPRINT_BASE}/werewolf-tribes"
     WEREWOLF_TRIBE_DETAIL = f"{WEREWOLF_TRIBES}/{{werewolf_tribe_id}}"
     WEREWOLF_AUSPICES = f"{BLUEPRINT_BASE}/werewolf-auspices"
-    WEREWOLF_AUSPIE_DETAIL = f"{WEREWOLF_AUSPICES}/{{werewolf_auspice_id}}"
+    WEREWOLF_AUSPICE_DETAIL = f"{WEREWOLF_AUSPICES}/{{werewolf_auspice_id}}"
     WEREWOLF_GIFTS = f"{BLUEPRINT_BASE}/werewolf-gifts"
     WEREWOLF_GIFT_DETAIL = f"{WEREWOLF_GIFTS}/{{werewolf_gift_id}}"
     WEREWOLF_RITES = f"{BLUEPRINT_BASE}/werewolf-rites"
@@ -140,7 +140,7 @@ class Endpoints:
     HUNTER_EDGE_PERK_DETAIL = f"{HUNTER_EDGE_PERKS}/{{hunter_edge_perk_id}}"
 
     # Dictionary endpoints
-    DICTIONARY_TERMS = f"{COMPANY}/dictionary"
+    DICTIONARY_TERMS = f"{COMPANY}/dictionaries"
     DICTIONARY_TERM = f"{DICTIONARY_TERMS}/{{term_id}}"
 
     # Dice Rolls
