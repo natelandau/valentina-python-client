@@ -1502,7 +1502,7 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         company_id = "company123"
         werewolf_auspice_id = "auspice123"
         route = respx.get(
-            f"{base_url}{Endpoints.WEREWOLF_AUSPIE_DETAIL.format(company_id=company_id, werewolf_auspice_id=werewolf_auspice_id)}"
+            f"{base_url}{Endpoints.WEREWOLF_AUSPICE_DETAIL.format(company_id=company_id, werewolf_auspice_id=werewolf_auspice_id)}"
         ).mock(return_value=Response(200, json=werewolf_auspice_response_data))
 
         # When: Requesting a werewolf auspice
@@ -1521,7 +1521,7 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         company_id = "company123"
         werewolf_auspice_id = "nonexistent"
         route = respx.get(
-            f"{base_url}{Endpoints.WEREWOLF_AUSPIE_DETAIL.format(company_id=company_id, werewolf_auspice_id=werewolf_auspice_id)}"
+            f"{base_url}{Endpoints.WEREWOLF_AUSPICE_DETAIL.format(company_id=company_id, werewolf_auspice_id=werewolf_auspice_id)}"
         ).mock(
             return_value=Response(
                 404, json={"detail": "Werewolf auspice not found", "status_code": 404}
