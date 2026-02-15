@@ -89,7 +89,6 @@ class ChaptersService(BaseService):
     async def create(
         self,
         request: ChapterCreate | None = None,
-        /,
         **kwargs,
     ) -> CampaignChapter:
         """Create a new campaign book chapter.
@@ -110,7 +109,6 @@ class ChaptersService(BaseService):
         self,
         chapter_id: str,
         request: ChapterUpdate | None = None,
-        /,
         **kwargs,
     ) -> CampaignChapter:
         """Update a campaign book chapter.
@@ -252,7 +250,6 @@ class ChaptersService(BaseService):
         self,
         chapter_id: str,
         request: NoteCreate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Create a new note for a chapter.
@@ -286,7 +283,6 @@ class ChaptersService(BaseService):
         chapter_id: str,
         note_id: str,
         request: NoteUpdate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Modify a note's content.

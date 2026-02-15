@@ -157,7 +157,6 @@ class UsersService(BaseService):
     async def create(
         self,
         request: UserCreate | None = None,
-        /,
         **kwargs,
     ) -> User:
         """Create a new user within a company.
@@ -192,7 +191,6 @@ class UsersService(BaseService):
         self,
         user_id: str,
         request: UserUpdate | None = None,
-        /,
         **kwargs,
     ) -> User:
         """Modify a user's properties.
@@ -626,7 +624,6 @@ class UsersService(BaseService):
         self,
         user_id: str,
         request: NoteCreate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Create a new note for a user.
@@ -660,7 +657,6 @@ class UsersService(BaseService):
         user_id: str,
         note_id: str,
         request: NoteUpdate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Modify a note's content.
@@ -824,7 +820,6 @@ class UsersService(BaseService):
         self,
         user_id: str,
         request: QuickrollCreate | None = None,
-        /,
         **kwargs,
     ) -> Quickroll:
         """Create a new quickroll for a user.
@@ -860,7 +855,6 @@ class UsersService(BaseService):
         user_id: str,
         quickroll_id: str,
         request: QuickrollUpdate | None = None,
-        /,
         **kwargs,
     ) -> Quickroll:
         """Modify a quickroll's name or trait configuration.

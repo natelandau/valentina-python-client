@@ -186,7 +186,6 @@ class CharacterTraitsService(BaseService):
     async def create(
         self,
         request: TraitCreate | None = None,
-        /,
         **kwargs,
     ) -> CharacterTrait:
         """Create a new character trait.

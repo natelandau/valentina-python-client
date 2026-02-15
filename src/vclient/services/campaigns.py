@@ -144,7 +144,6 @@ class CampaignsService(BaseService):
     async def create(
         self,
         request: CampaignCreate | None = None,
-        /,
         **kwargs,
     ) -> Campaign:
         """Create a new campaign.
@@ -174,7 +173,6 @@ class CampaignsService(BaseService):
         self,
         campaign_id: str,
         request: CampaignUpdate | None = None,
-        /,
         **kwargs,
     ) -> Campaign:
         """Modify a campaign's properties.
@@ -465,7 +463,6 @@ class CampaignsService(BaseService):
         self,
         campaign_id: str,
         request: NoteCreate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Create a new note for a campaign.
@@ -499,7 +496,6 @@ class CampaignsService(BaseService):
         campaign_id: str,
         note_id: str,
         request: NoteUpdate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Modify a note's content.

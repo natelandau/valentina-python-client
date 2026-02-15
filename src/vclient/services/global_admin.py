@@ -120,7 +120,6 @@ class GlobalAdminService(BaseService):
     async def create(
         self,
         request: DeveloperCreate | None = None,
-        /,
         **kwargs,
     ) -> Developer:
         """Create a new developer account.
@@ -153,7 +152,6 @@ class GlobalAdminService(BaseService):
         self,
         developer_id: str,
         request: DeveloperUpdate | None = None,
-        /,
         **kwargs,
     ) -> Developer:
         """Modify a developer account's properties.

@@ -216,7 +216,6 @@ class CharactersService(BaseService):
     async def create(
         self,
         request: CharacterCreate | None = None,
-        /,
         **kwargs,
     ) -> Character:
         """Create a new character within the campaign.
@@ -253,7 +252,6 @@ class CharactersService(BaseService):
         self,
         character_id: str,
         request: CharacterUpdate | None = None,
-        /,
         **kwargs,
     ) -> Character:
         """Modify a character's properties.
@@ -551,7 +549,6 @@ class CharactersService(BaseService):
         self,
         character_id: str,
         request: NoteCreate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Create a new note for a character.
@@ -585,7 +582,6 @@ class CharactersService(BaseService):
         character_id: str,
         note_id: str,
         request: NoteUpdate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Modify a note's content.
@@ -750,7 +746,6 @@ class CharactersService(BaseService):
         self,
         character_id: str,
         request: InventoryItemCreate | None = None,
-        /,
         **kwargs,
     ) -> InventoryItem:
         """Create a new inventory item for a character.
@@ -787,7 +782,6 @@ class CharactersService(BaseService):
         character_id: str,
         item_id: str,
         request: InventoryItemUpdate | None = None,
-        /,
         **kwargs,
     ) -> InventoryItem:
         """Modify an inventory item's content.
