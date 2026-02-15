@@ -487,6 +487,9 @@ class CharacterBlueprintService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
+        game_version: GameVersion | None = None,
+        auspice_id: str | None = None,
+        tribe_id: str | None = None,
     ) -> PaginatedResponse[WerewolfGift]:
         """Get a paginated page of werewolf gifts."""
         return await self._get_paginated_as(
@@ -494,16 +497,39 @@ class CharacterBlueprintService(BaseService):
             WerewolfGift,
             limit=limit,
             offset=offset,
+            params=self._build_params(
+                game_version=game_version, auspice_id=auspice_id, tribe_id=tribe_id
+            ),
         )
 
-    async def list_all_werewolf_gifts(self) -> list[WerewolfGift]:
+    async def list_all_werewolf_gifts(
+        self,
+        *,
+        game_version: GameVersion | None = None,
+        auspice_id: str | None = None,
+        tribe_id: str | None = None,
+    ) -> list[WerewolfGift]:
         """List all werewolf gifts."""
-        return [gift async for gift in self.iter_all_werewolf_gifts()]
+        return [
+            gift
+            async for gift in self.iter_all_werewolf_gifts(
+                game_version=game_version, auspice_id=auspice_id, tribe_id=tribe_id
+            )
+        ]
 
-    async def iter_all_werewolf_gifts(self) -> AsyncIterator[WerewolfGift]:
+    async def iter_all_werewolf_gifts(
+        self,
+        *,
+        game_version: GameVersion | None = None,
+        auspice_id: str | None = None,
+        tribe_id: str | None = None,
+    ) -> AsyncIterator[WerewolfGift]:
         """Iterate through all werewolf gifts."""
         async for gift in self._iter_all_pages(
             self._format_endpoint(Endpoints.WEREWOLF_GIFTS),
+            params=self._build_params(
+                game_version=game_version, auspice_id=auspice_id, tribe_id=tribe_id
+            ),
         ):
             yield WerewolfGift.model_validate(gift)
 

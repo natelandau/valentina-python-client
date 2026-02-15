@@ -1771,6 +1771,33 @@ class TestCharacterBlueprintServiceWerewolfGifts:
         assert isinstance(result.items[0], WerewolfGift)
 
     @respx.mock
+    async def test_get_werewolf_gifts_page_with_filters(
+        self, vclient, base_url, paginated_werewolf_gift_response
+    ) -> None:
+        """Verify get_werewolf_gifts_page passes filter params correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.WEREWOLF_GIFTS.format(company_id=company_id)}",
+            params={
+                "limit": "10",
+                "offset": "0",
+                "game_version": "V5",
+                "auspice_id": "auspice123",
+                "tribe_id": "tribe123",
+            },
+        ).mock(return_value=Response(200, json=paginated_werewolf_gift_response))
+
+        # When: Requesting with filters
+        result = await vclient.character_blueprint(company_id).get_werewolf_gifts_page(
+            game_version="V5", auspice_id="auspice123", tribe_id="tribe123"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
     async def test_list_all_werewolf_gifts(
         self, vclient, base_url, werewolf_gift_response_data
     ) -> None:
@@ -1823,6 +1850,75 @@ class TestCharacterBlueprintServiceWerewolfGifts:
         assert len(result) == 1
         assert isinstance(result[0], WerewolfGift)
         assert result[0].name == "Gift Name"
+
+    @respx.mock
+    async def test_list_all_werewolf_gifts_with_filters(
+        self, vclient, base_url, werewolf_gift_response_data
+    ) -> None:
+        """Verify list_all_werewolf_gifts passes filter params correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [werewolf_gift_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.WEREWOLF_GIFTS.format(company_id=company_id)}",
+            params__contains={
+                "game_version": "V5",
+                "auspice_id": "auspice123",
+                "tribe_id": "tribe123",
+            },
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting all werewolf gifts with filters
+        result = await vclient.character_blueprint(company_id).list_all_werewolf_gifts(
+            game_version="V5", auspice_id="auspice123", tribe_id="tribe123"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result) == 1
+        assert isinstance(result[0], WerewolfGift)
+
+    @respx.mock
+    async def test_iter_all_werewolf_gifts_with_filters(
+        self, vclient, base_url, werewolf_gift_response_data
+    ) -> None:
+        """Verify iter_all_werewolf_gifts passes filter params correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [werewolf_gift_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.WEREWOLF_GIFTS.format(company_id=company_id)}",
+            params__contains={
+                "game_version": "V5",
+                "auspice_id": "auspice123",
+                "tribe_id": "tribe123",
+            },
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating with filters
+        gifts = [
+            gift
+            async for gift in vclient.character_blueprint(company_id).iter_all_werewolf_gifts(
+                game_version="V5", auspice_id="auspice123", tribe_id="tribe123"
+            )
+        ]
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(gifts) == 1
+        assert isinstance(gifts[0], WerewolfGift)
 
     @respx.mock
     async def test_get_werewolf_gift(self, vclient, base_url, werewolf_gift_response_data) -> None:
