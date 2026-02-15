@@ -145,7 +145,6 @@ class BooksService(BaseService):
     async def create(
         self,
         request: BookCreate | None = None,
-        /,
         **kwargs,
     ) -> CampaignBook:
         """Create a new campaign book.
@@ -174,7 +173,6 @@ class BooksService(BaseService):
         self,
         book_id: str,
         request: BookUpdate | None = None,
-        /,
         **kwargs,
     ) -> CampaignBook:
         """Modify a campaign book's properties.
@@ -352,7 +350,6 @@ class BooksService(BaseService):
         self,
         book_id: str,
         request: NoteCreate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Create a new note for a book.
@@ -386,7 +383,6 @@ class BooksService(BaseService):
         book_id: str,
         note_id: str,
         request: NoteUpdate | None = None,
-        /,
         **kwargs,
     ) -> Note:
         """Modify a note's content.

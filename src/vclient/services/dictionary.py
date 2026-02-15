@@ -79,7 +79,6 @@ class DictionaryService(BaseService):
     async def create(
         self,
         request: DictionaryTermCreate | None = None,
-        /,
         **kwargs,
     ) -> DictionaryTerm:
         """Create a new dictionary term.
@@ -101,7 +100,6 @@ class DictionaryService(BaseService):
         self,
         term_id: str,
         request: DictionaryTermUpdate | None = None,
-        /,
         **kwargs,
     ) -> DictionaryTerm:
         """Update a specific dictionary term.

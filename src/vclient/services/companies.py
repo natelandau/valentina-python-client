@@ -103,7 +103,6 @@ class CompaniesService(BaseService):
     async def create(
         self,
         request: CompanyCreate | None = None,
-        /,
         **kwargs,
     ) -> NewCompanyResponse:
         """Create a new company in the system.
@@ -136,7 +135,6 @@ class CompaniesService(BaseService):
         self,
         company_id: str,
         request: CompanyUpdate | None = None,
-        /,
         **kwargs,
     ) -> Company:
         """Modify a company's properties.

@@ -39,7 +39,6 @@ class DeveloperService(BaseService):
     async def update_me(
         self,
         request: MeDeveloperUpdate | None = None,
-        /,
         **kwargs,
     ) -> MeDeveloper:
         """Update the current developer's profile.

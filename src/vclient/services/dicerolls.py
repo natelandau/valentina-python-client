@@ -107,7 +107,6 @@ class DicerollService(BaseService):
     async def create(
         self,
         request: DicerollCreate | None = None,
-        /,
         **kwargs,
     ) -> Diceroll:
         """Create a new dice roll.
