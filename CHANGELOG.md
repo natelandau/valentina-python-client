@@ -1,3 +1,9 @@
+## v1.0.3 (2026-02-15)
+
+### Fix
+
+- **diceroll**: rename create_from_quickroll method (#8)
+
 ## v1.0.2 (2026-02-15)
 
 ### Refactor
