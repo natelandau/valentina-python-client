@@ -1149,6 +1149,27 @@ class TestCharacterBlueprintServiceVampireClans:
         assert result.total == 1
 
     @respx.mock
+    async def test_get_vampire_clans_page_with_game_version_filter(
+        self, vclient, base_url, paginated_vampire_clan_response
+    ) -> None:
+        """Verify get_vampire_clans_page passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.VAMPIRE_CLANS.format(company_id=company_id)}",
+            params={"limit": "10", "offset": "0", "game_version": "V5"},
+        ).mock(return_value=Response(200, json=paginated_vampire_clan_response))
+
+        # When: Requesting with game_version filter
+        result = await vclient.character_blueprint(company_id).get_vampire_clans_page(
+            game_version="V5"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
     async def test_list_all_vampire_clans(
         self, vclient, base_url, vampire_clan_response_data
     ) -> None:
@@ -1176,6 +1197,35 @@ class TestCharacterBlueprintServiceVampireClans:
         assert result[0].name == "Clan Name"
 
     @respx.mock
+    async def test_list_all_vampire_clans_with_game_version_filter(
+        self, vclient, base_url, vampire_clan_response_data
+    ) -> None:
+        """Verify list_all_vampire_clans passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [vampire_clan_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.VAMPIRE_CLANS.format(company_id=company_id)}",
+            params__contains={"game_version": "V5"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting all vampire clans with game_version filter
+        result = await vclient.character_blueprint(company_id).list_all_vampire_clans(
+            game_version="V5"
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result) == 1
+        assert isinstance(result[0], VampireClan)
+
+    @respx.mock
     async def test_iter_all_vampire_clans(
         self, vclient, base_url, vampire_clan_response_data
     ) -> None:
@@ -1199,6 +1249,38 @@ class TestCharacterBlueprintServiceVampireClans:
         ]
 
         # Then: All vampire clans are yielded
+        assert route.called
+        assert len(clans) == 1
+        assert isinstance(clans[0], VampireClan)
+
+    @respx.mock
+    async def test_iter_all_vampire_clans_with_game_version_filter(
+        self, vclient, base_url, vampire_clan_response_data
+    ) -> None:
+        """Verify iter_all_vampire_clans passes game_version filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        paginated_response = {
+            "items": [vampire_clan_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+
+        route = respx.get(
+            f"{base_url}{Endpoints.VAMPIRE_CLANS.format(company_id=company_id)}",
+            params__contains={"game_version": "V5"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating with game_version filter
+        clans = [
+            clan
+            async for clan in vclient.character_blueprint(company_id).iter_all_vampire_clans(
+                game_version="V5"
+            )
+        ]
+
+        # Then: The route was called with correct params
         assert route.called
         assert len(clans) == 1
         assert isinstance(clans[0], VampireClan)
