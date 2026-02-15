@@ -377,6 +377,7 @@ class CharacterBlueprintService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
+        game_version: GameVersion | None = None,
     ) -> PaginatedResponse[VampireClan]:
         """Get a paginated page of vampire clans."""
         return await self._get_paginated_as(
@@ -384,16 +385,25 @@ class CharacterBlueprintService(BaseService):
             VampireClan,
             limit=limit,
             offset=offset,
+            params={"game_version": game_version} if game_version else None,
         )
 
-    async def list_all_vampire_clans(self) -> list[VampireClan]:
+    async def list_all_vampire_clans(
+        self, *, game_version: GameVersion | None = None
+    ) -> list[VampireClan]:
         """List all vampire clans."""
-        return [clan async for clan in self.iter_all_vampire_clans()]
+        return [clan async for clan in self.iter_all_vampire_clans(game_version=game_version)]
 
-    async def iter_all_vampire_clans(self) -> AsyncIterator[VampireClan]:
+    async def iter_all_vampire_clans(
+        self, *, game_version: GameVersion | None = None
+    ) -> AsyncIterator[VampireClan]:
         """Iterate through all vampire clans."""
+        params: dict[str, str | int] = {}
+        if game_version is not None:
+            params["game_version"] = game_version
         async for clan in self._iter_all_pages(
             self._format_endpoint(Endpoints.VAMPIRE_CLANS),
+            params=params or None,
         ):
             yield VampireClan.model_validate(clan)
 
