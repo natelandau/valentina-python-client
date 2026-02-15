@@ -3,7 +3,13 @@
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT, BlueprintTraitOrderBy, CharacterClass, GameVersion
+from vclient.constants import (
+    DEFAULT_PAGE_LIMIT,
+    BlueprintTraitOrderBy,
+    CharacterClass,
+    GameVersion,
+    HunterEdgeType,
+)
 from vclient.endpoints import Endpoints
 from vclient.models import (
     CharacterConcept,
@@ -587,6 +593,7 @@ class CharacterBlueprintService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
+        edge_type: HunterEdgeType | None = None,
     ) -> PaginatedResponse[HunterEdge]:
         """Get a paginated page of hunter edges."""
         return await self._get_paginated_as(
@@ -594,16 +601,22 @@ class CharacterBlueprintService(BaseService):
             HunterEdge,
             limit=limit,
             offset=offset,
+            params=self._build_params(edge_type=edge_type),
         )
 
-    async def list_all_hunter_edges(self) -> list[HunterEdge]:
+    async def list_all_hunter_edges(
+        self, *, edge_type: HunterEdgeType | None = None
+    ) -> list[HunterEdge]:
         """List all hunter edges."""
-        return [edge async for edge in self.iter_all_hunter_edges()]
+        return [edge async for edge in self.iter_all_hunter_edges(edge_type=edge_type)]
 
-    async def iter_all_hunter_edges(self) -> AsyncIterator[HunterEdge]:
+    async def iter_all_hunter_edges(
+        self, *, edge_type: HunterEdgeType | None = None
+    ) -> AsyncIterator[HunterEdge]:
         """Iterate through all hunter edges."""
         async for edge in self._iter_all_pages(
             self._format_endpoint(Endpoints.HUNTER_EDGES),
+            params=self._build_params(edge_type=edge_type),
         ):
             yield HunterEdge.model_validate(edge)
 
