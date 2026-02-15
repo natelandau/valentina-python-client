@@ -559,11 +559,11 @@ class TestCharactersServiceCreate:
         ).mock(return_value=Response(201, json=response_data))
 
         # Given: Traits to assign
-        from vclient.models.character_trait import _TraitAssign
+        from vclient.models.character_trait import CharacterCreateTraitAssign
 
         traits = [
-            _TraitAssign(trait_id="trait123", value=3),
-            _TraitAssign(trait_id="trait456", value=2),
+            CharacterCreateTraitAssign(trait_id="trait123", value=3),
+            CharacterCreateTraitAssign(trait_id="trait456", value=2),
         ]
 
         # When: Creating a character with traits

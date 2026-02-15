@@ -14,7 +14,7 @@ from vclient.constants import (
     HunterEdgeType,
 )
 
-from .character_trait import _TraitAssign
+from .character_trait import CharacterCreateTraitAssign
 from .shared import CharacterSpecialty, NameDescriptionSubDocument
 
 # -----------------------------------------------------------------------------
@@ -233,7 +233,7 @@ class CharacterCreate(BaseModel):
     user_player_id: str | None = Field(
         default=None, description="ID of the user who will play the character."
     )
-    traits: list[_TraitAssign] | None = Field(
+    traits: list[CharacterCreateTraitAssign] | None = Field(
         default=None, description="List of traits to assign to the character."
     )
     vampire_attributes: VampireAttributesCreate | None = Field(
