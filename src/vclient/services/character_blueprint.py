@@ -63,7 +63,7 @@ class CharacterBlueprintService(BaseService):
             SheetSection,
             limit=limit,
             offset=offset,
-            params={"character_class": character_class} if character_class else None,
+            params=self._build_params(character_class=character_class),
         )
 
     async def list_all_sections(
@@ -83,7 +83,7 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all character blueprint sections."""
         async for section in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_SECTIONS, game_version=game_version),
-            params={"character_class": character_class} if character_class else None,
+            params=self._build_params(character_class=character_class),
         ):
             yield SheetSection.model_validate(section)
 
@@ -118,7 +118,7 @@ class CharacterBlueprintService(BaseService):
             TraitCategory,
             limit=limit,
             offset=offset,
-            params={"character_class": character_class} if character_class else None,
+            params=self._build_params(character_class=character_class),
         )
 
     async def list_all_categories(
@@ -150,7 +150,7 @@ class CharacterBlueprintService(BaseService):
             self._format_endpoint(
                 Endpoints.BLUEPRINT_CATEGORIES, game_version=game_version, section_id=section_id
             ),
-            params={"character_class": character_class} if character_class else None,
+            params=self._build_params(character_class=character_class),
         ):
             yield TraitCategory.model_validate(category)
 
@@ -184,12 +184,6 @@ class CharacterBlueprintService(BaseService):
         character_id: str | None = None,
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of character blueprint category traits."""
-        params: dict[str, str | int] = {}
-        if character_class is not None:
-            params["character_class"] = character_class
-        if character_id is not None:
-            params["character_id"] = character_id
-
         return await self._get_paginated_as(
             self._format_endpoint(
                 Endpoints.BLUEPRINT_CATEGORY_TRAITS,
@@ -200,7 +194,7 @@ class CharacterBlueprintService(BaseService):
             Trait,
             limit=limit,
             offset=offset,
-            params=params or None,
+            params=self._build_params(character_class=character_class, character_id=character_id),
         )
 
     async def list_all_category_traits(
@@ -234,12 +228,6 @@ class CharacterBlueprintService(BaseService):
         character_id: str | None = None,
     ) -> AsyncIterator[Trait]:
         """Iterate through all character blueprint category traits."""
-        params: dict[str, str | int] = {}
-        if character_class is not None:
-            params["character_class"] = character_class
-        if character_id is not None:
-            params["character_id"] = character_id
-
         async for trait in self._iter_all_pages(
             self._format_endpoint(
                 Endpoints.BLUEPRINT_CATEGORY_TRAITS,
@@ -247,7 +235,7 @@ class CharacterBlueprintService(BaseService):
                 section_id=section_id,
                 category_id=category_id,
             ),
-            params=params or None,
+            params=self._build_params(character_class=character_class, character_id=character_id),
         ):
             yield Trait.model_validate(trait)
 
@@ -265,22 +253,17 @@ class CharacterBlueprintService(BaseService):
         order_by: BlueprintTraitOrderBy | None = None,
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of all character blueprint traits."""
-        params: dict[str, str | int] = {}
-        if character_class is not None:
-            params["character_class"] = character_class
-        if parent_category_id is not None:
-            params["parent_category_id"] = parent_category_id
-        if order_by is not None:
-            params["order_by"] = order_by
-        if game_version is not None:
-            params["game_version"] = game_version
-
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
             Trait,
             limit=limit,
             offset=offset,
-            params=params or None,
+            params=self._build_params(
+                character_class=character_class,
+                parent_category_id=parent_category_id,
+                order_by=order_by,
+                game_version=game_version,
+            ),
         )
 
     async def list_all_traits(
@@ -311,19 +294,14 @@ class CharacterBlueprintService(BaseService):
         order_by: BlueprintTraitOrderBy | None = None,
     ) -> AsyncIterator[Trait]:
         """Iterate through all character blueprint traits."""
-        params: dict[str, str | int] = {}
-        if character_class is not None:
-            params["character_class"] = character_class
-        if parent_category_id is not None:
-            params["parent_category_id"] = parent_category_id
-        if order_by is not None:
-            params["order_by"] = order_by
-        if game_version is not None:
-            params["game_version"] = game_version
-
         async for trait in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
-            params=params or None,
+            params=self._build_params(
+                character_class=character_class,
+                parent_category_id=parent_category_id,
+                order_by=order_by,
+                game_version=game_version,
+            ),
         ):
             yield Trait.model_validate(trait)
 
@@ -385,7 +363,7 @@ class CharacterBlueprintService(BaseService):
             VampireClan,
             limit=limit,
             offset=offset,
-            params={"game_version": game_version} if game_version else None,
+            params=self._build_params(game_version=game_version),
         )
 
     async def list_all_vampire_clans(
@@ -398,12 +376,9 @@ class CharacterBlueprintService(BaseService):
         self, *, game_version: GameVersion | None = None
     ) -> AsyncIterator[VampireClan]:
         """Iterate through all vampire clans."""
-        params: dict[str, str | int] = {}
-        if game_version is not None:
-            params["game_version"] = game_version
         async for clan in self._iter_all_pages(
             self._format_endpoint(Endpoints.VAMPIRE_CLANS),
-            params=params or None,
+            params=self._build_params(game_version=game_version),
         ):
             yield VampireClan.model_validate(clan)
 
