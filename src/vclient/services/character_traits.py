@@ -251,7 +251,7 @@ class CharacterTraitsService(BaseService):
             target_value=new_value,
             currency=currency,
         )
-        response = await self._post(
+        response = await self._put(
             self._format_endpoint(
                 Endpoints.CHARACTER_TRAIT_VALUE, character_trait_id=character_trait_id
             ),

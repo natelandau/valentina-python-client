@@ -741,7 +741,7 @@ class TestCharacterTraitsServiceChangeValue:
     async def test_change_value(self, vclient, base_url, character_trait_response_data) -> None:
         """Verify changing the value of a character trait."""
         # Given: A mocked change value endpoint
-        route = respx.post(
+        route = respx.put(
             f"{base_url}{Endpoints.CHARACTER_TRAIT_VALUE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
         ).mock(return_value=Response(200, json=character_trait_response_data))
 
