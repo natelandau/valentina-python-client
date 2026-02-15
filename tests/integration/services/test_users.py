@@ -602,7 +602,9 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Adding XP
-        result = await vclient.users(company_id).add_xp(user_id, campaign_id, amount=100)
+        result = await vclient.users(company_id).add_xp(
+            user_id, campaign_id, amount=100, requesting_user_id="requester123"
+        )
 
         # Then: Returns updated CampaignExperience object
         assert route.called
@@ -622,7 +624,9 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Removing XP
-        result = await vclient.users(company_id).remove_xp(user_id, campaign_id, amount=25)
+        result = await vclient.users(company_id).remove_xp(
+            user_id, campaign_id, amount=25, requesting_user_id="requester123"
+        )
 
         # Then: Returns updated CampaignExperience object
         assert route.called
@@ -642,7 +646,9 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Adding cool points
-        result = await vclient.users(company_id).add_cool_points(user_id, campaign_id, amount=5)
+        result = await vclient.users(company_id).add_cool_points(
+            user_id, campaign_id, amount=5, requesting_user_id="requester123"
+        )
 
         # Then: Returns updated CampaignExperience object
         assert route.called
