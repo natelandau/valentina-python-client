@@ -35,7 +35,7 @@ uv run python scripts/validate_constants.py --api-key <key> --company-id <id>
 The script reads configuration from (highest precedence first):
 
 1. CLI arguments (`--api-url`, `--api-key`, `--company-id`)
-2. System environment variables (`VALENTINA_API_URL`, `VALENTINA_API_KEY`, `VALENTINA_COMPANY_ID`)
+2. System environment variables (`VALENTINA_CLIENT_BASE_URL`, `VALENTINA_CLIENT_API_KEY`, `VALENTINA_CLIENT_DEFAULT_COMPANY_ID`)
 3. A `.env.secrets` file in the project root
 
 Exit codes: `0` = all constants match, `1` = mismatches found, `2` = missing configuration.

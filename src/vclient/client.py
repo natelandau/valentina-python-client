@@ -1,5 +1,6 @@
 """Main API client for Valentina."""
 
+import os
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
@@ -11,6 +12,9 @@ from vclient.constants import (
     DEFAULT_MAX_RETRIES,
     DEFAULT_RETRY_DELAY,
     DEFAULT_TIMEOUT,
+    ENV_API_KEY,
+    ENV_BASE_URL,
+    ENV_DEFAULT_COMPANY_ID,
 )
 
 if TYPE_CHECKING:
@@ -64,8 +68,8 @@ class VClient:
 
     def __init__(  # noqa: PLR0913
         self,
-        base_url: str,
-        api_key: str,
+        base_url: str | None = None,
+        api_key: str | None = None,
         *,
         timeout: float = DEFAULT_TIMEOUT,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -78,9 +82,18 @@ class VClient:
     ) -> None:
         """Initialize the API client.
 
+        Values for ``base_url``, ``api_key``, and ``default_company_id`` can be
+        provided as constructor arguments or via environment variables. Explicit
+        arguments always take precedence over environment variables.
+
+        Environment variables:
+            VALENTINA_CLIENT_BASE_URL: Base URL for the API.
+            VALENTINA_CLIENT_API_KEY: API key for authentication.
+            VALENTINA_CLIENT_DEFAULT_COMPANY_ID: Default company ID.
+
         Args:
-            base_url: Base URL for the API.
-            api_key: API key for authentication.
+            base_url: Base URL for the API. Falls back to VALENTINA_CLIENT_BASE_URL.
+            api_key: API key for authentication. Falls back to VALENTINA_CLIENT_API_KEY.
             timeout: Request timeout in seconds.
             max_retries: Maximum number of retry attempts for failed requests.
             retry_delay: Base delay between retries in seconds.
@@ -88,21 +101,38 @@ class VClient:
             auto_idempotency_keys: Automatically generate idempotency keys for
                 POST/PUT/PATCH requests.
             default_company_id: Default company ID to use when not explicitly provided
-                to service factory methods.
+                to service factory methods. Falls back to
+                VALENTINA_CLIENT_DEFAULT_COMPANY_ID.
             headers: Additional headers to include with all requests.
             set_as_default: If True, register this client as the default for factory
                 functions. Set to False when creating multiple clients or when using
                 the context manager pattern exclusively.
+
+        Raises:
+            ValueError: If base_url or api_key is not provided and the corresponding
+                environment variable is not set.
         """
+        resolved_base_url = base_url or os.environ.get(ENV_BASE_URL)
+        if resolved_base_url is None:
+            msg = "base_url is required (set it directly or via the VALENTINA_CLIENT_BASE_URL environment variable)"
+            raise ValueError(msg)
+
+        resolved_api_key = api_key or os.environ.get(ENV_API_KEY)
+        if resolved_api_key is None:
+            msg = "api_key is required (set it directly or via the VALENTINA_CLIENT_API_KEY environment variable)"
+            raise ValueError(msg)
+
+        resolved_company_id = default_company_id or os.environ.get(ENV_DEFAULT_COMPANY_ID)
+
         self._config = _APIConfig(
-            base_url=base_url,
-            api_key=api_key,
+            base_url=resolved_base_url,
+            api_key=resolved_api_key,
             timeout=timeout,
             max_retries=max_retries,
             retry_delay=retry_delay,
             auto_retry_rate_limit=auto_retry_rate_limit,
             auto_idempotency_keys=auto_idempotency_keys,
-            default_company_id=default_company_id,
+            default_company_id=resolved_company_id,
             headers=headers or {},
         )
 
