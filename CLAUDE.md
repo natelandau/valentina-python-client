@@ -1,13 +1,21 @@
-# vclient
+# CLAUDE.md
 
-Async Python client for the Valentina API. Python 3.13+ required.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+vclient - Async Python client for the Valentina API. Python 3.13+ required.
 
 ## Commands
 
 ```bash
-uv run duty lint    # Run all linting (ruff, ty, typos, format)
-uv run duty test    # Run tests with coverage
-uv run duty clean   # Clean build artifacts
+uv run duty lint                          # Run all linting (ruff, ty, typos, format)
+uv run duty test                          # Run tests with coverage
+uv run duty clean                         # Clean build artifacts
+
+# Single test or specific tests
+uv run pytest tests/path/to/test_file.py -x
+uv run pytest tests/ -k "test_name_pattern" -x
 ```
 
 ## Project Structure
@@ -41,23 +49,32 @@ Models are defined in `models/*.py` and exported from `models/__init__.py`.
 
 ## Service Pattern
 
-Services extend `BaseService` and provide:
+Services extend `BaseService` and provide standard methods:
+`get_page()`, `list_all()`, `iter_all()`, `get(id)`, `create()`, `update(id)`, `delete(id)`
 
-- `get_page()` - paginated results
-- `list_all()` - all results as list
-- `iter_all()` - async iterator for large datasets
-- `get(id)`, `create()`, `update(id)`, `delete(id)`
+**Service Hierarchy** - Services are scoped at initialization time:
+
+```
+VClient
+├── companies()           # Top-level: no scoping
+├── users(company_id)     # Scoped to company
+├── campaigns(user_id, company_id)
+├── characters(user_id, campaign_id, company_id)
+├── character_traits(user_id, campaign_id, character_id, company_id)
+└── ... etc
+```
 
 **Primary access via factory functions** (preferred over direct instantiation):
 
 ```python
-from vclient import campaigns_service, users_service
+from vclient import VClient, campaigns_service
 
-async with campaigns_service(api_key="...") as svc:
-    campaigns = await svc.list_all()
+async with VClient(api_key="...") as client:
+    campaigns = client.campaigns(user_id="123")
+    all_campaigns = await campaigns.list_all()
 ```
 
-Available: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `users_service`, etc.
+Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `users_service`, etc.
 
 ## Code Style
 
