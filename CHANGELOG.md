@@ -1,3 +1,14 @@
+## v1.2.0 (2026-02-17)
+
+### Feat
+
+- **config**: add environment variable support (#16)
+- add constants validation against API (#15)
+
+### Fix
+
+- **character_trait**: replace POST with PUT
+
 ## v1.1.2 (2026-02-15)
 
 ### Fix

@@ -10,7 +10,7 @@
     name = "valentina-python-client"
     readme = "README.md"
     requires-python = ">=3.13"
-    version = "1.1.2"
+    version = "1.2.0"
 
     [project.urls]
         Homepage   = "https://docs.valentina-noir.com/python-api-client/"
