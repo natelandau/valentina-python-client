@@ -5,6 +5,10 @@ from typing import Literal
 # Authentication
 API_KEY_HEADER = "X-API-KEY"
 
+# Environment variable names
+ENV_BASE_URL = "VALENTINA_CLIENT_BASE_URL"
+ENV_API_KEY = "VALENTINA_CLIENT_API_KEY"
+ENV_DEFAULT_COMPANY_ID = "VALENTINA_CLIENT_DEFAULT_COMPANY_ID"
 
 # Request defaults
 DEFAULT_TIMEOUT = 30.0

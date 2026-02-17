@@ -9,9 +9,9 @@ Configuration (highest precedence wins):
     3. .env.secrets file in the project root
 
 Environment variables:
-    VALENTINA_API_URL: Base URL for the API (default: https://api.valentina-noir.com)
-    VALENTINA_API_KEY: API key for authentication
-    VALENTINA_COMPANY_ID: Company ID (alternative to --company-id flag)
+    VALENTINA_CLIENT_BASE_URL: Base URL for the API (default: https://api.valentina-noir.com)
+    VALENTINA_CLIENT_API_KEY: API key for authentication
+    VALENTINA_CLIENT_DEFAULT_COMPANY_ID: Company ID (alternative to --company-id flag)
 """
 
 from __future__ import annotations
@@ -106,27 +106,32 @@ def cli() -> int:
     )
     parser.add_argument(
         "--api-url",
-        default=_get_config_value("VALENTINA_API_URL", secrets, "https://api.valentina-noir.com"),
-        help="Base URL for the API (env: VALENTINA_API_URL)",
+        default=_get_config_value(
+            "VALENTINA_CLIENT_BASE_URL", secrets, "https://api.valentina-noir.com"
+        ),
+        help="Base URL for the API (env: VALENTINA_CLIENT_BASE_URL)",
     )
     parser.add_argument(
         "--api-key",
-        default=_get_config_value("VALENTINA_API_KEY", secrets),
-        help="API key (env: VALENTINA_API_KEY)",
+        default=_get_config_value("VALENTINA_CLIENT_API_KEY", secrets),
+        help="API key (env: VALENTINA_CLIENT_API_KEY)",
     )
     parser.add_argument(
         "--company-id",
-        default=_get_config_value("VALENTINA_COMPANY_ID", secrets),
-        help="Company ID (env: VALENTINA_COMPANY_ID)",
+        default=_get_config_value("VALENTINA_CLIENT_DEFAULT_COMPANY_ID", secrets),
+        help="Company ID (env: VALENTINA_CLIENT_DEFAULT_COMPANY_ID)",
     )
     args = parser.parse_args()
 
     if not args.api_key:
-        print("Error: --api-key or VALENTINA_API_KEY environment variable is required.")
+        print("Error: --api-key or VALENTINA_CLIENT_API_KEY environment variable is required.")
         return 2
 
     if not args.company_id:
-        print("Error: --company-id or VALENTINA_COMPANY_ID environment variable is required.")
+        print(
+            "Error: --company-id or VALENTINA_CLIENT_DEFAULT_COMPANY_ID"
+            " environment variable is required."
+        )
         return 2
 
     return asyncio.run(main(args.api_url, args.api_key, args.company_id))
