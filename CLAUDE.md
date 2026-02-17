@@ -12,6 +12,7 @@ vclient - Async Python client for the Valentina API. Python 3.13+ required.
 uv run duty lint                          # Run all linting (ruff, ty, typos, format)
 uv run duty test                          # Run tests with coverage
 uv run duty clean                         # Clean build artifacts
+uv run duty validate_constants            # Validate constants against live API
 
 # Single test or specific tests
 uv run pytest tests/path/to/test_file.py -x
@@ -22,14 +23,18 @@ uv run pytest tests/ -k "test_name_pattern" -x
 
 ```
 src/vclient/
-├── services/      # API service classes (companies, campaigns, characters, etc.)
-├── models/        # Pydantic v2 models
-├── client.py      # VClient
-├── config.py      # Internal configuration (_APIConfig)
-├── constants.py   # Shared constants
-├── endpoints.py   # API endpoint paths
-├── exceptions.py  # RFC 9457 exception classes
-└── registry.py    # Service factory functions
+├── services/              # API service classes (companies, campaigns, characters, etc.)
+├── models/                # Pydantic v2 models
+├── client.py              # VClient
+├── config.py              # Internal configuration (_APIConfig)
+├── constants.py           # Shared constants (Literal types for API enums)
+├── endpoints.py           # API endpoint paths
+├── exceptions.py          # RFC 9457 exception classes
+├── registry.py            # Service factory functions
+└── validate_constants.py  # Constants validation against API options
+
+scripts/
+└── validate_constants.py  # CLI script for constants validation
 
 tests/
 ├── unit/          # Model validation tests
@@ -99,6 +104,18 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details forma
 | `ServerError`            | 5xx         | Server errors                                             |
 
 All have `.status_code`, `.title`, `.detail`, `.instance` properties from RFC 9457.
+
+## Constants Validation
+
+The `Literal` type constants in `constants.py` must stay in sync with the API's `/options` endpoint. The validation system detects drift.
+
+**Key files:**
+- `src/vclient/validate_constants.py` — mapping table (`CONSTANT_MAP`), `validate()`, `print_report()`
+- `scripts/validate_constants.py` — CLI wrapper (reads `.env.secrets`, env vars, or CLI args)
+
+**When adding/changing a constant:** Update both `constants.py` and `CONSTANT_MAP` in `validate_constants.py`. The mapping links each local constant name to its API location (`api_category`, `api_option`). Some names differ between local and API (e.g., `CharacterInventoryType` → `InventoryItemType`, `PermissionLevel` → `CompanyPermission`).
+
+**Running validation:** `uv run duty validate_constants` (requires live API access with credentials in `.env.secrets` or environment).
 
 ## Testing
 
