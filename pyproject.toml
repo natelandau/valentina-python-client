@@ -140,8 +140,13 @@
             "TD002",  # Missing author in TODO
             "TD003",  # Missing issue link on the line following this TODO
         ]
-        per-file-ignores = { "src/vclient/services/*.py" = [
+        per-file-ignores = { "scripts/*.py" = [
+            "INP001", # Implicit namespace package (no __init__.py needed)
+            "T201",   # print() is intentional for CLI output
+        ], "src/vclient/services/*.py" = [
             "PLR0913", # Too many arguments
+        ], "src/vclient/validate_constants.py" = [
+            "T201", # print() is intentional for report output
         ], "tests/**/*.py" = [
             "A002",
             "A003",
