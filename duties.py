@@ -162,3 +162,12 @@ def test(ctx: Context, *cli_args: str) -> None:
         title=pyprefix("Running tests - this may take a while"),
         capture=CI,
     )
+
+
+@duty()
+def validate_constants(ctx: Context) -> None:
+    """Validate client constants against the live API."""
+    ctx.run(
+        ["uv", "run", "python", "scripts/validate_constants.py"],
+        title="validate constants",
+    )
