@@ -7,6 +7,7 @@ from vclient.validate_constants import (
     ConstantMapping,
     ConstantMismatch,
     ValidationResult,
+    validate,
 )
 
 
@@ -79,3 +80,403 @@ class TestConstantMap:
 
         for name in CONSTANT_MAP:
             assert hasattr(constants, name), f"CONSTANT_MAP entry '{name}' has no matching constant"
+
+
+class TestValidate:
+    """Tests for the validate() function."""
+
+    def test_all_constants_match(self):
+        """Verify validate returns is_valid=True when all constants match API."""
+        # Given: API options that exactly match local constants
+        api_options = {
+            "characters": {
+                "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
+                "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
+                "BlueprintTraitOrderBy": ["NAME", "SHEET"],
+                "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterStatus": ["ALIVE", "DEAD"],
+                "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
+                "GameVersion": ["V4", "V5"],
+                "HunterCreed": [
+                    "ENTREPRENEURIAL",
+                    "FAITHFUL",
+                    "INQUISITIVE",
+                    "MARTIAL",
+                    "UNDERGROUND",
+                ],
+                "HunterEdgeType": ["ASSETS", "APTITUDES", "ENDOWMENTS"],
+                "InventoryItemType": [
+                    "BOOK",
+                    "CONSUMABLE",
+                    "ENCHANTED",
+                    "EQUIPMENT",
+                    "OTHER",
+                    "WEAPON",
+                ],
+                "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
+                "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
+            },
+            "companies": {
+                "CompanyPermission": ["USER", "ADMIN", "OWNER", "REVOKE"],
+                "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
+                "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
+                "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+            },
+            "gameplay": {
+                "DiceSize": [4, 6, 8, 10, 20, 100],
+                "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
+            },
+            "users": {
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER"],
+            },
+            "assets": {
+                "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
+                "AssetParentType": [
+                    "character",
+                    "campaign",
+                    "campaignbook",
+                    "campaignchapter",
+                    "user",
+                    "company",
+                    "unknown",
+                ],
+            },
+        }
+
+        # When: Validating
+        result = validate(api_options)
+
+        # Then: Everything matches
+        assert result.is_valid is True
+        assert result.mismatches == []
+        assert result.unmapped_api_options == {}
+
+    def test_missing_from_client(self):
+        """Verify validate detects values in API but missing from client."""
+        # Given: API has an extra value for CharacterStatus
+        api_options = {
+            "characters": {
+                "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
+                "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
+                "BlueprintTraitOrderBy": ["NAME", "SHEET"],
+                "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterStatus": ["ALIVE", "DEAD", "UNDEAD"],
+                "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
+                "GameVersion": ["V4", "V5"],
+                "HunterCreed": [
+                    "ENTREPRENEURIAL",
+                    "FAITHFUL",
+                    "INQUISITIVE",
+                    "MARTIAL",
+                    "UNDERGROUND",
+                ],
+                "HunterEdgeType": ["ASSETS", "APTITUDES", "ENDOWMENTS"],
+                "InventoryItemType": [
+                    "BOOK",
+                    "CONSUMABLE",
+                    "ENCHANTED",
+                    "EQUIPMENT",
+                    "OTHER",
+                    "WEAPON",
+                ],
+                "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
+                "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
+            },
+            "companies": {
+                "CompanyPermission": ["USER", "ADMIN", "OWNER", "REVOKE"],
+                "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
+                "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
+                "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+            },
+            "gameplay": {
+                "DiceSize": [4, 6, 8, 10, 20, 100],
+                "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
+            },
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "assets": {
+                "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
+                "AssetParentType": [
+                    "character",
+                    "campaign",
+                    "campaignbook",
+                    "campaignchapter",
+                    "user",
+                    "company",
+                    "unknown",
+                ],
+            },
+        }
+
+        # When: Validating
+        result = validate(api_options)
+
+        # Then: Mismatch detected
+        assert result.is_valid is False
+        assert len(result.mismatches) == 1
+        assert result.mismatches[0].constant_name == "CharacterStatus"
+        assert result.mismatches[0].missing_from_client == {"UNDEAD"}
+        assert result.mismatches[0].extra_in_client == set()
+
+    def test_extra_in_client(self):
+        """Verify validate detects values in client but missing from API."""
+        # Given: API is missing "MORTAL" from CharacterClass
+        api_options = {
+            "characters": {
+                "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
+                "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
+                "BlueprintTraitOrderBy": ["NAME", "SHEET"],
+                "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL"],
+                "CharacterStatus": ["ALIVE", "DEAD"],
+                "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
+                "GameVersion": ["V4", "V5"],
+                "HunterCreed": [
+                    "ENTREPRENEURIAL",
+                    "FAITHFUL",
+                    "INQUISITIVE",
+                    "MARTIAL",
+                    "UNDERGROUND",
+                ],
+                "HunterEdgeType": ["ASSETS", "APTITUDES", "ENDOWMENTS"],
+                "InventoryItemType": [
+                    "BOOK",
+                    "CONSUMABLE",
+                    "ENCHANTED",
+                    "EQUIPMENT",
+                    "OTHER",
+                    "WEAPON",
+                ],
+                "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
+                "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
+            },
+            "companies": {
+                "CompanyPermission": ["USER", "ADMIN", "OWNER", "REVOKE"],
+                "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
+                "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
+                "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+            },
+            "gameplay": {
+                "DiceSize": [4, 6, 8, 10, 20, 100],
+                "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
+            },
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "assets": {
+                "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
+                "AssetParentType": [
+                    "character",
+                    "campaign",
+                    "campaignbook",
+                    "campaignchapter",
+                    "user",
+                    "company",
+                    "unknown",
+                ],
+            },
+        }
+
+        # When: Validating
+        result = validate(api_options)
+
+        # Then: Mismatch detected
+        assert result.is_valid is False
+        assert len(result.mismatches) == 1
+        assert result.mismatches[0].constant_name == "CharacterClass"
+        assert result.mismatches[0].extra_in_client == {"MORTAL"}
+        assert result.mismatches[0].missing_from_client == set()
+
+    def test_unmapped_api_options(self):
+        """Verify validate detects API options with no local constant."""
+        # Given: API has an extra option not in CONSTANT_MAP
+        api_options = {
+            "characters": {
+                "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
+                "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
+                "BlueprintTraitOrderBy": ["NAME", "SHEET"],
+                "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterStatus": ["ALIVE", "DEAD"],
+                "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
+                "GameVersion": ["V4", "V5"],
+                "HunterCreed": [
+                    "ENTREPRENEURIAL",
+                    "FAITHFUL",
+                    "INQUISITIVE",
+                    "MARTIAL",
+                    "UNDERGROUND",
+                ],
+                "HunterEdgeType": ["ASSETS", "APTITUDES", "ENDOWMENTS"],
+                "InventoryItemType": [
+                    "BOOK",
+                    "CONSUMABLE",
+                    "ENCHANTED",
+                    "EQUIPMENT",
+                    "OTHER",
+                    "WEAPON",
+                ],
+                "NewOptionType": ["FOO", "BAR"],
+                "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
+                "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
+            },
+            "companies": {
+                "CompanyPermission": ["USER", "ADMIN", "OWNER", "REVOKE"],
+                "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
+                "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
+                "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+            },
+            "gameplay": {
+                "DiceSize": [4, 6, 8, 10, 20, 100],
+                "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
+            },
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "assets": {
+                "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
+                "AssetParentType": [
+                    "character",
+                    "campaign",
+                    "campaignbook",
+                    "campaignchapter",
+                    "user",
+                    "company",
+                    "unknown",
+                ],
+            },
+        }
+
+        # When: Validating
+        result = validate(api_options)
+
+        # Then: Unmapped option detected
+        assert result.is_valid is False
+        assert result.unmapped_api_options == {"characters": ["NewOptionType"]}
+
+    def test_skips_related_keys(self):
+        """Verify validate ignores _related keys in the API response."""
+        # Given: API response includes _related metadata
+        api_options = {
+            "characters": {
+                "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
+                "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
+                "BlueprintTraitOrderBy": ["NAME", "SHEET"],
+                "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterStatus": ["ALIVE", "DEAD"],
+                "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
+                "GameVersion": ["V4", "V5"],
+                "HunterCreed": [
+                    "ENTREPRENEURIAL",
+                    "FAITHFUL",
+                    "INQUISITIVE",
+                    "MARTIAL",
+                    "UNDERGROUND",
+                ],
+                "HunterEdgeType": ["ASSETS", "APTITUDES", "ENDOWMENTS"],
+                "InventoryItemType": [
+                    "BOOK",
+                    "CONSUMABLE",
+                    "ENCHANTED",
+                    "EQUIPMENT",
+                    "OTHER",
+                    "WEAPON",
+                ],
+                "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
+                "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
+                "_related": {"concepts": "https://example.com/concepts"},
+            },
+            "companies": {
+                "CompanyPermission": ["USER", "ADMIN", "OWNER", "REVOKE"],
+                "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
+                "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
+                "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+            },
+            "gameplay": {
+                "DiceSize": [4, 6, 8, 10, 20, 100],
+                "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
+            },
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "assets": {
+                "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
+                "AssetParentType": [
+                    "character",
+                    "campaign",
+                    "campaignbook",
+                    "campaignchapter",
+                    "user",
+                    "company",
+                    "unknown",
+                ],
+            },
+        }
+
+        # When: Validating
+        result = validate(api_options)
+
+        # Then: _related is ignored, result is valid
+        assert result.is_valid is True
+        assert result.unmapped_api_options == {}
+
+    def test_skips_non_list_values(self):
+        """Verify validate ignores non-list values (dicts, strings) in API categories."""
+        # Given: API has a dict value that should be skipped
+        api_options = {
+            "characters": {
+                "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
+                "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
+                "BlueprintTraitOrderBy": ["NAME", "SHEET"],
+                "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterStatus": ["ALIVE", "DEAD"],
+                "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
+                "GameVersion": ["V4", "V5"],
+                "HunterCreed": [
+                    "ENTREPRENEURIAL",
+                    "FAITHFUL",
+                    "INQUISITIVE",
+                    "MARTIAL",
+                    "UNDERGROUND",
+                ],
+                "HunterEdgeType": ["ASSETS", "APTITUDES", "ENDOWMENTS"],
+                "InventoryItemType": [
+                    "BOOK",
+                    "CONSUMABLE",
+                    "ENCHANTED",
+                    "EQUIPMENT",
+                    "OTHER",
+                    "WEAPON",
+                ],
+                "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
+                "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
+                "SomeMetadata": {"key": "value"},
+            },
+            "companies": {
+                "CompanyPermission": ["USER", "ADMIN", "OWNER", "REVOKE"],
+                "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
+                "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
+                "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+            },
+            "gameplay": {
+                "DiceSize": [4, 6, 8, 10, 20, 100],
+                "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
+            },
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "assets": {
+                "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
+                "AssetParentType": [
+                    "character",
+                    "campaign",
+                    "campaignbook",
+                    "campaignchapter",
+                    "user",
+                    "company",
+                    "unknown",
+                ],
+            },
+        }
+
+        # When: Validating
+        result = validate(api_options)
+
+        # Then: SomeMetadata (a dict, not a list) is ignored
+        assert result.is_valid is True
+        assert result.unmapped_api_options == {}
