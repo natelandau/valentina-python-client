@@ -152,3 +152,86 @@ def validate(api_options: dict[str, dict[str, list | dict]]) -> ValidationResult
         mismatches=mismatches,
         unmapped_api_options=unmapped_api_options,
     )
+
+
+def _print_status_lines(mismatched_names: set[str]) -> None:
+    """Print OK/FAIL status line for each constant in the mapping table."""
+    for constant_name in sorted(CONSTANT_MAP):
+        status = "FAIL" if constant_name in mismatched_names else "OK  "
+        print(f"  {status}  {constant_name}")
+
+
+def _print_mismatches(mismatches: list[ConstantMismatch]) -> None:
+    """Print detailed mismatch information for each failing constant."""
+    print()
+    print("-" * 60)
+    print("Mismatches:")
+    print("-" * 60)
+    for mismatch in mismatches:
+        print(f"\n  {mismatch.constant_name}")
+        print(f"    API: {mismatch.api_category}.{mismatch.api_option}")
+        if mismatch.missing_from_client:
+            print(f"    Missing from client: {sorted(mismatch.missing_from_client)}")
+        if mismatch.extra_in_client:
+            print(f"    Extra in client:     {sorted(mismatch.extra_in_client)}")
+
+
+def _print_unmapped(unmapped_api_options: dict[str, list[str]]) -> None:
+    """Print API options that have no corresponding local constant."""
+    print()
+    print("-" * 60)
+    print("Unmapped API options (no local constant):")
+    print("-" * 60)
+    for category, options in sorted(unmapped_api_options.items()):
+        for option in sorted(options):
+            print(f"  {category}.{option}")
+
+
+def _build_summary(
+    matched_count: int,
+    total: int,
+    mismatch_count: int,
+    unmapped_api_options: dict[str, list[str]],
+) -> str:
+    """Build the final summary line for the report."""
+    if mismatch_count == 0 and not unmapped_api_options:
+        return f"  {matched_count}/{total} constants in sync"
+
+    summary_parts: list[str] = []
+    if mismatch_count:
+        summary_parts.append(f"{mismatch_count} mismatch(es)")
+    if unmapped_api_options:
+        unmapped_count = sum(len(v) for v in unmapped_api_options.values())
+        summary_parts.append(f"{unmapped_count} unmapped API option(s)")
+    return f"  {matched_count}/{total} constants in sync, {', '.join(summary_parts)}"
+
+
+def print_report(result: ValidationResult) -> None:
+    """Print a human-readable validation report to stdout.
+
+    Args:
+        result: The ValidationResult from validate().
+    """
+    total = len(CONSTANT_MAP)
+    mismatch_count = len(result.mismatches)
+    matched_count = total - mismatch_count
+    mismatched_names = {m.constant_name for m in result.mismatches}
+
+    print()
+    print("=" * 60)
+    print("Constants Validation Report")
+    print("=" * 60)
+
+    _print_status_lines(mismatched_names)
+
+    if result.mismatches:
+        _print_mismatches(result.mismatches)
+
+    if result.unmapped_api_options:
+        _print_unmapped(result.unmapped_api_options)
+
+    print()
+    print("=" * 60)
+    print(_build_summary(matched_count, total, mismatch_count, result.unmapped_api_options))
+    print("=" * 60)
+    print()

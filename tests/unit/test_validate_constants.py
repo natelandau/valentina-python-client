@@ -7,6 +7,7 @@ from vclient.validate_constants import (
     ConstantMapping,
     ConstantMismatch,
     ValidationResult,
+    print_report,
     validate,
 )
 
@@ -480,3 +481,61 @@ class TestValidate:
         # Then: SomeMetadata (a dict, not a list) is ignored
         assert result.is_valid is True
         assert result.unmapped_api_options == {}
+
+
+class TestPrintReport:
+    """Tests for the print_report() function."""
+
+    def test_valid_report_output(self, capsys):
+        """Verify print_report shows success for valid result."""
+        # Given: A valid result
+        result = ValidationResult(is_valid=True, mismatches=[], unmapped_api_options={})
+
+        # When: Printing the report
+        print_report(result)
+
+        # Then: Output contains success message
+        captured = capsys.readouterr()
+        assert "22/22 constants in sync" in captured.out
+
+    def test_mismatch_report_output(self, capsys):
+        """Verify print_report shows mismatch details."""
+        # Given: A result with a mismatch
+        result = ValidationResult(
+            is_valid=False,
+            mismatches=[
+                ConstantMismatch(
+                    constant_name="CharacterStatus",
+                    api_category="characters",
+                    api_option="CharacterStatus",
+                    missing_from_client={"UNDEAD"},
+                    extra_in_client=set(),
+                )
+            ],
+            unmapped_api_options={},
+        )
+
+        # When: Printing the report
+        print_report(result)
+
+        # Then: Output contains mismatch details
+        captured = capsys.readouterr()
+        assert "CharacterStatus" in captured.out
+        assert "UNDEAD" in captured.out
+
+    def test_unmapped_report_output(self, capsys):
+        """Verify print_report shows unmapped API options."""
+        # Given: A result with unmapped options
+        result = ValidationResult(
+            is_valid=False,
+            mismatches=[],
+            unmapped_api_options={"characters": ["NewOptionType"]},
+        )
+
+        # When: Printing the report
+        print_report(result)
+
+        # Then: Output contains unmapped option
+        captured = capsys.readouterr()
+        assert "NewOptionType" in captured.out
+        assert "characters" in captured.out

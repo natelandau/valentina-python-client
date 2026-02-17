@@ -142,6 +142,8 @@
         ]
         per-file-ignores = { "src/vclient/services/*.py" = [
             "PLR0913", # Too many arguments
+        ], "src/vclient/validate_constants.py" = [
+            "T201", # print() is intentional for report output
         ], "tests/**/*.py" = [
             "A002",
             "A003",
