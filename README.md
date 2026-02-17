@@ -18,6 +18,28 @@ This client is a supported and up-to-date reference implementation for the Valen
 
 For complete documentation including configuration options, all available services, response models, and error handling, see the **[Full Documentation](https://docs.valentina-noir.com/python-api-client/)**.
 
+## Development Tools
+
+### Validate Constants
+
+Verify that the `Literal` type constants in this package are in sync with the live API's `/options` endpoint. This catches drift between client and server before a release.
+
+```bash
+# Via duty task
+uv run duty validate_constants
+
+# Via script directly
+uv run python scripts/validate_constants.py --api-key <key> --company-id <id>
+```
+
+The script reads configuration from (highest precedence first):
+
+1. CLI arguments (`--api-url`, `--api-key`, `--company-id`)
+2. System environment variables (`VALENTINA_API_URL`, `VALENTINA_API_KEY`, `VALENTINA_COMPANY_ID`)
+3. A `.env.secrets` file in the project root
+
+Exit codes: `0` = all constants match, `1` = mismatches found, `2` = missing configuration.
+
 ## Resources
 
 -   [Full Client Documentation](https://docs.valentina-noir.com/python-api-client/)
