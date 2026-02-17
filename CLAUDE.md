@@ -74,10 +74,20 @@ VClient
 ```python
 from vclient import VClient, campaigns_service
 
-async with VClient(api_key="...") as client:
+async with VClient(base_url="https://api.valentina-noir.com", api_key="...") as client:
     campaigns = client.campaigns(user_id="123")
     all_campaigns = await campaigns.list_all()
 ```
+
+**Environment variable configuration** — `base_url`, `api_key`, and `default_company_id` can be set via environment variables instead of constructor arguments. Explicit arguments always take precedence.
+
+| Env Var                              | Maps To              |
+| ------------------------------------ | -------------------- |
+| `VALENTINA_CLIENT_BASE_URL`          | `base_url`           |
+| `VALENTINA_CLIENT_API_KEY`           | `api_key`            |
+| `VALENTINA_CLIENT_DEFAULT_COMPANY_ID`| `default_company_id` |
+
+Constants for these names are in `constants.py`: `ENV_BASE_URL`, `ENV_API_KEY`, `ENV_DEFAULT_COMPANY_ID`.
 
 Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `users_service`, etc.
 
