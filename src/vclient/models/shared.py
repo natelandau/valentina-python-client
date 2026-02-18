@@ -158,7 +158,7 @@ class WerewolfGift(BaseModel):
     id: str
     name: str
     description: str | None = None
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
     date_created: datetime
     date_modified: datetime
     renown: WerewolfRenown
@@ -179,7 +179,7 @@ class WerewolfRite(BaseModel):
     id: str
     name: str
     description: str | None = None
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
     date_created: datetime
     date_modified: datetime
     pool: str | None = None
