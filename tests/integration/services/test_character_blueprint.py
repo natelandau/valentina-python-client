@@ -131,7 +131,14 @@ def character_concept_response_data() -> dict:
         "date_modified": "2024-01-15T10:30:00Z",
         "examples": ["Example 1", "Example 2"],
         "max_specialties": 1,
-        "specialties": [{"id": "spec1", "name": "Brawl: Kindred", "type": "ACTION"}],
+        "specialties": [
+            {
+                "id": "spec1",
+                "name": "Brawl: Kindred",
+                "type": "ACTION",
+                "description": "Skilled in fighting other Kindred",
+            }
+        ],
         "favored_ability_names": ["Ability 1", "Ability 2"],
     }
 

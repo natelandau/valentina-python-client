@@ -12,16 +12,16 @@ class DiceRollResultSchema(BaseModel):
 
     total_result: int | None = None
     total_result_type: RollResultType
-    total_result_humanized: str | None = None
+    total_result_humanized: str
     total_dice_roll: list[int] = Field(default_factory=list)
     player_roll: list[int] = Field(default_factory=list)
     desperation_roll: list[int] = Field(default_factory=list)
-    total_dice_roll_emoji: str | None = None
-    total_dice_roll_shortcode: str | None = None
-    player_roll_emoji: str | None = None
-    player_roll_shortcode: str | None = None
-    desperation_roll_emoji: str | None = None
-    desperation_roll_shortcode: str | None = None
+    total_dice_roll_emoji: str
+    total_dice_roll_shortcode: str
+    player_roll_emoji: str
+    player_roll_shortcode: str
+    desperation_roll_emoji: str
+    desperation_roll_shortcode: str
 
 
 class Diceroll(BaseModel):

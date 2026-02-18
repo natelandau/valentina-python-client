@@ -1,7 +1,6 @@
 """Pydantic models for Character API responses and requests."""
 
 from datetime import datetime
-from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -29,8 +28,10 @@ class VampireAttributes(BaseModel):
     clan_name: str | None = Field(default=None, description="Name of the vampire clan.")
     generation: int | None = Field(default=None, description="Vampire generation.")
     sire: str | None = Field(default=None, description="Name of the vampire's sire.")
-    bane: dict[str, Any] | None = Field(default=None, description="Clan bane details.")
-    compulsion: dict[str, Any] | None = Field(default=None, description="Clan compulsion details.")
+    bane: NameDescriptionSubDocument | None = Field(default=None, description="Clan bane details.")
+    compulsion: NameDescriptionSubDocument | None = Field(
+        default=None, description="Clan compulsion details."
+    )
 
 
 class VampireAttributesCreate(BaseModel):
@@ -63,6 +64,7 @@ class WerewolfAttributes(BaseModel):
     pack_name: str | None = Field(default=None, description="Name of the werewolf's pack.")
     rite_ids: list[str] = Field(default_factory=list, description="List of werewolf rite IDs.")
     gift_ids: list[str] = Field(default_factory=list, description="List of werewolf gift IDs.")
+    total_renown: int = Field(default=0, description="Total renown.")
 
 
 class WerewolfAttributesCreate(BaseModel):

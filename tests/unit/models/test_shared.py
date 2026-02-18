@@ -21,18 +21,22 @@ class TestS3Asset:
             id="asset123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
-            file_type="image",
+            asset_type="image",
+            mime_type="image/png",
             original_filename="avatar.png",
             public_url="https://example.com/avatar.png",
             uploaded_by="user123",
+            company_id="company123",
             parent_type="user",
         )
 
         assert asset.id == "asset123"
-        assert asset.file_type == "image"
+        assert asset.asset_type == "image"
+        assert asset.mime_type == "image/png"
         assert asset.original_filename == "avatar.png"
         assert asset.public_url == "https://example.com/avatar.png"
         assert asset.uploaded_by == "user123"
+        assert asset.company_id == "company123"
         assert asset.parent_type == "user"
 
     def test_parent_type_defaults_to_none(self):
@@ -41,29 +45,33 @@ class TestS3Asset:
             id="asset123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
-            file_type="document",
+            asset_type="document",
+            mime_type="application/pdf",
             original_filename="doc.pdf",
             public_url="https://example.com/doc.pdf",
             uploaded_by="user123",
+            company_id="company123",
         )
 
         assert asset.parent_type is None
 
-    def test_all_file_types(self):
-        """Verify all file types are valid."""
-        file_types = ["image", "text", "audio", "video", "document", "archive", "other"]
+    def test_all_asset_types(self):
+        """Verify all asset types are valid."""
+        asset_types = ["image", "text", "audio", "video", "document", "archive", "other"]
 
-        for file_type in file_types:
+        for asset_type in asset_types:
             asset = S3Asset(
                 id="asset123",
                 date_created="2024-01-15T10:30:00Z",
                 date_modified="2024-01-15T10:30:00Z",
-                file_type=file_type,
+                asset_type=asset_type,
+                mime_type="application/octet-stream",
                 original_filename="file.bin",
                 public_url="https://example.com/file.bin",
                 uploaded_by="user123",
+                company_id="company123",
             )
-            assert asset.file_type == file_type
+            assert asset.asset_type == asset_type
 
     def test_all_parent_types(self):
         """Verify all parent types are valid."""
@@ -82,10 +90,12 @@ class TestS3Asset:
                 id="asset123",
                 date_created="2024-01-15T10:30:00Z",
                 date_modified="2024-01-15T10:30:00Z",
-                file_type="image",
+                asset_type="image",
+                mime_type="image/png",
                 original_filename="file.png",
                 public_url="https://example.com/file.png",
                 uploaded_by="user123",
+                company_id="company123",
                 parent_type=parent_type,
             )
             assert asset.parent_type == parent_type
