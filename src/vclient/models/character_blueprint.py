@@ -48,7 +48,7 @@ class VampireClan(BaseModel):
     description: str | None = None
     date_created: datetime
     date_modified: datetime
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
 
     discipline_ids: list[str] = Field(default_factory=list)
     bane: NameDescriptionSubDocument | None = None
@@ -65,7 +65,7 @@ class WerewolfAuspice(BaseModel):
     description: str | None = None
     date_created: datetime
     date_modified: datetime
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
 
     gift_ids: list[str] = Field(default_factory=list)
     link: str | None = None
@@ -79,7 +79,7 @@ class WerewolfTribe(BaseModel):
     description: str | None = None
     date_created: datetime
     date_modified: datetime
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
 
     renown: WerewolfRenown
     patron_spirit: str | None = None
@@ -97,7 +97,7 @@ class HunterEdge(BaseModel):
     description: str | None = None
     date_created: datetime
     date_modified: datetime
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
 
     pool: str | None = None
     system: str | None = None
@@ -113,7 +113,7 @@ class HunterEdgePerk(BaseModel):
     description: str | None = None
     date_created: datetime
     date_modified: datetime
-    game_version: GameVersion
+    game_versions: list[GameVersion] = Field(default_factory=list)
 
     edge_id: str | None = None
 

@@ -156,7 +156,7 @@ def vampire_clan_response_data() -> dict:
         "description": "Clan description",
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "discipline_ids": ["discipline123", "discipline456"],
         "bane": {"name": "Rarefied Tastes", "description": "Feeds only on specific blood"},
         "variant_bane": {"name": "Rarefied Tastes", "description": "Feeds only on specific blood"},
@@ -183,7 +183,7 @@ def hunter_edge_response_data() -> dict:
         "id": "edge123",
         "name": "Hunter Edge Name",
         "description": "Hunter Edge description",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "pool": "Wits + Investigation",
         "system": "Roll to track supernatural creatures.",
         "type": "APTITUDES",
@@ -211,7 +211,7 @@ def hunter_edge_perk_response_data() -> dict:
         "id": "perk123",
         "name": "Hunter Edge Perk Name",
         "description": "Hunter Edge Perk description",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "edge_id": "edge123",
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
@@ -238,7 +238,7 @@ def werewolf_auspice_response_data() -> dict:
         "description": "Auspice description",
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "gift_ids": ["gift123", "gift456"],
         "link": "https://example.com/auspice123",
     }
@@ -264,7 +264,7 @@ def werewolf_tribe_response_data() -> dict:
         "description": "Tribe description",
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "renown": "HONOR",
         "patron_spirit": "Spirit Name",
         "favor": "Favor Name",
@@ -292,7 +292,7 @@ def werewolf_gift_response_data() -> dict:
         "id": "gift123",
         "name": "Gift Name",
         "description": "Gift description",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
         "renown": "HONOR",
@@ -327,7 +327,7 @@ def werewolf_rite_response_data() -> dict:
         "id": "rite123",
         "name": "Rite Name",
         "description": "Rite description",
-        "game_version": "V5",
+        "game_versions": ["V5"],
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
         "pool": "Charisma + Rituals",
@@ -1941,7 +1941,7 @@ class TestCharacterBlueprintServiceWerewolfGifts:
         assert result.id == "gift123"
         assert result.name == "Gift Name"
         assert result.description == "Gift description"
-        assert result.game_version == "V5"
+        assert result.game_versions == ["V5"]
 
     @respx.mock
     async def test_get_werewolf_gift_not_found(self, vclient, base_url) -> None:
@@ -2040,7 +2040,7 @@ class TestCharacterBlueprintServiceWerewolfRites:
         assert result.id == "rite123"
         assert result.name == "Rite Name"
         assert result.description == "Rite description"
-        assert result.game_version == "V5"
+        assert result.game_versions == ["V5"]
 
     @respx.mock
     async def test_get_werewolf_rite_not_found(self, vclient, base_url) -> None:
@@ -2246,7 +2246,7 @@ class TestCharacterBlueprintServiceHunterEdges:
         assert result.id == "edge123"
         assert result.name == "Hunter Edge Name"
         assert result.description == "Hunter Edge description"
-        assert result.game_version == "V5"
+        assert result.game_versions == ["V5"]
 
     @respx.mock
     async def test_get_hunter_edge_not_found(self, vclient, base_url) -> None:
@@ -2298,7 +2298,7 @@ class TestCharacterBlueprintServiceHunterEdgePerks:
         assert isinstance(result.items[0], HunterEdgePerk)
         assert result.items[0].name == "Hunter Edge Perk Name"
         assert result.items[0].description == "Hunter Edge Perk description"
-        assert result.items[0].game_version == "V5"
+        assert result.items[0].game_versions == ["V5"]
 
     @respx.mock
     async def test_list_all_hunter_edge_perks(
@@ -2388,7 +2388,7 @@ class TestCharacterBlueprintServiceHunterEdgePerks:
         assert result.id == "perk123"
         assert result.name == "Hunter Edge Perk Name"
         assert result.description == "Hunter Edge Perk description"
-        assert result.game_version == "V5"
+        assert result.game_versions == ["V5"]
 
     @respx.mock
     async def test_get_hunter_edge_perk_not_found(self, vclient, base_url) -> None:
