@@ -40,11 +40,14 @@ class S3Asset(BaseModel):
     id: str
     date_created: datetime
     date_modified: datetime
-    file_type: S3AssetType
+    asset_type: S3AssetType
+    mime_type: str
     original_filename: str
     public_url: str
     uploaded_by: str
+    company_id: str
     parent_type: S3AssetParentType | None = None
+    parent_id: str | None = None
 
 
 # -----------------------------------------------------------------------------
@@ -190,7 +193,7 @@ class CharacterSpecialty(BaseModel):
 
     name: str
     type: SpecialtyType
-    description: str | None = None
+    description: str
 
 
 __all__ = [

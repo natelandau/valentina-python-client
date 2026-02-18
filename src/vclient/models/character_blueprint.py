@@ -123,7 +123,7 @@ class CharacterConcept(BaseModel):
 
     id: str
     name: str
-    description: str | None = None
+    description: str
     date_created: datetime
     date_modified: datetime
     examples: list[str]

@@ -10,6 +10,7 @@ from vclient.models import (
     CharacterUpdate,
     HunterAttributes,
     MageAttributes,
+    NameDescriptionSubDocument,
     VampireAttributes,
     WerewolfAttributes,
 )
@@ -75,7 +76,14 @@ class TestCharacter:
             "campaign_id": "campaign123",
             "asset_ids": ["asset1", "asset2"],
             "character_trait_ids": ["trait1"],
-            "specialties": [{"id": "spec1", "name": "Brawl: Claws", "type": "ACTION"}],
+            "specialties": [
+                {
+                    "id": "spec1",
+                    "name": "Brawl: Claws",
+                    "type": "ACTION",
+                    "description": "Skilled with claws",
+                }
+            ],
             "vampire_attributes": None,
             "werewolf_attributes": {
                 "tribe_id": "tribe123",
@@ -353,15 +361,19 @@ class TestVampireAttributes:
             clan_name="Ventrue",
             generation=10,
             sire="Ancient One",
-            bane={"name": "Rarefied Tastes", "description": "Feeds only on specific blood"},
-            compulsion={"name": "Domineering", "description": "Must be in control"},
+            bane=NameDescriptionSubDocument(
+                name="Rarefied Tastes", description="Feeds only on specific blood"
+            ),
+            compulsion=NameDescriptionSubDocument(
+                name="Domineering", description="Must be in control"
+            ),
         )
 
         # Then: All fields are set
         assert attrs.clan_name == "Ventrue"
         assert attrs.generation == 10
         assert attrs.bane is not None
-        assert attrs.bane["name"] == "Rarefied Tastes"
+        assert attrs.bane.name == "Rarefied Tastes"
 
 
 class TestWerewolfAttributes:

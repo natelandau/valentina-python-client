@@ -63,10 +63,12 @@ def asset_response_data() -> dict:
         "id": "asset123",
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
-        "file_type": "image",
+        "asset_type": "image",
+        "mime_type": "image/png",
         "original_filename": "campaign.png",
         "public_url": "https://example.com/campaign.png",
         "uploaded_by": "user123",
+        "company_id": "company123",
         "parent_type": "campaign",
     }
 

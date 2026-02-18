@@ -32,7 +32,14 @@ def character_response_data() -> dict:
         "campaign_id": "campaign123",
         "asset_ids": ["asset1", "asset2"],
         "character_trait_ids": ["trait1", "trait2"],
-        "specialties": [{"id": "spec1", "name": "Brawl: Kindred", "type": "ACTION"}],
+        "specialties": [
+            {
+                "id": "spec1",
+                "name": "Brawl: Kindred",
+                "type": "ACTION",
+                "description": "Skilled in fighting other Kindred",
+            }
+        ],
         "vampire_attributes": {
             "clan_id": "clan123",
             "clan_name": "Ventrue",
