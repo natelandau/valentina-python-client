@@ -1,3 +1,9 @@
+## v1.2.1 (2026-02-18)
+
+### Fix
+
+- **models**: change game_version to game_versions list (#17)
+
 ## v1.2.0 (2026-02-17)
 
 ### Feat
