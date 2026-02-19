@@ -14,6 +14,7 @@ from vclient.constants import (
     HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_600_UPPER_BOUND,
     IDEMPOTENCY_KEY_HEADER,
+    IDEMPOTENT_HTTP_METHODS,
     MAX_PAGE_LIMIT,
     RATE_LIMIT_HEADER,
 )
@@ -109,6 +110,25 @@ class BaseService:
         jitter = random.uniform(0, delay * 0.25)
         return delay + jitter
 
+    @staticmethod
+    def _is_retryable_method(method: str, headers: dict[str, str] | None) -> bool:
+        """Check if a request method is safe to retry.
+
+        Idempotent methods (GET, PUT, DELETE) are always safe. Non-idempotent
+        methods (POST, PATCH) are only safe if an idempotency key is present.
+
+        Args:
+            method: The HTTP method (uppercase).
+            headers: The request headers, or None.
+
+        Returns:
+            True if the request is safe to retry.
+        """
+        if method in IDEMPOTENT_HTTP_METHODS:
+            return True
+
+        return IDEMPOTENCY_KEY_HEADER in (headers or {})
+
     async def _request(
         self,
         method: str,
@@ -118,11 +138,15 @@ class BaseService:
         json: dict[str, Any] | None = None,
         data: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        files: Any | None = None,
     ) -> httpx.Response:
-        """Make an HTTP request with automatic retry on rate limits.
+        """Make an HTTP request with automatic retry on transient errors.
 
-        When rate limited (429), automatically retries with exponential backoff
-        if auto_retry_rate_limit is enabled in the config.
+        Retries on rate limits (429), server errors (5xx in retry_statuses),
+        and network errors (ConnectError, TimeoutException). Non-idempotent
+        methods (POST, PATCH) only retry on 5xx/network errors when an
+        idempotency key header is present. Rate limit retries (429) always
+        apply regardless of method.
 
         Args:
             method: HTTP method (GET, POST, PUT, DELETE, etc.).
@@ -131,28 +155,42 @@ class BaseService:
             json: JSON body data.
             data: Form data.
             headers: Additional headers to include in the request.
+            files: Files to upload (passed through to httpx).
 
         Returns:
             The HTTP response.
 
         Raises:
             RateLimitError: When rate limit is exceeded and max retries are exhausted.
+            ServerError: When server error occurs and max retries are exhausted.
+            httpx.ConnectError: When connection fails and max retries are exhausted.
+            httpx.TimeoutException: When request times out and max retries are exhausted.
             APIError: For other API error responses.
         """
         config = self._client._config  # noqa: SLF001
         max_attempts = config.max_retries + 1 if config.auto_retry_rate_limit else 1
+        retry_statuses = config.retry_statuses
 
-        last_error: RateLimitError | None = None
+        last_error: RateLimitError | ServerError | None = None
 
         for attempt in range(max_attempts):
-            response = await self._http.request(
-                method=method,
-                url=path,
-                params=params,
-                json=json,
-                data=data,
-                headers=headers,
-            )
+            try:
+                response = await self._http.request(
+                    method=method,
+                    url=path,
+                    params=params,
+                    json=json,
+                    data=data,
+                    headers=headers,
+                    files=files,
+                )
+            except (httpx.ConnectError, httpx.TimeoutException):
+                if not self._is_retryable_method(method, headers) or attempt >= max_attempts - 1:
+                    raise
+
+                delay = self._calculate_backoff_delay(attempt, retry_after=None)
+                await asyncio.sleep(delay)
+                continue
 
             try:
                 self._raise_for_status(response)
@@ -160,19 +198,28 @@ class BaseService:
             except RateLimitError as e:
                 last_error = e
 
-                # If this was the last attempt, don't wait
                 if attempt >= max_attempts - 1:
                     break
 
-                # Calculate backoff and wait
                 delay = self._calculate_backoff_delay(attempt, e.retry_after)
                 await asyncio.sleep(delay)
+            except ServerError as e:
+                if e.status_code not in retry_statuses or not self._is_retryable_method(
+                    method, headers
+                ):
+                    raise
 
-        # Re-raise the last rate limit error
+                last_error = e
+
+                if attempt >= max_attempts - 1:
+                    break
+
+                delay = self._calculate_backoff_delay(attempt, retry_after=None)
+                await asyncio.sleep(delay)
+
         if last_error is not None:
             raise last_error
 
-        # This should never happen, but satisfies type checker
         msg = "Unexpected state: no response or error"
         raise RuntimeError(msg)
 
