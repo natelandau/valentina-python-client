@@ -1,6 +1,7 @@
 """Main API client for Valentina."""
 
 import os
+import platform
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
@@ -149,9 +150,14 @@ class VClient:
 
     def _create_http_client(self) -> httpx.AsyncClient:
         """Create and configure the HTTP client."""
+        from vclient import __version__
+
+        user_agent = f"vclient/{__version__} Python/{platform.python_version()}"
+
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
+            "User-Agent": user_agent,
             **self._config.headers,
         }
 
