@@ -11,6 +11,7 @@ from vclient.registry import (
     character_blueprint_service,
     character_traits_service,
     characters_service,
+    clear_default_client,
     companies_service,
     configure_default_client,
     default_client,
@@ -83,6 +84,61 @@ class TestConfigureDefaultClient:
         from vclient import registry
 
         assert registry._default_client is client2
+
+
+class TestClearDefaultClient:
+    """Tests for clear_default_client function."""
+
+    def test_clears_default_when_matching(self, base_url, api_key) -> None:
+        """Verify clear_default_client resets the default when the instance matches."""
+        # Given: A configured default client
+        client = VClient(base_url=base_url, api_key=api_key)
+        configure_default_client(client)
+
+        # When: Clearing with the same instance
+        clear_default_client(client)
+
+        # Then: No default client is configured
+        with pytest.raises(RuntimeError, match="No default client configured"):
+            default_client()
+
+    def test_preserves_default_when_not_matching(self, base_url, api_key) -> None:
+        """Verify clear_default_client is a no-op when a different instance is the default."""
+        # Given: Two clients, with client1 as default
+        client1 = VClient(base_url=base_url, api_key=api_key)
+        client2 = VClient(base_url=base_url, api_key=api_key, set_as_default=False)
+        configure_default_client(client1)
+
+        # When: Clearing with the non-default instance
+        clear_default_client(client2)
+
+        # Then: The original default is preserved
+        assert default_client() is client1
+
+    @pytest.mark.anyio
+    async def test_close_clears_default_client(self, base_url, api_key) -> None:
+        """Verify VClient.close() clears the default client reference."""
+        # Given: A default client
+        client = VClient(base_url=base_url, api_key=api_key)
+        configure_default_client(client)
+
+        # When: Closing the client
+        await client.close()
+
+        # Then: default_client() raises instead of returning a closed session
+        with pytest.raises(RuntimeError, match="No default client configured"):
+            default_client()
+
+    @pytest.mark.anyio
+    async def test_context_manager_clears_default_client(self, base_url, api_key) -> None:
+        """Verify async context manager exit clears the default client reference."""
+        # Given/When: Using client as async context manager
+        async with VClient(base_url=base_url, api_key=api_key):
+            pass
+
+        # Then: default_client() raises instead of returning a closed session
+        with pytest.raises(RuntimeError, match="No default client configured"):
+            default_client()
 
 
 class TestDefaultClient:
