@@ -64,6 +64,21 @@ def configure_default_client(client: "VClient") -> None:
     _default_client = client
 
 
+def clear_default_client(client: "VClient") -> None:
+    """Clear the default client if it matches the given instance.
+
+    Called automatically by ``VClient.close()`` so that subsequent calls to
+    ``default_client()`` raise a clear ``RuntimeError`` instead of returning a
+    closed HTTP session.
+
+    Args:
+        client: The client instance to compare against the current default.
+    """
+    global _default_client  # noqa: PLW0603
+    if _default_client is client:
+        _default_client = None
+
+
 def default_client() -> "VClient":
     """Retrieve the configured default client.
 

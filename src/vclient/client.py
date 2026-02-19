@@ -192,7 +192,10 @@ class VClient:
 
     async def close(self) -> None:
         """Close the HTTP client and release resources."""
+        from vclient.registry import clear_default_client
+
         await self._http.aclose()
+        clear_default_client(self)
 
     @property
     def is_closed(self) -> bool:
