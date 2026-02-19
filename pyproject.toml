@@ -4,7 +4,7 @@
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
     ]
-    dependencies = ["anyio>=4.12.1", "httpx>=0.28.1", "pydantic[email]>=2.12.5"]
+    dependencies = ["anyio>=4.12.1", "httpx>=0.28.1", "loguru>=0.7.3", "pydantic[email]>=2.12.5"]
     description = "Async Python client library for the Valentina Noir API"
     license = { file = "LICENSE" }
     name = "valentina-python-client"
