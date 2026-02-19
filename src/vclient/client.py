@@ -6,6 +6,7 @@ from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
 import httpx
+from loguru import logger
 
 from vclient.config import _APIConfig
 from vclient.constants import (
@@ -155,6 +156,15 @@ class VClient:
 
             configure_default_client(self)
 
+        logger.bind(
+            base_url=self._config.base_url,
+            timeout=self._config.timeout,
+            max_retries=self._config.max_retries,
+        ).debug(
+            "Initialize VClient (base_url={base_url})",
+            base_url=self._config.base_url,
+        )
+
     def _create_http_client(self) -> httpx.AsyncClient:
         """Create and configure the HTTP client."""
         from vclient import __version__
@@ -194,6 +204,7 @@ class VClient:
         """Close the HTTP client and release resources."""
         from vclient.registry import clear_default_client
 
+        logger.bind(base_url=self._config.base_url).debug("Close VClient")
         await self._http.aclose()
         clear_default_client(self)
 
