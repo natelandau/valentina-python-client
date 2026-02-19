@@ -12,6 +12,7 @@ from vclient.constants import (
     API_KEY_HEADER,
     DEFAULT_MAX_RETRIES,
     DEFAULT_RETRY_DELAY,
+    DEFAULT_RETRY_STATUSES,
     DEFAULT_TIMEOUT,
     ENV_API_KEY,
     ENV_BASE_URL,
@@ -77,6 +78,7 @@ class VClient:
         retry_delay: float = DEFAULT_RETRY_DELAY,
         auto_retry_rate_limit: bool = True,
         auto_idempotency_keys: bool = False,
+        retry_statuses: set[int] | frozenset[int] | None = None,
         default_company_id: str | None = None,
         headers: dict[str, str] | None = None,
         set_as_default: bool = True,
@@ -101,6 +103,8 @@ class VClient:
             auto_retry_rate_limit: Automatically retry requests that hit rate limits.
             auto_idempotency_keys: Automatically generate idempotency keys for
                 POST/PUT/PATCH requests.
+            retry_statuses: HTTP status codes that trigger automatic retries.
+                Defaults to {429, 500, 502, 503, 504}.
             default_company_id: Default company ID to use when not explicitly provided
                 to service factory methods. Falls back to
                 VALENTINA_CLIENT_DEFAULT_COMPANY_ID.
@@ -133,6 +137,9 @@ class VClient:
             retry_delay=retry_delay,
             auto_retry_rate_limit=auto_retry_rate_limit,
             auto_idempotency_keys=auto_idempotency_keys,
+            retry_statuses=frozenset(retry_statuses)
+            if retry_statuses is not None
+            else DEFAULT_RETRY_STATUSES,
             default_company_id=resolved_company_id,
             headers=headers or {},
         )

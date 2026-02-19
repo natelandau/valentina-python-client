@@ -4,6 +4,7 @@ import httpx
 import pytest
 import respx
 
+from vclient import VClient
 from vclient.constants import API_KEY_HEADER, IDEMPOTENCY_KEY_HEADER
 from vclient.exceptions import (
     APIError,
@@ -756,22 +757,500 @@ class TestBaseServiceRateLimitRetry:
         assert delays[1] >= 2.0  # 1 * 2^1 = 2
         assert delays[2] >= 4.0  # 1 * 2^2 = 4
 
+
+class TestBaseServiceTransientRetry:
+    """Tests for BaseService transient 5xx error retry behavior."""
+
     @respx.mock
-    async def test_non_rate_limit_errors_not_retried(self, base_service, base_url, mocker):
-        """Verify non-429 errors are not retried."""
-        # Given: An endpoint that returns 500
-        route = respx.get(f"{base_url}/test").respond(
-            500,
-            json={"detail": "Server error"},
+    async def test_get_retries_on_500(self, vclient, base_url, mocker):
+        """Verify GET request is retried on 500 and succeeds after retry."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500 once then succeeds
+        route = respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.Response(500, json={"detail": "Server error"}),
+                httpx.Response(200, json={"success": True}),
+            ]
         )
 
-        # Given: Mock asyncio.sleep
+        # When: Making a GET request
+        service = BaseService(vclient)
+        response = await service._get("/test")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 200
+
+    @respx.mock
+    async def test_get_retries_on_502(self, vclient, base_url, mocker):
+        """Verify GET request is retried on 502 and succeeds after retry."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 502 once then succeeds
+        route = respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.Response(502, json={"detail": "Bad Gateway"}),
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+
+        # When: Making a GET request
+        service = BaseService(vclient)
+        response = await service._get("/test")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 200
+
+    @respx.mock
+    async def test_get_retries_on_503(self, vclient, base_url, mocker):
+        """Verify GET request is retried on 503 and succeeds after retry."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 503 once then succeeds
+        route = respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.Response(503, json={"detail": "Service Unavailable"}),
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+
+        # When: Making a GET request
+        service = BaseService(vclient)
+        response = await service._get("/test")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 200
+
+    @respx.mock
+    async def test_get_retries_on_504(self, vclient, base_url, mocker):
+        """Verify GET request is retried on 504 and succeeds after retry."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 504 once then succeeds
+        route = respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.Response(504, json={"detail": "Gateway Timeout"}),
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+
+        # When: Making a GET request
+        service = BaseService(vclient)
+        response = await service._get("/test")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 200
+
+    @respx.mock
+    async def test_5xx_max_retries_exhausted_raises_server_error(self, vclient, base_url, mocker):
+        """Verify ServerError is raised after max retries are exhausted on 500."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that always returns 500
+        route = respx.get(f"{base_url}/test").respond(500, json={"detail": "Server error"})
+
+        # When/Then: Making a request raises ServerError after max retries
+        service = BaseService(vclient)
+        with pytest.raises(ServerError):
+            await service._get("/test")
+
+        # Then: Request was attempted max_retries + 1 times (initial + retries)
+        assert route.call_count == 4
+
+    @respx.mock
+    async def test_5xx_not_retried_for_non_retryable_status(self, vclient, base_url, mocker):
+        """Verify 501 is not retried because it is not in default retry_statuses."""
+        # Given: Mock asyncio.sleep to avoid actual delays
         mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
 
+        # Given: An endpoint that returns 501
+        route = respx.get(f"{base_url}/test").respond(501, json={"detail": "Not Implemented"})
+
         # When/Then: Making a request raises ServerError immediately
+        service = BaseService(vclient)
         with pytest.raises(ServerError):
-            await base_service._get("/test")
+            await service._get("/test")
 
         # Then: Only one request was made (no retries)
         assert route.call_count == 1
         mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_post_without_idempotency_key_not_retried_on_500(self, vclient, base_url, mocker):
+        """Verify POST without idempotency key is not retried on 500."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500
+        route = respx.post(f"{base_url}/items").respond(500, json={"detail": "Server error"})
+
+        # When/Then: Making a POST request without idempotency key raises ServerError
+        service = BaseService(vclient)
+        with pytest.raises(ServerError):
+            await service._post("/items", json={"name": "test"})
+
+        # Then: Only one request was made (no retries)
+        assert route.call_count == 1
+        mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_post_with_idempotency_key_retried_on_500(self, vclient, base_url, mocker):
+        """Verify POST with explicit idempotency key is retried on 500."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500 once then succeeds
+        route = respx.post(f"{base_url}/items").mock(
+            side_effect=[
+                httpx.Response(500, json={"detail": "Server error"}),
+                httpx.Response(201, json={"id": 1}),
+            ]
+        )
+
+        # When: Making a POST request with explicit idempotency key
+        service = BaseService(vclient)
+        response = await service._post("/items", json={"name": "test"}, idempotency_key="test-key")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 201
+
+    @respx.mock
+    async def test_post_with_auto_idempotency_retried_on_500(
+        self, vclient_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify POST with auto-idempotency is retried on 500."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500 once then succeeds
+        route = respx.post(f"{base_url}/items").mock(
+            side_effect=[
+                httpx.Response(500, json={"detail": "Server error"}),
+                httpx.Response(201, json={"id": 1}),
+            ]
+        )
+
+        # When: Making a POST request with auto-idempotency enabled
+        service = BaseService(vclient_with_auto_idempotency)
+        response = await service._post("/items", json={"name": "test"})
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 201
+
+    @respx.mock
+    async def test_put_retried_on_500(self, vclient, base_url, mocker):
+        """Verify PUT request is retried on 500 because PUT is idempotent."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500 once then succeeds
+        route = respx.put(f"{base_url}/items/1").mock(
+            side_effect=[
+                httpx.Response(500, json={"detail": "Server error"}),
+                httpx.Response(200, json={"id": 1}),
+            ]
+        )
+
+        # When: Making a PUT request
+        service = BaseService(vclient)
+        response = await service._put("/items/1", json={"name": "test"})
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 200
+
+    @respx.mock
+    async def test_delete_retried_on_500(self, vclient, base_url, mocker):
+        """Verify DELETE request is retried on 500 because DELETE is idempotent."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500 once then succeeds
+        route = respx.delete(f"{base_url}/items/1").mock(
+            side_effect=[
+                httpx.Response(500, json={"detail": "Server error"}),
+                httpx.Response(204),
+            ]
+        )
+
+        # When: Making a DELETE request
+        service = BaseService(vclient)
+        response = await service._delete("/items/1")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 204
+
+    @respx.mock
+    async def test_patch_without_idempotency_key_not_retried_on_500(
+        self, vclient, base_url, mocker
+    ):
+        """Verify PATCH without idempotency key is not retried on 500."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500
+        route = respx.patch(f"{base_url}/items/1").respond(500, json={"detail": "Server error"})
+
+        # When/Then: Making a PATCH request without idempotency key raises ServerError
+        service = BaseService(vclient)
+        with pytest.raises(ServerError):
+            await service._patch("/items/1", json={"name": "test"})
+
+        # Then: Only one request was made (no retries)
+        assert route.call_count == 1
+        mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_5xx_not_retried_when_auto_retry_disabled(self, base_url, api_key, mocker):
+        """Verify 500 is not retried when auto_retry_rate_limit is disabled."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500
+        route = respx.get(f"{base_url}/test").respond(500, json={"detail": "Server error"})
+
+        # When/Then: Making a request with retry disabled raises ServerError immediately
+        async with VClient(
+            base_url=base_url, api_key=api_key, auto_retry_rate_limit=False
+        ) as client:
+            service = BaseService(client)
+            with pytest.raises(ServerError):
+                await service._get("/test")
+
+        # Then: Only one request was made (no retries)
+        assert route.call_count == 1
+        mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_custom_retry_statuses(self, base_url, api_key, mocker):
+        """Verify custom retry_statuses are respected for retry decisions."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 501 once then succeeds
+        route = respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.Response(501, json={"detail": "Not Implemented"}),
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+
+        # When: Making a request with custom retry_statuses that includes 501
+        async with VClient(base_url=base_url, api_key=api_key, retry_statuses={501}) as client:
+            service = BaseService(client)
+            response = await service._get("/test")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 200
+
+    @respx.mock
+    async def test_5xx_uses_exponential_backoff(self, vclient, base_url, mocker):
+        """Verify 5xx retries use exponential backoff with increasing delays."""
+        # Given: Mock asyncio.sleep to capture the delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that returns 500 three times then succeeds
+        respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.Response(500, json={"detail": "Server error"}),
+                httpx.Response(500, json={"detail": "Server error"}),
+                httpx.Response(500, json={"detail": "Server error"}),
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+
+        # When: Making a request
+        service = BaseService(vclient)
+        await service._get("/test")
+
+        # Then: Sleep was called 3 times with increasing delays
+        assert mock_sleep.call_count == 3
+        delays = [call[0][0] for call in mock_sleep.call_args_list]
+
+        # Each delay should be roughly double the previous (exponential backoff)
+        assert delays[0] >= 1.0  # 1 * 2^0 = 1
+        assert delays[1] >= 2.0  # 1 * 2^1 = 2
+        assert delays[2] >= 4.0  # 1 * 2^2 = 4
+
+
+class TestBaseServiceNetworkErrorRetry:
+    """Tests for BaseService network error retry behavior."""
+
+    @respx.mock
+    async def test_get_retries_on_connect_error(self, vclient, base_url, mocker):
+        """Verify GET request is retried on ConnectError and succeeds after retry."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that raises ConnectError once then succeeds
+        route = respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.ConnectError("Connection refused"),
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+
+        # When: Making a GET request
+        service = BaseService(vclient)
+        response = await service._get("/test")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 200
+
+    @respx.mock
+    async def test_get_retries_on_timeout(self, vclient, base_url, mocker):
+        """Verify GET request is retried on ReadTimeout and succeeds after retry."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that raises ReadTimeout once then succeeds
+        route = respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.ReadTimeout("Read timed out"),
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+
+        # When: Making a GET request
+        service = BaseService(vclient)
+        response = await service._get("/test")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 200
+
+    @respx.mock
+    async def test_connect_error_max_retries_exhausted(self, vclient, base_url, mocker):
+        """Verify ConnectError is raised after max retries are exhausted."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that always raises ConnectError
+        respx.get(f"{base_url}/test").mock(side_effect=httpx.ConnectError("Connection refused"))
+
+        # When/Then: Making a request raises ConnectError after max retries
+        service = BaseService(vclient)
+        with pytest.raises(httpx.ConnectError):
+            await service._get("/test")
+
+    @respx.mock
+    async def test_timeout_max_retries_exhausted(self, vclient, base_url, mocker):
+        """Verify TimeoutException is raised after max retries are exhausted."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that always raises ReadTimeout
+        respx.get(f"{base_url}/test").mock(side_effect=httpx.ReadTimeout("Read timed out"))
+
+        # When/Then: Making a request raises TimeoutException after max retries
+        service = BaseService(vclient)
+        with pytest.raises(httpx.TimeoutException):
+            await service._get("/test")
+
+    @respx.mock
+    async def test_post_without_idempotency_key_not_retried_on_connect_error(
+        self, vclient, base_url, mocker
+    ):
+        """Verify POST without idempotency key is not retried on ConnectError."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that raises ConnectError
+        respx.post(f"{base_url}/items").mock(side_effect=httpx.ConnectError("Connection refused"))
+
+        # When/Then: Making a POST request without idempotency key raises immediately
+        service = BaseService(vclient)
+        with pytest.raises(httpx.ConnectError):
+            await service._post("/items", json={"name": "test"})
+
+        # Then: No retries were attempted
+        mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_post_with_idempotency_key_retried_on_connect_error(
+        self, vclient, base_url, mocker
+    ):
+        """Verify POST with idempotency key is retried on ConnectError."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that raises ConnectError once then succeeds
+        route = respx.post(f"{base_url}/items").mock(
+            side_effect=[
+                httpx.ConnectError("Connection refused"),
+                httpx.Response(201, json={"id": 1}),
+            ]
+        )
+
+        # When: Making a POST request with explicit idempotency key
+        service = BaseService(vclient)
+        response = await service._post("/items", json={"name": "test"}, idempotency_key="test-key")
+
+        # Then: Request was retried and succeeded
+        assert route.call_count == 2
+        assert response.status_code == 201
+
+    @respx.mock
+    async def test_network_error_not_retried_when_auto_retry_disabled(
+        self, base_url, api_key, mocker
+    ):
+        """Verify network errors are not retried when auto_retry_rate_limit is disabled."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that raises ConnectError
+        respx.get(f"{base_url}/test").mock(side_effect=httpx.ConnectError("Connection refused"))
+
+        # When/Then: Making a request with retry disabled raises immediately
+        async with VClient(
+            base_url=base_url, api_key=api_key, auto_retry_rate_limit=False
+        ) as client:
+            service = BaseService(client)
+            with pytest.raises(httpx.ConnectError):
+                await service._get("/test")
+
+        # Then: No retries were attempted
+        mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_network_error_uses_exponential_backoff(self, vclient, base_url, mocker):
+        """Verify network error retries use exponential backoff with increasing delays."""
+        # Given: Mock asyncio.sleep to capture the delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that raises ConnectError three times then succeeds
+        respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.ConnectError("Connection refused"),
+                httpx.ConnectError("Connection refused"),
+                httpx.ConnectError("Connection refused"),
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+
+        # When: Making a request
+        service = BaseService(vclient)
+        await service._get("/test")
+
+        # Then: Sleep was called 3 times with increasing delays
+        assert mock_sleep.call_count == 3
+        delays = [call[0][0] for call in mock_sleep.call_args_list]
+
+        # Each delay should be roughly double the previous (exponential backoff)
+        assert delays[0] >= 1.0  # 1 * 2^0 = 1
+        assert delays[1] >= 2.0  # 1 * 2^1 = 2
+        assert delays[2] >= 4.0  # 1 * 2^2 = 4
