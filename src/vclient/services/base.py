@@ -316,15 +316,6 @@ class BaseService:
 
         error_logger = logger.bind(method=method, url=url, status=status_code)
 
-        error_map: dict[int, type[APIError]] = {
-            400: ValidationError,
-            401: AuthenticationError,
-            403: AuthorizationError,
-            404: NotFoundError,
-            409: ConflictError,
-            429: RateLimitError,
-        }
-
         if status_code == 429:  # noqa: PLR2004
             retry_after = self._parse_retry_after(response)
             remaining = self._parse_remaining_tokens(response)
@@ -332,14 +323,23 @@ class BaseService:
                 message, status_code, response_data, retry_after=retry_after, remaining=remaining
             )
 
-        if status_code in (401, 403):
+        if status_code == 401:  # noqa: PLR2004
             error_logger.error(
                 "Fail authentication for {method} {url} ({status})",
                 method=method,
                 url=url,
                 status=status_code,
             )
-            raise error_map[status_code](message, status_code, response_data)
+            raise AuthenticationError(message, status_code, response_data)
+
+        if status_code == 403:  # noqa: PLR2004
+            error_logger.error(
+                "Deny authorization for {method} {url} ({status})",
+                method=method,
+                url=url,
+                status=status_code,
+            )
+            raise AuthorizationError(message, status_code, response_data)
 
         if status_code == 404:  # noqa: PLR2004
             error_logger.debug(
