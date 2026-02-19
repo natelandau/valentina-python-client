@@ -50,3 +50,5 @@ __all__ = (
     "system_service",
     "users_service",
 )
+
+__version__ = "1.2.1"
