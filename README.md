@@ -4,13 +4,13 @@ Async Python client library for accessing the Valentina Noir API.
 
 ## Features
 
--   **Async-first design** - Built on httpx for efficient async HTTP operations
--   **Type-safe** - Full type hints with Pydantic models for request/response validation
--   **Convenient factory pattern** - Create a client once, access services from anywhere
--   **Automatic pagination** - Stream through large datasets with `iter_all()` or fetch everything with `list_all()`
--   **Robust error handling** - Specific exception types for different error conditions
--   **Idempotency support** - Optional automatic idempotency keys for safe retries
--   **Rate limit handling** - Built-in support for automatic rate limit retries
+- **Async-first design** - Built on httpx for efficient async HTTP operations
+- **Type-safe** - Full type hints with Pydantic models for request/response validation
+- **Convenient factory pattern** - Create a client once, access services from anywhere
+- **Automatic pagination** - Stream through large datasets with `iter_all()` or fetch everything with `list_all()`
+- **Robust error handling** - Specific exception types for different error conditions
+- **Idempotency support** - Optional automatic idempotency keys for safe retries
+- **Rate limit handling** - Built-in support for automatic rate limit retries
 
 This client is a supported and up-to-date reference implementation for the Valentina Noir API. The full documentation for is available at https://docs.valentina-noir.com/python-api-client/.
 
@@ -36,12 +36,12 @@ The script reads configuration from (highest precedence first):
 
 1. CLI arguments (`--api-url`, `--api-key`, `--company-id`)
 2. System environment variables (`VALENTINA_CLIENT_BASE_URL`, `VALENTINA_CLIENT_API_KEY`, `VALENTINA_CLIENT_DEFAULT_COMPANY_ID`)
-3. A `.env.secrets` file in the project root
+3. A `.env.secret` file in the project root
 
 Exit codes: `0` = all constants match, `1` = mismatches found, `2` = missing configuration.
 
 ## Resources
 
--   [Full Client Documentation](https://docs.valentina-noir.com/python-api-client/)
--   [API Concepts](https://docs.valentina-noir.com/concepts/)
--   [API Reference](https://api.valentina-noir.com/docs)
+- [Full Client Documentation](https://docs.valentina-noir.com/python-api-client/)
+- [API Concepts](https://docs.valentina-noir.com/concepts/)
+- [API Reference](https://api.valentina-noir.com/docs)

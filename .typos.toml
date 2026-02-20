@@ -5,4 +5,4 @@
         criticals = "criticals"
 
 [files]
-    extend-exclude = ["*_cache", ".env", ".env.secrets", ".venv", "CHANGELOG.md", "_site", "static"]
+    extend-exclude = ["*_cache", ".env", ".env.secret", ".venv", "CHANGELOG.md", "_site", "static"]

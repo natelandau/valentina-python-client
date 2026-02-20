@@ -6,7 +6,7 @@ Usage:
 Configuration (highest precedence wins):
     1. CLI arguments (--api-url, --api-key, --company-id)
     2. System environment variables
-    3. .env.secrets file in the project root
+    3. .env.secret file in the project root
 
 Environment variables:
     VALENTINA_CLIENT_BASE_URL: Base URL for the API (default: https://api.valentina-noir.com)
@@ -48,16 +48,16 @@ async def main(api_url: str, api_key: str, company_id: str) -> int:
 
 
 def _load_env_secrets() -> dict[str, str]:
-    """Load variables from .env.secrets file if it exists.
+    """Load variables from .env.secret file if it exists.
 
-    Reads KEY=VALUE pairs from .env.secrets in the project root. Ignores
+    Reads KEY=VALUE pairs from .env.secret in the project root. Ignores
     blank lines, comments (#), and inline comments. Strips optional quotes
     from values.
 
     Returns:
         Dictionary of variable names to values.
     """
-    secrets_path = Path(__file__).resolve().parent.parent / ".env.secrets"
+    secrets_path = Path(__file__).resolve().parent.parent / ".env.secret"
     if not secrets_path.is_file():
         return {}
 
@@ -80,11 +80,11 @@ def _load_env_secrets() -> dict[str, str]:
 
 
 def _get_config_value(key: str, secrets: dict[str, str], default: str | None = None) -> str | None:
-    """Get a configuration value with precedence: system env > .env.secrets > default.
+    """Get a configuration value with precedence: system env > .env.secret > default.
 
     Args:
         key: The environment variable name.
-        secrets: Values loaded from .env.secrets.
+        secrets: Values loaded from .env.secret.
         default: Fallback value if not found elsewhere.
 
     Returns:
