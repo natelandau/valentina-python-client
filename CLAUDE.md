@@ -81,11 +81,11 @@ async with VClient(base_url="https://api.valentina-noir.com", api_key="...") as 
 
 **Environment variable configuration** — `base_url`, `api_key`, and `default_company_id` can be set via environment variables instead of constructor arguments. Explicit arguments always take precedence.
 
-| Env Var                              | Maps To              |
-| ------------------------------------ | -------------------- |
-| `VALENTINA_CLIENT_BASE_URL`          | `base_url`           |
-| `VALENTINA_CLIENT_API_KEY`           | `api_key`            |
-| `VALENTINA_CLIENT_DEFAULT_COMPANY_ID`| `default_company_id` |
+| Env Var                               | Maps To              |
+| ------------------------------------- | -------------------- |
+| `VALENTINA_CLIENT_BASE_URL`           | `base_url`           |
+| `VALENTINA_CLIENT_API_KEY`            | `api_key`            |
+| `VALENTINA_CLIENT_DEFAULT_COMPANY_ID` | `default_company_id` |
 
 Constants for these names are in `constants.py`: `ENV_BASE_URL`, `ENV_API_KEY`, `ENV_DEFAULT_COMPANY_ID`.
 
@@ -120,12 +120,13 @@ All have `.status_code`, `.title`, `.detail`, `.instance` properties from RFC 94
 The `Literal` type constants in `constants.py` must stay in sync with the API's `/options` endpoint. The validation system detects drift.
 
 **Key files:**
+
 - `src/vclient/validate_constants.py` — mapping table (`CONSTANT_MAP`), `validate()`, `print_report()`
-- `scripts/validate_constants.py` — CLI wrapper (reads `.env.secrets`, env vars, or CLI args)
+- `scripts/validate_constants.py` — CLI wrapper (reads `.env.secret`, env vars, or CLI args)
 
 **When adding/changing a constant:** Update both `constants.py` and `CONSTANT_MAP` in `validate_constants.py`. The mapping links each local constant name to its API location (`api_category`, `api_option`). Some names differ between local and API (e.g., `CharacterInventoryType` → `InventoryItemType`, `PermissionLevel` → `CompanyPermission`).
 
-**Running validation:** `uv run duty validate_constants` (requires live API access with credentials in `.env.secrets` or environment).
+**Running validation:** `uv run duty validate_constants` (requires live API access with credentials in `.env.secret` or environment).
 
 ## Testing
 

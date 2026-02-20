@@ -13,4 +13,4 @@ openapi.json
 .claude/settings.local.json
 .worktrees/
 docs/plans/
-.env.secrets
+.env.secret
