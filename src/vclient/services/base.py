@@ -173,7 +173,7 @@ class BaseService:
         retry_statuses = config.retry_statuses
         request_logger = logger.bind(method=method, url=path)
 
-        request_logger.debug("Send {method} {url}", method=method, url=path)
+        request_logger.debug("Send request")
 
         last_error: RateLimitError | ServerError | None = None
 
@@ -199,14 +199,7 @@ class BaseService:
                     attempt=attempt + 1,
                     max_attempts=max_attempts,
                     delay=delay,
-                ).warning(
-                    "Retry {method} {url} after {error_type} (attempt {attempt}/{max_attempts})",
-                    method=method,
-                    url=path,
-                    error_type=error_type,
-                    attempt=attempt + 1,
-                    max_attempts=max_attempts,
-                )
+                ).warning("Retry after network error")
                 await asyncio.sleep(delay)
                 continue
 
@@ -217,13 +210,7 @@ class BaseService:
                 request_logger.bind(
                     status=response.status_code,
                     elapsed_ms=elapsed_ms,
-                ).debug(
-                    "Receive {status} from {method} {url} ({elapsed_ms}ms)",
-                    status=response.status_code,
-                    method=method,
-                    url=path,
-                    elapsed_ms=f"{elapsed_ms:.0f}",
-                )
+                ).debug("Receive response")
                 return response  # noqa: TRY300
             except RateLimitError as e:
                 last_error = e
@@ -236,14 +223,7 @@ class BaseService:
                     attempt=attempt + 1,
                     max_attempts=max_attempts,
                     delay=delay,
-                ).warning(
-                    "Retry {method} {url} after rate limit (attempt {attempt}/{max_attempts}, delay {delay}s)",
-                    method=method,
-                    url=path,
-                    attempt=attempt + 1,
-                    max_attempts=max_attempts,
-                    delay=f"{delay:.1f}",
-                )
+                ).warning("Retry after rate limit")
                 await asyncio.sleep(delay)
             except ServerError as e:
                 if e.status_code not in retry_statuses or not self._is_retryable_method(
@@ -262,24 +242,11 @@ class BaseService:
                     attempt=attempt + 1,
                     max_attempts=max_attempts,
                     delay=delay,
-                ).warning(
-                    "Retry {method} {url} after {status} error (attempt {attempt}/{max_attempts}, delay {delay}s)",
-                    method=method,
-                    url=path,
-                    status=e.status_code,
-                    attempt=attempt + 1,
-                    max_attempts=max_attempts,
-                    delay=f"{delay:.1f}",
-                )
+                ).warning("Retry after server error")
                 await asyncio.sleep(delay)
 
         if last_error is not None:
-            request_logger.bind(attempts=max_attempts).error(
-                "Exhaust retries for {method} {url} after {attempts} attempts",
-                method=method,
-                url=path,
-                attempts=max_attempts,
-            )
+            request_logger.bind(attempts=max_attempts).error("Exhaust retries")
             raise last_error
 
         msg = "Unexpected state: no response or error"
@@ -324,45 +291,23 @@ class BaseService:
             )
 
         if status_code == 401:  # noqa: PLR2004
-            error_logger.error(
-                "Fail authentication for {method} {url} ({status})",
-                method=method,
-                url=url,
-                status=status_code,
-            )
+            error_logger.error("Fail authentication")
             raise AuthenticationError(message, status_code, response_data)
 
         if status_code == 403:  # noqa: PLR2004
-            error_logger.error(
-                "Deny authorization for {method} {url} ({status})",
-                method=method,
-                url=url,
-                status=status_code,
-            )
+            error_logger.error("Deny authorization")
             raise AuthorizationError(message, status_code, response_data)
 
         if status_code == 404:  # noqa: PLR2004
-            error_logger.debug(
-                "Return 404 for {method} {url}",
-                method=method,
-                url=url,
-            )
+            error_logger.debug("Return 404")
             raise NotFoundError(message, status_code, response_data)
 
         if status_code == 400:  # noqa: PLR2004
-            error_logger.warning(
-                "Reject {method} {url} with validation error",
-                method=method,
-                url=url,
-            )
+            error_logger.warning("Reject with validation error")
             raise ValidationError(message, status_code, response_data)
 
         if status_code == 409:  # noqa: PLR2004
-            error_logger.warning(
-                "Return 409 conflict for {method} {url}",
-                method=method,
-                url=url,
-            )
+            error_logger.warning("Return 409 conflict")
             raise ConflictError(message, status_code, response_data)
 
         if HTTP_500_INTERNAL_SERVER_ERROR <= status_code < HTTP_600_UPPER_BOUND:

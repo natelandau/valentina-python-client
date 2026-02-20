@@ -160,10 +160,7 @@ class VClient:
             base_url=self._config.base_url,
             timeout=self._config.timeout,
             max_retries=self._config.max_retries,
-        ).debug(
-            "Initialize VClient (base_url={base_url})",
-            base_url=self._config.base_url,
-        )
+        ).info("Initialize VClient")
 
     def _create_http_client(self) -> httpx.AsyncClient:
         """Create and configure the HTTP client."""
@@ -204,7 +201,7 @@ class VClient:
         """Close the HTTP client and release resources."""
         from vclient.registry import clear_default_client
 
-        logger.bind(base_url=self._config.base_url).debug("Close VClient")
+        logger.bind(base_url=self._config.base_url).info("Close VClient")
         await self._http.aclose()
         clear_default_client(self)
 

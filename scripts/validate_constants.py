@@ -22,6 +22,17 @@ import os
 import sys
 from pathlib import Path
 
+from loguru import logger
+
+logger.remove()
+logger.add(
+    sys.stderr,
+    level="DEBUG",
+    colorize=True,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>: <level>{message}</level> | <level>{extra}</level>",
+    enqueue=True,
+)
+
 
 async def main(api_url: str, api_key: str, company_id: str) -> int:
     """Run validation and return exit code.
@@ -36,6 +47,8 @@ async def main(api_url: str, api_key: str, company_id: str) -> int:
     """
     from vclient import VClient
     from vclient.validate_constants import print_report, validate
+
+    logger.enable("vclient")
 
     async with VClient(api_key=api_key, base_url=api_url) as client:
         options = client.options(company_id)
