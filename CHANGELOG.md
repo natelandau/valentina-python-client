@@ -1,3 +1,16 @@
+## v1.3.0 (2026-02-20)
+
+### Feat
+
+- **logging**: add structured logging with loguru (#22)
+- **retry**: add retry on transient 5xx and network errors (#20)
+- **client**: add User-Agent header to HTTP requests (#19)
+
+### Fix
+
+- **client**: clear default client on close (#21)
+- **models**: sync response models with API schemas (#18)
+
 ## v1.2.1 (2026-02-18)
 
 ### Fix
