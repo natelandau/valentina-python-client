@@ -1,3 +1,14 @@
+## v1.3.1 (2026-02-21)
+
+### Fix
+
+- **models**: use Annotated types for optional field constraints (#25)
+- rename .env.secrets to .env.secret (#23)
+
+### Refactor
+
+- **logging**: use structured fields over formatted messages (#24)
+
 ## v1.3.0 (2026-02-20)
 
 ### Feat
