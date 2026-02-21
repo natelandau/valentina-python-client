@@ -1,7 +1,7 @@
 """Shared Pydantic models used across multiple services."""
 
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 
 from pydantic import BaseModel, Field
 
@@ -84,8 +84,8 @@ class NoteUpdate(BaseModel):
     Only include fields that need to be changed; omitted fields remain unchanged.
     """
 
-    title: str | None = Field(default=None, min_length=3, max_length=50)
-    content: str | None = Field(default=None, min_length=3)
+    title: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    content: Annotated[str, Field(min_length=3)] | None = None
 
 
 # -----------------------------------------------------------------------------

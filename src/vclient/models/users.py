@@ -1,6 +1,7 @@
 """Pydantic models for User API responses and requests."""
 
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -89,7 +90,7 @@ class UserUpdate(BaseModel):
     Only include fields that need to be changed; omitted fields remain unchanged.
     """
 
-    name: str | None = Field(default=None, min_length=3, max_length=50)
+    name: Annotated[str, Field(min_length=3, max_length=50)] | None = None
     email: str | None = None
     role: UserRole | None = None
     discord_profile: DiscordProfile | None = None
@@ -124,7 +125,7 @@ class QuickrollCreate(BaseModel):
     """
 
     name: str = Field(min_length=3, max_length=50)
-    description: str | None = Field(default=None, min_length=3)
+    description: Annotated[str, Field(min_length=3)] | None = None
     trait_ids: list[str] = Field(default_factory=list)
 
 
@@ -134,8 +135,8 @@ class QuickrollUpdate(BaseModel):
     Only include fields that need to be changed; omitted fields remain unchanged.
     """
 
-    name: str | None = Field(default=None, min_length=3, max_length=50)
-    description: str | None = Field(default=None, min_length=3)
+    name: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    description: Annotated[str, Field(min_length=3)] | None = None
     trait_ids: list[str] | None = None
 
 

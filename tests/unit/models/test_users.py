@@ -328,6 +328,19 @@ class TestUserUpdate:
             "requesting_user_id": "requester123",
         }
 
+    def test_update_explicit_none_for_constrained_fields(self):
+        """Verify explicitly passing None for constrained optional fields does not raise."""
+        # When: Creating an update request with None for constrained name field
+        request = UserUpdate(name=None, requesting_user_id="requester123")
+
+        # Then: Name is None without validation errors
+        assert request.name is None
+
+    def test_update_constrained_fields_still_validate_non_none(self):
+        """Verify constraints still apply when a non-None value is provided."""
+        with pytest.raises(PydanticValidationError):
+            UserUpdate(name="ab", requesting_user_id="requester123")
+
 
 class TestRollStatistics:
     """Tests for RollStatistics model."""
@@ -612,3 +625,32 @@ class TestQuickrollUpdate:
         assert request.name == "Updated Name"
         assert request.description is None
         assert request.trait_ids is None
+
+    def test_update_explicit_none_for_constrained_fields(self):
+        """Verify explicitly passing None for constrained optional fields does not raise."""
+        # When: Creating an update request with None for constrained fields
+        request = QuickrollUpdate(name=None, description=None)
+
+        # Then: Fields are None without validation errors
+        assert request.name is None
+        assert request.description is None
+
+    def test_update_constrained_fields_still_validate_non_none(self):
+        """Verify constraints still apply when a non-None value is provided."""
+        with pytest.raises(PydanticValidationError):
+            QuickrollUpdate(name="ab")
+
+        with pytest.raises(PydanticValidationError):
+            QuickrollUpdate(description="ab")
+
+
+class TestQuickrollCreateConstraints:
+    """Tests for QuickrollCreate optional field constraint handling."""
+
+    def test_create_explicit_none_for_optional_constrained_fields(self):
+        """Verify explicitly passing None for optional constrained fields does not raise."""
+        # When: Creating a request with None for optional description
+        request = QuickrollCreate(name="Test Roll", description=None)
+
+        # Then: Description is None without validation errors
+        assert request.description is None
