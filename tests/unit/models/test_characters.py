@@ -338,6 +338,68 @@ class TestCharacterUpdate:
 
         assert "name_first" in str(exc_info.value)
 
+    def test_update_explicit_none_for_constrained_fields(self) -> None:
+        """Verify explicitly passing None for constrained optional fields does not raise."""
+        # When: Creating an update request with None for all constrained string fields
+        request = CharacterUpdate(
+            name_first=None,
+            name_last=None,
+            name_nick=None,
+            biography=None,
+            demeanor=None,
+            nature=None,
+        )
+
+        # Then: All fields are None without validation errors
+        assert request.name_first is None
+        assert request.name_last is None
+        assert request.name_nick is None
+        assert request.biography is None
+        assert request.demeanor is None
+        assert request.nature is None
+
+    def test_update_constrained_fields_still_validate_non_none(self) -> None:
+        """Verify constraints still apply when a non-None value is provided."""
+        # When/Then: Short values are rejected for each constrained field
+        with pytest.raises(PydanticValidationError):
+            CharacterUpdate(name_last="ab")
+
+        with pytest.raises(PydanticValidationError):
+            CharacterUpdate(name_nick="ab")
+
+        with pytest.raises(PydanticValidationError):
+            CharacterUpdate(biography="ab")
+
+        with pytest.raises(PydanticValidationError):
+            CharacterUpdate(demeanor="ab")
+
+        with pytest.raises(PydanticValidationError):
+            CharacterUpdate(nature="ab")
+
+
+class TestCharacterCreateConstraints:
+    """Tests for CharacterCreate optional field constraint handling."""
+
+    def test_create_explicit_none_for_optional_constrained_fields(self) -> None:
+        """Verify explicitly passing None for optional constrained fields does not raise."""
+        # When: Creating a request with None for optional constrained fields
+        request = CharacterCreate(
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            name_nick=None,
+            biography=None,
+            demeanor=None,
+            nature=None,
+        )
+
+        # Then: Optional fields are None without validation errors
+        assert request.name_nick is None
+        assert request.biography is None
+        assert request.demeanor is None
+        assert request.nature is None
+
 
 class TestVampireAttributes:
     """Tests for VampireAttributes model."""

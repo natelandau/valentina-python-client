@@ -173,6 +173,23 @@ class TestNoteUpdate:
 
         assert data == {"title": "New Title"}
 
+    def test_update_explicit_none_for_constrained_fields(self):
+        """Verify explicitly passing None for constrained optional fields does not raise."""
+        # When: Creating an update request with None for constrained fields
+        request = NoteUpdate(title=None, content=None)
+
+        # Then: Fields are None without validation errors
+        assert request.title is None
+        assert request.content is None
+
+    def test_update_constrained_fields_still_validate_non_none(self):
+        """Verify constraints still apply when a non-None value is provided."""
+        with pytest.raises(PydanticValidationError):
+            NoteUpdate(title="ab")
+
+        with pytest.raises(PydanticValidationError):
+            NoteUpdate(content="ab")
+
 
 class TestRollStatistics:
     """Tests for RollStatistics model."""

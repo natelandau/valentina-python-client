@@ -326,6 +326,35 @@ class TestCompanyUpdate:
         # Then: Only name is in the output
         assert data == {"name": "Updated Name"}
 
+    def test_update_explicit_none_for_constrained_fields(self):
+        """Verify explicitly passing None for constrained optional fields does not raise."""
+        # When: Creating an update request with None for constrained fields
+        request = CompanyUpdate(name=None, description=None)
+
+        # Then: Fields are None without validation errors
+        assert request.name is None
+        assert request.description is None
+
+    def test_update_constrained_fields_still_validate_non_none(self):
+        """Verify constraints still apply when a non-None value is provided."""
+        with pytest.raises(PydanticValidationError):
+            CompanyUpdate(name="ab")
+
+        with pytest.raises(PydanticValidationError):
+            CompanyUpdate(description="ab")
+
+
+class TestCompanyCreateConstraints:
+    """Tests for CompanyCreate optional field constraint handling."""
+
+    def test_create_explicit_none_for_optional_constrained_fields(self):
+        """Verify explicitly passing None for optional constrained fields does not raise."""
+        # When: Creating a request with None for optional description
+        request = CompanyCreate(name="Test", email="test@example.com", description=None)
+
+        # Then: Description is None without validation errors
+        assert request.description is None
+
 
 class TestGrantAccess:
     """Tests for _GrantAccess model."""

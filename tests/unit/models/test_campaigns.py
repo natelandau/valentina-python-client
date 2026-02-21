@@ -156,3 +156,31 @@ class TestCampaignUpdate:
         """Verify danger validation still applies when value is provided."""
         with pytest.raises(PydanticValidationError):
             CampaignUpdate(danger=6)
+
+    def test_update_explicit_none_for_constrained_fields(self):
+        """Verify explicitly passing None for constrained optional fields does not raise."""
+        # When: Creating an update request with None for all constrained fields
+        request = CampaignUpdate(
+            name=None,
+            description=None,
+            desperation=None,
+            danger=None,
+        )
+
+        # Then: All fields are None without validation errors
+        assert request.name is None
+        assert request.description is None
+        assert request.desperation is None
+        assert request.danger is None
+
+
+class TestCampaignCreateConstraints:
+    """Tests for CampaignCreate optional field constraint handling."""
+
+    def test_create_explicit_none_for_optional_constrained_fields(self):
+        """Verify explicitly passing None for optional constrained fields does not raise."""
+        # When: Creating a request with None for optional description
+        request = CampaignCreate(name="Test", description=None)
+
+        # Then: Description is None without validation errors
+        assert request.description is None
