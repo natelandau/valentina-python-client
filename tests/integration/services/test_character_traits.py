@@ -371,7 +371,7 @@ class TestCharacterTraitsServiceAssign:
         """Verify assigning an existing trait to a character."""
         # Given: A mocked create endpoint
         route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_CREATE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_ASSIGN.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
         ).mock(return_value=Response(201, json=character_trait_response_data))
 
         # When: Assigning a trait
@@ -403,7 +403,7 @@ class TestCharacterTraitsServiceAssign:
         # Given: A mocked create endpoint with zero value response
         response_data = {**character_trait_response_data, "value": 0}
         route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_CREATE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_ASSIGN.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
         ).mock(return_value=Response(201, json=response_data))
 
         # When: Assigning a trait with value 0
@@ -424,7 +424,7 @@ class TestCharacterTraitsServiceAssign:
         """Verify assigning a non-existent trait raises NotFoundError."""
         # Given: A mocked 404 response
         route = respx.post(
-            f"{base_url}{Endpoints.CHARACTER_TRAIT_CREATE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_ASSIGN.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
         ).mock(return_value=Response(404, json={"detail": "Trait not found", "status_code": 404}))
 
         # When/Then: Assigning raises NotFoundError

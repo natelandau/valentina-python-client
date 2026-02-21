@@ -178,7 +178,7 @@ class CharacterTraitsService(BaseService):
             value=value,
         )
         response = await self._post(
-            self._format_endpoint(Endpoints.CHARACTER_TRAIT_CREATE),
+            self._format_endpoint(Endpoints.CHARACTER_TRAIT_ASSIGN),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return CharacterTrait.model_validate(response.json())
