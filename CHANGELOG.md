@@ -1,3 +1,9 @@
+## v1.3.2 (2026-02-21)
+
+### Fix
+
+- **character-trait**: fix endpoint
+
 ## v1.3.1 (2026-02-21)
 
 ### Fix
