@@ -1,6 +1,7 @@
 """Pydantic models for Character API responses and requests."""
 
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -155,20 +156,22 @@ class Character(BaseModel):
     # Identity
     name_first: str = Field(..., min_length=3, description="Character's first name.")
     name_last: str = Field(..., min_length=3, description="Character's last name.")
-    name_nick: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's nickname."
+    name_nick: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's nickname."
     )
     name: str = Field(..., description="Character's display name.")
     name_full: str = Field(..., description="Character's full name.")
 
     # Biography
     age: int | None = Field(default=None, description="Character's age.")
-    biography: str | None = Field(default=None, min_length=3, description="Character biography.")
-    demeanor: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's demeanor."
+    biography: Annotated[str, Field(min_length=3)] | None = Field(
+        default=None, description="Character biography."
     )
-    nature: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's nature."
+    demeanor: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's demeanor."
+    )
+    nature: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's nature."
     )
     concept_id: str | None = Field(default=None, description="ID of the character concept.")
 
@@ -220,16 +223,18 @@ class CharacterCreate(BaseModel):
 
     # Optional fields
     type: CharacterType | None = Field(default=None, description="Character type.")
-    name_nick: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's nickname."
+    name_nick: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's nickname."
     )
     age: int | None = Field(default=None, description="Character's age.")
-    biography: str | None = Field(default=None, min_length=3, description="Character biography.")
-    demeanor: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's demeanor."
+    biography: Annotated[str, Field(min_length=3)] | None = Field(
+        default=None, description="Character biography."
     )
-    nature: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's nature."
+    demeanor: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's demeanor."
+    )
+    nature: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's nature."
     )
     concept_id: str | None = Field(default=None, description="ID of the character concept.")
     user_player_id: str | None = Field(
@@ -263,21 +268,25 @@ class CharacterUpdate(BaseModel):
     game_version: GameVersion | None = None
     status: CharacterStatus | None = None
 
-    name_first: str | None = Field(
-        default=None, min_length=3, description="Character's first name."
+    name_first: Annotated[str, Field(min_length=3)] | None = Field(
+        default=None, description="Character's first name."
     )
-    name_last: str | None = Field(default=None, min_length=3, description="Character's last name.")
-    name_nick: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's nickname."
+    name_last: Annotated[str, Field(min_length=3)] | None = Field(
+        default=None, description="Character's last name."
+    )
+    name_nick: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's nickname."
     )
 
     age: int | None = None
-    biography: str | None = Field(default=None, min_length=3, description="Character biography.")
-    demeanor: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's demeanor."
+    biography: Annotated[str, Field(min_length=3)] | None = Field(
+        default=None, description="Character biography."
     )
-    nature: str | None = Field(
-        default=None, min_length=3, max_length=50, description="Character's nature."
+    demeanor: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's demeanor."
+    )
+    nature: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
+        default=None, description="Character's nature."
     )
     concept_id: str | None = Field(default=None, description="ID of the character concept.")
 

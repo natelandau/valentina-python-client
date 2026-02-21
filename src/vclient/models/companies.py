@@ -1,6 +1,7 @@
 """Pydantic models for Company API responses."""
 
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -77,7 +78,7 @@ class CompanyCreate(BaseModel):
 
     name: str = Field(min_length=3, max_length=50)
     email: str
-    description: str | None = Field(default=None, min_length=3)
+    description: Annotated[str, Field(min_length=3)] | None = None
     settings: CompanySettings | None = None
 
 
@@ -87,9 +88,9 @@ class CompanyUpdate(BaseModel):
     Only include fields that need to be changed; omitted fields remain unchanged.
     """
 
-    name: str | None = Field(default=None, min_length=3, max_length=50)
+    name: Annotated[str, Field(min_length=3, max_length=50)] | None = None
     email: str | None = None
-    description: str | None = Field(default=None, min_length=3)
+    description: Annotated[str, Field(min_length=3)] | None = None
     settings: CompanySettings | None = None
 
 

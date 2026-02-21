@@ -1,6 +1,7 @@
 """Pydantic models for Campaign API responses and requests."""
 
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -39,7 +40,7 @@ class CampaignCreate(BaseModel):
     """
 
     name: str = Field(min_length=3, max_length=50)
-    description: str | None = Field(default=None, min_length=3)
+    description: Annotated[str, Field(min_length=3)] | None = None
     desperation: int = Field(default=0, ge=0, le=5)
     danger: int = Field(default=0, ge=0, le=5)
 
@@ -50,10 +51,10 @@ class CampaignUpdate(BaseModel):
     Only include fields that need to be changed; omitted fields remain unchanged.
     """
 
-    name: str | None = Field(default=None, min_length=3, max_length=50)
-    description: str | None = Field(default=None, min_length=3)
-    desperation: int | None = Field(default=None, ge=0, le=5)
-    danger: int | None = Field(default=None, ge=0, le=5)
+    name: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    description: Annotated[str, Field(min_length=3)] | None = None
+    desperation: Annotated[int, Field(ge=0, le=5)] | None = None
+    danger: Annotated[int, Field(ge=0, le=5)] | None = None
 
 
 __all__ = [
