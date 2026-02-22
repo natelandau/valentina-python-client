@@ -1,3 +1,13 @@
+## v1.4.0 (2026-02-22)
+
+### Feat
+
+- **services**: infer MIME type from filename in upload_asset (#27)
+
+### Fix
+
+- **http**: remove hardcoded Content-Type header (#26)
+
 ## v1.3.2 (2026-02-21)
 
 ### Fix
