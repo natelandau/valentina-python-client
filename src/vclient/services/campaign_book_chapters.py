@@ -342,14 +342,14 @@ class ChaptersService(BaseService):
     # Asset Methods
     # -------------------------------------------------------------------------
 
-    async def list_assets(
+    async def get_assets_page(
         self,
         chapter_id: str,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
     ) -> PaginatedResponse[Asset]:
-        """Retrieve a paginated list of assets for a chapter.
+        """Retrieve a paginated page of assets for a chapter.
 
         Args:
             chapter_id: The ID of the chapter whose assets to list.
@@ -369,6 +369,55 @@ class ChaptersService(BaseService):
             limit=limit,
             offset=offset,
         )
+
+    async def list_all_assets(
+        self,
+        chapter_id: str,
+    ) -> list[Asset]:
+        """Retrieve all assets for a chapter.
+
+        Automatically paginates through all results. Use `get_assets_page()` for paginated
+        access or `iter_all_assets()` for memory-efficient streaming of large datasets.
+
+        Args:
+            chapter_id: The ID of the chapter whose assets to list.
+
+        Returns:
+            A list of all Asset objects.
+
+        Raises:
+            NotFoundError: If the chapter does not exist.
+            AuthorizationError: If you don't have access.
+        """
+        return [asset async for asset in self.iter_all_assets(chapter_id)]
+
+    async def iter_all_assets(
+        self,
+        chapter_id: str,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[Asset]:
+        """Iterate through all assets for a chapter.
+
+        Yields individual assets, automatically fetching subsequent pages until
+        all items have been retrieved.
+
+        Args:
+            chapter_id: The ID of the chapter whose assets to iterate.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual Asset objects.
+
+        Example:
+            >>> async for asset in chapters.iter_all_assets("chapter_id"):
+            ...     print(asset.original_filename)
+        """
+        async for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.BOOK_CHAPTER_ASSETS, chapter_id=chapter_id),
+            limit=limit,
+        ):
+            yield Asset.model_validate(item)
 
     async def get_asset(
         self,
