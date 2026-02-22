@@ -137,22 +137,8 @@ The `Literal` type constants in `constants.py` must stay in sync with the API's 
 
 ## Documentation
 
-**IMPORTANT:** The public-facing documentation for this client library is maintained in a separate repository.
-
-- **Location:** `../valentina-noir/docs/python-api-client/`
-- **Published URL:** https://docs.valentina-noir.com/python-api-client/
-
-When making changes to this client that affect the public API, you MUST review and update the corresponding documentation:
-
-| Change Type                    | Documentation to Update                  |
-| ------------------------------ | ---------------------------------------- |
-| New service                    | Create new service doc                   |
-| New method on existing service | Update the relevant service doc          |
-| Changed method signature       | Update the relevant service doc          |
-| New/changed model              | Update `models.md`                       |
-| New/changed exception          | Update `index.md` Error Handling section |
-| Configuration option changes   | Update `index.md` Configuration section  |
-
-Documentation files follow the pattern `{service_name}.md` (e.g., `campaigns.md`, `users.md`).
-
-The documentation is managed by zensical and navigation is managed in `../valentina-noir/zensical.toml.`.
+- End user documentation is stored in the `docs/` directory.
+- The documentation is written in Markdown and uses the [Zensical](https://zensical.org/) static site generator.
+- Zensical is configured in `zensical.toml`.
+- The documentation is hosted on [GitHub Pages](https://pages.github.com/).
+- `docs/plans` is gitignored, it is used for Claude's planning and research and not published.
