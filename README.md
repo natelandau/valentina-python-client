@@ -12,11 +12,11 @@ Async Python client library for accessing the Valentina Noir API.
 - **Idempotency support** - Optional automatic idempotency keys for safe retries
 - **Rate limit handling** - Built-in support for automatic rate limit retries
 
-This client is a supported and up-to-date reference implementation for the Valentina Noir API. The full documentation for is available at https://docs.valentina-noir.com/python-api-client/.
+This client is a supported and up-to-date reference implementation for the [Valentina Noir API](https://docs.valentina-noir.com).
 
 ## Documentation
 
-For complete documentation including configuration options, all available services, response models, and error handling, see the **[Full Documentation](https://docs.valentina-noir.com/python-api-client/)**.
+The full documentation is available at https://natelandau.github.io/valentina-python-client/.
 
 ## Development Tools
 
