@@ -482,8 +482,8 @@ class TestUsersServiceAssets:
     """Tests for UsersService asset methods."""
 
     @respx.mock
-    async def test_list_assets(self, vclient, base_url, asset_response_data):
-        """Verify listing user assets."""
+    async def test_get_assets_page(self, vclient, base_url, asset_response_data):
+        """Verify getting a page of user assets."""
         # Given: A mocked assets endpoint
         company_id = "company123"
         user_id = "user123"
@@ -500,14 +500,41 @@ class TestUsersServiceAssets:
             },
         )
 
-        # When: Listing assets
-        result = await vclient.users(company_id).list_assets(user_id)
+        # When: Getting a page of assets
+        result = await vclient.users(company_id).get_assets_page(user_id)
 
         # Then: Returns PaginatedResponse with Asset objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
         assert isinstance(result.items[0], Asset)
+
+    @respx.mock
+    async def test_list_all_assets(self, vclient, base_url, asset_response_data):
+        """Verify list_all_assets returns all assets."""
+        # Given: A mocked assets endpoint
+        company_id = "company123"
+        user_id = "user123"
+        respx.get(
+            f"{base_url}{Endpoints.USER_ASSETS.format(company_id=company_id, user_id=user_id)}",
+            params={"limit": "100", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [asset_response_data],
+                "limit": 100,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Calling list_all_assets
+        result = await vclient.users(company_id).list_all_assets(user_id)
+
+        # Then: Returns list of Asset objects
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], Asset)
 
     @respx.mock
     async def test_get_asset(self, vclient, base_url, asset_response_data):

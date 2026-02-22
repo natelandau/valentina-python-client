@@ -275,14 +275,14 @@ class UsersService(BaseService):
     # Asset Methods
     # -------------------------------------------------------------------------
 
-    async def list_assets(
+    async def get_assets_page(
         self,
         user_id: str,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
     ) -> PaginatedResponse[Asset]:
-        """Retrieve a paginated list of assets for a user.
+        """Retrieve a paginated page of assets for a user.
 
         Args:
             user_id: The ID of the user whose assets to list.
@@ -302,6 +302,55 @@ class UsersService(BaseService):
             limit=limit,
             offset=offset,
         )
+
+    async def list_all_assets(
+        self,
+        user_id: str,
+    ) -> list[Asset]:
+        """Retrieve all assets for a user.
+
+        Automatically paginates through all results. Use `get_assets_page()` for paginated
+        access or `iter_all_assets()` for memory-efficient streaming of large datasets.
+
+        Args:
+            user_id: The ID of the user whose assets to list.
+
+        Returns:
+            A list of all Asset objects.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        return [asset async for asset in self.iter_all_assets(user_id)]
+
+    async def iter_all_assets(
+        self,
+        user_id: str,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[Asset]:
+        """Iterate through all assets for a user.
+
+        Yields individual assets, automatically fetching subsequent pages until
+        all items have been retrieved.
+
+        Args:
+            user_id: The ID of the user whose assets to iterate.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual Asset objects.
+
+        Example:
+            >>> async for asset in users.iter_all_assets("user_id"):
+            ...     print(asset.original_filename)
+        """
+        async for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.USER_ASSETS, user_id=user_id),
+            limit=limit,
+        ):
+            yield Asset.model_validate(item)
 
     async def get_asset(
         self,
