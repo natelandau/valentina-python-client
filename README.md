@@ -39,9 +39,3 @@ The script reads configuration from (highest precedence first):
 3. A `.env.secret` file in the project root
 
 Exit codes: `0` = all constants match, `1` = mismatches found, `2` = missing configuration.
-
-## Resources
-
-- [Full Client Documentation](https://docs.valentina-noir.com/python-api-client/)
-- [API Concepts](https://docs.valentina-noir.com/concepts/)
-- [API Reference](https://api.valentina-noir.com/docs)

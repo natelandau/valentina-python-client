@@ -1,3 +1,9 @@
+## v1.5.0 (2026-02-22)
+
+### Feat
+
+- add get_assets_page, list_all_assets, iter_all_assets to all services (#28)
+
 ## v1.4.1 (2026-02-22)
 
 ### Refactor
