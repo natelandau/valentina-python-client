@@ -4,6 +4,8 @@ icon: lucide/dices
 
 # Dice Roll Models
 
+Models for dice rolls and their results, used to record and query gameplay rolls.
+
 ## DiceRoll
 
 | Field                  | Type             | Description        |

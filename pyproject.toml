@@ -46,6 +46,7 @@
         "vulture>=2.14",
         "yamllint>=1.38.0",
     ]
+    docs = ["zensical>=0.0.23"]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"

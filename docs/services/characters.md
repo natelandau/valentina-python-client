@@ -157,7 +157,7 @@ updated = await characters.update(character.id, update)
 # Retrieve roll statistics
 stats = await characters.get_statistics(character.id)
 print(f"Total rolls: {stats.total_rolls}")
-print(f"Success rate: {stats.success_rate}%")
+print(f"Success rate: {stats.success_percentage}%")
 
 # Add an inventory item
 item_request = InventoryItemCreate(

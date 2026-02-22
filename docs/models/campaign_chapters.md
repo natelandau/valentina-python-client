@@ -4,6 +4,8 @@ icon: lucide/bookmark
 
 # Campaign Chapter Models
 
+Models for campaign chapters, which organize content within a campaign book.
+
 ## CampaignChapter
 
 | Field           | Type          | Description             |

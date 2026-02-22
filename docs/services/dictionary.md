@@ -6,7 +6,7 @@ icon: lucide/book-a
 
 Manage dictionary terms within a company for in-game terminology and definitions. Store and search custom terms, definitions, and synonyms specific to your campaigns.
 
-## Initialize the Service
+## Usage
 
 ```python
 from vclient import dictionary_service
@@ -14,7 +14,7 @@ from vclient import dictionary_service
 dictionary = dictionary_service(company_id="COMPANY_ID")
 ```
 
-## Available Methods
+## Methods
 
 ### CRUD Operations
 

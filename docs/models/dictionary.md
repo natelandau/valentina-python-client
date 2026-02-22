@@ -4,6 +4,8 @@ icon: lucide/book-a
 
 # Dictionary Models
 
+Models for in-game terminology, definitions, and synonyms specific to your campaigns.
+
 ## DictionaryTerm
 
 | Field           | Type          | Description             |

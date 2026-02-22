@@ -4,6 +4,8 @@ icon: lucide/code
 
 # Developer Models
 
+Models for developer accounts, API key management, and company permission grants.
+
 ## Developer
 
 | Field             | Type                               | Description             |
@@ -21,6 +23,21 @@ icon: lucide/code
 
 Your own developer profile. Contains the same fields as `Developer` but excludes the `is_global_admin` field for security.
 
-## DeveloperWithApiKey
+## MeDeveloperWithApiKey
 
-Extends `Developer` with an `api_key` field. Only returned when generating a new API key - save it immediately as it cannot be retrieved again.
+Extends `MeDeveloper` with the generated API key. Only returned when regenerating your API key — save it immediately as it can't be retrieved again.
+
+| Field     | Type  | Description                                    |
+| --------- | ----- | ---------------------------------------------- |
+| `api_key` | `str` | Generated API key (shown only at creation time) |
+
+All other fields are inherited from `MeDeveloper`.
+
+## MeDeveloperUpdate
+
+Request body for updating your developer profile.
+
+| Field      | Type          | Description        |
+| ---------- | ------------- | ------------------ |
+| `username` | `str \| None` | Updated username   |
+| `email`    | `str \| None` | Updated email      |

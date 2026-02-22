@@ -10,7 +10,7 @@ Check API health and system status. Use this service to monitor the API's operat
 
     This service does not require authentication. Use it for health checks and monitoring without an API key.
 
-## Initialize the Service
+## Usage
 
 ```python
 from vclient import system_service
@@ -18,7 +18,7 @@ from vclient import system_service
 system = system_service()
 ```
 
-## Available Methods
+## Methods
 
 | Method     | Returns        | Description                            |
 | ---------- | -------------- | -------------------------------------- |
@@ -71,4 +71,4 @@ async def monitor_health():
 
 ## Related Documentation
 
-- [Response Models](../models/index.md) - View `SystemHealth` model schema
+- [Response Models](../models/shared.md#systemhealth) - View `SystemHealth` model schema

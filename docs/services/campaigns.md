@@ -98,7 +98,7 @@ updated = await campaigns.update(campaign.id, update)
 # Get dice roll statistics for a campaign
 stats = await campaigns.get_statistics(campaign.id, num_top_traits=10)
 print(f"Total rolls: {stats.total_rolls}")
-print(f"Success rate: {stats.success_rate}%")
+print(f"Success rate: {stats.success_percentage}%")
 for trait in stats.top_traits:
     print(f"  {trait.name}: {trait.count} uses")
 ```
@@ -133,7 +133,7 @@ with open("map.png", "rb") as f:
         filename="campaign_map.png",
         content=f.read(),
     )
-print(f"Uploaded: {asset.url}")
+print(f"Uploaded: {asset.public_url}")
 
 # List all assets
 all_assets = await campaigns.list_all_assets(campaign.id)

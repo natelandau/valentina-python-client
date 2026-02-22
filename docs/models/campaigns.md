@@ -4,6 +4,8 @@ icon: lucide/map
 
 # Campaign Models
 
+Models for campaigns, which organize gameplay sessions within a company.
+
 ## Campaign
 
 | Field           | Type          | Description             |

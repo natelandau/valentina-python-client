@@ -4,6 +4,8 @@ icon: lucide/user
 
 # Character Models
 
+Models for player and non-player characters, including class-specific attributes for vampires, werewolves, mages, and hunters.
+
 ## Character
 
 | Field                 | Type                         | Description                                    |
@@ -63,3 +65,41 @@ icon: lucide/user
 | ----------- | ------------- | ---------------------- |
 | `sphere`    | `str \| None` | Primary sphere of magic |
 | `tradition` | `str \| None` | Mage tradition          |
+
+## InventoryItem
+
+Represents an item in a character's inventory.
+
+| Field           | Type                     | Description             |
+| --------------- | ------------------------ | ----------------------- |
+| `id`            | `str`                    | Unique identifier       |
+| `character_id`  | `str`                    | Parent character ID     |
+| `name`          | `str`                    | Item name               |
+| `type`          | `CharacterInventoryType` | Item type               |
+| `description`   | `str \| None`            | Item description        |
+| `date_created`  | `datetime`               | Creation timestamp      |
+| `date_modified` | `datetime`               | Last modified timestamp |
+
+## EdgeAndPerks
+
+Represents a hunter edge with its associated perks. Returned by the character edge management methods.
+
+| Field         | Type               | Description       |
+| ------------- | ------------------ | ----------------- |
+| `id`          | `str`              | Unique identifier |
+| `name`        | `str`              | Edge name         |
+| `description` | `str \| None`      | Edge description  |
+| `pool`        | `str \| None`      | Dice pool         |
+| `system`      | `str \| None`      | System rules      |
+| `type`        | `HunterEdgeType \| None` | Edge type   |
+| `perks`       | `list[Perk]`       | Associated perks  |
+
+## Perk
+
+Represents a perk within a hunter edge.
+
+| Field         | Type          | Description       |
+| ------------- | ------------- | ----------------- |
+| `id`          | `str`         | Unique identifier |
+| `name`        | `str`         | Perk name         |
+| `description` | `str \| None` | Perk description  |

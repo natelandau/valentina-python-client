@@ -18,17 +18,21 @@ Every resource service provides standard methods for creating, reading, updating
 | `delete(id)`      | Delete a resource                             |
 
 ```python
+from vclient import companies_service
+
+companies = companies_service()
+
 # Get a single resource
-company = await companies.get("507f1f77bcf86cd799439011")
+company = await companies.get("COMPANY_ID")
 
 # Create a new resource
 company = await companies.create(name="My Company", email="contact@example.com")
 
 # Update (only include fields to change)
-updated = await companies.update("507f1f77bcf86cd799439011", name="New Name")
+updated = await companies.update("COMPANY_ID", name="New Name")
 
 # Delete
-await companies.delete("507f1f77bcf86cd799439011")
+await companies.delete("COMPANY_ID")
 ```
 
 ## Pagination
@@ -66,6 +70,10 @@ These properties simplify page navigation:
 ### Example
 
 ```python
+from vclient import companies_service
+
+companies = companies_service()
+
 # Get a single page with metadata
 page = await companies.get_page(limit=10, offset=0)
 print(f"Page {page.current_page} of {page.total_pages}")

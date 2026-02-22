@@ -4,6 +4,8 @@ icon: lucide/building-2
 
 # Company Models
 
+Models for managing companies, their settings, and developer access permissions.
+
 ## Company
 
 | Field           | Type                      | Description             |
@@ -16,6 +18,25 @@ icon: lucide/building-2
 | `email`         | `str`                     | Contact email           |
 | `user_ids`      | `list[str]`               | Associated user IDs     |
 | `settings`      | `CompanySettings \| None` | Company configuration   |
+
+## NewCompanyResponse
+
+Returned when creating a new company. Contains both the created company and the admin user automatically generated for it.
+
+| Field        | Type      | Description                           |
+| ------------ | --------- | ------------------------------------- |
+| `company`    | `Company` | The newly created company             |
+| `admin_user` | `User`    | Admin user created for the company    |
+
+## CompanyPermissions
+
+Returned when granting or modifying developer access to a company.
+
+| Field         | Type              | Description              |
+| ------------- | ----------------- | ------------------------ |
+| `company_id`  | `str`             | Company ID               |
+| `name`        | `str \| None`     | Company name             |
+| `permission`  | `PermissionLevel` | Granted permission level |
 
 ## CompanySettings
 

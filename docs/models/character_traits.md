@@ -4,6 +4,8 @@ icon: lucide/list
 
 # Character Trait Models
 
+Models for character traits, trait definitions, and trait value modification options.
+
 ## CharacterTrait
 
 | Field          | Type    | Description         |
@@ -29,3 +31,29 @@ icon: lucide/list
 | `parent_category_name` | `str \| None`          | Parent category name    |
 | `game_versions`        | `list[GameVersion]`    | Available game versions |
 | `character_classes`    | `list[CharacterClass]` | Applicable classes      |
+
+## CharacterTraitValueOptionsResponse
+
+Returned when querying available value change options for a character trait. Contains the current state and a map of possible changes with their costs.
+
+| Field                    | Type                                      | Description                    |
+| ------------------------ | ----------------------------------------- | ------------------------------ |
+| `current_value`          | `int`                                     | Current trait value            |
+| `min_value`              | `int`                                     | Minimum allowed value          |
+| `max_value`              | `int`                                     | Maximum allowed value          |
+| `xp_current`             | `int`                                     | Available XP                   |
+| `starting_points_current`| `int`                                     | Available starting points      |
+| `options`                | `dict[str, CharacterTraitValueOption]`    | Map of value to change options |
+
+## CharacterTraitValueOption
+
+Represents a single value change option for a trait.
+
+| Field                   | Type   | Description                          |
+| ----------------------- | ------ | ------------------------------------ |
+| `direction`             | `str`  | Direction of change (up/down)        |
+| `point_change`          | `int`  | Cost in points for this change       |
+| `can_use_xp`            | `bool` | Whether XP can fund this change      |
+| `xp_after`              | `int`  | XP remaining after this change       |
+| `can_use_starting_points`| `bool`| Whether starting points can be used  |
+| `starting_points_after` | `int`  | Starting points remaining after      |

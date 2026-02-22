@@ -32,9 +32,9 @@ class NameDescriptionSubDocument(BaseModel):
 
 
 class Asset(BaseModel):
-    """Response model for an S3 asset.
+    """Response model for an asset.
 
-    Represents a file asset stored in S3, including its URL and metadata.
+    Represents a file asset, including its URL and metadata.
     """
 
     id: str

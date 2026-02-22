@@ -4,6 +4,8 @@ icon: lucide/users
 
 # User Models
 
+Models for users, their Discord profiles, campaign experience, and quickrolls.
+
 ## User
 
 | Field                 | Type                       | Description                       |
@@ -50,3 +52,23 @@ Pre-configured dice pool for frequently used trait combinations. Speed up gamepl
 | `description`   | `str \| None` | Optional description       |
 | `user_id`       | `str`         | Owner user ID              |
 | `trait_ids`     | `list[str]`   | Trait IDs in the dice pool |
+
+## QuickrollCreate
+
+Request body for creating a new quickroll.
+
+| Field         | Type          | Description                       |
+| ------------- | ------------- | --------------------------------- |
+| `name`        | `str`         | Quickroll name (3-50 characters)  |
+| `description` | `str \| None` | Optional description              |
+| `trait_ids`   | `list[str]`   | Trait IDs to include in dice pool |
+
+## QuickrollUpdate
+
+Request body for updating a quickroll. Only include fields that need to change.
+
+| Field         | Type               | Description           |
+| ------------- | ------------------ | --------------------- |
+| `name`        | `str \| None`      | Updated name          |
+| `description` | `str \| None`      | Updated description   |
+| `trait_ids`   | `list[str] \| None`| Updated trait IDs     |

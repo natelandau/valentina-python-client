@@ -6,7 +6,7 @@ icon: lucide/users
 
 Manage users within a company, including their experience points, assets, notes, and quickrolls. This service provides comprehensive user management for World of Darkness campaigns.
 
-## Initialize the Service
+## Usage
 
 ```python
 from vclient import users_service
@@ -14,7 +14,7 @@ from vclient import users_service
 users = users_service(company_id="COMPANY_ID")
 ```
 
-## Available Methods
+## Methods
 
 ### CRUD Operations
 

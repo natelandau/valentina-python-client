@@ -4,6 +4,8 @@ icon: lucide/book-open
 
 # Campaign Book Models
 
+Models for campaign books, which organize campaign content into sequentially numbered volumes.
+
 ## CampaignBook
 
 | Field           | Type          | Description             |
