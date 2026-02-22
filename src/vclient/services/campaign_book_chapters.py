@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    Asset,
     CampaignChapter,
     ChapterCreate,
     ChapterUpdate,
@@ -14,7 +15,6 @@ from vclient.models import (
     NoteCreate,
     NoteUpdate,
     PaginatedResponse,
-    S3Asset,
     _ChapterRenumber,
 )
 from vclient.services.base import BaseService
@@ -348,7 +348,7 @@ class ChaptersService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
-    ) -> PaginatedResponse[S3Asset]:
+    ) -> PaginatedResponse[Asset]:
         """Retrieve a paginated list of assets for a chapter.
 
         Args:
@@ -357,7 +357,7 @@ class ChaptersService(BaseService):
             offset: Number of items to skip from the beginning (default 0).
 
         Returns:
-            A PaginatedResponse containing S3Asset objects and pagination metadata.
+            A PaginatedResponse containing Asset objects and pagination metadata.
 
         Raises:
             NotFoundError: If the chapter does not exist.
@@ -365,7 +365,7 @@ class ChaptersService(BaseService):
         """
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.BOOK_CHAPTER_ASSETS, chapter_id=chapter_id),
-            S3Asset,
+            Asset,
             limit=limit,
             offset=offset,
         )
@@ -374,7 +374,7 @@ class ChaptersService(BaseService):
         self,
         chapter_id: str,
         asset_id: str,
-    ) -> S3Asset:
+    ) -> Asset:
         """Retrieve details of a specific asset including its URL and metadata.
 
         Args:
@@ -382,7 +382,7 @@ class ChaptersService(BaseService):
             asset_id: The ID of the asset to retrieve.
 
         Returns:
-            The S3Asset object with full details.
+            The Asset object with full details.
 
         Raises:
             NotFoundError: If the asset does not exist.
@@ -393,7 +393,7 @@ class ChaptersService(BaseService):
                 Endpoints.BOOK_CHAPTER_ASSET, chapter_id=chapter_id, asset_id=asset_id
             )
         )
-        return S3Asset.model_validate(response.json())
+        return Asset.model_validate(response.json())
 
     async def upload_asset(
         self,
@@ -401,7 +401,7 @@ class ChaptersService(BaseService):
         filename: str,
         content: bytes,
         content_type: str | None = None,
-    ) -> S3Asset:
+    ) -> Asset:
         """Upload a new asset for a chapter.
 
         Uploads a file to S3 storage and associates it with the chapter.
@@ -413,7 +413,7 @@ class ChaptersService(BaseService):
             content_type: The MIME type of the file. If not provided, inferred from filename.
 
         Returns:
-            The created S3Asset object with the public URL and metadata.
+            The created Asset object with the public URL and metadata.
 
         Raises:
             NotFoundError: If the chapter does not exist.
@@ -427,7 +427,7 @@ class ChaptersService(BaseService):
             self._format_endpoint(Endpoints.BOOK_CHAPTER_ASSET_UPLOAD, chapter_id=chapter_id),
             file=(filename, content, content_type),
         )
-        return S3Asset.model_validate(response.json())
+        return Asset.model_validate(response.json())
 
     async def delete_asset(
         self,

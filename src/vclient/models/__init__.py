@@ -95,13 +95,13 @@ from .global_admin import (
 )
 from .pagination import PaginatedResponse
 from .shared import (
+    Asset,
     CharacterSpecialty,
     NameDescriptionSubDocument,
     Note,
     NoteCreate,
     NoteUpdate,
     RollStatistics,
-    S3Asset,
     Trait,
     WerewolfGift,
     WerewolfRite,
@@ -120,6 +120,7 @@ from .users import (
 )
 
 __all__ = [
+    "Asset",
     "BookCreate",
     "BookUpdate",
     "Campaign",
@@ -183,7 +184,6 @@ __all__ = [
     "QuickrollCreate",
     "QuickrollUpdate",
     "RollStatistics",
-    "S3Asset",
     "SheetSection",
     "SystemHealth",
     "Trait",

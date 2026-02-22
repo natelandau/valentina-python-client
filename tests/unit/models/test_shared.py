@@ -4,20 +4,20 @@ import pytest
 from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models.shared import (
+    Asset,
     Note,
     NoteCreate,
     NoteUpdate,
     RollStatistics,
-    S3Asset,
 )
 
 
-class TestS3Asset:
-    """Tests for S3Asset model."""
+class TestAsset:
+    """Tests for Asset model."""
 
     def test_valid_asset(self):
         """Verify valid asset creation."""
-        asset = S3Asset(
+        asset = Asset(
             id="asset123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
@@ -41,7 +41,7 @@ class TestS3Asset:
 
     def test_parent_type_defaults_to_none(self):
         """Verify parent_type defaults to None."""
-        asset = S3Asset(
+        asset = Asset(
             id="asset123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
@@ -60,7 +60,7 @@ class TestS3Asset:
         asset_types = ["image", "text", "audio", "video", "document", "archive", "other"]
 
         for asset_type in asset_types:
-            asset = S3Asset(
+            asset = Asset(
                 id="asset123",
                 date_created="2024-01-15T10:30:00Z",
                 date_modified="2024-01-15T10:30:00Z",
@@ -86,7 +86,7 @@ class TestS3Asset:
         ]
 
         for parent_type in parent_types:
-            asset = S3Asset(
+            asset = Asset(
                 id="asset123",
                 date_created="2024-01-15T10:30:00Z",
                 date_modified="2024-01-15T10:30:00Z",

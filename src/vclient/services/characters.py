@@ -12,6 +12,7 @@ from vclient.constants import (
 )
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    Asset,
     Character,
     CharacterCreate,
     CharacterUpdate,
@@ -25,7 +26,6 @@ from vclient.models import (
     PaginatedResponse,
     Perk,
     RollStatistics,
-    S3Asset,
     WerewolfGift,
     WerewolfRite,
 )
@@ -339,7 +339,7 @@ class CharactersService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
-    ) -> PaginatedResponse[S3Asset]:
+    ) -> PaginatedResponse[Asset]:
         """Retrieve a paginated list of assets for a campaign.
 
         Args:
@@ -348,7 +348,7 @@ class CharactersService(BaseService):
             offset: Number of items to skip from the beginning (default 0).
 
         Returns:
-            A PaginatedResponse containing S3Asset objects and pagination metadata.
+            A PaginatedResponse containing Asset objects and pagination metadata.
 
         Raises:
             NotFoundError: If the campaign does not exist.
@@ -356,7 +356,7 @@ class CharactersService(BaseService):
         """
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.CHARACTER_ASSETS, character_id=character_id),
-            S3Asset,
+            Asset,
             limit=limit,
             offset=offset,
         )
@@ -365,7 +365,7 @@ class CharactersService(BaseService):
         self,
         character_id: str,
         asset_id: str,
-    ) -> S3Asset:
+    ) -> Asset:
         """Retrieve details of a specific asset including its URL and metadata.
 
         Args:
@@ -373,7 +373,7 @@ class CharactersService(BaseService):
             asset_id: The ID of the asset to retrieve.
 
         Returns:
-            The S3Asset object with full details.
+            The Asset object with full details.
 
         Raises:
             NotFoundError: If the asset does not exist.
@@ -384,7 +384,7 @@ class CharactersService(BaseService):
                 Endpoints.CHARACTER_ASSET, character_id=character_id, asset_id=asset_id
             )
         )
-        return S3Asset.model_validate(response.json())
+        return Asset.model_validate(response.json())
 
     async def delete_asset(
         self,
@@ -415,7 +415,7 @@ class CharactersService(BaseService):
         filename: str,
         content: bytes,
         content_type: str | None = None,
-    ) -> S3Asset:
+    ) -> Asset:
         """Upload a new asset for a campaign.
 
         Uploads a file to S3 storage and associates it with the campaign.
@@ -427,7 +427,7 @@ class CharactersService(BaseService):
             content_type: The MIME type of the file. If not provided, inferred from filename.
 
         Returns:
-            The created S3Asset object with the public URL and metadata.
+            The created Asset object with the public URL and metadata.
 
         Raises:
             NotFoundError: If the character does not exist.
@@ -441,7 +441,7 @@ class CharactersService(BaseService):
             self._format_endpoint(Endpoints.CHARACTER_ASSET_UPLOAD, character_id=character_id),
             file=(filename, content, content_type),
         )
-        return S3Asset.model_validate(response.json())
+        return Asset.model_validate(response.json())
 
     # -------------------------------------------------------------------------
     # Notes Methods

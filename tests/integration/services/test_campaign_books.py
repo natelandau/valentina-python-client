@@ -5,7 +5,7 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError, RequestValidationError
-from vclient.models import CampaignBook, Note, PaginatedResponse, S3Asset
+from vclient.models import Asset, CampaignBook, Note, PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 
@@ -638,11 +638,11 @@ class TestBooksServiceAssets:
             book_id
         )
 
-        # Then: Returns paginated S3Asset objects
+        # Then: Returns paginated Asset objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], S3Asset)
+        assert isinstance(result.items[0], Asset)
 
     @respx.mock
     async def test_get_asset(self, vclient, base_url, asset_response_data):
@@ -662,9 +662,9 @@ class TestBooksServiceAssets:
             book_id, asset_id
         )
 
-        # Then: Returns S3Asset object
+        # Then: Returns Asset object
         assert route.called
-        assert isinstance(result, S3Asset)
+        assert isinstance(result, Asset)
         assert result.id == "asset123"
 
     @respx.mock
@@ -708,7 +708,7 @@ class TestBooksServiceAssets:
             content_type="image/png",
         )
 
-        # Then: Returns S3Asset object
+        # Then: Returns Asset object
         assert route.called
-        assert isinstance(result, S3Asset)
+        assert isinstance(result, Asset)
         assert result.id == "asset123"

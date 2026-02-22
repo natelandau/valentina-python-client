@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    Asset,
     BookCreate,
     BookUpdate,
     CampaignBook,
@@ -14,7 +15,6 @@ from vclient.models import (
     NoteCreate,
     NoteUpdate,
     PaginatedResponse,
-    S3Asset,
     _BookRenumber,
 )
 from vclient.services.base import BaseService
@@ -444,7 +444,7 @@ class BooksService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
-    ) -> PaginatedResponse[S3Asset]:
+    ) -> PaginatedResponse[Asset]:
         """Retrieve a paginated list of assets for a book.
 
         Args:
@@ -453,7 +453,7 @@ class BooksService(BaseService):
             offset: Number of items to skip from the beginning (default 0).
 
         Returns:
-            A PaginatedResponse containing S3Asset objects and pagination metadata.
+            A PaginatedResponse containing Asset objects and pagination metadata.
 
         Raises:
             NotFoundError: If the book does not exist.
@@ -461,7 +461,7 @@ class BooksService(BaseService):
         """
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.BOOK_ASSETS, book_id=book_id),
-            S3Asset,
+            Asset,
             limit=limit,
             offset=offset,
         )
@@ -470,7 +470,7 @@ class BooksService(BaseService):
         self,
         book_id: str,
         asset_id: str,
-    ) -> S3Asset:
+    ) -> Asset:
         """Retrieve details of a specific asset including its URL and metadata.
 
         Args:
@@ -478,7 +478,7 @@ class BooksService(BaseService):
             asset_id: The ID of the asset to retrieve.
 
         Returns:
-            The S3Asset object with full details.
+            The Asset object with full details.
 
         Raises:
             NotFoundError: If the asset does not exist.
@@ -487,7 +487,7 @@ class BooksService(BaseService):
         response = await self._get(
             self._format_endpoint(Endpoints.BOOK_ASSET, book_id=book_id, asset_id=asset_id)
         )
-        return S3Asset.model_validate(response.json())
+        return Asset.model_validate(response.json())
 
     async def upload_asset(
         self,
@@ -495,7 +495,7 @@ class BooksService(BaseService):
         filename: str,
         content: bytes,
         content_type: str | None = None,
-    ) -> S3Asset:
+    ) -> Asset:
         """Upload a new asset for a book.
 
         Uploads a file to S3 storage and associates it with the book.
@@ -507,7 +507,7 @@ class BooksService(BaseService):
             content_type: The MIME type of the file. If not provided, inferred from filename.
 
         Returns:
-            The created S3Asset object with the public URL and metadata.
+            The created Asset object with the public URL and metadata.
 
         Raises:
             NotFoundError: If the book does not exist.
@@ -521,7 +521,7 @@ class BooksService(BaseService):
             self._format_endpoint(Endpoints.BOOK_ASSET_UPLOAD, book_id=book_id),
             file=(filename, content, content_type),
         )
-        return S3Asset.model_validate(response.json())
+        return Asset.model_validate(response.json())
 
     async def delete_asset(
         self,

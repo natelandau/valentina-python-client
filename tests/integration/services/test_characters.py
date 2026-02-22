@@ -9,6 +9,7 @@ from httpx import Response
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
 from vclient.models import (
+    Asset,
     Character,
     CharacterHunterEdge,
     EdgeAndPerks,
@@ -20,7 +21,6 @@ from vclient.models import (
     PaginatedResponse,
     Perk,
     RollStatistics,
-    S3Asset,
     VampireAttributesCreate,
     VampireAttributesUpdate,
     WerewolfAttributesCreate,
@@ -968,11 +968,11 @@ class TestCharactersServiceAssets:
             "char123"
         )
 
-        # Then: Returns paginated S3Asset objects
+        # Then: Returns paginated Asset objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], S3Asset)
+        assert isinstance(result.items[0], Asset)
 
     @respx.mock
     async def test_get_asset(self, vclient, base_url, asset_response_data):
@@ -991,9 +991,9 @@ class TestCharactersServiceAssets:
             "char123", asset_id
         )
 
-        # Then: Returns S3Asset object
+        # Then: Returns Asset object
         assert route.called
-        assert isinstance(result, S3Asset)
+        assert isinstance(result, Asset)
         assert result.id == "asset123"
 
     @respx.mock
@@ -1035,9 +1035,9 @@ class TestCharactersServiceAssets:
             content_type="image/png",
         )
 
-        # Then: Returns S3Asset object
+        # Then: Returns Asset object
         assert route.called
-        assert isinstance(result, S3Asset)
+        assert isinstance(result, Asset)
         assert result.id == "asset123"
 
 

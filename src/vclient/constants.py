@@ -55,10 +55,10 @@ HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
 RollResultType = Literal["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"]
-S3AssetParentType = Literal[
+AssetParentType = Literal[
     "character", "campaign", "campaignbook", "campaignchapter", "user", "company", "unknown"
 ]
-S3AssetType = Literal["image", "text", "audio", "video", "document", "archive", "other"]
+AssetType = Literal["image", "text", "audio", "video", "document", "archive", "other"]
 SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
 UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER"]
 WerewolfRenown = Literal["HONOR", "GLORY", "WISDOM"]

@@ -6,13 +6,13 @@ import respx
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError, RequestValidationError
 from vclient.models import (
+    Asset,
     CampaignExperience,
     DiscordProfile,
     Note,
     PaginatedResponse,
     Quickroll,
     RollStatistics,
-    S3Asset,
     User,
 )
 
@@ -503,11 +503,11 @@ class TestUsersServiceAssets:
         # When: Listing assets
         result = await vclient.users(company_id).list_assets(user_id)
 
-        # Then: Returns PaginatedResponse with S3Asset objects
+        # Then: Returns PaginatedResponse with Asset objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
-        assert isinstance(result.items[0], S3Asset)
+        assert isinstance(result.items[0], Asset)
 
     @respx.mock
     async def test_get_asset(self, vclient, base_url, asset_response_data):
@@ -523,9 +523,9 @@ class TestUsersServiceAssets:
         # When: Getting the asset
         result = await vclient.users(company_id).get_asset(user_id, asset_id)
 
-        # Then: Returns S3Asset object
+        # Then: Returns Asset object
         assert route.called
-        assert isinstance(result, S3Asset)
+        assert isinstance(result, Asset)
         assert result.id == "asset123"
 
     @respx.mock
@@ -563,9 +563,9 @@ class TestUsersServiceAssets:
             content_type="image/png",
         )
 
-        # Then: Returns S3Asset object
+        # Then: Returns Asset object
         assert route.called
-        assert isinstance(result, S3Asset)
+        assert isinstance(result, Asset)
         assert result.id == "asset123"
 
 

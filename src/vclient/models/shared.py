@@ -6,10 +6,10 @@ from typing import Annotated, Any
 from pydantic import BaseModel, Field
 
 from vclient.constants import (
+    AssetParentType,
+    AssetType,
     CharacterClass,
     GameVersion,
-    S3AssetParentType,
-    S3AssetType,
     SpecialtyType,
     WerewolfRenown,
 )
@@ -31,7 +31,7 @@ class NameDescriptionSubDocument(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class S3Asset(BaseModel):
+class Asset(BaseModel):
     """Response model for an S3 asset.
 
     Represents a file asset stored in S3, including its URL and metadata.
@@ -40,13 +40,13 @@ class S3Asset(BaseModel):
     id: str
     date_created: datetime
     date_modified: datetime
-    asset_type: S3AssetType
+    asset_type: AssetType
     mime_type: str
     original_filename: str
     public_url: str
     uploaded_by: str
     company_id: str
-    parent_type: S3AssetParentType | None = None
+    parent_type: AssetParentType | None = None
     parent_id: str | None = None
 
 
@@ -197,13 +197,13 @@ class CharacterSpecialty(BaseModel):
 
 
 __all__ = [
+    "Asset",
     "CharacterSpecialty",
     "NameDescriptionSubDocument",
     "Note",
     "NoteCreate",
     "NoteUpdate",
     "RollStatistics",
-    "S3Asset",
     "Trait",
     "WerewolfGift",
     "WerewolfRite",

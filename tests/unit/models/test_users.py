@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models import (
+    Asset,
     CampaignExperience,
     DiscordProfile,
     Note,
@@ -13,7 +14,6 @@ from vclient.models import (
     QuickrollCreate,
     QuickrollUpdate,
     RollStatistics,
-    S3Asset,
     User,
     UserCreate,
     UserUpdate,
@@ -403,13 +403,13 @@ class TestRollStatistics:
         assert len(stats.top_traits) == 2
 
 
-class TestS3Asset:
-    """Tests for S3Asset model."""
+class TestAsset:
+    """Tests for Asset model."""
 
     def test_all_fields(self):
         """Verify creating asset with all fields."""
         # When: Creating asset
-        asset = S3Asset(
+        asset = Asset(
             id="asset123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
@@ -436,7 +436,7 @@ class TestS3Asset:
         """Verify invalid asset type is rejected."""
         # When/Then: Creating asset with invalid asset type raises error
         with pytest.raises(PydanticValidationError):
-            S3Asset(
+            Asset(
                 id="asset123",
                 date_created="2024-01-15T10:30:00Z",
                 date_modified="2024-01-15T10:30:00Z",

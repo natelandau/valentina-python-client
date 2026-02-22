@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT, UserRole
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    Asset,
     CampaignExperience,
     Note,
     NoteCreate,
@@ -16,7 +17,6 @@ from vclient.models import (
     QuickrollCreate,
     QuickrollUpdate,
     RollStatistics,
-    S3Asset,
     User,
     UserCreate,
     UserUpdate,
@@ -281,7 +281,7 @@ class UsersService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
-    ) -> PaginatedResponse[S3Asset]:
+    ) -> PaginatedResponse[Asset]:
         """Retrieve a paginated list of assets for a user.
 
         Args:
@@ -290,7 +290,7 @@ class UsersService(BaseService):
             offset: Number of items to skip from the beginning (default 0).
 
         Returns:
-            A PaginatedResponse containing S3Asset objects and pagination metadata.
+            A PaginatedResponse containing Asset objects and pagination metadata.
 
         Raises:
             NotFoundError: If the user does not exist.
@@ -298,7 +298,7 @@ class UsersService(BaseService):
         """
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.USER_ASSETS, user_id=user_id),
-            S3Asset,
+            Asset,
             limit=limit,
             offset=offset,
         )
@@ -307,7 +307,7 @@ class UsersService(BaseService):
         self,
         user_id: str,
         asset_id: str,
-    ) -> S3Asset:
+    ) -> Asset:
         """Retrieve details of a specific asset including its URL and metadata.
 
         Args:
@@ -315,7 +315,7 @@ class UsersService(BaseService):
             asset_id: The ID of the asset to retrieve.
 
         Returns:
-            The S3Asset object with full details.
+            The Asset object with full details.
 
         Raises:
             NotFoundError: If the asset does not exist.
@@ -324,7 +324,7 @@ class UsersService(BaseService):
         response = await self._get(
             self._format_endpoint(Endpoints.USER_ASSET, user_id=user_id, asset_id=asset_id)
         )
-        return S3Asset.model_validate(response.json())
+        return Asset.model_validate(response.json())
 
     async def delete_asset(
         self,
@@ -353,7 +353,7 @@ class UsersService(BaseService):
         filename: str,
         content: bytes,
         content_type: str | None = None,
-    ) -> S3Asset:
+    ) -> Asset:
         """Upload a new asset for a user.
 
         Uploads a file to S3 storage and associates it with the user.
@@ -365,7 +365,7 @@ class UsersService(BaseService):
             content_type: The MIME type of the file. If not provided, inferred from filename.
 
         Returns:
-            The created S3Asset object with the public URL and metadata.
+            The created Asset object with the public URL and metadata.
 
         Raises:
             NotFoundError: If the user does not exist.
@@ -379,7 +379,7 @@ class UsersService(BaseService):
             self._format_endpoint(Endpoints.USER_ASSET_UPLOAD, user_id=user_id),
             file=(filename, content, content_type),
         )
-        return S3Asset.model_validate(response.json())
+        return Asset.model_validate(response.json())
 
     # -------------------------------------------------------------------------
     # Experience Methods
