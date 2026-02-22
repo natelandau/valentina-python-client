@@ -36,3 +36,17 @@ icon: lucide/users
 | `username`    | `str \| None` | Discord username |
 | `global_name` | `str \| None` | Display name     |
 | `avatar_url`  | `str \| None` | Avatar URL       |
+
+## Quickroll
+
+Pre-configured dice pool for frequently used trait combinations. Speed up gameplay by saving common rolls like "Strength + Brawl" or "Wits + Investigation".
+
+| Field           | Type          | Description                |
+| --------------- | ------------- | -------------------------- |
+| `id`            | `str`         | Unique identifier          |
+| `date_created`  | `datetime`    | Creation timestamp         |
+| `date_modified` | `datetime`    | Last modified timestamp    |
+| `name`          | `str`         | Quickroll name             |
+| `description`   | `str \| None` | Optional description       |
+| `user_id`       | `str`         | Owner user ID              |
+| `trait_ids`     | `list[str]`   | Trait IDs in the dice pool |
