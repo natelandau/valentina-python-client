@@ -170,7 +170,6 @@ class VClient:
 
         headers = {
             "Accept": "application/json",
-            "Content-Type": "application/json",
             "User-Agent": user_agent,
             **self._config.headers,
         }
