@@ -1,3 +1,9 @@
+## v1.4.1 (2026-02-22)
+
+### Refactor
+
+- **models**: rename Asset to be backend agnostic
+
 ## v1.4.0 (2026-02-22)
 
 ### Feat
