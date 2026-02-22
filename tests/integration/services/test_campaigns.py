@@ -439,8 +439,8 @@ class TestCampaignsServiceAssets:
     """Tests for CampaignsService asset methods."""
 
     @respx.mock
-    async def test_list_assets(self, vclient, base_url, asset_response_data):
-        """Verify listing campaign assets."""
+    async def test_get_assets_page(self, vclient, base_url, asset_response_data):
+        """Verify getting a page of campaign assets."""
         # Given: A mocked assets endpoint
         company_id = "company123"
         user_id = "user123"
@@ -458,14 +458,42 @@ class TestCampaignsServiceAssets:
             },
         )
 
-        # When: Listing assets
-        result = await vclient.campaigns(user_id, company_id).list_assets(campaign_id)
+        # When: Getting a page of assets
+        result = await vclient.campaigns(user_id, company_id).get_assets_page(campaign_id)
 
         # Then: Returns paginated Asset objects
         assert route.called
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
         assert isinstance(result.items[0], Asset)
+
+    @respx.mock
+    async def test_list_all_assets(self, vclient, base_url, asset_response_data):
+        """Verify list_all_assets returns all assets."""
+        # Given: A mocked assets endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        respx.get(
+            f"{base_url}{Endpoints.CAMPAIGN_ASSETS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id)}",
+            params={"limit": "100", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [asset_response_data],
+                "limit": 100,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Calling list_all_assets
+        result = await vclient.campaigns(user_id, company_id).list_all_assets(campaign_id)
+
+        # Then: Returns list of Asset objects
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], Asset)
 
     @respx.mock
     async def test_get_asset(self, vclient, base_url, asset_response_data):
