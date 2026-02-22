@@ -1,5 +1,6 @@
 """Service for interacting with the Campaigns API."""
 
+import mimetypes
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
@@ -329,7 +330,7 @@ class CampaignsService(BaseService):
         campaign_id: str,
         filename: str,
         content: bytes,
-        content_type: str = "application/octet-stream",
+        content_type: str | None = None,
     ) -> S3Asset:
         """Upload a new asset for a campaign.
 
@@ -339,7 +340,7 @@ class CampaignsService(BaseService):
             campaign_id: The ID of the campaign to upload the asset for.
             filename: The original filename of the asset.
             content: The raw bytes of the file to upload.
-            content_type: The MIME type of the file (default: application/octet-stream).
+            content_type: The MIME type of the file. If not provided, inferred from filename.
 
         Returns:
             The created S3Asset object with the public URL and metadata.
@@ -349,6 +350,9 @@ class CampaignsService(BaseService):
             AuthorizationError: If you don't have appropriate access.
             ValidationError: If the file is invalid or exceeds size limits.
         """
+        if content_type is None:
+            content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+
         response = await self._post_file(
             self._format_endpoint(Endpoints.CAMPAIGN_ASSET_UPLOAD, campaign_id=campaign_id),
             file=(filename, content, content_type),
