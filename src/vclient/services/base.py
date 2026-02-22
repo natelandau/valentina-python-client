@@ -577,7 +577,7 @@ class BaseService:
         return await self._request(
             "POST",
             path,
-            files={"file": (filename, content, content_type)},
+            files={"data": (filename, content, content_type)},
             headers=self._build_idempotency_headers(idempotency_key),
         )
 
