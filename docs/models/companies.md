@@ -8,35 +8,36 @@ Models for managing companies, their settings, and developer access permissions.
 
 ## Company
 
-| Field           | Type                      | Description             |
-| --------------- | ------------------------- | ----------------------- |
-| `id`            | `str`                     | Unique identifier       |
-| `date_created`  | `datetime`                | Creation timestamp      |
-| `date_modified` | `datetime`                | Last modified timestamp |
-| `name`          | `str`                     | Company name            |
-| `description`   | `str \| None`             | Company description     |
-| `email`         | `str`                     | Contact email           |
-| `user_ids`      | `list[str]`               | Associated user IDs     |
-| `settings`      | `CompanySettings \| None` | Company configuration   |
+| Field                   | Type                      | Description                                 |
+| ----------------------- | ------------------------- | ------------------------------------------- |
+| `id`                    | `str`                     | Unique identifier                           |
+| `date_created`          | `datetime`                | Creation timestamp                          |
+| `date_modified`         | `datetime`                | Last modified timestamp                     |
+| `name`                  | `str`                     | Company name                                |
+| `description`           | `str \| None`             | Company description                         |
+| `email`                 | `str`                     | Contact email                               |
+| `user_ids`              | `list[str]`               | Associated user IDs                         |
+| `resources_modified_at` | `datetime`                | Last modified timestamp for child resources |
+| `settings`              | `CompanySettings \| None` | Company configuration                       |
 
 ## NewCompanyResponse
 
 Returned when creating a new company. Contains both the created company and the admin user automatically generated for it.
 
-| Field        | Type      | Description                           |
-| ------------ | --------- | ------------------------------------- |
-| `company`    | `Company` | The newly created company             |
-| `admin_user` | `User`    | Admin user created for the company    |
+| Field        | Type      | Description                        |
+| ------------ | --------- | ---------------------------------- |
+| `company`    | `Company` | The newly created company          |
+| `admin_user` | `User`    | Admin user created for the company |
 
 ## CompanyPermissions
 
 Returned when granting or modifying developer access to a company.
 
-| Field         | Type              | Description              |
-| ------------- | ----------------- | ------------------------ |
-| `company_id`  | `str`             | Company ID               |
-| `name`        | `str \| None`     | Company name             |
-| `permission`  | `PermissionLevel` | Granted permission level |
+| Field        | Type              | Description              |
+| ------------ | ----------------- | ------------------------ |
+| `company_id` | `str`             | Company ID               |
+| `name`       | `str \| None`     | Company name             |
+| `permission` | `PermissionLevel` | Granted permission level |
 
 ## CompanySettings
 
