@@ -78,6 +78,7 @@ class TestCompany:
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
             name="Test",
+            resources_modified_at="2024-01-15T10:30:00Z",
             description=None,
             email="test@example.com",
             user_ids=[],
@@ -108,6 +109,7 @@ class TestCompany:
             description="A complete company",
             email="full@example.com",
             user_ids=["user1", "user2"],
+            resources_modified_at="2024-01-15T10:30:00Z",
             settings=settings,
         )
 
@@ -133,6 +135,7 @@ class TestCompany:
             "description": "From API",
             "email": "api@example.com",
             "user_ids": ["u1"],
+            "resources_modified_at": "2024-01-15T10:30:00Z",
             "settings": {
                 "character_autogen_xp_cost": 10,
                 "character_autogen_num_choices": 3,
@@ -160,6 +163,7 @@ class TestCompany:
                 date_created="2024-01-15T10:30:00Z",
                 date_modified="2024-01-15T10:30:00Z",
                 name="Test",
+                resources_modified_at="2024-01-15T10:30:00Z",
                 email="test@example.com",
                 # Missing: description, user_ids, settings
             )
