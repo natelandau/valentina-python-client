@@ -1,3 +1,9 @@
+## v1.5.1 (2026-02-24)
+
+### Fix
+
+- **company**: add resources_modified_at field (#30)
+
 ## v1.5.0 (2026-02-22)
 
 ### Feat
