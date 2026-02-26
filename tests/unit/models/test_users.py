@@ -112,14 +112,18 @@ class TestUser:
             id="user123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
-            name="Test User",
+            name_first="Test",
+            name_last="User",
+            username="testuser",
             email="test@example.com",
             company_id="company123",
         )
 
         # Then: User is created correctly with defaults
         assert user.id == "user123"
-        assert user.name == "Test User"
+        assert user.name_first == "Test"
+        assert user.name_last == "User"
+        assert user.username == "testuser"
         assert user.email == "test@example.com"
         assert user.company_id == "company123"
         assert user.role is None
@@ -138,7 +142,9 @@ class TestUser:
             id="user123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
-            name="Full User",
+            name_first="Full",
+            name_last="User",
+            username="fulluser",
             email="full@example.com",
             role="PLAYER",
             company_id="company123",
@@ -161,7 +167,9 @@ class TestUser:
             "id": "507f1f77bcf86cd799439011",
             "date_created": "2024-01-15T10:30:00Z",
             "date_modified": "2024-01-15T10:30:00Z",
-            "name": "API User",
+            "name_first": "API",
+            "name_last": "User",
+            "username": "apiuser",
             "email": "api@example.com",
             "role": "STORYTELLER",
             "company_id": "company123",
@@ -180,7 +188,9 @@ class TestUser:
 
         # Then: User is created correctly
         assert user.id == "507f1f77bcf86cd799439011"
-        assert user.name == "API User"
+        assert user.name_first == "API"
+        assert user.name_last == "User"
+        assert user.username == "apiuser"
         assert user.role == "STORYTELLER"
         assert user.discord_profile.username == "apiuser"
         assert user.campaign_experience[0].xp_current == 100
@@ -193,7 +203,9 @@ class TestUser:
                 id="user123",
                 date_created="2024-01-15T10:30:00Z",
                 date_modified="2024-01-15T10:30:00Z",
-                name="Test",
+                name_first="Test",
+                name_last="User",
+                username="testuser",
                 email="test@example.com",
                 role="INVALID",
                 company_id="company123",
@@ -207,14 +219,18 @@ class TestUserCreate:
         """Verify creating request with required fields only."""
         # When: Creating request with required fields
         request = UserCreate(
-            name="Test User",
+            name_first="Test",
+            name_last="User",
+            username="testuser",
             email="test@example.com",
             role="PLAYER",
             requesting_user_id="requester123",
         )
 
         # Then: Request is created correctly
-        assert request.name == "Test User"
+        assert request.name_first == "Test"
+        assert request.name_last == "User"
+        assert request.username == "testuser"
         assert request.email == "test@example.com"
         assert request.role == "PLAYER"
         assert request.requesting_user_id == "requester123"
@@ -227,7 +243,9 @@ class TestUserCreate:
 
         # When: Creating request with all fields
         request = UserCreate(
-            name="Full User",
+            name_first="Full",
+            name_last="User",
+            username="fulluser",
             email="full@example.com",
             role="ADMIN",
             requesting_user_id="requester123",
@@ -235,7 +253,9 @@ class TestUserCreate:
         )
 
         # Then: All fields are set correctly
-        assert request.name == "Full User"
+        assert request.name_first == "Full"
+        assert request.name_last == "User"
+        assert request.username == "fulluser"
         assert request.discord_profile.id == "discord123"
 
     def test_name_validation_min_length(self):
@@ -243,7 +263,8 @@ class TestUserCreate:
         # When/Then: Creating request with name too short raises error
         with pytest.raises(PydanticValidationError):
             UserCreate(
-                name="AB",
+                name_first="AB",
+                username="ab",
                 email="test@example.com",
                 role="PLAYER",
                 requesting_user_id="requester123",
@@ -254,7 +275,8 @@ class TestUserCreate:
         # When/Then: Creating request with name too long raises error
         with pytest.raises(PydanticValidationError):
             UserCreate(
-                name="A" * 51,
+                name_first="A" * 51,
+                username="a" * 51,
                 email="test@example.com",
                 role="PLAYER",
                 requesting_user_id="requester123",
@@ -264,7 +286,8 @@ class TestUserCreate:
         """Verify model_dump with exclude_unset excludes unset fields."""
         # Given: Request with required fields only
         request = UserCreate(
-            name="Test",
+            name_first="Test",
+            username="testuser",
             email="test@example.com",
             role="PLAYER",
             requesting_user_id="requester123",
@@ -275,7 +298,8 @@ class TestUserCreate:
 
         # Then: Only set fields are included
         assert data == {
-            "name": "Test",
+            "name_first": "Test",
+            "username": "testuser",
             "email": "test@example.com",
             "role": "PLAYER",
             "requesting_user_id": "requester123",
@@ -292,7 +316,8 @@ class TestUserUpdate:
 
         # Then: All other fields are None
         assert request.requesting_user_id == "requester123"
-        assert request.name is None
+        assert request.name_first is None
+        assert request.name_last is None
         assert request.email is None
         assert request.role is None
         assert request.discord_profile is None
@@ -301,13 +326,15 @@ class TestUserUpdate:
         """Verify creating request with some fields."""
         # When: Creating request with name and role
         request = UserUpdate(
-            name="Updated Name",
+            name_first="Updated",
+            name_last="Name",
             role="STORYTELLER",
             requesting_user_id="requester123",
         )
 
         # Then: Only specified fields are set
-        assert request.name == "Updated Name"
+        assert request.name_first == "Updated"
+        assert request.name_last == "Name"
         assert request.role == "STORYTELLER"
         assert request.email is None
 
@@ -315,7 +342,8 @@ class TestUserUpdate:
         """Verify model_dump with exclude_unset only includes set fields."""
         # Given: Request with only some fields set
         request = UserUpdate(
-            name="Updated Name",
+            name_first="Updated",
+            name_last="Name",
             requesting_user_id="requester123",
         )
 
@@ -324,22 +352,24 @@ class TestUserUpdate:
 
         # Then: Only set fields are in the output
         assert data == {
-            "name": "Updated Name",
+            "name_first": "Updated",
+            "name_last": "Name",
             "requesting_user_id": "requester123",
         }
 
     def test_update_explicit_none_for_constrained_fields(self):
         """Verify explicitly passing None for constrained optional fields does not raise."""
         # When: Creating an update request with None for constrained name field
-        request = UserUpdate(name=None, requesting_user_id="requester123")
+        request = UserUpdate(name_first=None, name_last=None, requesting_user_id="requester123")
 
         # Then: Name is None without validation errors
-        assert request.name is None
+        assert request.name_first is None
+        assert request.name_last is None
 
     def test_update_constrained_fields_still_validate_non_none(self):
         """Verify constraints still apply when a non-None value is provided."""
         with pytest.raises(PydanticValidationError):
-            UserUpdate(name="ab", requesting_user_id="requester123")
+            UserUpdate(name_first="ab", name_last="ab", requesting_user_id="requester123")
 
 
 class TestRollStatistics:

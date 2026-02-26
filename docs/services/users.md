@@ -50,14 +50,14 @@ users = users_service(company_id="COMPANY_ID")
 
 ### Asset Management
 
-| Method                                     | Returns                    | Description             |
-| ------------------------------------------ | -------------------------- | ----------------------- |
-| `get_assets_page(user_id, limit=10, offset=0)` | `PaginatedResponse[Asset]` | Get a page of assets     |
-| `list_all_assets(user_id)`                      | `list[Asset]`              | Get all assets           |
-| `iter_all_assets(user_id, limit=100)`           | `AsyncIterator[Asset]`     | Iterate through assets   |
-| `get_asset(user_id, asset_id)`                  | `Asset`                    | Retrieve an asset by ID  |
-| `upload_asset(user_id, filename, content)`      | `Asset`                    | Upload a new file        |
-| `delete_asset(user_id, asset_id)`               | `None`                     | Delete an asset          |
+| Method                                         | Returns                    | Description             |
+| ---------------------------------------------- | -------------------------- | ----------------------- |
+| `get_assets_page(user_id, limit=10, offset=0)` | `PaginatedResponse[Asset]` | Get a page of assets    |
+| `list_all_assets(user_id)`                     | `list[Asset]`              | Get all assets          |
+| `iter_all_assets(user_id, limit=100)`          | `AsyncIterator[Asset]`     | Iterate through assets  |
+| `get_asset(user_id, asset_id)`                 | `Asset`                    | Retrieve an asset by ID |
+| `upload_asset(user_id, filename, content)`     | `Asset`                    | Upload a new file       |
+| `delete_asset(user_id, asset_id)`              | `None`                     | Delete an asset         |
 
 ### Notes Management
 
@@ -102,16 +102,20 @@ from vclient.models import UserCreate
 
 # Option 1: Use a model object (preferred)
 request = UserCreate(
-    name="John Doe",
+    name_first="John",
+    name_last="Doe",
+    username="john_doe",
     email="john@example.com",
     role="PLAYER",
     requesting_user_id="admin_user_id"
 )
-user = await users.create(request)
+user = await users.create(request=request)
 
 # Option 2: Pass fields as keyword arguments
 user = await users.create(
-    name="John Doe",
+    name_first="John",
+    name_last="Doe",
+    username="john_doe",
     email="john@example.com",
     role="PLAYER",
     requesting_user_id="admin_user_id"
