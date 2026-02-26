@@ -124,7 +124,8 @@ class TestUsersServiceGetPage:
         assert isinstance(result, PaginatedResponse)
         assert len(result.items) == 1
         assert isinstance(result.items[0], User)
-        assert result.items[0].name == "Test User"
+        assert result.items[0].name_first == "Test"
+        assert result.items[0].name_last == "User"
         assert result.total == 1
 
     @respx.mock
@@ -209,7 +210,7 @@ class TestUsersServiceIterAll:
         """Verify iter_all yields User objects across pages."""
         # Given: Mocked endpoints for multiple pages
         company_id = "company123"
-        user2 = {**user_response_data, "id": "507f1f77bcf86cd799439012", "name": "User 2"}
+        user2 = {**user_response_data, "id": "507f1f77bcf86cd799439012", "name_first": "User 2"}
         respx.get(
             f"{base_url}{Endpoints.USERS.format(company_id=company_id)}",
             params={"limit": "1", "offset": "0"},
@@ -241,8 +242,8 @@ class TestUsersServiceIterAll:
         # Then: All users are yielded as User objects
         assert len(users) == 2
         assert all(isinstance(u, User) for u in users)
-        assert users[0].name == "Test User"
-        assert users[1].name == "User 2"
+        assert users[0].name_first == "Test"
+        assert users[1].name_first == "User 2"
 
 
 class TestUsersServiceGet:
@@ -265,7 +266,9 @@ class TestUsersServiceGet:
         assert route.called
         assert isinstance(result, User)
         assert result.id == user_id
-        assert result.name == "Test User"
+        assert result.name_first == "Test"
+        assert result.name_last == "User"
+        assert result.username == "testuser"
         assert result.email == "test@example.com"
 
     @respx.mock
@@ -297,7 +300,9 @@ class TestUsersServiceCreate:
 
         # When: Creating a user with minimal data
         result = await vclient.users(company_id).create(
-            name="Test User",
+            name_first="Test",
+            name_last="User",
+            username="testuser",
             email="test@example.com",
             role="PLAYER",
             requesting_user_id="requester123",
@@ -306,14 +311,18 @@ class TestUsersServiceCreate:
         # Then: Returns created User object
         assert route.called
         assert isinstance(result, User)
-        assert result.name == "Test User"
+        assert result.name_first == "Test"
+        assert result.name_last == "User"
+        assert result.username == "testuser"
 
         # Verify request body
         request = route.calls.last.request
         import json
 
         body = json.loads(request.content)
-        assert body["name"] == "Test User"
+        assert body["name_first"] == "Test"
+        assert body["name_last"] == "User"
+        assert body["username"] == "testuser"
         assert body["email"] == "test@example.com"
         assert body["role"] == "PLAYER"
         assert body["requesting_user_id"] == "requester123"
@@ -330,7 +339,9 @@ class TestUsersServiceCreate:
         # When: Creating a user with Discord profile
         discord = DiscordProfile(id="discord123", username="testuser")
         result = await vclient.users(company_id).create(
-            name="Test User",
+            name_first="Test",
+            name_last="User",
+            username="testuser",
             email="test@example.com",
             role="PLAYER",
             requesting_user_id="requester123",
@@ -354,7 +365,8 @@ class TestUsersServiceCreate:
         # When/Then: Creating with invalid data raises RequestValidationError
         with pytest.raises(RequestValidationError) as exc_info:
             await vclient.users("company123").create(
-                name="AB",
+                name_first="AB",
+                username="abcde",
                 email="test@example.com",
                 role="PLAYER",
                 requesting_user_id="requester123",
@@ -362,7 +374,7 @@ class TestUsersServiceCreate:
 
         # Verify error details are accessible
         assert len(exc_info.value.errors) == 1
-        assert exc_info.value.errors[0]["loc"] == ("name",)
+        assert exc_info.value.errors[0]["loc"] == ("name_first",)
 
 
 class TestUsersServiceUpdate:
@@ -374,7 +386,7 @@ class TestUsersServiceUpdate:
         # Given: A mocked update endpoint
         company_id = "company123"
         user_id = "507f1f77bcf86cd799439011"
-        updated_data = {**user_response_data, "name": "Updated Name"}
+        updated_data = {**user_response_data, "name_first": "Updated"}
         route = respx.patch(
             f"{base_url}{Endpoints.USER.format(company_id=company_id, user_id=user_id)}"
         ).respond(200, json=updated_data)
@@ -383,20 +395,20 @@ class TestUsersServiceUpdate:
         result = await vclient.users(company_id).update(
             user_id,
             requesting_user_id="requester123",
-            name="Updated Name",
+            name_first="Updated",
         )
 
         # Then: Returns updated User object
         assert route.called
         assert isinstance(result, User)
-        assert result.name == "Updated Name"
+        assert result.name_first == "Updated"
 
         # Verify request body
         request = route.calls.last.request
         import json
 
         body = json.loads(request.content)
-        assert body == {"name": "Updated Name", "requesting_user_id": "requester123"}
+        assert body == {"name_first": "Updated", "requesting_user_id": "requester123"}
 
     @respx.mock
     async def test_update_user_not_found(self, vclient, base_url):

@@ -13,7 +13,9 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `id`                  | `str`                      | Unique identifier                 |
 | `date_created`        | `datetime`                 | Creation timestamp                |
 | `date_modified`       | `datetime`                 | Last modified timestamp           |
-| `name`                | `str`                      | Display name                      |
+| `name_first`          | `str`                      | First name                        |
+| `name_last`           | `str`                      | Last name                         |
+| `username`            | `str`                      | Username                          |
 | `email`               | `str`                      | Email address                     |
 | `role`                | `UserRole \| None`         | Role (ADMIN, STORYTELLER, PLAYER) |
 | `company_id`          | `str`                      | Company ID                        |
@@ -67,8 +69,8 @@ Request body for creating a new quickroll.
 
 Request body for updating a quickroll. Only include fields that need to change.
 
-| Field         | Type               | Description           |
-| ------------- | ------------------ | --------------------- |
-| `name`        | `str \| None`      | Updated name          |
-| `description` | `str \| None`      | Updated description   |
-| `trait_ids`   | `list[str] \| None`| Updated trait IDs     |
+| Field         | Type                | Description         |
+| ------------- | ------------------- | ------------------- |
+| `name`        | `str \| None`       | Updated name        |
+| `description` | `str \| None`       | Updated description |
+| `trait_ids`   | `list[str] \| None` | Updated trait IDs   |

@@ -57,7 +57,9 @@ class User(BaseModel):
     id: str
     date_created: datetime
     date_modified: datetime
-    name: str
+    name_first: str | None = None
+    name_last: str | None = None
+    username: str
     email: str
     role: UserRole | None = None
     company_id: str
@@ -77,7 +79,9 @@ class UserCreate(BaseModel):
     Used to construct the JSON payload for user creation.
     """
 
-    name: str = Field(min_length=3, max_length=50)
+    name_first: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    name_last: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    username: str = Field(min_length=3, max_length=50)
     email: str
     role: UserRole
     discord_profile: DiscordProfile | None = None
@@ -90,7 +94,9 @@ class UserUpdate(BaseModel):
     Only include fields that need to be changed; omitted fields remain unchanged.
     """
 
-    name: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    name_first: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    name_last: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    username: Annotated[str, Field(min_length=3, max_length=50)] | None = None
     email: str | None = None
     role: UserRole | None = None
     discord_profile: DiscordProfile | None = None

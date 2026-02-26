@@ -236,7 +236,8 @@ class TestCompaniesServiceCreate:
         assert route.called
         assert isinstance(result, NewCompanyResponse)
         assert result.company.name == "Test Company"
-        assert result.admin_user.name == "Test User"
+        assert result.admin_user.name_first == "Test"
+        assert result.admin_user.name_last == "User"
 
         # Verify request body
         request = route.calls.last.request
@@ -276,7 +277,8 @@ class TestCompaniesServiceCreate:
         assert route.called
         assert isinstance(result, NewCompanyResponse)
         assert result.company.name == "Test Company"
-        assert result.admin_user.name == "Test User"
+        assert result.admin_user.name_first == "Test"
+        assert result.admin_user.name_last == "User"
 
         # Verify request body includes all options
         request = route.calls.last.request
