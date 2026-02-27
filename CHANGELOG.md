@@ -1,3 +1,9 @@
+## v1.5.2 (2026-02-27)
+
+### Fix
+
+- **user**: support detailed name fields (#31)
+
 ## v1.5.1 (2026-02-24)
 
 ### Fix
