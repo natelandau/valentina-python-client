@@ -1,3 +1,9 @@
+## v1.6.0 (2026-02-28)
+
+### Feat
+
+- **companies**: add get_statistics method (#32)
+
 ## v1.5.2 (2026-02-27)
 
 ### Fix
