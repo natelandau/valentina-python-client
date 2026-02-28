@@ -11,6 +11,7 @@ from vclient.models import (
     CompanyUpdate,
     NewCompanyResponse,
     PaginatedResponse,
+    RollStatistics,
     _GrantAccess,
 )
 from vclient.services.base import BaseService
@@ -213,3 +214,31 @@ class CompaniesService(BaseService):
             json=body.model_dump(mode="json"),
         )
         return CompanyPermissions.model_validate(response.json())
+
+    async def get_statistics(
+        self,
+        company_id: str,
+        *,
+        num_top_traits: int = 5,
+    ) -> RollStatistics:
+        """Retrieve aggregated dice roll statistics for a specific company.
+
+        Includes success rates, critical frequencies, most-used traits, etc.
+        across all users and campaigns in the company.
+
+        Args:
+            company_id: The ID of the company to get statistics for.
+            num_top_traits: Number of top traits to include (default 5).
+
+        Returns:
+            RollStatistics object with aggregated statistics.
+
+        Raises:
+            NotFoundError: If the company does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        response = await self._get(
+            Endpoints.COMPANY_STATISTICS.format(company_id=company_id),
+            params={"num_top_traits": num_top_traits},
+        )
+        return RollStatistics.model_validate(response.json())
