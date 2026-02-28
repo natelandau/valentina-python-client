@@ -39,6 +39,12 @@ companies = companies_service()
 | ---------------------------------------------------- | -------------------- | ----------------------------------------- |
 | `grant_access(company_id, developer_id, permission)` | `CompanyPermissions` | Grant, modify, or revoke developer access |
 
+### Statistics
+
+| Method                                         | Returns          | Description                    |
+| ---------------------------------------------- | ---------------- | ------------------------------ |
+| `get_statistics(company_id, num_top_traits=5)` | `RollStatistics` | Retrieve aggregated roll stats |
+
 ## Permission Levels
 
 | Level    | Description                                 |
@@ -83,6 +89,19 @@ permissions = await companies.grant_access(
     permission="ADMIN"
 )
 print(f"Granted {permissions.permission} access")
+```
+
+## Statistics
+
+View aggregated dice roll statistics for a company.
+
+```python
+stats = await companies.get_statistics(company.id, num_top_traits=10)
+
+print(f"Total rolls: {stats.total_rolls}")
+print(f"Success rate: {stats.success_percentage:.1f}%")
+print(f"Critical rate: {stats.criticals_percentage:.1f}%")
+print(f"Botch rate: {stats.botch_percentage:.1f}%")
 ```
 
 See [Response Models](../models/companies.md) for `Company`, `CompanySettings`, and related types.

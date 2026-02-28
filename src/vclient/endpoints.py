@@ -32,6 +32,7 @@ class Endpoints:
     COMPANIES = f"{_BASE}/companies"
     COMPANY = f"{COMPANIES}/{{company_id}}"
     COMPANY_ACCESS = f"{COMPANY}/access"
+    COMPANY_STATISTICS = f"{COMPANY}/statistics"
 
     # User endpoints
     USERS = f"{COMPANY}/users"

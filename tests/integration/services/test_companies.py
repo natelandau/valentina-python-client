@@ -11,6 +11,7 @@ from vclient.models import (
     CompanySettings,
     NewCompanyResponse,
     PaginatedResponse,
+    RollStatistics,
 )
 
 pytestmark = pytest.mark.anyio
@@ -55,6 +56,25 @@ def new_company_response_data(company_response_data: dict, user_response_data: d
     return {
         "company": company_response_data,
         "admin_user": user_response_data,
+    }
+
+
+@pytest.fixture
+def statistics_response_data() -> dict:
+    """Return sample statistics response data."""
+    return {
+        "botches": 5,
+        "successes": 50,
+        "failures": 30,
+        "criticals": 15,
+        "total_rolls": 100,
+        "average_difficulty": 6.5,
+        "average_pool": 4.2,
+        "top_traits": [{"name": "Strength", "count": 20}],
+        "criticals_percentage": 15.0,
+        "success_percentage": 50.0,
+        "failure_percentage": 30.0,
+        "botch_percentage": 5.0,
     }
 
 
@@ -531,6 +551,62 @@ class TestCompaniesServiceGrantAccess:
         # When/Then: Granting access raises AuthorizationError
         with pytest.raises(AuthorizationError):
             await vclient.companies.grant_access(company_id, "developer123", "USER")
+
+
+class TestCompaniesServiceGetStatistics:
+    """Tests for CompaniesService.get_statistics method."""
+
+    @respx.mock
+    async def test_get_statistics(self, vclient, base_url, statistics_response_data):
+        """Verify getting company statistics."""
+        # Given: A mocked statistics endpoint
+        company_id = "507f1f77bcf86cd799439011"
+        route = respx.get(
+            f"{base_url}{Endpoints.COMPANY_STATISTICS.format(company_id=company_id)}",
+            params={"num_top_traits": "5"},
+        ).respond(200, json=statistics_response_data)
+
+        # When: Getting company statistics
+        result = await vclient.companies.get_statistics(company_id)
+
+        # Then: Returns RollStatistics object with correct data
+        assert route.called
+        assert isinstance(result, RollStatistics)
+        assert result.total_rolls == 100
+        assert result.success_percentage == 50.0
+
+    @respx.mock
+    async def test_get_statistics_custom_top_traits(
+        self, vclient, base_url, statistics_response_data
+    ):
+        """Verify getting company statistics with custom num_top_traits."""
+        # Given: A mocked statistics endpoint expecting custom num_top_traits
+        company_id = "507f1f77bcf86cd799439011"
+        route = respx.get(
+            f"{base_url}{Endpoints.COMPANY_STATISTICS.format(company_id=company_id)}",
+            params={"num_top_traits": "10"},
+        ).respond(200, json=statistics_response_data)
+
+        # When: Getting statistics with custom num_top_traits
+        result = await vclient.companies.get_statistics(company_id, num_top_traits=10)
+
+        # Then: Request was made with correct params
+        assert route.called
+        assert isinstance(result, RollStatistics)
+
+    @respx.mock
+    async def test_get_statistics_not_found(self, vclient, base_url):
+        """Verify getting statistics for non-existent company raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "nonexistent"
+        respx.get(
+            f"{base_url}{Endpoints.COMPANY_STATISTICS.format(company_id=company_id)}",
+            params={"num_top_traits": "5"},
+        ).respond(404, json={"detail": "Company not found"})
+
+        # When/Then: Getting statistics raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.companies.get_statistics(company_id)
 
 
 class TestCompaniesServiceClientIntegration:
