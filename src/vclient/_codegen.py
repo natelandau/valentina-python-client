@@ -10,9 +10,7 @@ import ast
 import sys
 from pathlib import Path
 
-GENERATED_HEADER = (
-    "# AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.\n"
-)
+HEADER_COMMENT = "# AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.\n"
 
 RENAME_CLASSES: dict[str, str] = {
     "BaseService": "SyncBaseService",
@@ -275,7 +273,7 @@ def transform_file(source_path: Path) -> str:
     transformer = AsyncToSyncTransformer()
     new_tree = transformer.visit(tree)
     ast.fix_missing_locations(new_tree)
-    return GENERATED_HEADER + ast.unparse(new_tree) + "\n"
+    return HEADER_COMMENT + ast.unparse(new_tree) + "\n"
 
 
 def _write_sync_init(path: Path) -> None:
@@ -285,7 +283,7 @@ def _write_sync_init(path: Path) -> None:
         path: Path to the ``_sync/__init__.py`` file to write.
     """
     lines = [
-        GENERATED_HEADER,
+        HEADER_COMMENT,
         "from vclient._sync.client import SyncVClient",
         "from vclient._sync.registry import (",
         "    sync_books_service,",

@@ -341,8 +341,8 @@ class TestAsyncToSyncTransformer:
         assert "with httpx.Client() as client:" in result
         assert "result = client.get('/data')" in result
 
-    def test_async_generator_expression(self) -> None:
-        """Verify async generator expressions are converted to sync."""
+    def test_async_set_comprehension(self) -> None:
+        """Verify async set comprehensions are converted to sync."""
         # Given: A function with an async set comprehension
         source = """
         async def collect():
@@ -355,3 +355,18 @@ class TestAsyncToSyncTransformer:
         # Then: The async keyword is removed from the comprehension
         assert "async for" not in result
         assert "{item for item in aiterable}" in result
+
+    def test_async_generator_expression(self) -> None:
+        """Verify async generator expressions are converted to sync."""
+        # Given: A function with an async generator expression
+        source = """
+        async def collect():
+            return list(item async for item in aiterable)
+        """
+
+        # When: The transformer processes the source
+        result = self._transform(source)
+
+        # Then: The async keyword is removed from the generator
+        assert "async for" not in result
+        assert "item for item in aiterable" in result
