@@ -11,7 +11,7 @@ class CampaignChapter(BaseModel):
     Represents a chapter within a campaign book, containing notes and assets.
     """
 
-    id: str | None = Field(default=None, description="MongoDB document ObjectID.")
+    id: str = Field(..., description="MongoDB document ObjectID.")
     date_created: datetime = Field(..., description="Timestamp when the chapter was created.")
     date_modified: datetime = Field(
         ..., description="Timestamp when the chapter was last modified."

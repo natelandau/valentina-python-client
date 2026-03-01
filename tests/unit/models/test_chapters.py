@@ -37,6 +37,7 @@ class TestCampaignChapter:
     def test_defaults(self):
         """Verify default values."""
         chapter = CampaignChapter(
+            id="chapter123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
             name="Test Chapter",
@@ -44,7 +45,6 @@ class TestCampaignChapter:
             book_id="book123",
         )
 
-        assert chapter.id is None
         assert chapter.description is None
         assert chapter.asset_ids == []
 

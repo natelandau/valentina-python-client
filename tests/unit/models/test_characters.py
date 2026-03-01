@@ -23,6 +23,7 @@ class TestCharacter:
         """Verify Character model with minimal required fields."""
         # When: Creating a character with required fields only
         character = Character(
+            id="char123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",

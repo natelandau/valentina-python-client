@@ -11,7 +11,7 @@ class CampaignBook(BaseModel):
     Represents a book within a campaign, containing notes and assets.
     """
 
-    id: str | None = Field(default=None, description="MongoDB document ObjectID.")
+    id: str = Field(..., description="MongoDB document ObjectID.")
     date_created: datetime = Field(..., description="Timestamp when the book was created.")
     date_modified: datetime = Field(..., description="Timestamp when the book was last modified.")
     name: str = Field(..., description="Book name (3-50 characters).")

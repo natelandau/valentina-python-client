@@ -135,7 +135,7 @@ class Character(BaseModel):
     Characters are player or non-player entities within a campaign.
     """
 
-    id: str | None = Field(default=None, description="MongoDB document ObjectID.")
+    id: str = Field(..., description="MongoDB document ObjectID.")
     date_created: datetime | None = Field(
         default=None, description="Timestamp when the character was created."
     )
