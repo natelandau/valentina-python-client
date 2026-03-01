@@ -1,3 +1,9 @@
+## v1.6.1 (2026-02-28)
+
+### Fix
+
+- **models**: add id to all response models
+
 ## v1.6.0 (2026-02-28)
 
 ### Feat
