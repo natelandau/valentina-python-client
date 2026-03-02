@@ -4,7 +4,7 @@ icon: lucide/settings
 
 # Configuration
 
-The `VClient` constructor accepts several options that control timeouts, retries, idempotency, and more. You can also set required values through environment variables.
+Both `VClient` (async) and `SyncVClient` (sync) accept the same constructor options for timeouts, retries, idempotency, and more. You can also set required values through environment variables. See the [Sync Client](sync-client.md) page for sync-specific usage patterns.
 
 ## Configuration Options
 
@@ -206,11 +206,12 @@ svc2 = users_service(company_id="explicit-id")  # Override
 
 ## Context Manager
 
-For applications that need explicit resource management, use the async context manager pattern:
+For applications that need explicit resource management, use a context manager to ensure the HTTP client is closed automatically:
 
 ```python
 from vclient import VClient
 
+# Async
 async with VClient(
     base_url="https://api.valentina-noir.com",
     api_key="your-api-key",
@@ -218,5 +219,19 @@ async with VClient(
 ) as client:
     companies = client.companies
     all_companies = await companies.list_all()
+    # HTTP client is automatically closed when exiting the context
+```
+
+```python
+from vclient import SyncVClient
+
+# Sync
+with SyncVClient(
+    base_url="https://api.valentina-noir.com",
+    api_key="your-api-key",
+    set_as_default=False,  # Don't register as default
+) as client:
+    companies = client.companies
+    all_companies = companies.list_all()
     # HTTP client is automatically closed when exiting the context
 ```
