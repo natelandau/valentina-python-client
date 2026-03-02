@@ -25,10 +25,10 @@
 
 [dependency-groups]
     dev = [
-        "commitizen>=4.13.8",
+        "commitizen>=4.13.9",
         "coverage>=7.13.4",
         "duty>=1.9.0",
-        "prek>=0.3.3",
+        "prek>=0.3.4",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.0.0",
@@ -39,14 +39,14 @@
         "pytest-xdist>=3.8.0",
         "pytest>=9.0.2",
         "respx>=0.22.0",
-        "ruff>=0.15.2",
+        "ruff>=0.15.4",
         "shellcheck-py>=0.11.0.1",
-        "ty>=0.0.17",
-        "typos>=1.43.5",
+        "ty>=0.0.19",
+        "typos>=1.44.0",
         "vulture>=2.14",
         "yamllint>=1.38.0",
     ]
-    docs = ["zensical>=0.0.23"]
+    docs = ["zensical>=0.0.24"]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"
