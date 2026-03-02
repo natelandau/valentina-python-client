@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Options and enumerations service."""
+
 import json
 from typing import TYPE_CHECKING
 
@@ -8,6 +9,7 @@ from vclient.endpoints import Endpoints
 
 if TYPE_CHECKING:
     from vclient._sync.client import SyncVClient
+
 
 class SyncOptionsService(SyncBaseService):
     """Service for interacting with the Options and Enumerations API."""

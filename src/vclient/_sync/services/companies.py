@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Companies API."""
+
 from collections.abc import Iterator
 
 from vclient._sync.services.base import SyncBaseService
@@ -29,7 +30,9 @@ class SyncCompaniesService(SyncBaseService):
         ...     company = await client.companies.get("company_id")
     """
 
-    def get_page(self, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0) -> PaginatedResponse[Company]:
+    def get_page(
+        self, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+    ) -> PaginatedResponse[Company]:
         """Retrieve a paginated page of companies you have access to.
 
         Only companies where you have been granted at least user-level permissions are returned.
@@ -54,7 +57,7 @@ class SyncCompaniesService(SyncBaseService):
         """
         return [company for company in self.iter_all()]
 
-    def iter_all(self, *, limit: int=100) -> Iterator[Company]:
+    def iter_all(self, *, limit: int = 100) -> Iterator[Company]:
         """Iterate through all companies you have access to.
 
         Yields individual companies, automatically fetching subsequent pages until
@@ -91,7 +94,7 @@ class SyncCompaniesService(SyncBaseService):
         response = self._get(Endpoints.COMPANY.format(company_id=company_id))
         return Company.model_validate(response.json())
 
-    def create(self, request: CompanyCreate | None=None, **kwargs) -> NewCompanyResponse:
+    def create(self, request: CompanyCreate | None = None, **kwargs) -> NewCompanyResponse:
         """Create a new company in the system.
 
         You are automatically granted OWNER permission for the new company, giving you
@@ -112,10 +115,13 @@ class SyncCompaniesService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(CompanyCreate, **kwargs)
-        response = self._post(Endpoints.COMPANIES, json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            Endpoints.COMPANIES,
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return NewCompanyResponse.model_validate(response.json())
 
-    def update(self, company_id: str, request: CompanyUpdate | None=None, **kwargs) -> Company:
+    def update(self, company_id: str, request: CompanyUpdate | None = None, **kwargs) -> Company:
         """Modify a company's properties.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -137,7 +143,10 @@ class SyncCompaniesService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(CompanyUpdate, **kwargs)
-        response = self._patch(Endpoints.COMPANY.format(company_id=company_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._patch(
+            Endpoints.COMPANY.format(company_id=company_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Company.model_validate(response.json())
 
     def delete(self, company_id: str) -> None:
@@ -154,7 +163,9 @@ class SyncCompaniesService(SyncBaseService):
         """
         self._delete(Endpoints.COMPANY.format(company_id=company_id))
 
-    def grant_access(self, company_id: str, developer_id: str, permission: PermissionLevel) -> CompanyPermissions:
+    def grant_access(
+        self, company_id: str, developer_id: str, permission: PermissionLevel
+    ) -> CompanyPermissions:
         """Add, update, or revoke a developer's permission level for a company.
 
         Valid permission levels are USER, ADMIN, and OWNER. Set permission to REVOKE
@@ -174,11 +185,16 @@ class SyncCompaniesService(SyncBaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If trying to remove the last owner.
         """
-        body = self._validate_request(_GrantAccess, developer_id=developer_id, permission=permission)
-        response = self._post(Endpoints.COMPANY_ACCESS.format(company_id=company_id), json=body.model_dump(mode="json"))
+        body = self._validate_request(
+            _GrantAccess, developer_id=developer_id, permission=permission
+        )
+        response = self._post(
+            Endpoints.COMPANY_ACCESS.format(company_id=company_id),
+            json=body.model_dump(mode="json"),
+        )
         return CompanyPermissions.model_validate(response.json())
 
-    def get_statistics(self, company_id: str, *, num_top_traits: int=5) -> RollStatistics:
+    def get_statistics(self, company_id: str, *, num_top_traits: int = 5) -> RollStatistics:
         """Retrieve aggregated dice roll statistics for a specific company.
 
         Includes success rates, critical frequencies, most-used traits, etc.
@@ -195,5 +211,8 @@ class SyncCompaniesService(SyncBaseService):
             NotFoundError: If the company does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = self._get(Endpoints.COMPANY_STATISTICS.format(company_id=company_id), params={"num_top_traits": num_top_traits})
+        response = self._get(
+            Endpoints.COMPANY_STATISTICS.format(company_id=company_id),
+            params={"num_top_traits": num_top_traits},
+        )
         return RollStatistics.model_validate(response.json())

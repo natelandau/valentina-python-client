@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Main API client for Valentina."""
+
 import os
 import platform
 from types import TracebackType
@@ -39,6 +40,7 @@ if TYPE_CHECKING:
         SyncUsersService,
     )
 
+
 class SyncVClient:
     """Async API client for the Valentina API.
 
@@ -68,7 +70,21 @@ class SyncVClient:
         ```
     """
 
-    def __init__(self, base_url: str | None=None, api_key: str | None=None, *, timeout: float=DEFAULT_TIMEOUT, max_retries: int=DEFAULT_MAX_RETRIES, retry_delay: float=DEFAULT_RETRY_DELAY, auto_retry_rate_limit: bool=True, auto_idempotency_keys: bool=False, retry_statuses: set[int] | frozenset[int] | None=None, default_company_id: str | None=None, headers: dict[str, str] | None=None, set_as_default: bool=True) -> None:
+    def __init__(
+        self,
+        base_url: str | None = None,
+        api_key: str | None = None,
+        *,
+        timeout: float = DEFAULT_TIMEOUT,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        retry_delay: float = DEFAULT_RETRY_DELAY,
+        auto_retry_rate_limit: bool = True,
+        auto_idempotency_keys: bool = False,
+        retry_statuses: set[int] | frozenset[int] | None = None,
+        default_company_id: str | None = None,
+        headers: dict[str, str] | None = None,
+        set_as_default: bool = True,
+    ) -> None:
         """Initialize the API client.
 
         Values for ``base_url``, ``api_key``, and ``default_company_id`` can be
@@ -112,7 +128,20 @@ class SyncVClient:
             msg = "api_key is required (set it directly or via the VALENTINA_CLIENT_API_KEY environment variable)"
             raise ValueError(msg)
         resolved_company_id = default_company_id or os.environ.get(ENV_DEFAULT_COMPANY_ID)
-        self._config = _APIConfig(base_url=resolved_base_url, api_key=resolved_api_key, timeout=timeout, max_retries=max_retries, retry_delay=retry_delay, auto_retry_rate_limit=auto_retry_rate_limit, auto_idempotency_keys=auto_idempotency_keys, retry_statuses=frozenset(retry_statuses) if retry_statuses is not None else DEFAULT_RETRY_STATUSES, default_company_id=resolved_company_id, headers=headers or {})
+        self._config = _APIConfig(
+            base_url=resolved_base_url,
+            api_key=resolved_api_key,
+            timeout=timeout,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            auto_retry_rate_limit=auto_retry_rate_limit,
+            auto_idempotency_keys=auto_idempotency_keys,
+            retry_statuses=frozenset(retry_statuses)
+            if retry_statuses is not None
+            else DEFAULT_RETRY_STATUSES,
+            default_company_id=resolved_company_id,
+            headers=headers or {},
+        )
         self._http: httpx.Client = self._create_http_client()
         self._companies: SyncCompaniesService | None = None
         self._developer: SyncDeveloperService | None = None
@@ -120,29 +149,45 @@ class SyncVClient:
         self._system: SyncSystemService | None = None
         if set_as_default:
             from vclient._sync.registry import sync_configure_default_client
+
             sync_configure_default_client(self)
-        logger.bind(base_url=self._config.base_url, timeout=self._config.timeout, max_retries=self._config.max_retries).info("Initialize SyncVClient")
+        logger.bind(
+            base_url=self._config.base_url,
+            timeout=self._config.timeout,
+            max_retries=self._config.max_retries,
+        ).info("Initialize SyncVClient")
 
     def _create_http_client(self) -> httpx.Client:
         """Create and configure the HTTP client."""
         from vclient import __version__
+
         user_agent = f"vclient/{__version__} Python/{platform.python_version()}"
         headers = {"Accept": "application/json", "User-Agent": user_agent, **self._config.headers}
         if self._config.api_key:
             headers[API_KEY_HEADER] = self._config.api_key
-        return httpx.Client(base_url=self._config.base_url, headers=headers, timeout=httpx.Timeout(self._config.timeout))
+        return httpx.Client(
+            base_url=self._config.base_url,
+            headers=headers,
+            timeout=httpx.Timeout(self._config.timeout),
+        )
 
     def __enter__(self) -> Self:
         """Enter async context manager."""
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Exit async context manager."""
         self.close()
 
     def close(self) -> None:
         """Close the HTTP client and release resources."""
         from vclient._sync.registry import sync_clear_default_client
+
         logger.bind(base_url=self._config.base_url).info("Close SyncVClient")
         self._http.close()
         sync_clear_default_client(self)
@@ -184,6 +229,7 @@ class SyncVClient:
         """
         if self._companies is None:
             from vclient._sync.services.companies import SyncCompaniesService
+
             self._companies = SyncCompaniesService(self)
         return self._companies
 
@@ -199,6 +245,7 @@ class SyncVClient:
         """
         if self._developer is None:
             from vclient._sync.services.developers import SyncDeveloperService
+
             self._developer = SyncDeveloperService(self)
         return self._developer
 
@@ -214,6 +261,7 @@ class SyncVClient:
         """
         if self._global_admin is None:
             from vclient._sync.services.global_admin import SyncGlobalAdminService
+
             self._global_admin = SyncGlobalAdminService(self)
         return self._global_admin
 
@@ -226,10 +274,11 @@ class SyncVClient:
         """
         if self._system is None:
             from vclient._sync.services.system import SyncSystemService
+
             self._system = SyncSystemService(self)
         return self._system
 
-    def users(self, company_id: str | None=None) -> "SyncUsersService":
+    def users(self, company_id: str | None = None) -> "SyncUsersService":
         """Get a SyncUsersService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete users,
@@ -251,9 +300,10 @@ class SyncVClient:
             >>> user = await users.get("user_id")
         """
         from vclient._sync.services.users import SyncUsersService
+
         return SyncUsersService(self, self._resolve_company_id(company_id))
 
-    def campaigns(self, user_id: str, company_id: str | None=None) -> "SyncCampaignsService":
+    def campaigns(self, user_id: str, company_id: str | None = None) -> "SyncCampaignsService":
         """Get a SyncCampaignsService scoped to a specific company and user.
 
         Provides methods to create, retrieve, update, and delete campaigns,
@@ -276,9 +326,12 @@ class SyncVClient:
             >>> campaign = await campaigns.get("campaign_id")
         """
         from vclient._sync.services.campaigns import SyncCampaignsService
+
         return SyncCampaignsService(self, self._resolve_company_id(company_id), user_id)
 
-    def books(self, user_id: str, campaign_id: str, *, company_id: str | None=None) -> "SyncBooksService":
+    def books(
+        self, user_id: str, campaign_id: str, *, company_id: str | None = None
+    ) -> "SyncBooksService":
         """Get a SyncBooksService scoped to a specific company, user, and campaign.
 
         Provides methods to create, retrieve, update, and delete campaign books,
@@ -302,9 +355,12 @@ class SyncVClient:
             >>> book = await books.get("book_id")
         """
         from vclient._sync.services.campaign_books import SyncBooksService
+
         return SyncBooksService(self, self._resolve_company_id(company_id), user_id, campaign_id)
 
-    def chapters(self, user_id: str, campaign_id: str, book_id: str, *, company_id: str | None=None) -> "SyncChaptersService":
+    def chapters(
+        self, user_id: str, campaign_id: str, book_id: str, *, company_id: str | None = None
+    ) -> "SyncChaptersService":
         """Get a SyncChaptersService scoped to a specific company, user, campaign, and book.
 
         Provides methods to create, retrieve, update, and delete campaign book chapters,
@@ -329,9 +385,14 @@ class SyncVClient:
             >>> chapter = await chapters.get("chapter_id")
         """
         from vclient._sync.services.campaign_book_chapters import SyncChaptersService
-        return SyncChaptersService(self, self._resolve_company_id(company_id), user_id, campaign_id, book_id)
 
-    def characters(self, user_id: str, campaign_id: str, *, company_id: str | None=None) -> "SyncCharactersService":
+        return SyncChaptersService(
+            self, self._resolve_company_id(company_id), user_id, campaign_id, book_id
+        )
+
+    def characters(
+        self, user_id: str, campaign_id: str, *, company_id: str | None = None
+    ) -> "SyncCharactersService":
         """Get a SyncCharactersService scoped to a specific company, user, and campaign.
 
         Provides methods to create, retrieve, update, and delete characters within
@@ -355,9 +416,14 @@ class SyncVClient:
             >>> character = await characters.get("character_id")
         """
         from vclient._sync.services.characters import SyncCharactersService
-        return SyncCharactersService(self, self._resolve_company_id(company_id), user_id, campaign_id)
 
-    def character_traits(self, user_id: str, campaign_id: str, character_id: str, *, company_id: str | None=None) -> "SyncCharacterTraitsService":
+        return SyncCharactersService(
+            self, self._resolve_company_id(company_id), user_id, campaign_id
+        )
+
+    def character_traits(
+        self, user_id: str, campaign_id: str, character_id: str, *, company_id: str | None = None
+    ) -> "SyncCharacterTraitsService":
         """Get a SyncCharacterTraitsService scoped to a specific company, user, campaign, and character.
 
         Provides methods to create, retrieve, update, and delete character traits within
@@ -382,9 +448,12 @@ class SyncVClient:
             >>> character_trait = await character_traits.get("character_trait_id")
         """
         from vclient._sync.services.character_traits import SyncCharacterTraitsService
-        return SyncCharacterTraitsService(self, self._resolve_company_id(company_id), user_id, campaign_id, character_id)
 
-    def character_blueprint(self, company_id: str | None=None) -> "SyncCharacterBlueprintService":
+        return SyncCharacterTraitsService(
+            self, self._resolve_company_id(company_id), user_id, campaign_id, character_id
+        )
+
+    def character_blueprint(self, company_id: str | None = None) -> "SyncCharacterBlueprintService":
         """Get a SyncCharacterBlueprintService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete character blueprint sections,
@@ -398,9 +467,10 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
         """
         from vclient._sync.services.character_blueprint import SyncCharacterBlueprintService
+
         return SyncCharacterBlueprintService(self, self._resolve_company_id(company_id))
 
-    def dictionary(self, company_id: str | None=None) -> "SyncDictionaryService":
+    def dictionary(self, company_id: str | None = None) -> "SyncDictionaryService":
         """Get a SyncDictionaryService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete dictionary terms.
@@ -413,9 +483,10 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
         """
         from vclient._sync.services.dictionary import SyncDictionaryService
+
         return SyncDictionaryService(self, self._resolve_company_id(company_id))
 
-    def dicerolls(self, user_id: str, company_id: str | None=None) -> "SyncDicerollService":
+    def dicerolls(self, user_id: str, company_id: str | None = None) -> "SyncDicerollService":
         """Get a SyncDicerollService scoped to a specific company and user.
 
         Provides methods to create, retrieve, and list dice rolls.
@@ -429,9 +500,10 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
         """
         from vclient._sync.services.dicerolls import SyncDicerollService
+
         return SyncDicerollService(self, self._resolve_company_id(company_id), user_id)
 
-    def options(self, company_id: str | None=None) -> "SyncOptionsService":
+    def options(self, company_id: str | None = None) -> "SyncOptionsService":
         """Get a SyncOptionsService scoped to a specific company.
 
         Provides methods to retrieve all options and enumerations for the api.
@@ -444,9 +516,12 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
         """
         from vclient._sync.services.options import SyncOptionsService
+
         return SyncOptionsService(self, self._resolve_company_id(company_id))
 
-    def character_autogen(self, user_id: str, campaign_id: str, *, company_id: str | None=None) -> "SyncCharacterAutogenService":
+    def character_autogen(
+        self, user_id: str, campaign_id: str, *, company_id: str | None = None
+    ) -> "SyncCharacterAutogenService":
         """Get a SyncCharacterAutogenService scoped to a specific company, user, and campaign.
 
         Provides methods to create, retrieve, update, and delete character autogen.
@@ -461,4 +536,7 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
         """
         from vclient._sync.services.character_autogen import SyncCharacterAutogenService
-        return SyncCharacterAutogenService(self, self._resolve_company_id(company_id), user_id, campaign_id)
+
+        return SyncCharacterAutogenService(
+            self, self._resolve_company_id(company_id), user_id, campaign_id
+        )

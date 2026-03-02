@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Campaign Books API."""
+
 import mimetypes
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
@@ -22,6 +23,7 @@ from vclient.models import (
 if TYPE_CHECKING:
     from vclient._sync.client import SyncVClient
 
+
 class SyncBooksService(SyncBaseService):
     """Service for managing campaign books within a campaign in the Valentina API.
 
@@ -38,7 +40,9 @@ class SyncBooksService(SyncBaseService):
         ...     book = await books.get("book_id")
     """
 
-    def __init__(self, client: "SyncVClient", company_id: str, user_id: str, campaign_id: str) -> None:
+    def __init__(
+        self, client: "SyncVClient", company_id: str, user_id: str, campaign_id: str
+    ) -> None:
         """Initialize the service scoped to a specific company, user, and campaign.
 
         Args:
@@ -54,9 +58,16 @@ class SyncBooksService(SyncBaseService):
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
         """Format an endpoint with the scoped company_id, user_id, campaign_id plus any extra params."""
-        return endpoint.format(company_id=self._company_id, user_id=self._user_id, campaign_id=self._campaign_id, **kwargs)
+        return endpoint.format(
+            company_id=self._company_id,
+            user_id=self._user_id,
+            campaign_id=self._campaign_id,
+            **kwargs,
+        )
 
-    def get_page(self, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0) -> PaginatedResponse[CampaignBook]:
+    def get_page(
+        self, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+    ) -> PaginatedResponse[CampaignBook]:
         """Retrieve a paginated page of campaign books.
 
         Args:
@@ -66,7 +77,12 @@ class SyncBooksService(SyncBaseService):
         Returns:
             A PaginatedResponse containing CampaignBook objects and pagination metadata.
         """
-        return self._get_paginated_as(self._format_endpoint(Endpoints.CAMPAIGN_BOOKS), CampaignBook, limit=limit, offset=offset)
+        return self._get_paginated_as(
+            self._format_endpoint(Endpoints.CAMPAIGN_BOOKS),
+            CampaignBook,
+            limit=limit,
+            offset=offset,
+        )
 
     def list_all(self) -> list[CampaignBook]:
         """Retrieve all campaign books.
@@ -79,7 +95,7 @@ class SyncBooksService(SyncBaseService):
         """
         return [book for book in self.iter_all()]
 
-    def iter_all(self, *, limit: int=100) -> Iterator[CampaignBook]:
+    def iter_all(self, *, limit: int = 100) -> Iterator[CampaignBook]:
         """Iterate through all campaign books.
 
         Yields individual books, automatically fetching subsequent pages until
@@ -95,7 +111,9 @@ class SyncBooksService(SyncBaseService):
             >>> async for book in books.iter_all():
             ...     print(book.name)
         """
-        for item in self._iter_all_pages(self._format_endpoint(Endpoints.CAMPAIGN_BOOKS), limit=limit):
+        for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.CAMPAIGN_BOOKS), limit=limit
+        ):
             yield CampaignBook.model_validate(item)
 
     def get(self, book_id: str) -> CampaignBook:
@@ -116,7 +134,7 @@ class SyncBooksService(SyncBaseService):
         response = self._get(self._format_endpoint(Endpoints.CAMPAIGN_BOOK, book_id=book_id))
         return CampaignBook.model_validate(response.json())
 
-    def create(self, request: BookCreate | None=None, **kwargs) -> CampaignBook:
+    def create(self, request: BookCreate | None = None, **kwargs) -> CampaignBook:
         """Create a new campaign book.
 
         Args:
@@ -133,10 +151,13 @@ class SyncBooksService(SyncBaseService):
             AuthorizationError: If you don't have book management privileges.
         """
         body = request if request is not None else self._validate_request(BookCreate, **kwargs)
-        response = self._post(self._format_endpoint(Endpoints.CAMPAIGN_BOOKS), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            self._format_endpoint(Endpoints.CAMPAIGN_BOOKS),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return CampaignBook.model_validate(response.json())
 
-    def update(self, book_id: str, request: BookUpdate | None=None, **kwargs) -> CampaignBook:
+    def update(self, book_id: str, request: BookUpdate | None = None, **kwargs) -> CampaignBook:
         """Modify a campaign book's properties.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -157,7 +178,10 @@ class SyncBooksService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(BookUpdate, **kwargs)
-        response = self._patch(self._format_endpoint(Endpoints.CAMPAIGN_BOOK, book_id=book_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._patch(
+            self._format_endpoint(Endpoints.CAMPAIGN_BOOK, book_id=book_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return CampaignBook.model_validate(response.json())
 
     def delete(self, book_id: str) -> None:
@@ -195,10 +219,15 @@ class SyncBooksService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(_BookRenumber, number=number)
-        response = self._put(self._format_endpoint(Endpoints.CAMPAIGN_BOOK_NUMBER, book_id=book_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._put(
+            self._format_endpoint(Endpoints.CAMPAIGN_BOOK_NUMBER, book_id=book_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return CampaignBook.model_validate(response.json())
 
-    def get_notes_page(self, book_id: str, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0) -> PaginatedResponse[Note]:
+    def get_notes_page(
+        self, book_id: str, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+    ) -> PaginatedResponse[Note]:
         """Retrieve a paginated page of notes for a book.
 
         Args:
@@ -213,7 +242,12 @@ class SyncBooksService(SyncBaseService):
             NotFoundError: If the book does not exist.
             AuthorizationError: If you don't have access.
         """
-        return self._get_paginated_as(self._format_endpoint(Endpoints.BOOK_NOTES, book_id=book_id), Note, limit=limit, offset=offset)
+        return self._get_paginated_as(
+            self._format_endpoint(Endpoints.BOOK_NOTES, book_id=book_id),
+            Note,
+            limit=limit,
+            offset=offset,
+        )
 
     def list_all_notes(self, book_id: str) -> list[Note]:
         """Retrieve all notes for a book.
@@ -233,7 +267,7 @@ class SyncBooksService(SyncBaseService):
         """
         return [note for note in self.iter_all_notes(book_id)]
 
-    def iter_all_notes(self, book_id: str, *, limit: int=100) -> Iterator[Note]:
+    def iter_all_notes(self, book_id: str, *, limit: int = 100) -> Iterator[Note]:
         """Iterate through all notes for a book.
 
         Yields individual notes, automatically fetching subsequent pages until
@@ -250,7 +284,9 @@ class SyncBooksService(SyncBaseService):
             >>> async for note in books.iter_all_notes("book_id"):
             ...     print(note.title)
         """
-        for item in self._iter_all_pages(self._format_endpoint(Endpoints.BOOK_NOTES, book_id=book_id), limit=limit):
+        for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.BOOK_NOTES, book_id=book_id), limit=limit
+        ):
             yield Note.model_validate(item)
 
     def get_note(self, book_id: str, note_id: str) -> Note:
@@ -267,10 +303,12 @@ class SyncBooksService(SyncBaseService):
             NotFoundError: If the note does not exist.
             AuthorizationError: If you don't have access.
         """
-        response = self._get(self._format_endpoint(Endpoints.BOOK_NOTE, book_id=book_id, note_id=note_id))
+        response = self._get(
+            self._format_endpoint(Endpoints.BOOK_NOTE, book_id=book_id, note_id=note_id)
+        )
         return Note.model_validate(response.json())
 
-    def create_note(self, book_id: str, request: NoteCreate | None=None, **kwargs) -> Note:
+    def create_note(self, book_id: str, request: NoteCreate | None = None, **kwargs) -> Note:
         """Create a new note for a book.
 
         Notes support markdown formatting for rich text content.
@@ -291,10 +329,15 @@ class SyncBooksService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(NoteCreate, **kwargs)
-        response = self._post(self._format_endpoint(Endpoints.BOOK_NOTES, book_id=book_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            self._format_endpoint(Endpoints.BOOK_NOTES, book_id=book_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Note.model_validate(response.json())
 
-    def update_note(self, book_id: str, note_id: str, request: NoteUpdate | None=None, **kwargs) -> Note:
+    def update_note(
+        self, book_id: str, note_id: str, request: NoteUpdate | None = None, **kwargs
+    ) -> Note:
         """Modify a note's content.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -316,7 +359,10 @@ class SyncBooksService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(NoteUpdate, **kwargs)
-        response = self._patch(self._format_endpoint(Endpoints.BOOK_NOTE, book_id=book_id, note_id=note_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._patch(
+            self._format_endpoint(Endpoints.BOOK_NOTE, book_id=book_id, note_id=note_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Note.model_validate(response.json())
 
     def delete_note(self, book_id: str, note_id: str) -> None:
@@ -334,7 +380,9 @@ class SyncBooksService(SyncBaseService):
         """
         self._delete(self._format_endpoint(Endpoints.BOOK_NOTE, book_id=book_id, note_id=note_id))
 
-    def get_assets_page(self, book_id: str, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0) -> PaginatedResponse[Asset]:
+    def get_assets_page(
+        self, book_id: str, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+    ) -> PaginatedResponse[Asset]:
         """Retrieve a paginated page of assets for a book.
 
         Args:
@@ -349,7 +397,12 @@ class SyncBooksService(SyncBaseService):
             NotFoundError: If the book does not exist.
             AuthorizationError: If you don't have access.
         """
-        return self._get_paginated_as(self._format_endpoint(Endpoints.BOOK_ASSETS, book_id=book_id), Asset, limit=limit, offset=offset)
+        return self._get_paginated_as(
+            self._format_endpoint(Endpoints.BOOK_ASSETS, book_id=book_id),
+            Asset,
+            limit=limit,
+            offset=offset,
+        )
 
     def list_all_assets(self, book_id: str) -> list[Asset]:
         """Retrieve all assets for a book.
@@ -369,7 +422,7 @@ class SyncBooksService(SyncBaseService):
         """
         return [asset for asset in self.iter_all_assets(book_id)]
 
-    def iter_all_assets(self, book_id: str, *, limit: int=100) -> Iterator[Asset]:
+    def iter_all_assets(self, book_id: str, *, limit: int = 100) -> Iterator[Asset]:
         """Iterate through all assets for a book.
 
         Yields individual assets, automatically fetching subsequent pages until
@@ -386,7 +439,9 @@ class SyncBooksService(SyncBaseService):
             >>> async for asset in books.iter_all_assets("book_id"):
             ...     print(asset.original_filename)
         """
-        for item in self._iter_all_pages(self._format_endpoint(Endpoints.BOOK_ASSETS, book_id=book_id), limit=limit):
+        for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.BOOK_ASSETS, book_id=book_id), limit=limit
+        ):
             yield Asset.model_validate(item)
 
     def get_asset(self, book_id: str, asset_id: str) -> Asset:
@@ -403,10 +458,14 @@ class SyncBooksService(SyncBaseService):
             NotFoundError: If the asset does not exist.
             AuthorizationError: If you don't have access.
         """
-        response = self._get(self._format_endpoint(Endpoints.BOOK_ASSET, book_id=book_id, asset_id=asset_id))
+        response = self._get(
+            self._format_endpoint(Endpoints.BOOK_ASSET, book_id=book_id, asset_id=asset_id)
+        )
         return Asset.model_validate(response.json())
 
-    def upload_asset(self, book_id: str, filename: str, content: bytes, content_type: str | None=None) -> Asset:
+    def upload_asset(
+        self, book_id: str, filename: str, content: bytes, content_type: str | None = None
+    ) -> Asset:
         """Upload a new asset for a book.
 
         Uploads a file to S3 storage and associates it with the book.
@@ -427,7 +486,10 @@ class SyncBooksService(SyncBaseService):
         """
         if content_type is None:
             content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
-        response = self._post_file(self._format_endpoint(Endpoints.BOOK_ASSET_UPLOAD, book_id=book_id), file=(filename, content, content_type))
+        response = self._post_file(
+            self._format_endpoint(Endpoints.BOOK_ASSET_UPLOAD, book_id=book_id),
+            file=(filename, content, content_type),
+        )
         return Asset.model_validate(response.json())
 
     def delete_asset(self, book_id: str, asset_id: str) -> None:
@@ -443,4 +505,6 @@ class SyncBooksService(SyncBaseService):
             NotFoundError: If the asset does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        self._delete(self._format_endpoint(Endpoints.BOOK_ASSET, book_id=book_id, asset_id=asset_id))
+        self._delete(
+            self._format_endpoint(Endpoints.BOOK_ASSET, book_id=book_id, asset_id=asset_id)
+        )

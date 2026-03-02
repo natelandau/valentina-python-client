@@ -18,6 +18,7 @@ Example:
         return await companies.list_all()
     ```
 """
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -41,6 +42,7 @@ if TYPE_CHECKING:
     )
 _default_client: "SyncVClient | None" = None
 
+
 def sync_configure_default_client(client: "SyncVClient") -> None:
     """Configure the default client for service factory functions.
 
@@ -61,6 +63,7 @@ def sync_configure_default_client(client: "SyncVClient") -> None:
     global _default_client
     _default_client = client
 
+
 def sync_clear_default_client(client: "SyncVClient") -> None:
     """Clear the default client if it matches the given instance.
 
@@ -74,6 +77,7 @@ def sync_clear_default_client(client: "SyncVClient") -> None:
     global _default_client
     if _default_client is client:
         _default_client = None
+
 
 def sync_default_client() -> "SyncVClient":
     """Retrieve the configured default client.
@@ -91,6 +95,7 @@ def sync_default_client() -> "SyncVClient":
         msg = "No default client configured. Call sync_configure_sync_default_client() first."
         raise RuntimeError(msg)
     return _default_client
+
 
 def sync_companies_service() -> "SyncCompaniesService":
     """Create a SyncCompaniesService using the default client.
@@ -111,7 +116,9 @@ def sync_companies_service() -> "SyncCompaniesService":
         ```
     """
     from vclient._sync.services.companies import SyncCompaniesService
+
     return SyncCompaniesService(sync_default_client())
+
 
 def sync_developer_service() -> "SyncDeveloperService":
     """Create a SyncDeveloperService using the default client.
@@ -132,7 +139,9 @@ def sync_developer_service() -> "SyncDeveloperService":
         ```
     """
     from vclient._sync.services.developers import SyncDeveloperService
+
     return SyncDeveloperService(sync_default_client())
+
 
 def sync_global_admin_service() -> "SyncGlobalAdminService":
     """Create a SyncGlobalAdminService using the default client.
@@ -153,7 +162,9 @@ def sync_global_admin_service() -> "SyncGlobalAdminService":
         ```
     """
     from vclient._sync.services.global_admin import SyncGlobalAdminService
+
     return SyncGlobalAdminService(sync_default_client())
+
 
 def sync_system_service() -> "SyncSystemService":
     """Create a SyncSystemService using the default client.
@@ -174,9 +185,11 @@ def sync_system_service() -> "SyncSystemService":
         ```
     """
     from vclient._sync.services.system import SyncSystemService
+
     return SyncSystemService(sync_default_client())
 
-def sync_users_service(company_id: str | None=None) -> "SyncUsersService":
+
+def sync_users_service(company_id: str | None = None) -> "SyncUsersService":
     """Create a SyncUsersService scoped to a specific company using the default client.
 
     Provides access to user management operations (list, get, create, update, delete)
@@ -202,7 +215,8 @@ def sync_users_service(company_id: str | None=None) -> "SyncUsersService":
     """
     return sync_default_client().users(company_id)
 
-def sync_campaigns_service(user_id: str, company_id: str | None=None) -> "SyncCampaignsService":
+
+def sync_campaigns_service(user_id: str, company_id: str | None = None) -> "SyncCampaignsService":
     """Create a SyncCampaignsService scoped to a specific company and user.
 
     Provides access to campaign management operations (list, get, create, update, delete)
@@ -229,7 +243,10 @@ def sync_campaigns_service(user_id: str, company_id: str | None=None) -> "SyncCa
     """
     return sync_default_client().campaigns(user_id, company_id)
 
-def sync_books_service(user_id: str, campaign_id: str, *, company_id: str | None=None) -> "SyncBooksService":
+
+def sync_books_service(
+    user_id: str, campaign_id: str, *, company_id: str | None = None
+) -> "SyncBooksService":
     """Create a SyncBooksService scoped to a specific company, user, and campaign.
 
     Provides access to campaign book management operations (list, get, create, update, delete)
@@ -257,7 +274,10 @@ def sync_books_service(user_id: str, campaign_id: str, *, company_id: str | None
     """
     return sync_default_client().books(user_id, campaign_id, company_id=company_id)
 
-def sync_chapters_service(user_id: str, campaign_id: str, book_id: str, *, company_id: str | None=None) -> "SyncChaptersService":
+
+def sync_chapters_service(
+    user_id: str, campaign_id: str, book_id: str, *, company_id: str | None = None
+) -> "SyncChaptersService":
     """Create a SyncChaptersService scoped to a specific company, user, campaign, and book.
 
     Provides access to campaign book chapter management operations (list, get, create, update, delete)
@@ -276,7 +296,10 @@ def sync_chapters_service(user_id: str, campaign_id: str, book_id: str, *, compa
     """
     return sync_default_client().chapters(user_id, campaign_id, book_id, company_id=company_id)
 
-def sync_characters_service(user_id: str, campaign_id: str, *, company_id: str | None=None) -> "SyncCharactersService":
+
+def sync_characters_service(
+    user_id: str, campaign_id: str, *, company_id: str | None = None
+) -> "SyncCharactersService":
     """Create a SyncCharactersService scoped to a specific company, user, and campaign.
 
     Provides access to character management operations (list, get, create, update, delete)
@@ -294,7 +317,10 @@ def sync_characters_service(user_id: str, campaign_id: str, *, company_id: str |
     """
     return sync_default_client().characters(user_id, campaign_id, company_id=company_id)
 
-def sync_character_traits_service(user_id: str, campaign_id: str, character_id: str, *, company_id: str | None=None) -> "SyncCharacterTraitsService":
+
+def sync_character_traits_service(
+    user_id: str, campaign_id: str, character_id: str, *, company_id: str | None = None
+) -> "SyncCharacterTraitsService":
     """Create a SyncCharacterTraitsService scoped to a specific company, user, campaign, and character.
 
     Provides access to character trait management operations (list, get, create, update, delete)
@@ -311,9 +337,14 @@ def sync_character_traits_service(user_id: str, campaign_id: str, character_id: 
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().character_traits(user_id, campaign_id, character_id, company_id=company_id)
+    return sync_default_client().character_traits(
+        user_id, campaign_id, character_id, company_id=company_id
+    )
 
-def sync_character_blueprint_service(company_id: str | None=None) -> "SyncCharacterBlueprintService":
+
+def sync_character_blueprint_service(
+    company_id: str | None = None,
+) -> "SyncCharacterBlueprintService":
     """Create a SyncCharacterBlueprintService scoped to a specific company.
 
     Provides access to character blueprint management operations (list, get, create, update, delete)
@@ -329,7 +360,8 @@ def sync_character_blueprint_service(company_id: str | None=None) -> "SyncCharac
     """
     return sync_default_client().character_blueprint(company_id)
 
-def sync_dictionary_service(company_id: str | None=None) -> "SyncDictionaryService":
+
+def sync_dictionary_service(company_id: str | None = None) -> "SyncDictionaryService":
     """Create a SyncDictionaryService scoped to a specific company.
 
     Provides access to dictionary term management operations (list, get, create, update, delete)
@@ -345,7 +377,8 @@ def sync_dictionary_service(company_id: str | None=None) -> "SyncDictionaryServi
     """
     return sync_default_client().dictionary(company_id)
 
-def sync_dicerolls_service(user_id: str, company_id: str | None=None) -> "SyncDicerollService":
+
+def sync_dicerolls_service(user_id: str, company_id: str | None = None) -> "SyncDicerollService":
     """Create a SyncDicerollService scoped to a specific company and user.
 
     Provides access to dice roll management operations (list, get, create)
@@ -362,7 +395,8 @@ def sync_dicerolls_service(user_id: str, company_id: str | None=None) -> "SyncDi
     """
     return sync_default_client().dicerolls(user_id, company_id)
 
-def sync_options_service(company_id: str | None=None) -> "SyncOptionsService":
+
+def sync_options_service(company_id: str | None = None) -> "SyncOptionsService":
     """Create a SyncOptionsService scoped to a specific company.
 
     Provides access to options and enumerations management operations (list, get, create, update, delete)
@@ -378,7 +412,10 @@ def sync_options_service(company_id: str | None=None) -> "SyncOptionsService":
     """
     return sync_default_client().options(company_id)
 
-def sync_character_autogen_service(user_id: str, campaign_id: str, *, company_id: str | None=None) -> "SyncCharacterAutogenService":
+
+def sync_character_autogen_service(
+    user_id: str, campaign_id: str, *, company_id: str | None = None
+) -> "SyncCharacterAutogenService":
     """Create a SyncCharacterAutogenService scoped to a specific company, user, and campaign.
 
     Provides access to character autogen management operations (list, get, create, update, delete)

@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """API services for interacting with specific endpoints."""
+
 from .base import SyncBaseService
 from .campaign_book_chapters import SyncChaptersService
 from .campaign_books import SyncBooksService
@@ -17,4 +18,21 @@ from .options import SyncOptionsService
 from .system import SyncSystemService
 from .users import SyncUsersService
 
-__all__ = ["SyncBaseService", "SyncBooksService", "SyncCampaignsService", "SyncChaptersService", "SyncCharacterAutogenService", "SyncCharacterBlueprintService", "SyncCharacterTraitsService", "SyncCharactersService", "SyncCompaniesService", "SyncDeveloperService", "SyncDicerollService", "SyncDictionaryService", "SyncGlobalAdminService", "SyncOptionsService", "SyncSystemService", "SyncUsersService"]
+__all__ = [
+    "SyncBaseService",
+    "SyncBooksService",
+    "SyncCampaignsService",
+    "SyncChaptersService",
+    "SyncCharacterAutogenService",
+    "SyncCharacterBlueprintService",
+    "SyncCharacterTraitsService",
+    "SyncCharactersService",
+    "SyncCompaniesService",
+    "SyncDeveloperService",
+    "SyncDicerollService",
+    "SyncDictionaryService",
+    "SyncGlobalAdminService",
+    "SyncOptionsService",
+    "SyncSystemService",
+    "SyncUsersService",
+]

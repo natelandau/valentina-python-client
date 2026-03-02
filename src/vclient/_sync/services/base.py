@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Base service class for API services."""
+
 import random
 import time
 import uuid
@@ -35,6 +36,7 @@ from vclient.models.pagination import PaginatedResponse
 T = TypeVar("T", bound=BaseModel)
 if TYPE_CHECKING:
     from vclient._sync.client import SyncVClient
+
 
 class SyncBaseService:
     """Base class for all API services.
@@ -99,7 +101,7 @@ class SyncBaseService:
         base_delay = config.retry_delay
         if retry_after is not None and retry_after > 0:
             base_delay = max(base_delay, float(retry_after))
-        delay = base_delay * 2 ** attempt
+        delay = base_delay * 2**attempt
         jitter = random.uniform(0, delay * 0.25)
         return delay + jitter
 
@@ -121,7 +123,17 @@ class SyncBaseService:
             return True
         return IDEMPOTENCY_KEY_HEADER in (headers or {})
 
-    def _request(self, method: str, path: str, *, params: dict[str, Any] | None=None, json: dict[str, Any] | None=None, data: dict[str, Any] | None=None, headers: dict[str, str] | None=None, files: Any | None=None) -> httpx.Response:
+    def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        files: Any | None = None,
+    ) -> httpx.Response:
         """Make an HTTP request with automatic retry on transient errors.
 
         Retries on rate limits (429), server errors (5xx in retry_statuses),
@@ -157,35 +169,59 @@ class SyncBaseService:
         last_error: RateLimitError | ServerError | None = None
         for attempt in range(max_attempts):
             try:
-                response = self._http.request(method=method, url=path, params=params, json=json, data=data, headers=headers, files=files)
+                response = self._http.request(
+                    method=method,
+                    url=path,
+                    params=params,
+                    json=json,
+                    data=data,
+                    headers=headers,
+                    files=files,
+                )
             except (httpx.ConnectError, httpx.TimeoutException) as exc:
                 if not self._is_retryable_method(method, headers) or attempt >= max_attempts - 1:
                     raise
                 error_type = type(exc).__name__
                 delay = self._calculate_backoff_delay(attempt, retry_after=None)
-                request_logger.bind(error_type=error_type, attempt=attempt + 1, max_attempts=max_attempts, delay=delay).warning("Retry after network error")
+                request_logger.bind(
+                    error_type=error_type,
+                    attempt=attempt + 1,
+                    max_attempts=max_attempts,
+                    delay=delay,
+                ).warning("Retry after network error")
                 time.sleep(delay)
                 continue
             try:
                 self._raise_for_status(response, method, path)
                 elapsed_ms = response.elapsed.total_seconds() * 1000
-                request_logger.bind(status=response.status_code, elapsed_ms=elapsed_ms).debug("Receive response")
+                request_logger.bind(status=response.status_code, elapsed_ms=elapsed_ms).debug(
+                    "Receive response"
+                )
                 return response
             except RateLimitError as e:
                 last_error = e
                 if attempt >= max_attempts - 1:
                     break
                 delay = self._calculate_backoff_delay(attempt, e.retry_after)
-                request_logger.bind(attempt=attempt + 1, max_attempts=max_attempts, delay=delay).warning("Retry after rate limit")
+                request_logger.bind(
+                    attempt=attempt + 1, max_attempts=max_attempts, delay=delay
+                ).warning("Retry after rate limit")
                 time.sleep(delay)
             except ServerError as e:
-                if e.status_code not in retry_statuses or not self._is_retryable_method(method, headers):
+                if e.status_code not in retry_statuses or not self._is_retryable_method(
+                    method, headers
+                ):
                     raise
                 last_error = e
                 if attempt >= max_attempts - 1:
                     break
                 delay = self._calculate_backoff_delay(attempt, retry_after=None)
-                request_logger.bind(status=e.status_code, attempt=attempt + 1, max_attempts=max_attempts, delay=delay).warning("Retry after server error")
+                request_logger.bind(
+                    status=e.status_code,
+                    attempt=attempt + 1,
+                    max_attempts=max_attempts,
+                    delay=delay,
+                ).warning("Retry after server error")
                 time.sleep(delay)
         if last_error is not None:
             request_logger.bind(attempts=max_attempts).error("Exhaust retries")
@@ -224,7 +260,9 @@ class SyncBaseService:
         if status_code == 429:
             retry_after = self._parse_retry_after(response)
             remaining = self._parse_remaining_tokens(response)
-            raise RateLimitError(message, status_code, response_data, retry_after=retry_after, remaining=remaining)
+            raise RateLimitError(
+                message, status_code, response_data, retry_after=retry_after, remaining=remaining
+            )
         if status_code == 401:
             error_logger.error("Fail authentication")
             raise AuthenticationError(message, status_code, response_data)
@@ -309,7 +347,7 @@ class SyncBaseService:
             return None
         return SyncBaseService._parse_rate_limit_header_value(rate_limit_header, "r")
 
-    def _get(self, path: str, *, params: dict[str, Any] | None=None) -> httpx.Response:
+    def _get(self, path: str, *, params: dict[str, Any] | None = None) -> httpx.Response:
         """Make a GET request.
 
         Args:
@@ -347,7 +385,15 @@ class SyncBaseService:
         params = {k: v for k, v in kwargs.items() if v is not None}
         return params or None
 
-    def _post(self, path: str, *, json: dict[str, Any] | None=None, data: dict[str, Any] | None=None, params: dict[str, Any] | None=None, idempotency_key: str | None=None) -> httpx.Response:
+    def _post(
+        self,
+        path: str,
+        *,
+        json: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+        idempotency_key: str | None = None,
+    ) -> httpx.Response:
         """Make a POST request.
 
         Args:
@@ -362,9 +408,24 @@ class SyncBaseService:
         """
         if idempotency_key is None and self._client._config.auto_idempotency_keys:
             idempotency_key = self._generate_idempotency_key()
-        return self._request("POST", path, json=json, data=data, params=params, headers=self._build_idempotency_headers(idempotency_key))
+        return self._request(
+            "POST",
+            path,
+            json=json,
+            data=data,
+            params=params,
+            headers=self._build_idempotency_headers(idempotency_key),
+        )
 
-    def _put(self, path: str, *, json: dict[str, Any] | None=None, data: dict[str, Any] | None=None, params: dict[str, Any] | None=None, idempotency_key: str | None=None) -> httpx.Response:
+    def _put(
+        self,
+        path: str,
+        *,
+        json: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+        idempotency_key: str | None = None,
+    ) -> httpx.Response:
         """Make a PUT request.
 
         Args:
@@ -379,9 +440,24 @@ class SyncBaseService:
         """
         if idempotency_key is None and self._client._config.auto_idempotency_keys:
             idempotency_key = self._generate_idempotency_key()
-        return self._request("PUT", path, json=json, data=data, params=params, headers=self._build_idempotency_headers(idempotency_key))
+        return self._request(
+            "PUT",
+            path,
+            json=json,
+            data=data,
+            params=params,
+            headers=self._build_idempotency_headers(idempotency_key),
+        )
 
-    def _patch(self, path: str, *, json: dict[str, Any] | None=None, data: dict[str, Any] | None=None, params: dict[str, Any] | None=None, idempotency_key: str | None=None) -> httpx.Response:
+    def _patch(
+        self,
+        path: str,
+        *,
+        json: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+        idempotency_key: str | None = None,
+    ) -> httpx.Response:
         """Make a PATCH request.
 
         Args:
@@ -396,9 +472,16 @@ class SyncBaseService:
         """
         if idempotency_key is None and self._client._config.auto_idempotency_keys:
             idempotency_key = self._generate_idempotency_key()
-        return self._request("PATCH", path, json=json, data=data, params=params, headers=self._build_idempotency_headers(idempotency_key))
+        return self._request(
+            "PATCH",
+            path,
+            json=json,
+            data=data,
+            params=params,
+            headers=self._build_idempotency_headers(idempotency_key),
+        )
 
-    def _delete(self, path: str, *, params: dict[str, Any] | None=None) -> httpx.Response:
+    def _delete(self, path: str, *, params: dict[str, Any] | None = None) -> httpx.Response:
         """Make a DELETE request.
 
         Args:
@@ -410,7 +493,9 @@ class SyncBaseService:
         """
         return self._request("DELETE", path, params=params)
 
-    def _post_file(self, path: str, *, file: tuple[str, bytes, str], idempotency_key: str | None=None) -> httpx.Response:
+    def _post_file(
+        self, path: str, *, file: tuple[str, bytes, str], idempotency_key: str | None = None
+    ) -> httpx.Response:
         """Make a POST request with a file upload (multipart/form-data).
 
         Args:
@@ -427,9 +512,21 @@ class SyncBaseService:
             APIError: For other API error responses.
         """
         filename, content, content_type = file
-        return self._request("POST", path, files={"data": (filename, content, content_type)}, headers=self._build_idempotency_headers(idempotency_key))
+        return self._request(
+            "POST",
+            path,
+            files={"data": (filename, content, content_type)},
+            headers=self._build_idempotency_headers(idempotency_key),
+        )
 
-    def _get_paginated(self, path: str, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0, params: dict[str, Any] | None=None) -> PaginatedResponse[dict[str, Any]]:
+    def _get_paginated(
+        self,
+        path: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        params: dict[str, Any] | None = None,
+    ) -> PaginatedResponse[dict[str, Any]]:
         """Make a paginated GET request.
 
         Args:
@@ -441,11 +538,23 @@ class SyncBaseService:
         Returns:
             A PaginatedResponse containing the items and pagination metadata.
         """
-        request_params = {"limit": min(max(limit, 0), MAX_PAGE_LIMIT), "offset": max(offset, 0), **(params or {})}
+        request_params = {
+            "limit": min(max(limit, 0), MAX_PAGE_LIMIT),
+            "offset": max(offset, 0),
+            **(params or {}),
+        }
         response = self._get(path, params=request_params)
         return PaginatedResponse.from_dict(response.json())
 
-    def _get_paginated_as(self, path: str, model_class: type[T], *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0, params: dict[str, Any] | None=None) -> PaginatedResponse[T]:
+    def _get_paginated_as(
+        self,
+        path: str,
+        model_class: type[T],
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        params: dict[str, Any] | None = None,
+    ) -> PaginatedResponse[T]:
         """Make a paginated GET request and parse items into the given model class.
 
         Args:
@@ -459,9 +568,16 @@ class SyncBaseService:
             A PaginatedResponse containing validated model instances.
         """
         response = self._get_paginated(path, limit=limit, offset=offset, params=params)
-        return PaginatedResponse(items=[model_class.model_validate(item) for item in response.items], limit=response.limit, offset=response.offset, total=response.total)
+        return PaginatedResponse(
+            items=[model_class.model_validate(item) for item in response.items],
+            limit=response.limit,
+            offset=response.offset,
+            total=response.total,
+        )
 
-    def _iter_all_pages(self, path: str, *, limit: int=MAX_PAGE_LIMIT, params: dict[str, Any] | None=None) -> Iterator[dict[str, Any]]:
+    def _iter_all_pages(
+        self, path: str, *, limit: int = MAX_PAGE_LIMIT, params: dict[str, Any] | None = None
+    ) -> Iterator[dict[str, Any]]:
         """Iterate through all pages of a paginated endpoint.
 
         Yields individual items from each page, automatically fetching
@@ -490,7 +606,9 @@ class SyncBaseService:
                 break
             offset = page.next_offset
 
-    def _get_all(self, path: str, *, limit: int=MAX_PAGE_LIMIT, params: dict[str, Any] | None=None) -> list[dict[str, Any]]:
+    def _get_all(
+        self, path: str, *, limit: int = MAX_PAGE_LIMIT, params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """Fetch all items from a paginated endpoint.
 
         Convenience method that collects all items from _iter_all_pages

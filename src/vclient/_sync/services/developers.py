@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Developer API."""
+
 from vclient._sync.services.base import SyncBaseService
 from vclient.endpoints import Endpoints
 from vclient.models import MeDeveloper, MeDeveloperUpdate, MeDeveloperWithApiKey
@@ -32,7 +33,7 @@ class SyncDeveloperService(SyncBaseService):
         response = self._get(Endpoints.DEVELOPER_ME)
         return MeDeveloper.model_validate(response.json())
 
-    def update_me(self, request: MeDeveloperUpdate | None=None, **kwargs) -> MeDeveloper:
+    def update_me(self, request: MeDeveloperUpdate | None = None, **kwargs) -> MeDeveloper:
         """Update the current developer's profile.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -49,8 +50,13 @@ class SyncDeveloperService(SyncBaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = request if request is not None else self._validate_request(MeDeveloperUpdate, **kwargs)
-        response = self._patch(Endpoints.DEVELOPER_ME, json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        body = (
+            request if request is not None else self._validate_request(MeDeveloperUpdate, **kwargs)
+        )
+        response = self._patch(
+            Endpoints.DEVELOPER_ME,
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return MeDeveloper.model_validate(response.json())
 
     def regenerate_api_key(self) -> MeDeveloperWithApiKey:

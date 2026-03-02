@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Global Admin API."""
+
 from collections.abc import Iterator
 
 from vclient._sync.services.base import SyncBaseService
@@ -26,7 +27,13 @@ class SyncGlobalAdminService(SyncBaseService):
         ...     developer = await client.global_admin.get("developer_id")
     """
 
-    def get_page(self, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0, is_global_admin: bool | None=None) -> PaginatedResponse[Developer]:
+    def get_page(
+        self,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        is_global_admin: bool | None = None,
+    ) -> PaginatedResponse[Developer]:
         """Retrieve a paginated page of developer accounts.
 
         Requires global admin privileges.
@@ -40,9 +47,11 @@ class SyncGlobalAdminService(SyncBaseService):
             A PaginatedResponse containing Developer objects and pagination metadata.
         """
         params = {"is_global_admin": is_global_admin} if is_global_admin is not None else None
-        return self._get_paginated_as(Endpoints.ADMIN_DEVELOPERS, Developer, limit=limit, offset=offset, params=params)
+        return self._get_paginated_as(
+            Endpoints.ADMIN_DEVELOPERS, Developer, limit=limit, offset=offset, params=params
+        )
 
-    def list_all(self, *, is_global_admin: bool | None=None) -> list[Developer]:
+    def list_all(self, *, is_global_admin: bool | None = None) -> list[Developer]:
         """Retrieve all developer accounts.
 
         Automatically paginates through all results. Use `get_page()` for paginated access
@@ -56,7 +65,9 @@ class SyncGlobalAdminService(SyncBaseService):
         """
         return [developer for developer in self.iter_all(is_global_admin=is_global_admin)]
 
-    def iter_all(self, *, limit: int=100, is_global_admin: bool | None=None) -> Iterator[Developer]:
+    def iter_all(
+        self, *, limit: int = 100, is_global_admin: bool | None = None
+    ) -> Iterator[Developer]:
         """Iterate through all developer accounts.
 
         Yields individual developers, automatically fetching subsequent pages until
@@ -76,7 +87,9 @@ class SyncGlobalAdminService(SyncBaseService):
         params = {}
         if is_global_admin is not None:
             params["is_global_admin"] = is_global_admin
-        for item in self._iter_all_pages(Endpoints.ADMIN_DEVELOPERS, limit=limit, params=params or None):
+        for item in self._iter_all_pages(
+            Endpoints.ADMIN_DEVELOPERS, limit=limit, params=params or None
+        ):
             yield Developer.model_validate(item)
 
     def get(self, developer_id: str) -> Developer:
@@ -95,7 +108,7 @@ class SyncGlobalAdminService(SyncBaseService):
         response = self._get(Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id))
         return Developer.model_validate(response.json())
 
-    def create(self, request: DeveloperCreate | None=None, **kwargs) -> Developer:
+    def create(self, request: DeveloperCreate | None = None, **kwargs) -> Developer:
         """Create a new developer account.
 
         This creates the account but does not create an API key or grant access to any
@@ -116,10 +129,15 @@ class SyncGlobalAdminService(SyncBaseService):
             AuthorizationError: If you don't have global admin privileges.
         """
         body = request if request is not None else self._validate_request(DeveloperCreate, **kwargs)
-        response = self._post(Endpoints.ADMIN_DEVELOPERS, json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            Endpoints.ADMIN_DEVELOPERS,
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Developer.model_validate(response.json())
 
-    def update(self, developer_id: str, request: DeveloperUpdate | None=None, **kwargs) -> Developer:
+    def update(
+        self, developer_id: str, request: DeveloperUpdate | None = None, **kwargs
+    ) -> Developer:
         """Modify a developer account's properties.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -141,7 +159,10 @@ class SyncGlobalAdminService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(DeveloperUpdate, **kwargs)
-        response = self._patch(Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._patch(
+            Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Developer.model_validate(response.json())
 
     def delete(self, developer_id: str) -> None:

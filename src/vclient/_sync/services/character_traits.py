@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Character Traits API."""
+
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
@@ -18,10 +19,18 @@ from vclient.models import (
 if TYPE_CHECKING:
     from vclient._sync.client import SyncVClient
 
+
 class SyncCharacterTraitsService(SyncBaseService):
     """Service for interacting with the Character Traits API."""
 
-    def __init__(self, client: "SyncVClient", company_id: str, user_id: str, campaign_id: str, character_id: str) -> None:
+    def __init__(
+        self,
+        client: "SyncVClient",
+        company_id: str,
+        user_id: str,
+        campaign_id: str,
+        character_id: str,
+    ) -> None:
         """Initialize the service.
 
         Args:
@@ -39,9 +48,21 @@ class SyncCharacterTraitsService(SyncBaseService):
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
         """Format an endpoint with the scoped company_id, user_id, campaign_id, and character_id plus any extra params."""
-        return endpoint.format(company_id=self._company_id, user_id=self._user_id, campaign_id=self._campaign_id, character_id=self._character_id, **kwargs)
+        return endpoint.format(
+            company_id=self._company_id,
+            user_id=self._user_id,
+            campaign_id=self._campaign_id,
+            character_id=self._character_id,
+            **kwargs,
+        )
 
-    def get_page(self, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0, parent_category_id: str | None=None) -> PaginatedResponse[CharacterTrait]:
+    def get_page(
+        self,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        parent_category_id: str | None = None,
+    ) -> PaginatedResponse[CharacterTrait]:
         """Retrieve a paginated page of character traits.
 
         Args:
@@ -55,9 +76,15 @@ class SyncCharacterTraitsService(SyncBaseService):
         params: dict[str, str | int] = {}
         if parent_category_id is not None:
             params["parent_category_id"] = parent_category_id
-        return self._get_paginated_as(self._format_endpoint(Endpoints.CHARACTER_TRAITS), CharacterTrait, limit=limit, offset=offset, params=params or None)
+        return self._get_paginated_as(
+            self._format_endpoint(Endpoints.CHARACTER_TRAITS),
+            CharacterTrait,
+            limit=limit,
+            offset=offset,
+            params=params or None,
+        )
 
-    def list_all(self, *, parent_category_id: str | None=None) -> list[CharacterTrait]:
+    def list_all(self, *, parent_category_id: str | None = None) -> list[CharacterTrait]:
         """Retrieve all character traits.
 
         Args:
@@ -68,7 +95,9 @@ class SyncCharacterTraitsService(SyncBaseService):
         """
         return [trait for trait in self.iter_all(parent_category_id=parent_category_id)]
 
-    def iter_all(self, *, limit: int=100, parent_category_id: str | None=None) -> Iterator[CharacterTrait]:
+    def iter_all(
+        self, *, limit: int = 100, parent_category_id: str | None = None
+    ) -> Iterator[CharacterTrait]:
         """Iterate through all character traits.
 
         Args:
@@ -85,7 +114,9 @@ class SyncCharacterTraitsService(SyncBaseService):
         params: dict[str, str | int] = {}
         if parent_category_id is not None:
             params["parent_category_id"] = parent_category_id
-        for item in self._iter_all_pages(self._format_endpoint(Endpoints.CHARACTER_TRAITS), limit=limit, params=params or None):
+        for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.CHARACTER_TRAITS), limit=limit, params=params or None
+        ):
             yield CharacterTrait.model_validate(item)
 
     def get(self, character_trait_id: str) -> CharacterTrait:
@@ -101,7 +132,9 @@ class SyncCharacterTraitsService(SyncBaseService):
             NotFoundError: If the character trait does not exist.
             AuthorizationError: If you don't have access to the character.
         """
-        response = self._get(self._format_endpoint(Endpoints.CHARACTER_TRAIT, character_trait_id=character_trait_id))
+        response = self._get(
+            self._format_endpoint(Endpoints.CHARACTER_TRAIT, character_trait_id=character_trait_id)
+        )
         return CharacterTrait.model_validate(response.json())
 
     def delete(self, character_trait_id: str) -> None:
@@ -110,7 +143,9 @@ class SyncCharacterTraitsService(SyncBaseService):
         Args:
             character_trait_id: The ID of the trait to delete.
         """
-        self._delete(self._format_endpoint(Endpoints.CHARACTER_TRAIT, character_trait_id=character_trait_id))
+        self._delete(
+            self._format_endpoint(Endpoints.CHARACTER_TRAIT, character_trait_id=character_trait_id)
+        )
 
     def assign(self, trait_id: str, value: int) -> CharacterTrait:
         """Assign a trait to a character.
@@ -129,10 +164,13 @@ class SyncCharacterTraitsService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(CharacterCreateTraitAssign, trait_id=trait_id, value=value)
-        response = self._post(self._format_endpoint(Endpoints.CHARACTER_TRAIT_ASSIGN), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            self._format_endpoint(Endpoints.CHARACTER_TRAIT_ASSIGN),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return CharacterTrait.model_validate(response.json())
 
-    def create(self, request: TraitCreate | None=None, **kwargs) -> CharacterTrait:
+    def create(self, request: TraitCreate | None = None, **kwargs) -> CharacterTrait:
         """Create a new character trait.
 
         Args:
@@ -144,7 +182,10 @@ class SyncCharacterTraitsService(SyncBaseService):
                 upgrade_cost (int | None), value (int | None).
         """
         body = request if request is not None else self._validate_request(TraitCreate, **kwargs)
-        response = self._post(self._format_endpoint(Endpoints.CHARACTER_TRAIT_CREATE), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            self._format_endpoint(Endpoints.CHARACTER_TRAIT_CREATE),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return CharacterTrait.model_validate(response.json())
 
     def get_value_options(self, character_trait_id: str) -> CharacterTraitValueOptionsResponse:
@@ -162,10 +203,16 @@ class SyncCharacterTraitsService(SyncBaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        response = self._get(self._format_endpoint(Endpoints.CHARACTER_TRAIT_VALUE_OPTIONS, character_trait_id=character_trait_id))
+        response = self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_VALUE_OPTIONS, character_trait_id=character_trait_id
+            )
+        )
         return CharacterTraitValueOptionsResponse.model_validate(response.json())
 
-    def change_value(self, character_trait_id: str, new_value: int, currency: TraitModifyCurrency) -> CharacterTrait:
+    def change_value(
+        self, character_trait_id: str, new_value: int, currency: TraitModifyCurrency
+    ) -> CharacterTrait:
         """Change the value of a character trait.
 
         Args:
@@ -174,5 +221,10 @@ class SyncCharacterTraitsService(SyncBaseService):
             currency: The currency to use for the modification.
         """
         body = self._validate_request(_TraitModify, target_value=new_value, currency=currency)
-        response = self._put(self._format_endpoint(Endpoints.CHARACTER_TRAIT_VALUE, character_trait_id=character_trait_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._put(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_VALUE, character_trait_id=character_trait_id
+            ),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return CharacterTrait.model_validate(response.json())

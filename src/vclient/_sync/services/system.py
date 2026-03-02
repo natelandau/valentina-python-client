@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the System API."""
+
 from vclient._sync.services.base import SyncBaseService
 from vclient.endpoints import Endpoints
 from vclient.models.system import SystemHealth

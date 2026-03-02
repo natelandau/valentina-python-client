@@ -1,5 +1,6 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Users API."""
+
 import mimetypes
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
@@ -26,6 +27,7 @@ from vclient.models import (
 
 if TYPE_CHECKING:
     from vclient._sync.client import SyncVClient
+
 
 class SyncUsersService(SyncBaseService):
     """Service for managing users within a company in the Valentina API.
@@ -57,7 +59,9 @@ class SyncUsersService(SyncBaseService):
         """Format an endpoint with the scoped company_id plus any extra params."""
         return endpoint.format(company_id=self._company_id, **kwargs)
 
-    def get_page(self, *, user_role: UserRole | None=None, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0) -> PaginatedResponse[User]:
+    def get_page(
+        self, *, user_role: UserRole | None = None, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+    ) -> PaginatedResponse[User]:
         """Retrieve a paginated page of users within a company.
 
         Optionally filter by user role to view specific user types such as players
@@ -71,9 +75,15 @@ class SyncUsersService(SyncBaseService):
         Returns:
             A PaginatedResponse containing User objects and pagination metadata.
         """
-        return self._get_paginated_as(self._format_endpoint(Endpoints.USERS), User, limit=limit, offset=offset, params=self._build_params(user_role=user_role))
+        return self._get_paginated_as(
+            self._format_endpoint(Endpoints.USERS),
+            User,
+            limit=limit,
+            offset=offset,
+            params=self._build_params(user_role=user_role),
+        )
 
-    def list_all(self, *, user_role: UserRole | None=None) -> list[User]:
+    def list_all(self, *, user_role: UserRole | None = None) -> list[User]:
         """Retrieve all users within a company.
 
         Automatically paginates through all results. Use `get_page()` for paginated access
@@ -87,7 +97,7 @@ class SyncUsersService(SyncBaseService):
         """
         return [user for user in self.iter_all(user_role=user_role)]
 
-    def iter_all(self, *, user_role: UserRole | None=None, limit: int=100) -> Iterator[User]:
+    def iter_all(self, *, user_role: UserRole | None = None, limit: int = 100) -> Iterator[User]:
         """Iterate through all users within a company.
 
         Yields individual users, automatically fetching subsequent pages until
@@ -104,7 +114,11 @@ class SyncUsersService(SyncBaseService):
             >>> async for user in users.iter_all():
             ...     print(user.name)
         """
-        for item in self._iter_all_pages(self._format_endpoint(Endpoints.USERS), limit=limit, params=self._build_params(user_role=user_role)):
+        for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.USERS),
+            limit=limit,
+            params=self._build_params(user_role=user_role),
+        ):
             yield User.model_validate(item)
 
     def get(self, user_id: str) -> User:
@@ -125,7 +139,7 @@ class SyncUsersService(SyncBaseService):
         response = self._get(self._format_endpoint(Endpoints.USER, user_id=user_id))
         return User.model_validate(response.json())
 
-    def create(self, request: UserCreate | None=None, **kwargs) -> User:
+    def create(self, request: UserCreate | None = None, **kwargs) -> User:
         """Create a new user within a company.
 
         The user is automatically added to the company's user list. The Discord profile
@@ -148,10 +162,13 @@ class SyncUsersService(SyncBaseService):
             AuthorizationError: If you don't have admin-level access to the company.
         """
         body = request if request is not None else self._validate_request(UserCreate, **kwargs)
-        response = self._post(self._format_endpoint(Endpoints.USERS), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            self._format_endpoint(Endpoints.USERS),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return User.model_validate(response.json())
 
-    def update(self, user_id: str, request: UserUpdate | None=None, **kwargs) -> User:
+    def update(self, user_id: str, request: UserUpdate | None = None, **kwargs) -> User:
         """Modify a user's properties.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -174,7 +191,10 @@ class SyncUsersService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(UserUpdate, **kwargs)
-        response = self._patch(self._format_endpoint(Endpoints.USER, user_id=user_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._patch(
+            self._format_endpoint(Endpoints.USER, user_id=user_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return User.model_validate(response.json())
 
     def delete(self, user_id: str, requesting_user_id: str) -> None:
@@ -190,9 +210,12 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        self._delete(self._format_endpoint(Endpoints.USER, user_id=user_id), params={"requesting_user_id": requesting_user_id})
+        self._delete(
+            self._format_endpoint(Endpoints.USER, user_id=user_id),
+            params={"requesting_user_id": requesting_user_id},
+        )
 
-    def get_statistics(self, user_id: str, *, num_top_traits: int=5) -> RollStatistics:
+    def get_statistics(self, user_id: str, *, num_top_traits: int = 5) -> RollStatistics:
         """Retrieve aggregated dice roll statistics for a specific user.
 
         Includes success rates, critical frequencies, most-used traits, etc.
@@ -208,10 +231,15 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = self._get(self._format_endpoint(Endpoints.USER_STATISTICS, user_id=user_id), params={"num_top_traits": num_top_traits})
+        response = self._get(
+            self._format_endpoint(Endpoints.USER_STATISTICS, user_id=user_id),
+            params={"num_top_traits": num_top_traits},
+        )
         return RollStatistics.model_validate(response.json())
 
-    def get_assets_page(self, user_id: str, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0) -> PaginatedResponse[Asset]:
+    def get_assets_page(
+        self, user_id: str, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+    ) -> PaginatedResponse[Asset]:
         """Retrieve a paginated page of assets for a user.
 
         Args:
@@ -226,7 +254,12 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        return self._get_paginated_as(self._format_endpoint(Endpoints.USER_ASSETS, user_id=user_id), Asset, limit=limit, offset=offset)
+        return self._get_paginated_as(
+            self._format_endpoint(Endpoints.USER_ASSETS, user_id=user_id),
+            Asset,
+            limit=limit,
+            offset=offset,
+        )
 
     def list_all_assets(self, user_id: str) -> list[Asset]:
         """Retrieve all assets for a user.
@@ -246,7 +279,7 @@ class SyncUsersService(SyncBaseService):
         """
         return [asset for asset in self.iter_all_assets(user_id)]
 
-    def iter_all_assets(self, user_id: str, *, limit: int=100) -> Iterator[Asset]:
+    def iter_all_assets(self, user_id: str, *, limit: int = 100) -> Iterator[Asset]:
         """Iterate through all assets for a user.
 
         Yields individual assets, automatically fetching subsequent pages until
@@ -263,7 +296,9 @@ class SyncUsersService(SyncBaseService):
             >>> async for asset in users.iter_all_assets("user_id"):
             ...     print(asset.original_filename)
         """
-        for item in self._iter_all_pages(self._format_endpoint(Endpoints.USER_ASSETS, user_id=user_id), limit=limit):
+        for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.USER_ASSETS, user_id=user_id), limit=limit
+        ):
             yield Asset.model_validate(item)
 
     def get_asset(self, user_id: str, asset_id: str) -> Asset:
@@ -280,7 +315,9 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the asset does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = self._get(self._format_endpoint(Endpoints.USER_ASSET, user_id=user_id, asset_id=asset_id))
+        response = self._get(
+            self._format_endpoint(Endpoints.USER_ASSET, user_id=user_id, asset_id=asset_id)
+        )
         return Asset.model_validate(response.json())
 
     def delete_asset(self, user_id: str, asset_id: str) -> None:
@@ -296,9 +333,13 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the asset does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        self._delete(self._format_endpoint(Endpoints.USER_ASSET, user_id=user_id, asset_id=asset_id))
+        self._delete(
+            self._format_endpoint(Endpoints.USER_ASSET, user_id=user_id, asset_id=asset_id)
+        )
 
-    def upload_asset(self, user_id: str, filename: str, content: bytes, content_type: str | None=None) -> Asset:
+    def upload_asset(
+        self, user_id: str, filename: str, content: bytes, content_type: str | None = None
+    ) -> Asset:
         """Upload a new asset for a user.
 
         Uploads a file to S3 storage and associates it with the user.
@@ -319,7 +360,10 @@ class SyncUsersService(SyncBaseService):
         """
         if content_type is None:
             content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
-        response = self._post_file(self._format_endpoint(Endpoints.USER_ASSET_UPLOAD, user_id=user_id), file=(filename, content, content_type))
+        response = self._post_file(
+            self._format_endpoint(Endpoints.USER_ASSET_UPLOAD, user_id=user_id),
+            file=(filename, content, content_type),
+        )
         return Asset.model_validate(response.json())
 
     def get_experience(self, user_id: str, campaign_id: str) -> CampaignExperience:
@@ -338,10 +382,16 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = self._get(self._format_endpoint(Endpoints.USER_EXPERIENCE_CAMPAIGN, user_id=user_id, campaign_id=campaign_id))
+        response = self._get(
+            self._format_endpoint(
+                Endpoints.USER_EXPERIENCE_CAMPAIGN, user_id=user_id, campaign_id=campaign_id
+            )
+        )
         return CampaignExperience.model_validate(response.json())
 
-    def add_xp(self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str) -> CampaignExperience:
+    def add_xp(
+        self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str
+    ) -> CampaignExperience:
         """Award experience points to a user for a specific campaign.
 
         The XP is added to both the current XP pool (available for spending) and
@@ -361,11 +411,21 @@ class SyncUsersService(SyncBaseService):
             AuthorizationError: If you don't have appropriate access.
             RequestValidationError: If the input parameters fail client-side validation.
         """
-        body = self._validate_request(_ExperienceAddRemove, amount=amount, campaign_id=campaign_id, requesting_user_id=requesting_user_id)
-        response = self._post(self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_ADD, user_id=user_id), json=body.model_dump(mode="json"))
+        body = self._validate_request(
+            _ExperienceAddRemove,
+            amount=amount,
+            campaign_id=campaign_id,
+            requesting_user_id=requesting_user_id,
+        )
+        response = self._post(
+            self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_ADD, user_id=user_id),
+            json=body.model_dump(mode="json"),
+        )
         return CampaignExperience.model_validate(response.json())
 
-    def remove_xp(self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str) -> CampaignExperience:
+    def remove_xp(
+        self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str
+    ) -> CampaignExperience:
         """Deduct experience points from a user's current XP pool.
 
         Returns an error if the user has insufficient XP to complete the deduction.
@@ -385,11 +445,21 @@ class SyncUsersService(SyncBaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the user has insufficient XP.
         """
-        body = self._validate_request(_ExperienceAddRemove, amount=amount, campaign_id=campaign_id, requesting_user_id=requesting_user_id)
-        response = self._post(self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_REMOVE, user_id=user_id), json=body.model_dump(mode="json"))
+        body = self._validate_request(
+            _ExperienceAddRemove,
+            amount=amount,
+            campaign_id=campaign_id,
+            requesting_user_id=requesting_user_id,
+        )
+        response = self._post(
+            self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_REMOVE, user_id=user_id),
+            json=body.model_dump(mode="json"),
+        )
         return CampaignExperience.model_validate(response.json())
 
-    def add_cool_points(self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str) -> CampaignExperience:
+    def add_cool_points(
+        self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str
+    ) -> CampaignExperience:
         """Award cool points to a user for a specific campaign.
 
         Cool points are converted to XP automatically based on the company's
@@ -409,11 +479,21 @@ class SyncUsersService(SyncBaseService):
             AuthorizationError: If you don't have appropriate access.
             RequestValidationError: If the input parameters fail client-side validation.
         """
-        body = self._validate_request(_ExperienceAddRemove, amount=amount, campaign_id=campaign_id, requesting_user_id=requesting_user_id)
-        response = self._post(self._format_endpoint(Endpoints.USER_EXPERIENCE_CP_ADD, user_id=user_id), json=body.model_dump(mode="json"))
+        body = self._validate_request(
+            _ExperienceAddRemove,
+            amount=amount,
+            campaign_id=campaign_id,
+            requesting_user_id=requesting_user_id,
+        )
+        response = self._post(
+            self._format_endpoint(Endpoints.USER_EXPERIENCE_CP_ADD, user_id=user_id),
+            json=body.model_dump(mode="json"),
+        )
         return CampaignExperience.model_validate(response.json())
 
-    def get_notes_page(self, user_id: str, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0) -> PaginatedResponse[Note]:
+    def get_notes_page(
+        self, user_id: str, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+    ) -> PaginatedResponse[Note]:
         """Retrieve a paginated page of notes for a user.
 
         Args:
@@ -428,7 +508,12 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        return self._get_paginated_as(self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id), Note, limit=limit, offset=offset)
+        return self._get_paginated_as(
+            self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id),
+            Note,
+            limit=limit,
+            offset=offset,
+        )
 
     def list_all_notes(self, user_id: str) -> list[Note]:
         """Retrieve all notes for a user.
@@ -448,7 +533,7 @@ class SyncUsersService(SyncBaseService):
         """
         return [note for note in self.iter_all_notes(user_id)]
 
-    def iter_all_notes(self, user_id: str, *, limit: int=100) -> Iterator[Note]:
+    def iter_all_notes(self, user_id: str, *, limit: int = 100) -> Iterator[Note]:
         """Iterate through all notes for a user.
 
         Yields individual notes, automatically fetching subsequent pages until
@@ -465,7 +550,9 @@ class SyncUsersService(SyncBaseService):
             >>> async for note in users.iter_all_notes("user_id"):
             ...     print(note.title)
         """
-        for item in self._iter_all_pages(self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id), limit=limit):
+        for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id), limit=limit
+        ):
             yield Note.model_validate(item)
 
     def get_note(self, user_id: str, note_id: str) -> Note:
@@ -482,10 +569,12 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the note does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = self._get(self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id))
+        response = self._get(
+            self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id)
+        )
         return Note.model_validate(response.json())
 
-    def create_note(self, user_id: str, request: NoteCreate | None=None, **kwargs) -> Note:
+    def create_note(self, user_id: str, request: NoteCreate | None = None, **kwargs) -> Note:
         """Create a new note for a user.
 
         Notes support markdown formatting for rich text content.
@@ -506,10 +595,15 @@ class SyncUsersService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(NoteCreate, **kwargs)
-        response = self._post(self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            self._format_endpoint(Endpoints.USER_NOTES, user_id=user_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Note.model_validate(response.json())
 
-    def update_note(self, user_id: str, note_id: str, request: NoteUpdate | None=None, **kwargs) -> Note:
+    def update_note(
+        self, user_id: str, note_id: str, request: NoteUpdate | None = None, **kwargs
+    ) -> Note:
         """Modify a note's content.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -531,7 +625,10 @@ class SyncUsersService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(NoteUpdate, **kwargs)
-        response = self._patch(self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._patch(
+            self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Note.model_validate(response.json())
 
     def delete_note(self, user_id: str, note_id: str) -> None:
@@ -549,7 +646,9 @@ class SyncUsersService(SyncBaseService):
         """
         self._delete(self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id))
 
-    def get_quickrolls_page(self, user_id: str, *, limit: int=DEFAULT_PAGE_LIMIT, offset: int=0) -> PaginatedResponse[Quickroll]:
+    def get_quickrolls_page(
+        self, user_id: str, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+    ) -> PaginatedResponse[Quickroll]:
         """Retrieve a paginated page of quickrolls for a user.
 
         Quickrolls are pre-configured dice pools for frequently used trait combinations,
@@ -567,7 +666,12 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        return self._get_paginated_as(self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id), Quickroll, limit=limit, offset=offset)
+        return self._get_paginated_as(
+            self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id),
+            Quickroll,
+            limit=limit,
+            offset=offset,
+        )
 
     def list_all_quickrolls(self, user_id: str) -> list[Quickroll]:
         """Retrieve all quickrolls for a user.
@@ -587,7 +691,7 @@ class SyncUsersService(SyncBaseService):
         """
         return [qr for qr in self.iter_all_quickrolls(user_id)]
 
-    def iter_all_quickrolls(self, user_id: str, *, limit: int=100) -> Iterator[Quickroll]:
+    def iter_all_quickrolls(self, user_id: str, *, limit: int = 100) -> Iterator[Quickroll]:
         """Iterate through all quickrolls for a user.
 
         Yields individual quickrolls, automatically fetching subsequent pages until
@@ -604,7 +708,9 @@ class SyncUsersService(SyncBaseService):
             >>> async for qr in users.iter_all_quickrolls("user_id"):
             ...     print(qr.name)
         """
-        for item in self._iter_all_pages(self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id), limit=limit):
+        for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id), limit=limit
+        ):
             yield Quickroll.model_validate(item)
 
     def get_quickroll(self, user_id: str, quickroll_id: str) -> Quickroll:
@@ -621,10 +727,16 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the quickroll does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = self._get(self._format_endpoint(Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id))
+        response = self._get(
+            self._format_endpoint(
+                Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id
+            )
+        )
         return Quickroll.model_validate(response.json())
 
-    def create_quickroll(self, user_id: str, request: QuickrollCreate | None=None, **kwargs) -> Quickroll:
+    def create_quickroll(
+        self, user_id: str, request: QuickrollCreate | None = None, **kwargs
+    ) -> Quickroll:
         """Create a new quickroll for a user.
 
         Define the traits that make up the dice pool. Quickroll names must be unique
@@ -647,10 +759,15 @@ class SyncUsersService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(QuickrollCreate, **kwargs)
-        response = self._post(self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._post(
+            self._format_endpoint(Endpoints.USER_QUICKROLLS, user_id=user_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Quickroll.model_validate(response.json())
 
-    def update_quickroll(self, user_id: str, quickroll_id: str, request: QuickrollUpdate | None=None, **kwargs) -> Quickroll:
+    def update_quickroll(
+        self, user_id: str, quickroll_id: str, request: QuickrollUpdate | None = None, **kwargs
+    ) -> Quickroll:
         """Modify a quickroll's name or trait configuration.
 
         Only include fields that need to be changed; omitted fields remain unchanged.
@@ -673,7 +790,12 @@ class SyncUsersService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(QuickrollUpdate, **kwargs)
-        response = self._patch(self._format_endpoint(Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id), json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"))
+        response = self._patch(
+            self._format_endpoint(
+                Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id
+            ),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
         return Quickroll.model_validate(response.json())
 
     def delete_quickroll(self, user_id: str, quickroll_id: str) -> None:
@@ -689,4 +811,8 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If the quickroll does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        self._delete(self._format_endpoint(Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id))
+        self._delete(
+            self._format_endpoint(
+                Endpoints.USER_QUICKROLL, user_id=user_id, quickroll_id=quickroll_id
+            )
+        )
