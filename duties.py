@@ -165,6 +165,29 @@ def test(ctx: Context, *cli_args: str) -> None:
 
 
 @duty()
+def generate_sync(ctx: Context) -> None:
+    """Generate synchronous client from async source and format the output."""
+    ctx.run(
+        [
+            "uv",
+            "run",
+            "python",
+            "-c",
+            "from vclient._codegen import generate_sync; from pathlib import Path; generate_sync(Path('src/vclient'))",
+        ],
+        title="generate sync client",
+    )
+    ctx.run(
+        ["uv", "run", "ruff", "format", "--config", "pyproject.toml", "src/vclient/_sync/"],
+        title="format generated sync client",
+    )
+    ctx.run(
+        ["uv", "run", "ruff", "check", "--fix", "--config", "pyproject.toml", "src/vclient/_sync/"],
+        title="lint generated sync client",
+    )
+
+
+@duty()
 def validate_constants(ctx: Context) -> None:
     """Validate client constants against the live API."""
     ctx.run(

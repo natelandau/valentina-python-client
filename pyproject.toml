@@ -121,7 +121,18 @@
             "TD002",  # Missing author in TODO
             "TD003",  # Missing issue link on the line following this TODO
         ]
-        per-file-ignores = { "scripts/*.py" = [
+        per-file-ignores = { "src/vclient/_sync/**" = [
+            "C416",    # Unnecessary list comprehension (AST unparser artifact)
+            "D",       # Docstring formatting (AST unparser doesn't preserve style)
+            "E501",    # Line too long
+            "ERA001",  # Commented-out code false positives
+            "PLR0913", # Too many arguments
+            "PLR2004", # Magic value used in comparison
+            "PLW0603", # Using global statement
+            "SLF001",  # Private member accessed
+            "TRY300",  # Consider moving to else block
+            "UP028",   # Replace yield over for loop
+        ], "scripts/*.py" = [
             "INP001", # Implicit namespace package (no __init__.py needed)
             "T201",   # print() is intentional for CLI output
         ], "src/vclient/services/*.py" = [
@@ -173,6 +184,7 @@
             max-args = 6
 
     [tool.ruff.format]
+        exclude                   = ["src/vclient/_sync"]
         indent-style              = "space"
         line-ending               = "auto"
         quote-style               = "double"
