@@ -6,6 +6,10 @@ icon: lucide/layers
 
 All services that manage resources share a consistent API for CRUD operations and pagination. This page covers the common methods available across services.
 
+!!! note
+
+    The examples below use the async client. The [sync client](../sync-client.md) provides the same methods — remove `await` and replace `async for` with `for`. See the [sync client page](../sync-client.md) for details.
+
 ## CRUD Operations
 
 Every resource service provides standard methods for creating, reading, updating, and deleting resources:
@@ -43,7 +47,7 @@ Services that return collections provide three methods for accessing paginated d
 | ------------ | ---------------------- | ----------------------------------------------- |
 | `get_page()` | `PaginatedResponse[T]` | Retrieve a single page with pagination metadata |
 | `list_all()` | `list[T]`              | Fetch all items across all pages into a list    |
-| `iter_all()` | `AsyncIterator[T]`     | Memory-efficient streaming through all pages    |
+| `iter_all()` | `AsyncIterator[T]` / `Iterator[T]` | Memory-efficient streaming through all pages    |
 
 ### PaginatedResponse Model
 
