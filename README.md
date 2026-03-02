@@ -1,10 +1,10 @@
 # Valentina Python Client
 
-Async Python client library for accessing the Valentina Noir API.
+Async and sync Python client library for accessing the Valentina Noir API.
 
 ## Features
 
-- **Async-first design** - Built on httpx for efficient async HTTP operations
+- **Async and sync clients** - Both `VClient` (async) and `SyncVClient` (sync) built on httpx
 - **Type-safe** - Full type hints with Pydantic models for request/response validation
 - **Convenient factory pattern** - Create a client once, access services from anywhere
 - **Automatic pagination** - Stream through large datasets with `iter_all()` or fetch everything with `list_all()`

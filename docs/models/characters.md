@@ -20,14 +20,21 @@ Models for player and non-player characters, including class-specific attributes
 | `name_first`          | `str`                        | First name                                     |
 | `name_last`           | `str`                        | Last name                                      |
 | `name_nick`           | `str \| None`                | Nickname                                       |
-| `name`                | `str`                        | Display name                                   |
-| `name_full`           | `str`                        | Full name                                      |
+| `name`                | `str`                        | First and last name                            |
+| `name_full`           | `str`                        | First, last, and nickname                      |
 | `age`                 | `int \| None`                | Age                                            |
 | `biography`           | `str \| None`                | Biography                                      |
 | `user_creator_id`     | `str`                        | Creator user ID                                |
 | `user_player_id`      | `str`                        | Player user ID                                 |
 | `company_id`          | `str`                        | Company ID                                     |
 | `campaign_id`         | `str`                        | Campaign ID                                    |
+| `concept_id`          | `str \| None`                | Concept ID                                     |
+| `starting_points`     | `int`                        | Starting experience points                     |
+| `demeanor`            | `str \| None`                | demeanor                                       |
+| `nature`              | `str \| None`                | nature                                         |
+| `asset_ids`           | `list[str]`                  | Asset IDs                                      |
+| `specialties`         | `list[CharacterSpecialty]`   | Character specialties                          |
+| `character_trait_ids` | `list[str]`                  | Character trait IDs                            |
 | `vampire_attributes`  | `VampireAttributes \| None`  | Vampire-specific data                          |
 | `werewolf_attributes` | `WerewolfAttributes \| None` | Werewolf-specific data                         |
 | `hunter_attributes`   | `HunterAttributes \| None`   | Hunter-specific data                           |
@@ -61,8 +68,8 @@ Models for player and non-player characters, including class-specific attributes
 
 ## MageAttributes
 
-| Field       | Type          | Description            |
-| ----------- | ------------- | ---------------------- |
+| Field       | Type          | Description             |
+| ----------- | ------------- | ----------------------- |
 | `sphere`    | `str \| None` | Primary sphere of magic |
 | `tradition` | `str \| None` | Mage tradition          |
 
@@ -84,15 +91,15 @@ Represents an item in a character's inventory.
 
 Represents a hunter edge with its associated perks. Returned by the character edge management methods.
 
-| Field         | Type               | Description       |
-| ------------- | ------------------ | ----------------- |
-| `id`          | `str`              | Unique identifier |
-| `name`        | `str`              | Edge name         |
-| `description` | `str \| None`      | Edge description  |
-| `pool`        | `str \| None`      | Dice pool         |
-| `system`      | `str \| None`      | System rules      |
-| `type`        | `HunterEdgeType \| None` | Edge type   |
-| `perks`       | `list[Perk]`       | Associated perks  |
+| Field         | Type                     | Description       |
+| ------------- | ------------------------ | ----------------- |
+| `id`          | `str`                    | Unique identifier |
+| `name`        | `str`                    | Edge name         |
+| `description` | `str \| None`            | Edge description  |
+| `pool`        | `str \| None`            | Dice pool         |
+| `system`      | `str \| None`            | System rules      |
+| `type`        | `HunterEdgeType \| None` | Edge type         |
+| `perks`       | `list[Perk]`             | Associated perks  |
 
 ## Perk
 
