@@ -224,7 +224,9 @@ class AsyncToSyncTransformer(ast.NodeTransformer):
 
         if node.names:
             for alias in node.names:
-                if alias.name in _ALL_RENAMES:
+                if alias.name == "AsyncIterator":
+                    alias.name = "Iterator"
+                elif alias.name in _ALL_RENAMES:
                     alias.name = _ALL_RENAMES[alias.name]
 
         self.generic_visit(node)

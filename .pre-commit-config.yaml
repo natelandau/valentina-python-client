@@ -70,6 +70,7 @@ repos:
       - id: ruff-check
       - id: ruff-format
         args: [--check]
+        exclude: ^src/vclient/_sync/
 
   - repo: "https://github.com/adhtruong/mirrors-typos"
     rev: v1.43.5
@@ -111,7 +112,7 @@ repos:
       - id: ty
         name: ty
         entry: ty check src/
-        exclude: "tests/|duties.py|scripts/"
+        exclude: "tests/|duties.py|scripts/|src/vclient/_sync/"
         language: system
         types: [python]
 
