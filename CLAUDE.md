@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-vclient - Async Python client for the Valentina API. Python 3.13+ required.
+vclient - Async and sync Python client for the Valentina API. Python 3.13+ required.
 
 ## Commands
 
@@ -12,6 +12,7 @@ vclient - Async Python client for the Valentina API. Python 3.13+ required.
 uv run duty lint                          # Run all linting (ruff, ty, typos, format)
 uv run duty test                          # Run tests with coverage
 uv run duty clean                         # Clean build artifacts
+uv run duty generate_sync                 # Regenerate sync client from async source
 uv run duty validate_constants            # Validate constants against live API
 
 # Single test or specific tests
@@ -23,14 +24,19 @@ uv run pytest tests/ -k "test_name_pattern" -x
 
 ```
 src/vclient/
-├── services/              # API service classes (companies, campaigns, characters, etc.)
-├── models/                # Pydantic v2 models
-├── client.py              # VClient
+├── services/              # Async API service classes (source of truth)
+├── _sync/                 # Generated sync client (do not edit directly)
+│   ├── client.py          # SyncVClient
+│   ├── registry.py        # Sync factory functions
+│   └── services/          # Sync service classes
+├── models/                # Pydantic v2 models (shared by async and sync)
+├── client.py              # VClient (async)
+├── _codegen.py            # AST-based async-to-sync code generator
 ├── config.py              # Internal configuration (_APIConfig)
 ├── constants.py           # Shared constants (Literal types for API enums)
 ├── endpoints.py           # API endpoint paths
 ├── exceptions.py          # RFC 9457 exception classes
-├── registry.py            # Service factory functions
+├── registry.py            # Async factory functions
 └── validate_constants.py  # Constants validation against API options
 
 scripts/
@@ -72,11 +78,19 @@ VClient
 **Primary access via factory functions** (preferred over direct instantiation):
 
 ```python
+# Async
 from vclient import VClient, campaigns_service
 
 async with VClient(base_url="https://api.valentina-noir.com", api_key="...") as client:
     campaigns = client.campaigns(user_id="123")
     all_campaigns = await campaigns.list_all()
+
+# Sync
+from vclient import SyncVClient, sync_campaigns_service
+
+with SyncVClient(base_url="https://api.valentina-noir.com", api_key="...") as client:
+    campaigns = client.campaigns(user_id="123")
+    all_campaigns = campaigns.list_all()
 ```
 
 **Environment variable configuration** — `base_url`, `api_key`, and `default_company_id` can be set via environment variables instead of constructor arguments. Explicit arguments always take precedence.
@@ -91,12 +105,26 @@ Constants for these names are in `constants.py`: `ENV_BASE_URL`, `ENV_API_KEY`, 
 
 Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `users_service`, etc.
 
+Sync factory functions in `_sync/registry.py`: `sync_books_service`, `sync_campaigns_service`, `sync_characters_service`, `sync_companies_service`, etc.
+
+## Sync Client (Code Generation)
+
+The sync client in `_sync/` is **auto-generated** from async source via AST transformation (`_codegen.py`). Never edit `_sync/` files directly.
+
+**Workflow when modifying async services, client, or registry:**
+
+1. Edit async source files (`services/`, `client.py`, `registry.py`)
+2. Run `uv run duty generate_sync` to regenerate `_sync/` (includes ruff format + lint)
+3. Commit both async source and generated sync output
+
+**Key transformations:** `async def` → `def`, `await` → removed, `async with` → `with`, `AsyncIterator` → `Iterator`, `httpx.AsyncClient` → `httpx.Client`, `VClient` → `SyncVClient`, `BaseService` → `SyncBaseService`, `{X}Service` → `Sync{X}Service`.
+
 ## Code Style
 
 - Google-style docstrings
 - Type hints required
 - Pydantic v2 models with field validation
-- Async/await throughout (httpx for HTTP)
+- Async/await for async client, synchronous for sync client (both use httpx)
 
 ## Exceptions
 
