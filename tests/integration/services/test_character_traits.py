@@ -65,6 +65,7 @@ def paginated_character_trait_response(character_trait_response_data: dict) -> d
 def character_trait_value_options_response_data() -> dict:
     """Return a response data for the value options for a character trait."""
     return {
+        "name": "Strength",
         "current_value": 2,
         "min_value": 1,
         "max_value": 5,
