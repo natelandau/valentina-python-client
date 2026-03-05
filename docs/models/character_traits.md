@@ -40,8 +40,7 @@ Returned when querying available value change options for a character trait. Con
 | ------------------------- | -------------------------------------- | ------------------------------ |
 | `name`                    | `str`                                  | Name of the trait              |
 | `current_value`           | `int`                                  | Current trait value            |
-| `min_value`               | `int`                                  | Minimum allowed value          |
-| `max_value`               | `int`                                  | Maximum allowed value          |
+| `trait`                   | `Trait`                                | Full Trait definition          |
 | `xp_current`              | `int`                                  | Available XP                   |
 | `starting_points_current` | `int`                                  | Available starting points      |
 | `options`                 | `dict[str, CharacterTraitValueOption]` | Map of value to change options |

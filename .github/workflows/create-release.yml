@@ -73,7 +73,7 @@ jobs:
               id: generate_notes
               uses: anmarkoulis/commitizen-changelog-reader@master
               with:
-                  tag_name: ${{ env.CURRENT_TAG }}
+                  tag_name: ${{ env.PROJECT_VERSION }}
                   changelog: CHANGELOG.md
 
             - name: Create Release

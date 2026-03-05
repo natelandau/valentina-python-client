@@ -62,13 +62,12 @@ def paginated_character_trait_response(character_trait_response_data: dict) -> d
 
 
 @pytest.fixture
-def character_trait_value_options_response_data() -> dict:
+def character_trait_value_options_response_data(trait_response_data: dict) -> dict:
     """Return a response data for the value options for a character trait."""
     return {
         "name": "Strength",
         "current_value": 2,
-        "min_value": 1,
-        "max_value": 5,
+        "trait": trait_response_data,
         "xp_current": 0,
         "starting_points_current": 0,
         "options": {

@@ -65,8 +65,7 @@ class CharacterTraitValueOptionsResponse(BaseModel):
 
     name: str
     current_value: int
-    min_value: int
-    max_value: int
+    trait: Trait
     xp_current: int
     starting_points_current: int
     options: dict[str, CharacterTraitValueOption]
