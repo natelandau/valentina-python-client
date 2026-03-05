@@ -1,3 +1,9 @@
+## v1.7.3 (2026-03-05)
+
+### Fix
+
+- **character-trait**: return full trait in value-options response
+
 ## v1.7.2 (2026-03-05)
 
 ### Fix
@@ -16,8 +22,6 @@
 
 - add synchronous client (#34)
 
-## v1.6.1 (2026-02-28)
-
 ### Fix
 
 - **models**: add id to all response models
@@ -28,16 +32,9 @@
 
 - **companies**: add get_statistics method (#32)
 
-## v1.5.2 (2026-02-27)
-
 ### Fix
 
 - **user**: support detailed name fields (#31)
-
-## v1.5.1 (2026-02-24)
-
-### Fix
-
 - **company**: add resources_modified_at field (#30)
 
 ## v1.5.0 (2026-02-22)
@@ -45,8 +42,6 @@
 ### Feat
 
 - add get_assets_page, list_all_assets, iter_all_assets to all services (#28)
-
-## v1.4.1 (2026-02-22)
 
 ### Refactor
 
@@ -61,17 +56,7 @@
 ### Fix
 
 - **http**: remove hardcoded Content-Type header (#26)
-
-## v1.3.2 (2026-02-21)
-
-### Fix
-
 - **character-trait**: fix endpoint
-
-## v1.3.1 (2026-02-21)
-
-### Fix
-
 - **models**: use Annotated types for optional field constraints (#25)
 - rename .env.secrets to .env.secret (#23)
 
@@ -108,18 +93,8 @@
 ### Fix
 
 - **character_trait**: replace POST with PUT
-
-## v1.1.2 (2026-02-15)
-
-### Fix
-
 - **endpoints**: correct dictionary path and auspice typo (#14)
 - **experience**: use requesting_user_id in body (#13)
-
-## v1.1.1 (2026-02-15)
-
-### Fix
-
 - **models**: expose _TraitAssign as public API (#12)
 
 ## v1.1.0 (2026-02-15)
