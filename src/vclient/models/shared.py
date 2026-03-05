@@ -139,7 +139,7 @@ class Trait(BaseModel):
     upgrade_cost: int = 2
 
     sheet_section_name: str | None = None
-    sheet_section_id: str | None = None
+    sheet_section_id: str
     parent_category_name: str | None = None
     parent_category_id: str
     custom_for_character_id: str | None = None

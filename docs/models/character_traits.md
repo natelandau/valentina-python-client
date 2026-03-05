@@ -29,6 +29,8 @@ Models for character traits, trait definitions, and trait value modification opt
 | `upgrade_cost`         | `int`                  | XP cost per upgrade     |
 | `parent_category_id`   | `str`                  | Parent category ID      |
 | `parent_category_name` | `str \| None`          | Parent category name    |
+| `sheet_section_id`     | `str`                  | Sheet section ID        |
+| `sheet_section_name`   | `str \| None`          | Sheet section name      |
 | `game_versions`        | `list[GameVersion]`    | Available game versions |
 | `character_classes`    | `list[CharacterClass]` | Applicable classes      |
 

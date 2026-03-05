@@ -22,6 +22,7 @@ class TestCharacterTrait:
             date_created=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
             date_modified=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
             parent_category_id="cat123",
+            sheet_section_id="section123",
         )
 
         # When: Creating a character trait
@@ -53,6 +54,7 @@ class TestCharacterTrait:
                 "date_modified": "2024-01-15T10:30:00Z",
                 "parent_category_id": "cat456",
                 "show_when_zero": True,
+                "sheet_section_id": "section123",
                 "max_value": 5,
                 "min_value": 0,
                 "is_custom": False,
