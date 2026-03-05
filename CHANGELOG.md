@@ -1,3 +1,9 @@
+## v1.7.4 (2026-03-05)
+
+### Fix
+
+- **blueprint**: require sheet section id in Trait model
+
 ## v1.7.3 (2026-03-05)
 
 ### Fix
