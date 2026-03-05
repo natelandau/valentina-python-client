@@ -1,3 +1,9 @@
+## v1.7.1 (2026-03-04)
+
+### Fix
+
+- **character_trait**: add name to CharacterTraitValueOption (#36)
+
 ## v1.7.0 (2026-03-01)
 
 ### Feat
