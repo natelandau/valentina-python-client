@@ -146,14 +146,31 @@ class CharacterTraitsService(BaseService):
         )
         return CharacterTrait.model_validate(response.json())
 
-    async def delete(self, character_trait_id: str) -> None:
+    async def delete(
+        self, character_trait_id: str, currency: TraitModifyCurrency | None = None
+    ) -> None:
         """Delete a character trait.
 
         Args:
             character_trait_id: The ID of the trait to delete.
+            currency: The currency to use to recoup the cost of the trait.
+
+        Returns:
+            None
+
+        Raises:
+            NotFoundError: If the trait does not exist.
+            AuthorizationError: If you don't have access to the character.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the request data is invalid.
         """
+        params: dict[str, str | int] = {}
+        if currency is not None:
+            params["currency"] = currency
+
         await self._delete(
-            self._format_endpoint(Endpoints.CHARACTER_TRAIT, character_trait_id=character_trait_id)
+            self._format_endpoint(Endpoints.CHARACTER_TRAIT, character_trait_id=character_trait_id),
+            params=params or None,
         )
 
     async def assign(self, trait_id: str, value: int) -> CharacterTrait:

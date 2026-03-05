@@ -38,6 +38,7 @@ Returned when querying available value change options for a character trait. Con
 
 | Field                     | Type                                   | Description                    |
 | ------------------------- | -------------------------------------- | ------------------------------ |
+| `name`                    | `str`                                  | Name of the trait              |
 | `current_value`           | `int`                                  | Current trait value            |
 | `min_value`               | `int`                                  | Minimum allowed value          |
 | `max_value`               | `int`                                  | Maximum allowed value          |
@@ -51,7 +52,6 @@ Represents a single value change option for a trait.
 
 | Field                     | Type   | Description                         |
 | ------------------------- | ------ | ----------------------------------- |
-| `name`                    | `str`  | Name of the trait                   |
 | `direction`               | `str`  | Direction of change (up/down)       |
 | `point_change`            | `int`  | Cost in points for this change      |
 | `can_use_xp`              | `bool` | Whether XP can fund this change     |
