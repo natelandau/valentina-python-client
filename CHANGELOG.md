@@ -1,3 +1,9 @@
+## v1.7.2 (2026-03-05)
+
+### Fix
+
+- **character_trait**: delete with currency param (#37)
+
 ## v1.7.1 (2026-03-04)
 
 ### Fix
