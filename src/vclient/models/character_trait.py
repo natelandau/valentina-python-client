@@ -63,6 +63,7 @@ class CharacterTraitValueOption(BaseModel):
 class CharacterTraitValueOptionsResponse(BaseModel):
     """Response model for the value options for a character trait."""
 
+    name: str
     current_value: int
     min_value: int
     max_value: int
