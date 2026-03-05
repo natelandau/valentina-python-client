@@ -626,6 +626,27 @@ class TestCharacterTraitsServiceDelete:
         assert result is None
 
     @respx.mock
+    async def test_delete_trait_with_currency(self, vclient, base_url) -> None:
+        """Verify deleting a character trait with a currency parameter."""
+        # Given: A mocked delete endpoint expecting currency param
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
+            params={"currency": "XP"},
+        ).mock(return_value=Response(204))
+
+        # When: Deleting the trait with currency
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).delete("ct123", currency="XP")
+
+        # Then: The route was called with currency param and None is returned
+        assert route.called
+        assert result is None
+
+    @respx.mock
     async def test_delete_trait_not_found(self, vclient, base_url) -> None:
         """Verify deleting a non-existent trait raises NotFoundError."""
         # Given: A mocked 404 response

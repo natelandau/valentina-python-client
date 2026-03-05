@@ -23,12 +23,12 @@ traits = character_traits_service(
 
 ### CRUD Operations
 
-| Method                          | Returns          | Description                               |
-| ------------------------------- | ---------------- | ----------------------------------------- |
-| `get(character_trait_id)`       | `CharacterTrait` | Get a character trait by ID               |
-| `assign(trait_id, value)`       | `CharacterTrait` | Assign an existing trait to the character |
-| `create(TraitCreate, **kwargs)` | `CharacterTrait` | Create a custom trait                     |
-| `delete(character_trait_id)`    | `None`           | Delete a character trait                  |
+| Method                                  | Returns          | Description                                                                 |
+| --------------------------------------- | ---------------- | --------------------------------------------------------------------------- |
+| `get(character_trait_id)`               | `CharacterTrait` | Get a character trait by ID                                                 |
+| `assign(trait_id, value)`               | `CharacterTrait` | Assign an existing trait to the character                                   |
+| `create(TraitCreate, **kwargs)`         | `CharacterTrait` | Create a custom trait                                                       |
+| `delete(character_trait_id, currency?)` | `None`           | Delete a character trait. Optional `TraitModifyCurrency` to recoup the cost |
 
 ### Pagination
 
