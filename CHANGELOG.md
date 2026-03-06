@@ -1,3 +1,13 @@
+## v1.8.0 (2026-03-06)
+
+### Feat
+
+- **testing**: add vclient.testing module with fake client (#38)
+
+### Fix
+
+- **character-trait**: update the sync client
+
 ## v1.7.4 (2026-03-05)
 
 ### Fix
