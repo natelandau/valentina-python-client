@@ -30,6 +30,7 @@ RENAME_CLASSES: dict[str, str] = {
     "SystemService": "SyncSystemService",
     "UsersService": "SyncUsersService",
     "VClient": "SyncVClient",
+    "FakeVClient": "SyncFakeVClient",
 }
 
 FACTORY_RENAMES: dict[str, str] = {
@@ -73,6 +74,7 @@ IMPORT_REWRITES: dict[str, str] = {
     "vclient.services.options": "vclient._sync.services.options",
     "vclient.services.character_autogen": "vclient._sync.services.character_autogen",
     "vclient.registry": "vclient._sync.registry",
+    "vclient.testing._client": "vclient._sync.testing._client",
 }
 
 # Combined lookup for renaming any identifier (class or factory function)
@@ -334,6 +336,22 @@ def _write_sync_init(path: Path) -> None:
     path.write_text("\n".join(lines))
 
 
+def _write_sync_testing_init(path: Path) -> None:
+    """Write the _sync/testing/__init__.py that re-exports public names.
+
+    Args:
+        path: Path to the ``_sync/testing/__init__.py`` file to write.
+    """
+    lines = [
+        HEADER_COMMENT,
+        "from vclient._sync.testing._client import SyncFakeVClient",
+        "",
+        '__all__ = ["SyncFakeVClient"]',
+        "",
+    ]
+    path.write_text("\n".join(lines))
+
+
 def generate_sync(src_dir: Path) -> None:
     """Transform all async source files and write them into the ``_sync/`` package.
 
@@ -361,6 +379,17 @@ def generate_sync(src_dir: Path) -> None:
 
     # Write the _sync/__init__.py
     _write_sync_init(sync_dir / "__init__.py")
+
+    # Transform testing module
+    testing_src = src_dir / "testing"
+    testing_dst = sync_dir / "testing"
+    if testing_src.exists():
+        testing_dst.mkdir(exist_ok=True)
+        client_source = testing_src / "_client.py"
+        if client_source.exists():
+            output_path = testing_dst / "_client.py"
+            output_path.write_text(transform_file(client_source))
+        _write_sync_testing_init(testing_dst / "__init__.py")
 
 
 if __name__ == "__main__":

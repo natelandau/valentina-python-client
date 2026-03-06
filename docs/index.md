@@ -103,6 +103,7 @@ Detailed guides are available for each aspect of the client:
 | [Services](services/index.md)      | Available services, method signatures, scoping, and pagination patterns |
 | [Response Models](models/index.md) | Pydantic model specifications for all API resources                     |
 | [Error Handling](errors.md)        | Exception hierarchy, HTTP status mapping, and usage examples            |
+| [Testing](testing.md)              | Fake client for testing downstream applications against the vclient contract |
 
 ## Resources
 

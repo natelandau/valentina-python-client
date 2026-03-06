@@ -111,14 +111,14 @@ repos:
 
       - id: ty
         name: ty
-        entry: ty check src/
+        entry: uv run ty check src/
         exclude: "tests/|duties.py|scripts/|src/vclient/_sync/"
         language: system
         types: [python]
 
       - id: pytest
         name: pytest
-        entry: duty test
+        entry: uv run duty test
         language: system
         pass_filenames: false
         files: |

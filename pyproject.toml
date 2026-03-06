@@ -12,6 +12,9 @@
     requires-python = ">=3.13"
     version = "1.7.4"
 
+    [project.optional-dependencies]
+        testing = ["polyfactory>=2.21.0"]
+
     [project.urls]
         Homepage   = "https://docs.valentina-noir.com/python-api-client/"
         Repository = "https://github.com/natelandau/valentina-python-client"
