@@ -29,6 +29,10 @@ src/vclient/
 │   ├── client.py          # SyncVClient
 │   ├── registry.py        # Sync factory functions
 │   └── services/          # Sync service classes
+├── testing/               # Fake client for downstream test suites
+│   ├── _client.py         # FakeVClient (async)
+│   ├── _factories.py      # polyfactory ModelFactory subclasses
+│   └── _router.py         # _FakeRouter with default routes
 ├── models/                # Pydantic v2 models (shared by async and sync)
 ├── client.py              # VClient (async)
 ├── _codegen.py            # AST-based async-to-sync code generator
@@ -162,6 +166,27 @@ The `Literal` type constants in `constants.py` must stay in sync with the API's 
 - RESPX mocking is used for integration tests. No HTTP requests.
 - Integration tests: service methods with respx mocking
 - Shared fixtures in `tests/shared_response_fixtures.py`
+
+## Testing Module (for downstream developers)
+
+The `vclient.testing` module provides a fake client for downstream applications to test against. Install with `pip install vclient[testing]`.
+
+**Key files:**
+
+- `src/vclient/testing/_factories.py` — polyfactory `ModelFactory` subclasses for all response models
+- `src/vclient/testing/_client.py` — `FakeVClient` (async), subclasses `VClient` with `httpx.MockTransport`
+- `src/vclient/testing/_router.py` — `_FakeRouter` with default routes for all endpoints
+- `src/vclient/_sync/testing/_client.py` — `SyncFakeVClient` (generated via `_codegen.py`)
+
+**When adding a new service endpoint:** Add a corresponding entry to `_ROUTE_DEFAULTS` in `_router.py`.
+
+**When adding a new response model:** Add a factory class in `_factories.py`, add it to `_FACTORY_MAP` in `_router.py`, and export it from `testing/__init__.py`.
+
+**Workflow when modifying testing/\_client.py:**
+
+1. Edit `src/vclient/testing/_client.py` (async source)
+2. Run `uv run duty generate_sync` to regenerate `_sync/testing/_client.py`
+3. Commit both async source and generated sync output
 
 ## Documentation
 
