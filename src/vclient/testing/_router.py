@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 import re
 from typing import Any
 
@@ -425,13 +426,21 @@ class _FakeRouter:
 
         for route in self._overrides:
             if route.matches(method, path):
-                return route.respond()
+                return self._with_elapsed(route.respond())
 
         for route in self._defaults:
             if route.matches(method, path):
-                return route.respond()
+                return self._with_elapsed(route.respond())
 
-        return httpx.Response(
-            status_code=404,
-            json={"detail": f"No route matched: {method} {path}"},
+        return self._with_elapsed(
+            httpx.Response(
+                status_code=404,
+                json={"detail": f"No route matched: {method} {path}"},
+            )
         )
+
+    @staticmethod
+    def _with_elapsed(response: httpx.Response) -> httpx.Response:
+        """Set the elapsed time on a response so BaseService._request can log it."""
+        response.elapsed = datetime.timedelta(milliseconds=1)
+        return response
