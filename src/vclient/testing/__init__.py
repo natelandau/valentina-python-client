@@ -12,6 +12,7 @@ except ImportError as e:
     )
     raise ImportError(msg) from e
 
+from vclient._sync.testing import SyncFakeVClient
 from vclient.testing._client import FakeVClient
 from vclient.testing._factories import (
     AssetFactory,
@@ -83,6 +84,7 @@ __all__ = [
     "QuickrollFactory",
     "RollStatisticsFactory",
     "SheetSectionFactory",
+    "SyncFakeVClient",
     "SystemHealthFactory",
     "TraitCategoryFactory",
     "TraitFactory",
