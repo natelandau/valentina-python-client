@@ -1,3 +1,9 @@
+## v1.9.0 (2026-03-08)
+
+### Feat
+
+- **character-traits**: add CharacterTraitAdd model (#39)
+
 ## v1.8.0 (2026-03-06)
 
 ### Feat
