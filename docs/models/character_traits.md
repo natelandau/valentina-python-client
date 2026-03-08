@@ -15,6 +15,16 @@ Models for character traits, trait definitions, and trait value modification opt
 | `value`        | `int`   | Current trait value |
 | `trait`        | `Trait` | Trait definition    |
 
+## CharacterTraitAdd
+
+Request model for assigning a trait to an already-created character. Used by the `assign()` method on the character traits service.
+
+| Field      | Type                  | Description                          |
+| ---------- | --------------------- | ------------------------------------ |
+| `trait_id` | `str`                 | ID of the trait to assign            |
+| `value`    | `int`                 | Value to set for the trait           |
+| `currency` | `TraitModifyCurrency` | Currency to use to pay for the trait |
+
 ## Trait
 
 | Field                  | Type                   | Description             |

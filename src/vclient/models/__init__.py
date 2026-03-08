@@ -36,6 +36,7 @@ from .character_blueprint import (
 from .character_trait import (
     CharacterCreateTraitAssign,
     CharacterTrait,
+    CharacterTraitAdd,
     CharacterTraitValueOptionsResponse,
     TraitCreate,
     _TraitModify as _TraitModify,
@@ -138,6 +139,7 @@ __all__ = [
     "CharacterHunterEdge",
     "CharacterSpecialty",
     "CharacterTrait",
+    "CharacterTraitAdd",
     "CharacterTraitValueOptionsResponse",
     "CharacterUpdate",
     "ChargenSessionFinalizeDTO",

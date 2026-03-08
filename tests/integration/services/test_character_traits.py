@@ -380,7 +380,7 @@ class TestCharacterTraitsServiceAssign:
             campaign_id="campaign123",
             character_id="char123",
             company_id="company123",
-        ).assign(trait_id="trait123", value=3)
+        ).assign(trait_id="trait123", value=3, currency="XP")
 
         # Then: The route was called and character trait is returned
         assert route.called
@@ -412,7 +412,7 @@ class TestCharacterTraitsServiceAssign:
             campaign_id="campaign123",
             character_id="char123",
             company_id="company123",
-        ).assign(trait_id="trait123", value=0)
+        ).assign(trait_id="trait123", value=0, currency="XP")
 
         # Then: The route was called and character trait is returned
         assert route.called
@@ -434,7 +434,7 @@ class TestCharacterTraitsServiceAssign:
                 campaign_id="campaign123",
                 character_id="char123",
                 company_id="company123",
-            ).assign(trait_id="nonexistent", value=1)
+            ).assign(trait_id="nonexistent", value=1, currency="XP")
 
         assert route.called
 

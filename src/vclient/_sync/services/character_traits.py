@@ -8,8 +8,8 @@ from vclient._sync.services.base import SyncBaseService
 from vclient.constants import DEFAULT_PAGE_LIMIT, TraitModifyCurrency
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    CharacterCreateTraitAssign,
     CharacterTrait,
+    CharacterTraitAdd,
     CharacterTraitValueOptionsResponse,
     PaginatedResponse,
     TraitCreate,
@@ -161,12 +161,13 @@ class SyncCharacterTraitsService(SyncBaseService):
             params=params or None,
         )
 
-    def assign(self, trait_id: str, value: int) -> CharacterTrait:
+    def assign(self, trait_id: str, value: int, currency: TraitModifyCurrency) -> CharacterTrait:
         """Assign a trait to a character.
 
         Args:
             trait_id: The ID of the trait to assign.
             value: The value of the trait to assign.
+            currency: The currency to use to pay for the trait.
 
         Returns:
             The newly assigned CharacterTrait object.
@@ -177,7 +178,9 @@ class SyncCharacterTraitsService(SyncBaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = self._validate_request(CharacterCreateTraitAssign, trait_id=trait_id, value=value)
+        body = self._validate_request(
+            CharacterTraitAdd, trait_id=trait_id, value=value, currency=currency
+        )
         response = self._post(
             self._format_endpoint(Endpoints.CHARACTER_TRAIT_ASSIGN),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),

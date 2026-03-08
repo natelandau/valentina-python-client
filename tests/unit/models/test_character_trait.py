@@ -3,8 +3,8 @@
 from datetime import UTC, datetime
 
 from vclient.models.character_trait import (
-    CharacterCreateTraitAssign,
     CharacterTrait,
+    CharacterTraitAdd,
     TraitCreate,
 )
 from vclient.models.shared import Trait
@@ -116,14 +116,15 @@ class TestCharacterTrait:
 
 
 class TestTraitAssign:
-    """Tests for CharacterCreateTraitAssign model."""
+    """Tests for CharacterTraitAdd model."""
 
     def test_assign_request_required_fields(self) -> None:
-        """Verify CharacterCreateTraitAssign with required fields."""
+        """Verify CharacterTraitAdd with required fields."""
         # When: Creating a request
-        request = CharacterCreateTraitAssign(
+        request = CharacterTraitAdd(
             trait_id="trait123",
             value=3,
+            currency="XP",
         )
 
         # Then: Fields are set correctly
@@ -133,9 +134,10 @@ class TestTraitAssign:
     def test_assign_request_model_dump(self) -> None:
         """Verify model_dump produces correct JSON payload."""
         # Given: An assign request
-        request = CharacterCreateTraitAssign(
+        request = CharacterTraitAdd(
             trait_id="trait456",
             value=5,
+            currency="XP",
         )
 
         # When: Dumping to JSON
@@ -145,14 +147,16 @@ class TestTraitAssign:
         assert data == {
             "trait_id": "trait456",
             "value": 5,
+            "currency": "XP",
         }
 
     def test_assign_request_zero_value(self) -> None:
-        """Verify CharacterCreateTraitAssign accepts zero value."""
+        """Verify CharacterTraitAdd accepts zero value."""
         # When: Creating a request with value 0
-        request = CharacterCreateTraitAssign(
+        request = CharacterTraitAdd(
             trait_id="trait789",
             value=0,
+            currency="XP",
         )
 
         # Then: Value is set correctly
