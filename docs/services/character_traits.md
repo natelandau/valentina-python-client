@@ -26,7 +26,7 @@ traits = character_traits_service(
 | Method                                  | Returns          | Description                                                                 |
 | --------------------------------------- | ---------------- | --------------------------------------------------------------------------- |
 | `get(character_trait_id)`               | `CharacterTrait` | Get a character trait by ID                                                 |
-| `assign(trait_id, value)`               | `CharacterTrait` | Assign an existing trait to the character                                   |
+| `assign(trait_id, value, currency)`     | `CharacterTrait` | Assign an existing trait to the character with `TraitModifyCurrency`        |
 | `create(TraitCreate, **kwargs)`         | `CharacterTrait` | Create a custom trait                                                       |
 | `delete(character_trait_id, currency?)` | `None`           | Delete a character trait. Optional `TraitModifyCurrency` to recoup the cost |
 
@@ -55,7 +55,7 @@ traits = character_traits_service(
 from vclient.models import TraitCreate
 
 # Assign an existing trait from the blueprint
-trait = await traits.assign(trait_id="strength_trait_id", value=3)
+trait = await traits.assign(trait_id="strength_trait_id", value=3, currency="XP")
 
 # Create a custom trait (preferred method: use model object)
 request = TraitCreate(

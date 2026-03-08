@@ -25,6 +25,14 @@ class CharacterCreateTraitAssign(BaseModel):
     value: int
 
 
+class CharacterTraitAdd(BaseModel):
+    """Request model for adding a character trait to an already created character."""
+
+    trait_id: str
+    value: int
+    currency: TraitModifyCurrency
+
+
 class TraitCreate(BaseModel):
     """Request model for creating a character trait.
 

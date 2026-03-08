@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT, TraitModifyCurrency
 from vclient.endpoints import Endpoints
 from vclient.models import (
-    CharacterCreateTraitAssign,
     CharacterTrait,
+    CharacterTraitAdd,
     CharacterTraitValueOptionsResponse,
     PaginatedResponse,
     TraitCreate,
@@ -173,12 +173,15 @@ class CharacterTraitsService(BaseService):
             params=params or None,
         )
 
-    async def assign(self, trait_id: str, value: int) -> CharacterTrait:
+    async def assign(
+        self, trait_id: str, value: int, currency: TraitModifyCurrency
+    ) -> CharacterTrait:
         """Assign a trait to a character.
 
         Args:
             trait_id: The ID of the trait to assign.
             value: The value of the trait to assign.
+            currency: The currency to use to pay for the trait.
 
         Returns:
             The newly assigned CharacterTrait object.
@@ -190,9 +193,10 @@ class CharacterTraitsService(BaseService):
             ValidationError: If the request data is invalid.
         """
         body = self._validate_request(
-            CharacterCreateTraitAssign,
+            CharacterTraitAdd,
             trait_id=trait_id,
             value=value,
+            currency=currency,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.CHARACTER_TRAIT_ASSIGN),
