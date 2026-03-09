@@ -1,3 +1,9 @@
+## v1.12.0 (2026-03-09)
+
+### Feat
+
+- **users**: integrate GoogleProfile and GitHubProfile models (#44)
+
 ## v1.11.0 (2026-03-09)
 
 ### Feat
