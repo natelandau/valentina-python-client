@@ -103,6 +103,19 @@ class UserUpdate(BaseModel):
     requesting_user_id: str
 
 
+class UserApproveDTO(BaseModel):
+    """Approve an unapproved user and assign a role."""
+
+    role: UserRole
+    requesting_user_id: str
+
+
+class UserDenyDTO(BaseModel):
+    """Deny an unapproved user."""
+
+    requesting_user_id: str
+
+
 # -----------------------------------------------------------------------------
 # Quickroll Models
 # -----------------------------------------------------------------------------

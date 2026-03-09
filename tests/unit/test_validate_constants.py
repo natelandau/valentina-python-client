@@ -129,7 +129,7 @@ class TestValidate:
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
             "users": {
-                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"],
             },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
@@ -195,7 +195,7 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
                 "AssetParentType": [
@@ -262,7 +262,7 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
                 "AssetParentType": [
@@ -330,7 +330,7 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
                 "AssetParentType": [
@@ -395,7 +395,7 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
                 "AssetParentType": [
@@ -460,7 +460,7 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER"]},
+            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
                 "AssetParentType": [

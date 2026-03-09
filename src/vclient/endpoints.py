@@ -36,7 +36,10 @@ class Endpoints:
 
     # User endpoints
     USERS = f"{COMPANY}/users"
+    USERS_UNAPPROVED_LIST = f"{USERS}/unapproved"
     USER = f"{USERS}/{{user_id}}"
+    USER_APPROVE = f"{USER}/approve"
+    USER_DENY = f"{USER}/deny"
     USER_STATISTICS = f"{USER}/statistics"
     USER_ASSETS = f"{USER}/assets"
     USER_ASSET = f"{USER_ASSETS}/{{asset_id}}"
