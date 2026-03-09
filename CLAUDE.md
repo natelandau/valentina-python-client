@@ -176,9 +176,12 @@ The `vclient.testing` module provides a fake client for downstream applications 
 - `src/vclient/testing/_factories.py` — polyfactory `ModelFactory` subclasses for all response models
 - `src/vclient/testing/_client.py` — `FakeVClient` (async), subclasses `VClient` with `httpx.MockTransport`
 - `src/vclient/testing/_router.py` — `_FakeRouter` with default routes for all endpoints
+- `src/vclient/testing/_routes.py` — `RouteSpec` NamedTuple and `Routes` class with named constants for all API routes
 - `src/vclient/_sync/testing/_client.py` — `SyncFakeVClient` (generated via `_codegen.py`)
 
-**When adding a new service endpoint:** Add a corresponding entry to `_ROUTE_DEFAULTS` in `_router.py`.
+**Response overrides:** Use `set_response(route, *, items=None, model=None)` for data overrides and `set_error(route, *, status_code, detail=None)` for error simulation. Pass route constants from the `Routes` class (e.g., `Routes.USERS_LIST`, `Routes.BOOKS_RENUMBER`). The low-level `add_route()` method remains available for edge cases.
+
+**When adding a new service endpoint:** Add a corresponding entry to `_ROUTE_DEFAULTS` in `_router.py` and a matching `Routes` constant in `_routes.py`.
 
 **When adding a new response model:** Add a factory class in `_factories.py`, add it to `_FACTORY_MAP` in `_router.py`, and export it from `testing/__init__.py`.
 
