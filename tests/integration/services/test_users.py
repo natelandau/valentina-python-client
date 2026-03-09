@@ -490,6 +490,215 @@ class TestUsersServiceGetStatistics:
         assert result.success_percentage == 50.0
 
 
+class TestUsersServiceGetUnapprovedPage:
+    """Tests for UsersService.get_unapproved_page method."""
+
+    @respx.mock
+    async def test_get_unapproved_page(self, vclient, base_url, paginated_users_response):
+        """Verify get_unapproved_page returns paginated User objects."""
+        # Given: A mocked unapproved users endpoint
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).respond(200, json=paginated_users_response)
+
+        # When: Getting a page of unapproved users
+        result = await vclient.users(company_id).get_unapproved_page()
+
+        # Then: Returns PaginatedResponse with User objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], User)
+
+    @respx.mock
+    async def test_get_unapproved_page_with_pagination(self, vclient, base_url, user_response_data):
+        """Verify get_unapproved_page accepts pagination parameters."""
+        # Given: A mocked endpoint expecting custom pagination
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
+            params={"limit": "25", "offset": "50"},
+        ).respond(
+            200,
+            json={
+                "items": [user_response_data],
+                "limit": 25,
+                "offset": 50,
+                "total": 100,
+            },
+        )
+
+        # When: Getting a page with custom pagination
+        result = await vclient.users(company_id).get_unapproved_page(limit=25, offset=50)
+
+        # Then: Request was made with correct params
+        assert route.called
+        assert result.limit == 25
+        assert result.offset == 50
+
+
+class TestUsersServiceListAllUnapproved:
+    """Tests for UsersService.list_all_unapproved method."""
+
+    @respx.mock
+    async def test_list_all_unapproved(self, vclient, base_url, user_response_data):
+        """Verify list_all_unapproved returns all unapproved users."""
+        # Given: Mocked endpoint
+        company_id = "company123"
+        respx.get(
+            f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
+            params={"limit": "100", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [user_response_data],
+                "limit": 100,
+                "offset": 0,
+                "total": 1,
+            },
+        )
+
+        # When: Calling list_all_unapproved
+        result = await vclient.users(company_id).list_all_unapproved()
+
+        # Then: Returns list of User objects
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], User)
+
+
+class TestUsersServiceIterAllUnapproved:
+    """Tests for UsersService.iter_all_unapproved method."""
+
+    @respx.mock
+    async def test_iter_all_unapproved(self, vclient, base_url, user_response_data):
+        """Verify iter_all_unapproved yields User objects across pages."""
+        # Given: Mocked endpoints for multiple pages
+        company_id = "company123"
+        user2 = {**user_response_data, "id": "507f1f77bcf86cd799439012", "name_first": "User 2"}
+        respx.get(
+            f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
+            params={"limit": "1", "offset": "0"},
+        ).respond(
+            200,
+            json={
+                "items": [user_response_data],
+                "limit": 1,
+                "offset": 0,
+                "total": 2,
+            },
+        )
+        respx.get(
+            f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
+            params={"limit": "1", "offset": "1"},
+        ).respond(
+            200,
+            json={
+                "items": [user2],
+                "limit": 1,
+                "offset": 1,
+                "total": 2,
+            },
+        )
+
+        # When: Iterating through all unapproved users
+        users = [user async for user in vclient.users(company_id).iter_all_unapproved(limit=1)]
+
+        # Then: All users are yielded as User objects
+        assert len(users) == 2
+        assert all(isinstance(u, User) for u in users)
+
+
+class TestUsersServiceApproveUser:
+    """Tests for UsersService.approve_user method."""
+
+    @respx.mock
+    async def test_approve_user(self, vclient, base_url, user_response_data):
+        """Verify approving a user returns the updated User object."""
+        # Given: A mocked approve endpoint
+        company_id = "company123"
+        user_id = "507f1f77bcf86cd799439011"
+        approved_data = {**user_response_data, "role": "PLAYER"}
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_APPROVE.format(company_id=company_id, user_id=user_id)}"
+        ).respond(200, json=approved_data)
+
+        # When: Approving the user
+        result = await vclient.users(company_id).approve_user(
+            user_id, role="PLAYER", requesting_user_id="requester123"
+        )
+
+        # Then: Returns User object with assigned role
+        assert route.called
+        assert isinstance(result, User)
+        assert result.role == "PLAYER"
+
+        # Verify request body
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"role": "PLAYER", "requesting_user_id": "requester123"}
+
+    @respx.mock
+    async def test_approve_user_not_found(self, vclient, base_url):
+        """Verify approving non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        respx.post(
+            f"{base_url}{Endpoints.USER_APPROVE.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Approving raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users(company_id).approve_user(
+                user_id, role="PLAYER", requesting_user_id="requester123"
+            )
+
+
+class TestUsersServiceDenyUser:
+    """Tests for UsersService.deny_user method."""
+
+    @respx.mock
+    async def test_deny_user(self, vclient, base_url):
+        """Verify denying a user returns None."""
+        # Given: A mocked deny endpoint
+        company_id = "company123"
+        user_id = "507f1f77bcf86cd799439011"
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_DENY.format(company_id=company_id, user_id=user_id)}"
+        ).respond(204)
+
+        # When: Denying the user
+        result = await vclient.users(company_id).deny_user(user_id, "requester123")
+
+        # Then: Request was made and returns None
+        assert route.called
+        assert result is None
+
+        # Verify request body
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"requesting_user_id": "requester123"}
+
+    @respx.mock
+    async def test_deny_user_not_found(self, vclient, base_url):
+        """Verify denying non-existent user raises NotFoundError."""
+        # Given: A mocked endpoint returning 404
+        company_id = "company123"
+        user_id = "nonexistent"
+        respx.post(
+            f"{base_url}{Endpoints.USER_DENY.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: Denying raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users(company_id).deny_user(user_id, "requester123")
+
+
 class TestUsersServiceAssets:
     """Tests for UsersService asset methods."""
 

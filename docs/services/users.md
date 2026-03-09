@@ -33,6 +33,16 @@ users = users_service(company_id="COMPANY_ID")
 | `list_all(user_role=None)`                     | `list[User]`              | Retrieve all users        |
 | `iter_all(user_role=None, limit=100)`          | `AsyncIterator[User]`     | Iterate through all users |
 
+### User Approval
+
+| Method                                                  | Returns                   | Description                         |
+| ------------------------------------------------------- | ------------------------- | ----------------------------------- |
+| `get_unapproved_page(limit=10, offset=0)`               | `PaginatedResponse[User]` | List unapproved users (paginated)   |
+| `list_all_unapproved()`                                 | `list[User]`              | List all unapproved users           |
+| `iter_all_unapproved(limit=100)`                        | `AsyncIterator[User]`     | Iterate through unapproved users    |
+| `approve_user(user_id, role, requesting_user_id)`        | `User`                    | Approve a user and assign a role    |
+| `deny_user(user_id, requesting_user_id)`                 | `None`                    | Deny an unapproved user             |
+
 ### Statistics
 
 | Method                                      | Returns          | Description                    |
@@ -90,6 +100,7 @@ users = users_service(company_id="COMPANY_ID")
 | `ADMIN`       | Full administrative access to company |
 | `STORYTELLER` | Game master role with elevated access |
 | `PLAYER`      | Standard player with limited access   |
+| `UNAPPROVED`  | Registered but not yet approved       |
 
 ## Examples
 
@@ -247,6 +258,33 @@ players_page = await users.get_page(user_role=UserRole.PLAYER, limit=25)
 print(f"Total players: {players_page.total}")
 ```
 
+### Approve or Deny Users
+
+Manage the user approval workflow.
+
+```python
+from vclient.models import UserApproveDTO
+
+# List all pending users
+unapproved = await users.list_all_unapproved()
+for user in unapproved:
+    print(f"Pending: {user.name_first} {user.name_last} ({user.email})")
+
+# Approve a user as a player
+approved = await users.approve_user(
+    user_id=user.id,
+    role="PLAYER",
+    requesting_user_id=admin_user_id,
+)
+print(f"Approved {approved.name_first} as {approved.role}")
+
+# Deny a user
+await users.deny_user(
+    user_id=user.id,
+    requesting_user_id=admin_user_id,
+)
+```
+
 ## Related Documentation
 
-- [Response Models](../models/users.md) - View `User`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [Response Models](../models/users.md) - View `User`, `UserApproveDTO`, `UserDenyDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas

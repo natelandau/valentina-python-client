@@ -17,7 +17,7 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `name_last`           | `str`                      | Last name                         |
 | `username`            | `str`                      | Username                          |
 | `email`               | `str`                      | Email address                     |
-| `role`                | `UserRole`                 | Role (ADMIN, STORYTELLER, PLAYER) |
+| `role`                | `UserRole`                 | Role (ADMIN, STORYTELLER, PLAYER, UNAPPROVED) |
 | `company_id`          | `str`                      | Company ID                        |
 | `discord_profile`     | `DiscordProfile \| None`   | Discord information               |
 | `campaign_experience` | `list[CampaignExperience]` | XP per campaign                   |
@@ -74,3 +74,20 @@ Request body for updating a quickroll. Only include fields that need to change.
 | `name`        | `str \| None`       | Updated name        |
 | `description` | `str \| None`       | Updated description |
 | `trait_ids`   | `list[str] \| None` | Updated trait IDs   |
+
+## UserApproveDTO
+
+Request body for approving an unapproved user.
+
+| Field                | Type       | Description                        |
+| -------------------- | ---------- | ---------------------------------- |
+| `role`               | `UserRole` | Role to assign to the approved user |
+| `requesting_user_id` | `str`      | ID of the user making the request  |
+
+## UserDenyDTO
+
+Request body for denying an unapproved user.
+
+| Field                | Type  | Description                       |
+| -------------------- | ----- | --------------------------------- |
+| `requesting_user_id` | `str` | ID of the user making the request |

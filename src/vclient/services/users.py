@@ -18,7 +18,9 @@ from vclient.models import (
     QuickrollUpdate,
     RollStatistics,
     User,
+    UserApproveDTO,
     UserCreate,
+    UserDenyDTO,
     UserUpdate,
     _ExperienceAddRemove,
 )
@@ -57,6 +59,115 @@ class UsersService(BaseService):
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
         """Format an endpoint with the scoped company_id plus any extra params."""
         return endpoint.format(company_id=self._company_id, **kwargs)
+
+    # -------------------------------------------------------------------------
+    # Unapproved User Methods
+    # -------------------------------------------------------------------------
+
+    async def get_unapproved_page(
+        self,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> PaginatedResponse[User]:
+        """Retrieve a paginated page of unapproved users within a company.
+
+        Unapproved users have registered but have not yet been approved by an admin.
+
+        Args:
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+
+        Returns:
+            A PaginatedResponse containing User objects and pagination metadata.
+        """
+        return await self._get_paginated_as(
+            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST),
+            User,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def list_all_unapproved(self) -> list[User]:
+        """Retrieve all unapproved users within a company.
+
+        Automatically paginates through all results. Use `get_unapproved_page()` for
+        paginated access or `iter_all_unapproved()` for memory-efficient streaming.
+
+        Returns:
+            A list of all unapproved User objects.
+        """
+        return [user async for user in self.iter_all_unapproved()]
+
+    async def iter_all_unapproved(
+        self,
+        *,
+        limit: int = 100,
+    ) -> AsyncIterator[User]:
+        """Iterate through all unapproved users within a company.
+
+        Yields individual unapproved users, automatically fetching subsequent pages
+        until all items have been retrieved.
+
+        Args:
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual User objects.
+        """
+        async for item in self._iter_all_pages(
+            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST),
+            limit=limit,
+        ):
+            yield User.model_validate(item)
+
+    async def approve_user(
+        self,
+        user_id: str,
+        role: UserRole,
+        requesting_user_id: str,
+    ) -> User:
+        """Approve an unapproved user and assign them a role.
+
+        Args:
+            user_id: The ID of the unapproved user to approve.
+            role: The role to assign to the approved user.
+            requesting_user_id: ID of the user making the request (for permissions).
+
+        Returns:
+            The approved User object with the assigned role.
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+        """
+        body = UserApproveDTO(role=role, requesting_user_id=requesting_user_id)
+        response = await self._post(
+            self._format_endpoint(Endpoints.USER_APPROVE, user_id=user_id),
+            json=body.model_dump(mode="json"),
+        )
+        return User.model_validate(response.json())
+
+    async def deny_user(
+        self,
+        user_id: str,
+        requesting_user_id: str,
+    ) -> None:
+        """Deny an unapproved user.
+
+        Args:
+            user_id: The ID of the unapproved user to deny.
+            requesting_user_id: ID of the user making the request (for permissions).
+
+        Raises:
+            NotFoundError: If the user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+        """
+        body = UserDenyDTO(requesting_user_id=requesting_user_id)
+        await self._post(
+            self._format_endpoint(Endpoints.USER_DENY, user_id=user_id),
+            json=body.model_dump(mode="json"),
+        )
 
     # -------------------------------------------------------------------------
     # User CRUD Methods

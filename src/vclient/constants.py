@@ -60,7 +60,7 @@ AssetParentType = Literal[
 ]
 AssetType = Literal["image", "text", "audio", "video", "document", "archive", "other"]
 SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
-UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER"]
+UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]
 WerewolfRenown = Literal["HONOR", "GLORY", "WISDOM"]
 BlueprintTraitOrderBy = Literal["NAME", "SHEET"]
 TraitModifyCurrency = Literal["XP", "STARTING_POINTS", "NO_COST"]
