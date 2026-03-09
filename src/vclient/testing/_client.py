@@ -15,6 +15,8 @@ from vclient.client import VClient
 from vclient.testing._router import NO_CONTENT, PAGINATED, _FakeRouter
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from vclient.testing._routes import RouteSpec
 
 
@@ -91,7 +93,7 @@ class FakeVClient(VClient):
         self,
         route: RouteSpec,
         *,
-        items: list[BaseModel | dict[str, Any]] | None = None,
+        items: Sequence[BaseModel | dict[str, Any]] | None = None,
         model: BaseModel | dict[str, Any] | None = None,
     ) -> None:
         """Override a route to return specific response data.
