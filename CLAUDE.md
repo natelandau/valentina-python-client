@@ -32,7 +32,8 @@ src/vclient/
 ├── testing/               # Fake client for downstream test suites
 │   ├── _client.py         # FakeVClient (async)
 │   ├── _factories.py      # polyfactory ModelFactory subclasses
-│   └── _router.py         # _FakeRouter with default routes
+│   ├── _router.py         # _FakeRouter (derives defaults from Routes)
+│   └── _routes.py         # RouteSpec, Routes (single source of truth for all routes)
 ├── models/                # Pydantic v2 models (shared by async and sync)
 ├── client.py              # VClient (async)
 ├── _codegen.py            # AST-based async-to-sync code generator
@@ -173,15 +174,15 @@ The `vclient.testing` module provides a fake client for downstream applications 
 
 **Key files:**
 
+- `src/vclient/testing/_routes.py` — `RouteSpec` NamedTuple and `Routes` class (single source of truth for all API routes, including model class mappings)
 - `src/vclient/testing/_factories.py` — polyfactory `ModelFactory` subclasses for all response models
 - `src/vclient/testing/_client.py` — `FakeVClient` (async), subclasses `VClient` with `httpx.MockTransport`
-- `src/vclient/testing/_router.py` — `_FakeRouter` with default routes for all endpoints
-- `src/vclient/testing/_routes.py` — `RouteSpec` NamedTuple and `Routes` class with named constants for all API routes
+- `src/vclient/testing/_router.py` — `_FakeRouter` that derives defaults from `Routes`
 - `src/vclient/_sync/testing/_client.py` — `SyncFakeVClient` (generated via `_codegen.py`)
 
 **Response overrides:** Use `set_response(route, *, items=None, model=None)` for data overrides and `set_error(route, *, status_code, detail=None)` for error simulation. Pass route constants from the `Routes` class (e.g., `Routes.USERS_LIST`, `Routes.BOOKS_RENUMBER`). The low-level `add_route()` method remains available for edge cases.
 
-**When adding a new service endpoint:** Add a corresponding entry to `_ROUTE_DEFAULTS` in `_router.py` and a matching `Routes` constant in `_routes.py`.
+**When adding a new service endpoint:** Add a `RouteSpec` constant to the `Routes` class in `_routes.py` (this is the only place — `_FakeRouter` derives its defaults automatically).
 
 **When adding a new response model:** Add a factory class in `_factories.py`, add it to `_FACTORY_MAP` in `_router.py`, and export it from `testing/__init__.py`.
 

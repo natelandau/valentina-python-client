@@ -13,7 +13,8 @@ import httpx
 from pydantic import BaseModel
 
 from vclient._sync.client import SyncVClient
-from vclient.testing._router import NO_CONTENT, PAGINATED, _FakeRouter
+from vclient.testing._router import _FakeRouter
+from vclient.testing._routes import NO_CONTENT, PAGINATED
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -107,7 +108,7 @@ class SyncFakeVClient(SyncVClient):
             TypeError: If ``model`` is passed to a paginated route or ``items`` is
                 passed to a single-object route.
         """
-        method, pattern, style = route
+        method, pattern, style = (route.method, route.pattern, route.style)
         if style == PAGINATED:
             if model is not None:
                 msg = f"Route {pattern!r} is paginated; pass 'items' instead of 'model'"
@@ -137,6 +138,6 @@ class SyncFakeVClient(SyncVClient):
             status_code: The HTTP status code to return.
             detail: Optional error detail message. Defaults to ``"Error {status_code}"``.
         """
-        method, pattern, _style = route
+        method, pattern = (route.method, route.pattern)
         body: dict[str, Any] = {"detail": detail or f"Error {status_code}"}
         self._router.add_route(method, pattern, json=body, status_code=status_code)
