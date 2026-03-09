@@ -1,3 +1,9 @@
+## v1.13.0 (2026-03-09)
+
+### Feat
+
+- **users**: add google/github profiles to UserCreate and UserUpdate
+
 ## v1.12.0 (2026-03-09)
 
 ### Feat
