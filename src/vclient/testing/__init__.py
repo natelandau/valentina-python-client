@@ -53,6 +53,7 @@ from vclient.testing._factories import (
     WerewolfRiteFactory,
     WerewolfTribeFactory,
 )
+from vclient.testing._routes import Routes, RouteSpec
 
 __all__ = [
     "AssetFactory",
@@ -83,6 +84,8 @@ __all__ = [
     "PerkFactory",
     "QuickrollFactory",
     "RollStatisticsFactory",
+    "RouteSpec",
+    "Routes",
     "SheetSectionFactory",
     "SyncFakeVClient",
     "SystemHealthFactory",
