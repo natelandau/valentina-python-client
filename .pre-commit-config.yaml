@@ -105,7 +105,7 @@ repos:
     hooks:
       - id: generate-sync
         name: generate-sync
-        entry: uv run duty generate_sync
+        entry: uv run duty verify_sync
         language: system
         pass_filenames: false
         files: |
