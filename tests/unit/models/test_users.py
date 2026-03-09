@@ -116,6 +116,7 @@ class TestUser:
             name_last="User",
             username="testuser",
             email="test@example.com",
+            role="PLAYER",
             company_id="company123",
         )
 
@@ -126,7 +127,7 @@ class TestUser:
         assert user.username == "testuser"
         assert user.email == "test@example.com"
         assert user.company_id == "company123"
-        assert user.role is None
+        assert user.role == "PLAYER"
         assert user.discord_profile is None
         assert user.campaign_experience == []
         assert user.asset_ids == []
