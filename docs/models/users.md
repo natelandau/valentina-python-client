@@ -20,6 +20,8 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `role`                | `UserRole`                 | Role (ADMIN, STORYTELLER, PLAYER, UNAPPROVED) |
 | `company_id`          | `str`                      | Company ID                        |
 | `discord_profile`     | `DiscordProfile \| None`   | Discord information               |
+| `google_profile`      | `GoogleProfile \| None`    | Google account information        |
+| `github_profile`      | `GitHubProfile \| None`    | GitHub account information        |
 | `campaign_experience` | `list[CampaignExperience]` | XP per campaign                   |
 | `asset_ids`           | `list[str]`                | Owned asset IDs                   |
 
@@ -40,6 +42,30 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `username`    | `str \| None` | Discord username |
 | `global_name` | `str \| None` | Display name     |
 | `avatar_url`  | `str \| None` | Avatar URL       |
+
+## GoogleProfile
+
+| Field            | Type           | Description              |
+| ---------------- | -------------- | ------------------------ |
+| `id`             | `str \| None`  | Google user ID           |
+| `email`          | `str \| None`  | Google email address     |
+| `verified_email` | `bool \| None` | Whether email is verified |
+| `username`       | `str \| None`  | Google username          |
+| `name_first`     | `str \| None`  | First name               |
+| `name_last`      | `str \| None`  | Last name                |
+| `avatar_url`     | `str \| None`  | Avatar URL               |
+| `locale`         | `str \| None`  | Locale setting           |
+
+## GitHubProfile
+
+| Field         | Type          | Description        |
+| ------------- | ------------- | ------------------ |
+| `id`          | `str \| None` | GitHub user ID     |
+| `login`       | `str \| None` | GitHub login name  |
+| `username`    | `str \| None` | GitHub username    |
+| `avatar_url`  | `str \| None` | Avatar URL         |
+| `email`       | `str \| None` | GitHub email       |
+| `profile_url` | `str \| None` | GitHub profile URL |
 
 ## Quickroll
 

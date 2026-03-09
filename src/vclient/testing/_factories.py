@@ -18,6 +18,8 @@ from vclient.models import (
     Diceroll,
     DictionaryTerm,
     EdgeAndPerks,
+    GitHubProfile,
+    GoogleProfile,
     HunterEdge,
     HunterEdgePerk,
     InventoryItem,
@@ -127,6 +129,16 @@ class DictionaryTermFactory(ModelFactory[DictionaryTerm]):
 
 class EdgeAndPerksFactory(ModelFactory[EdgeAndPerks]):
     __model__ = EdgeAndPerks
+    __use_defaults__ = True
+
+
+class GitHubProfileFactory(ModelFactory[GitHubProfile]):
+    __model__ = GitHubProfile
+    __use_defaults__ = True
+
+
+class GoogleProfileFactory(ModelFactory[GoogleProfile]):
+    __model__ = GoogleProfile
     __use_defaults__ = True
 
 
@@ -249,6 +261,8 @@ __all__ = [
     "DicerollFactory",
     "DictionaryTermFactory",
     "EdgeAndPerksFactory",
+    "GitHubProfileFactory",
+    "GoogleProfileFactory",
     "HunterEdgeFactory",
     "HunterEdgePerkFactory",
     "InventoryItemFactory",
