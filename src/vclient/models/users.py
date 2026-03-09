@@ -111,6 +111,8 @@ class UserCreate(BaseModel):
     email: str
     role: UserRole
     discord_profile: DiscordProfile | None = None
+    google_profile: GoogleProfile | None = None
+    github_profile: GitHubProfile | None = None
     requesting_user_id: str
 
 
@@ -126,6 +128,8 @@ class UserUpdate(BaseModel):
     email: str | None = None
     role: UserRole | None = None
     discord_profile: DiscordProfile | None = None
+    google_profile: GoogleProfile | None = None
+    github_profile: GitHubProfile | None = None
     requesting_user_id: str
 
 

@@ -359,11 +359,15 @@ class TestUserCreate:
         assert request.role == "PLAYER"
         assert request.requesting_user_id == "requester123"
         assert request.discord_profile is None
+        assert request.google_profile is None
+        assert request.github_profile is None
 
     def test_full_request(self):
         """Verify creating request with all fields."""
-        # Given: Discord profile
+        # Given: Profile objects
         discord = DiscordProfile(id="discord123", username="testuser")
+        google = GoogleProfile(id="google123", email="user@gmail.com")
+        github = GitHubProfile(id="github123", login="testuser")
 
         # When: Creating request with all fields
         request = UserCreate(
@@ -374,6 +378,8 @@ class TestUserCreate:
             role="ADMIN",
             requesting_user_id="requester123",
             discord_profile=discord,
+            google_profile=google,
+            github_profile=github,
         )
 
         # Then: All fields are set correctly
@@ -381,6 +387,8 @@ class TestUserCreate:
         assert request.name_last == "User"
         assert request.username == "fulluser"
         assert request.discord_profile.id == "discord123"
+        assert request.google_profile.id == "google123"
+        assert request.github_profile.id == "github123"
 
     def test_name_validation_min_length(self):
         """Verify name minimum length validation."""
@@ -445,6 +453,8 @@ class TestUserUpdate:
         assert request.email is None
         assert request.role is None
         assert request.discord_profile is None
+        assert request.google_profile is None
+        assert request.github_profile is None
 
     def test_partial_update(self):
         """Verify creating request with some fields."""

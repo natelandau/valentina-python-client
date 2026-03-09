@@ -36,29 +36,9 @@
 ### Fix
 
 - **character-trait**: update the sync client
-
-## v1.7.4 (2026-03-05)
-
-### Fix
-
 - **blueprint**: require sheet section id in Trait model
-
-## v1.7.3 (2026-03-05)
-
-### Fix
-
 - **character-trait**: return full trait in value-options response
-
-## v1.7.2 (2026-03-05)
-
-### Fix
-
 - **character_trait**: delete with currency param (#37)
-
-## v1.7.1 (2026-03-04)
-
-### Fix
-
 - **character_trait**: add name to CharacterTraitValueOption (#36)
 
 ## v1.7.0 (2026-03-01)
@@ -121,11 +101,6 @@
 
 - **client**: clear default client on close (#21)
 - **models**: sync response models with API schemas (#18)
-
-## v1.2.1 (2026-02-18)
-
-### Fix
-
 - **models**: change game_version to game_versions list (#17)
 
 ## v1.2.0 (2026-02-17)
