@@ -81,3 +81,91 @@ class TestFakeRouterOverrides:
         )
         response = router.handle(request)
         assert response.status_code == 404
+
+    def test_override_with_params_matches_specific_id(self):
+        """Verify parameterized override only matches the specified path parameter value."""
+        router = _FakeRouter()
+        router.add_route(
+            "GET",
+            Endpoints.CAMPAIGN,
+            json={"id": "campaign-aaa", "name": "Alpha"},
+            params={"campaign_id": "aaa"},
+        )
+
+        # When requesting the matching campaign_id
+        matched = httpx.Request(
+            "GET",
+            "https://fake.test/api/v1/companies/co1/users/u1/campaigns/aaa",
+        )
+        response = router.handle(matched)
+        body = json.loads(response.content)
+        assert body["id"] == "campaign-aaa"
+
+        # When requesting a different campaign_id, the default factory response is used
+        other = httpx.Request(
+            "GET",
+            "https://fake.test/api/v1/companies/co1/users/u1/campaigns/bbb",
+        )
+        response = router.handle(other)
+        body = json.loads(response.content)
+        assert body["id"] != "campaign-aaa"
+
+    def test_multiple_parameterized_overrides(self):
+        """Verify different param values return different responses."""
+        router = _FakeRouter()
+        router.add_route(
+            "GET",
+            Endpoints.CAMPAIGN,
+            json={"id": "aaa", "name": "Alpha"},
+            params={"campaign_id": "aaa"},
+        )
+        router.add_route(
+            "GET",
+            Endpoints.CAMPAIGN,
+            json={"id": "bbb", "name": "Beta"},
+            params={"campaign_id": "bbb"},
+        )
+
+        # When requesting campaign aaa
+        resp_a = router.handle(
+            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/users/u1/campaigns/aaa")
+        )
+        assert json.loads(resp_a.content)["id"] == "aaa"
+
+        # When requesting campaign bbb
+        resp_b = router.handle(
+            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/users/u1/campaigns/bbb")
+        )
+        assert json.loads(resp_b.content)["id"] == "bbb"
+
+    def test_parameterized_override_beats_generic_override(self):
+        """Verify parameterized overrides take priority regardless of insertion order."""
+        router = _FakeRouter()
+
+        # Given a generic override added first
+        router.add_route(
+            "GET",
+            Endpoints.CAMPAIGN,
+            json={"id": "generic"},
+        )
+        # Given a parameterized override added second
+        router.add_route(
+            "GET",
+            Endpoints.CAMPAIGN,
+            json={"id": "specific"},
+            params={"campaign_id": "target"},
+        )
+
+        # When requesting the targeted campaign_id
+        response = router.handle(
+            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/users/u1/campaigns/target")
+        )
+        body = json.loads(response.content)
+        assert body["id"] == "specific"
+
+        # When requesting a different campaign_id, the generic override is used
+        response = router.handle(
+            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/users/u1/campaigns/other")
+        )
+        body = json.loads(response.content)
+        assert body["id"] == "generic"

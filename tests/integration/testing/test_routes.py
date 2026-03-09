@@ -149,6 +149,84 @@ class TestSetError:
                 await campaigns_service("user123").get("nonexistent")
 
 
+class TestSetResponseWithParams:
+    """set_response() with params should return different responses per path parameter."""
+
+    async def test_different_responses_per_campaign_id(self):
+        """Verify different campaign_id values return different models."""
+        async with FakeVClient() as client:
+            # Given two campaigns with distinct IDs
+            campaign_a = CampaignFactory.build()
+            campaign_b = CampaignFactory.build()
+            client.set_response(
+                Routes.CAMPAIGNS_GET,
+                model=campaign_a,
+                params={"campaign_id": campaign_a.id},
+            )
+            client.set_response(
+                Routes.CAMPAIGNS_GET,
+                model=campaign_b,
+                params={"campaign_id": campaign_b.id},
+            )
+
+            svc = campaigns_service("user123")
+
+            # When fetching each campaign by its ID
+            result_a = await svc.get(campaign_a.id)
+            result_b = await svc.get(campaign_b.id)
+
+            # Then the correct campaign is returned for each
+            assert result_a.id == campaign_a.id
+            assert result_b.id == campaign_b.id
+
+    async def test_params_override_with_generic_fallback(self):
+        """Verify parameterized override wins over generic for matching ID."""
+        async with FakeVClient() as client:
+            # Given a generic override and a parameterized override
+            generic = CampaignFactory.build()
+            specific = CampaignFactory.build()
+            client.set_response(Routes.CAMPAIGNS_GET, model=generic)
+            client.set_response(
+                Routes.CAMPAIGNS_GET,
+                model=specific,
+                params={"campaign_id": "target-id"},
+            )
+
+            svc = campaigns_service("user123")
+
+            # When fetching the targeted campaign
+            result = await svc.get("target-id")
+
+            # Then the parameterized override is returned
+            assert result.id == specific.id
+
+            # When fetching a different campaign
+            result = await svc.get("other-id")
+
+            # Then the generic fallback is returned
+            assert result.id == generic.id
+
+    async def test_set_error_with_params(self):
+        """Verify set_error with params only errors for the matching ID."""
+        async with FakeVClient() as client:
+            # Given a 404 error only for a specific campaign
+            client.set_error(
+                Routes.CAMPAIGNS_GET,
+                status_code=404,
+                params={"campaign_id": "missing"},
+            )
+
+            svc = campaigns_service("user123")
+
+            # When fetching the missing campaign
+            with pytest.raises(NotFoundError):
+                await svc.get("missing")
+
+            # When fetching a different campaign, the default response is used
+            result = await svc.get("other")
+            assert result.id is not None
+
+
 class TestSetResponseValidation:
     """set_response() should enforce correct kwarg usage per route style."""
 

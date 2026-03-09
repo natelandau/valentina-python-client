@@ -130,8 +130,12 @@ _FACTORY_MAP: dict[type, type] = {
 
 
 def _endpoint_to_regex(pattern: str) -> re.Pattern[str]:
-    """Convert an Endpoints pattern like '/api/v1/companies/{company_id}' to a regex."""
-    regex = re.sub(r"\{[^}]+\}", r"[^/]+", pattern)
+    """Convert an Endpoints pattern like '/api/v1/companies/{company_id}' to a regex.
+
+    Path parameters become named capture groups so their values can be extracted
+    for per-parameter response matching.
+    """
+    regex = re.sub(r"\{([^}]+)\}", r"(?P<\1>[^/]+)", pattern)
     return re.compile(f"^{regex}$")
 
 
@@ -147,7 +151,7 @@ def _collect_route_specs() -> list[RouteSpec]:
 class _Route:
     """A single route entry with pattern matching and response generation."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         method: str,
         pattern: str,
@@ -156,6 +160,7 @@ class _Route:
         *,
         override_json: dict[str, Any] | None = None,
         override_status: int | None = None,
+        match_params: dict[str, str] | None = None,
     ) -> None:
         self.method = method.upper()
         self.pattern = pattern
@@ -164,10 +169,24 @@ class _Route:
         self.style = style
         self.override_json = override_json
         self.override_status = override_status
+        self.match_params = match_params
 
     def matches(self, method: str, path: str) -> bool:
         """Check if the given HTTP method and URL path match this route."""
-        return self.method == method.upper() and self.regex.match(path) is not None
+        if self.method != method.upper():
+            return False
+
+        m = self.regex.match(path)
+        if m is None:
+            return False
+
+        if self.match_params is not None:
+            captured = m.groupdict()
+            for key, value in self.match_params.items():
+                if captured.get(key) != value:
+                    return False
+
+        return True
 
     def respond(self) -> httpx.Response:
         """Generate an httpx.Response for this route."""
@@ -225,6 +244,7 @@ class _FakeRouter:
         *,
         json: dict[str, Any],
         status_code: int = 200,
+        params: dict[str, str] | None = None,
     ) -> None:
         """Register a user-defined override that takes precedence over defaults.
 
@@ -233,6 +253,9 @@ class _FakeRouter:
             pattern: Endpoint pattern string from Endpoints class.
             json: Response body to return.
             status_code: HTTP status code to return.
+            params: Optional path parameter values to match against. When set,
+                this override only matches requests whose path segments match
+                all specified parameter values.
         """
         self._overrides.append(
             _Route(
@@ -242,6 +265,7 @@ class _FakeRouter:
                 style="single",
                 override_json=json,
                 override_status=status_code,
+                match_params=params,
             )
         )
 
@@ -260,8 +284,13 @@ class _FakeRouter:
         method = request.method
         path = request.url.raw_path.decode("ascii").split("?")[0]
 
+        # Parameterized overrides first so specific matches beat generic ones
         for route in self._overrides:
-            if route.matches(method, path):
+            if route.match_params and route.matches(method, path):
+                return self._with_elapsed(route.respond())
+
+        for route in self._overrides:
+            if not route.match_params and route.matches(method, path):
                 return self._with_elapsed(route.respond())
 
         for route in self._defaults:

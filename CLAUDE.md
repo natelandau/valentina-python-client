@@ -180,7 +180,7 @@ The `vclient.testing` module provides a fake client for downstream applications 
 - `src/vclient/testing/_router.py` — `_FakeRouter` that derives defaults from `Routes`
 - `src/vclient/_sync/testing/_client.py` — `SyncFakeVClient` (generated via `_codegen.py`)
 
-**Response overrides:** Use `set_response(route, *, items=None, model=None)` for data overrides and `set_error(route, *, status_code, detail=None)` for error simulation. Pass route constants from the `Routes` class (e.g., `Routes.USERS_LIST`, `Routes.BOOKS_RENUMBER`). The low-level `add_route()` method remains available for edge cases.
+**Response overrides:** Use `set_response(route, *, items=None, model=None, params=None)` for data overrides and `set_error(route, *, status_code, detail=None, params=None)` for error simulation. Pass route constants from the `Routes` class (e.g., `Routes.USERS_LIST`, `Routes.BOOKS_RENUMBER`). Use `params` to return different responses per path parameter value (e.g., `params={"campaign_id": "abc"}`). Parameterized overrides always take priority over generic ones. The low-level `add_route()` method remains available for edge cases.
 
 **When adding a new service endpoint:** Add a `RouteSpec` constant to the `Routes` class in `_routes.py` (this is the only place — `_FakeRouter` derives its defaults automatically).
 
