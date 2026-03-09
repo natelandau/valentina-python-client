@@ -187,6 +187,15 @@ def generate_sync(ctx: Context) -> None:
     )
 
 
+@duty(pre=[generate_sync])
+def verify_sync(ctx: Context) -> None:
+    """Verify the generated sync client is up to date with async source."""
+    ctx.run(
+        ["git", "diff", "--exit-code", "src/vclient/_sync/"],
+        title="verify sync client is up to date",
+    )
+
+
 @duty()
 def validate_constants(ctx: Context) -> None:
     """Validate client constants against the live API."""

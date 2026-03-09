@@ -28,6 +28,14 @@ class FakeVClient(VClient):
     for all endpoints. Registers itself as the default client so factory
     functions like campaigns_service() work without configuration.
 
+    Important:
+        When ``set_as_default=True`` (the default), FakeVClient registers itself
+        as the global default client. If your application also creates a real
+        ``VClient`` with ``set_as_default=True``, the **last one created wins**.
+        Ensure FakeVClient is created **after** any real VClient to avoid the
+        fake being silently overridden. In pytest, this means the fake client
+        fixture must depend on the application fixture that creates the real client.
+
     Example:
         ```python
         from vclient.testing import FakeVClient
@@ -96,6 +104,7 @@ class FakeVClient(VClient):
         *,
         items: Sequence[BaseModel | dict[str, Any]] | None = None,
         model: BaseModel | dict[str, Any] | None = None,
+        params: dict[str, str] | None = None,
     ) -> None:
         """Override a route to return specific response data.
 
@@ -107,6 +116,11 @@ class FakeVClient(VClient):
             items: List of items for paginated routes. Mutually exclusive with ``model``.
             model: A single model instance or dict for single-object routes.
                 Mutually exclusive with ``items``.
+            params: Optional path parameter values to match against. When set,
+                the override only applies to requests whose URL path segments match
+                all specified values. For example,
+                ``params={"campaign_id": "abc"}`` only matches requests where
+                ``{campaign_id}`` is ``"abc"``.
 
         Raises:
             TypeError: If ``model`` is passed to a paginated route or ``items`` is
@@ -126,10 +140,10 @@ class FakeVClient(VClient):
                 "limit": 100,
                 "offset": 0,
             }
-            self._router.add_route(method, pattern, json=body, status_code=200)
+            self._router.add_route(method, pattern, json=body, status_code=200, params=params)
 
         elif style == NO_CONTENT:
-            self._router.add_route(method, pattern, json={}, status_code=204)
+            self._router.add_route(method, pattern, json={}, status_code=204, params=params)
 
         else:
             if items is not None:
@@ -137,7 +151,7 @@ class FakeVClient(VClient):
                 raise TypeError(msg)
 
             data: dict[str, Any] = self._serialize(model) if model is not None else {}
-            self._router.add_route(method, pattern, json=data, status_code=200)
+            self._router.add_route(method, pattern, json=data, status_code=200, params=params)
 
     def set_error(
         self,
@@ -145,6 +159,7 @@ class FakeVClient(VClient):
         *,
         status_code: int,
         detail: str | None = None,
+        params: dict[str, str] | None = None,
     ) -> None:
         """Override a route to return an error response.
 
@@ -152,7 +167,10 @@ class FakeVClient(VClient):
             route: A ``RouteSpec`` from the ``Routes`` class identifying the endpoint.
             status_code: The HTTP status code to return.
             detail: Optional error detail message. Defaults to ``"Error {status_code}"``.
+            params: Optional path parameter values to match against. When set,
+                the error override only applies to requests whose URL path segments
+                match all specified values.
         """
         method, pattern = route.method, route.pattern
         body: dict[str, Any] = {"detail": detail or f"Error {status_code}"}
-        self._router.add_route(method, pattern, json=body, status_code=status_code)
+        self._router.add_route(method, pattern, json=body, status_code=status_code, params=params)
