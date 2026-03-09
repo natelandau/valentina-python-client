@@ -1,3 +1,10 @@
+## v1.11.0 (2026-03-09)
+
+### Feat
+
+- **users**: add user approval workflow (#43)
+- **testing**: add per-ID response matching (#42)
+
 ## v1.10.0 (2026-03-08)
 
 ### Feat
