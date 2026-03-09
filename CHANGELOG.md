@@ -1,3 +1,13 @@
+## v1.10.0 (2026-03-08)
+
+### Feat
+
+- **testing**: add set_response/set_error API for FakeVClient (#41)
+
+### Fix
+
+- **models**: make User.role a required field (#40)
+
 ## v1.9.0 (2026-03-08)
 
 ### Feat
