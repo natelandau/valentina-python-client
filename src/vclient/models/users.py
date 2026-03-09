@@ -12,6 +12,30 @@ from vclient.constants import UserRole
 # -----------------------------------------------------------------------------
 
 
+class GoogleProfile(BaseModel):
+    """Google profile model."""
+
+    id: str | None = None
+    email: str | None = None
+    verified_email: bool | None = None
+    username: str | None = None
+    name_first: str | None = None
+    name_last: str | None = None
+    avatar_url: str | None = None
+    locale: str | None = None
+
+
+class GitHubProfile(BaseModel):
+    """GitHub profile model."""
+
+    id: str | None = None
+    login: str | None = None
+    username: str | None = None
+    avatar_url: str | None = None
+    email: str | None = None
+    profile_url: str | None = None
+
+
 class DiscordProfile(BaseModel):
     """Discord profile information for a user.
 
@@ -64,6 +88,8 @@ class User(BaseModel):
     role: UserRole
     company_id: str
     discord_profile: DiscordProfile | None = None
+    google_profile: GoogleProfile | None = None
+    github_profile: GitHubProfile | None = None
     campaign_experience: list[CampaignExperience] = Field(default_factory=list)
     asset_ids: list[str] = Field(default_factory=list)
 
@@ -178,6 +204,8 @@ class _ExperienceAddRemove(BaseModel):
 __all__ = [
     "CampaignExperience",
     "DiscordProfile",
+    "GitHubProfile",
+    "GoogleProfile",
     "Quickroll",
     "QuickrollCreate",
     "QuickrollUpdate",

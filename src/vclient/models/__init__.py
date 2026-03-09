@@ -111,6 +111,8 @@ from .system import SystemHealth
 from .users import (
     CampaignExperience,
     DiscordProfile,
+    GitHubProfile,
+    GoogleProfile,
     Quickroll,
     QuickrollCreate,
     QuickrollUpdate,
@@ -164,6 +166,8 @@ __all__ = [
     "DictionaryTermUpdate",
     "DiscordProfile",
     "EdgeAndPerks",
+    "GitHubProfile",
+    "GoogleProfile",
     "HunterAttributes",
     "HunterAttributesCreate",
     "HunterAttributesUpdate",

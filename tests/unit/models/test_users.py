@@ -7,6 +7,8 @@ from vclient.models import (
     Asset,
     CampaignExperience,
     DiscordProfile,
+    GitHubProfile,
+    GoogleProfile,
     Note,
     NoteCreate,
     NoteUpdate,
@@ -73,6 +75,106 @@ class TestDiscordProfile:
         }
 
 
+class TestGoogleProfile:
+    """Tests for GoogleProfile model."""
+
+    def test_all_fields_default_to_none(self):
+        """Verify all fields default to None."""
+        # When: Creating profile with no arguments
+        profile = GoogleProfile()
+
+        # Then: All values are None
+        assert profile.id is None
+        assert profile.email is None
+        assert profile.verified_email is None
+        assert profile.username is None
+        assert profile.name_first is None
+        assert profile.name_last is None
+        assert profile.avatar_url is None
+        assert profile.locale is None
+
+    def test_partial_profile(self):
+        """Verify partial profile creation."""
+        # When: Creating profile with some values
+        profile = GoogleProfile(
+            id="google123",
+            email="user@gmail.com",
+            verified_email=True,
+        )
+
+        # Then: Specified values are set, others are None
+        assert profile.id == "google123"
+        assert profile.email == "user@gmail.com"
+        assert profile.verified_email is True
+        assert profile.username is None
+
+    def test_model_dump_excludes_none(self):
+        """Verify model_dump with exclude_none works correctly."""
+        # Given: Profile with some values set
+        profile = GoogleProfile(
+            id="google123",
+            email="user@gmail.com",
+        )
+
+        # When: Dumping with exclude_none
+        data = profile.model_dump(exclude_none=True)
+
+        # Then: Only non-None values are included
+        assert data == {
+            "id": "google123",
+            "email": "user@gmail.com",
+        }
+
+
+class TestGitHubProfile:
+    """Tests for GitHubProfile model."""
+
+    def test_all_fields_default_to_none(self):
+        """Verify all fields default to None."""
+        # When: Creating profile with no arguments
+        profile = GitHubProfile()
+
+        # Then: All values are None
+        assert profile.id is None
+        assert profile.login is None
+        assert profile.username is None
+        assert profile.avatar_url is None
+        assert profile.email is None
+        assert profile.profile_url is None
+
+    def test_partial_profile(self):
+        """Verify partial profile creation."""
+        # When: Creating profile with some values
+        profile = GitHubProfile(
+            id="github123",
+            login="testuser",
+            email="test@github.com",
+        )
+
+        # Then: Specified values are set, others are None
+        assert profile.id == "github123"
+        assert profile.login == "testuser"
+        assert profile.email == "test@github.com"
+        assert profile.username is None
+
+    def test_model_dump_excludes_none(self):
+        """Verify model_dump with exclude_none works correctly."""
+        # Given: Profile with some values set
+        profile = GitHubProfile(
+            id="github123",
+            login="testuser",
+        )
+
+        # When: Dumping with exclude_none
+        data = profile.model_dump(exclude_none=True)
+
+        # Then: Only non-None values are included
+        assert data == {
+            "id": "github123",
+            "login": "testuser",
+        }
+
+
 class TestCampaignExperience:
     """Tests for CampaignExperience model."""
 
@@ -131,6 +233,8 @@ class TestUser:
         assert user.company_id == "company123"
         assert user.role == "PLAYER"
         assert user.discord_profile is None
+        assert user.google_profile is None
+        assert user.github_profile is None
         assert user.campaign_experience == []
         assert user.asset_ids == []
 
@@ -138,6 +242,8 @@ class TestUser:
         """Verify creating user with all fields populated."""
         # Given: Nested objects
         discord = DiscordProfile(id="discord123", username="testuser")
+        google = GoogleProfile(id="google123", email="user@gmail.com")
+        github = GitHubProfile(id="github123", login="testuser")
         experience = CampaignExperience(campaign_id="campaign1", xp_current=50)
 
         # When: Creating user with all fields
@@ -152,6 +258,8 @@ class TestUser:
             role="PLAYER",
             company_id="company123",
             discord_profile=discord,
+            google_profile=google,
+            github_profile=github,
             campaign_experience=[experience],
             asset_ids=["asset1", "asset2"],
         )
@@ -159,6 +267,8 @@ class TestUser:
         # Then: All fields are set correctly
         assert user.role == "PLAYER"
         assert user.discord_profile.id == "discord123"
+        assert user.google_profile.id == "google123"
+        assert user.github_profile.id == "github123"
         assert len(user.campaign_experience) == 1
         assert user.campaign_experience[0].xp_current == 50
         assert user.asset_ids == ["asset1", "asset2"]
@@ -180,6 +290,15 @@ class TestUser:
                 "id": "discord123",
                 "username": "apiuser",
             },
+            "google_profile": {
+                "id": "google123",
+                "email": "apiuser@gmail.com",
+                "verified_email": True,
+            },
+            "github_profile": {
+                "id": "github123",
+                "login": "apiuser",
+            },
             "campaign_experience": [
                 {"campaign_id": "campaign1", "xp_current": 100, "xp_total": 200, "cool_points": 10}
             ],
@@ -196,6 +315,8 @@ class TestUser:
         assert user.username == "apiuser"
         assert user.role == "STORYTELLER"
         assert user.discord_profile.username == "apiuser"
+        assert user.google_profile.email == "apiuser@gmail.com"
+        assert user.github_profile.login == "apiuser"
         assert user.campaign_experience[0].xp_current == 100
 
     def test_invalid_role_rejected(self):

@@ -71,6 +71,18 @@ def user_response_data() -> dict:
             "id": "discord123",
             "username": "testuser",
         },
+        "google_profile": {
+            "id": "google123",
+            "email": "test@gmail.com",
+            "verified_email": True,
+            "username": "testuser",
+        },
+        "github_profile": {
+            "id": "github123",
+            "login": "testuser",
+            "username": "testuser",
+            "email": "test@github.com",
+        },
         "campaign_experience": [
             {"campaign_id": "campaign1", "xp_current": 50, "xp_total": 100, "cool_points": 5}
         ],
