@@ -17,7 +17,7 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `name_last`           | `str`                      | Last name                         |
 | `username`            | `str`                      | Username                          |
 | `email`               | `str`                      | Email address                     |
-| `role`                | `UserRole \| None`         | Role (ADMIN, STORYTELLER, PLAYER) |
+| `role`                | `UserRole`                 | Role (ADMIN, STORYTELLER, PLAYER) |
 | `company_id`          | `str`                      | Company ID                        |
 | `discord_profile`     | `DiscordProfile \| None`   | Discord information               |
 | `campaign_experience` | `list[CampaignExperience]` | XP per campaign                   |

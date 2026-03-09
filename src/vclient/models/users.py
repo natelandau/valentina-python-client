@@ -61,7 +61,7 @@ class User(BaseModel):
     name_last: str | None = None
     username: str
     email: str
-    role: UserRole | None = None
+    role: UserRole
     company_id: str
     discord_profile: DiscordProfile | None = None
     campaign_experience: list[CampaignExperience] = Field(default_factory=list)
