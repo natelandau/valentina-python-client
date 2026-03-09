@@ -6,12 +6,16 @@ instead of real HTTP. All real service classes work unmodified.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
+from pydantic import BaseModel
 
 from vclient.client import VClient
-from vclient.testing._router import _FakeRouter
+from vclient.testing._router import NO_CONTENT, PAGINATED, _FakeRouter
+
+if TYPE_CHECKING:
+    from vclient.testing._routes import RouteSpec
 
 
 class FakeVClient(VClient):
@@ -55,6 +59,13 @@ class FakeVClient(VClient):
             base_url="https://fake.valentina-api.test",
         )
 
+    @staticmethod
+    def _serialize(obj: BaseModel | dict[str, Any]) -> dict[str, Any]:
+        """Serialize a model instance or pass through a dict."""
+        if isinstance(obj, BaseModel):
+            return obj.model_dump(mode="json")
+        return obj
+
     def add_route(
         self,
         method: str,
@@ -65,6 +76,9 @@ class FakeVClient(VClient):
     ) -> None:
         """Add a custom route override.
 
+        Low-level method for full control over the response. Prefer
+        ``set_response()`` or ``set_error()`` for most use cases.
+
         Args:
             method: HTTP method (GET, POST, PATCH, DELETE, PUT).
             pattern: Endpoint pattern from vclient.endpoints.Endpoints.
@@ -72,3 +86,70 @@ class FakeVClient(VClient):
             status_code: HTTP status code to return (default 200).
         """
         self._router.add_route(method, pattern, json=json, status_code=status_code)
+
+    def set_response(
+        self,
+        route: RouteSpec,
+        *,
+        items: list[BaseModel | dict[str, Any]] | None = None,
+        model: BaseModel | dict[str, Any] | None = None,
+    ) -> None:
+        """Override a route to return specific response data.
+
+        Automatically wraps data in the correct envelope based on the route's
+        response style (paginated, single, or no-content).
+
+        Args:
+            route: A ``RouteSpec`` from the ``Routes`` class identifying the endpoint.
+            items: List of items for paginated routes. Mutually exclusive with ``model``.
+            model: A single model instance or dict for single-object routes.
+                Mutually exclusive with ``items``.
+
+        Raises:
+            TypeError: If ``model`` is passed to a paginated route or ``items`` is
+                passed to a single-object route.
+        """
+        method, pattern, style = route
+
+        if style == PAGINATED:
+            if model is not None:
+                msg = f"Route {pattern!r} is paginated; pass 'items' instead of 'model'"
+                raise TypeError(msg)
+
+            serialized: list[dict[str, Any]] = [self._serialize(item) for item in (items or [])]
+            body: dict[str, Any] = {
+                "items": serialized,
+                "total": len(serialized),
+                "limit": 100,
+                "offset": 0,
+            }
+            self._router.add_route(method, pattern, json=body, status_code=200)
+
+        elif style == NO_CONTENT:
+            self._router.add_route(method, pattern, json={}, status_code=204)
+
+        else:
+            if items is not None:
+                msg = f"Route {pattern!r} returns a single object; pass 'model' instead of 'items'"
+                raise TypeError(msg)
+
+            data: dict[str, Any] = self._serialize(model) if model is not None else {}
+            self._router.add_route(method, pattern, json=data, status_code=200)
+
+    def set_error(
+        self,
+        route: RouteSpec,
+        *,
+        status_code: int,
+        detail: str | None = None,
+    ) -> None:
+        """Override a route to return an error response.
+
+        Args:
+            route: A ``RouteSpec`` from the ``Routes`` class identifying the endpoint.
+            status_code: The HTTP status code to return.
+            detail: Optional error detail message. Defaults to ``"Error {status_code}"``.
+        """
+        method, pattern, _style = route
+        body: dict[str, Any] = {"detail": detail or f"Error {status_code}"}
+        self._router.add_route(method, pattern, json=body, status_code=status_code)
