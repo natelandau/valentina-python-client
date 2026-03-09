@@ -203,6 +203,7 @@ class TraitFactory(ModelFactory[Trait]):
 class UserFactory(ModelFactory[User]):
     __model__ = User
     __use_defaults__ = True
+    role = "PLAYER"
 
 
 class VampireClanFactory(ModelFactory[VampireClan]):
