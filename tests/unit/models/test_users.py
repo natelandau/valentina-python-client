@@ -15,7 +15,9 @@ from vclient.models import (
     QuickrollUpdate,
     RollStatistics,
     User,
+    UserApproveDTO,
     UserCreate,
+    UserDenyDTO,
     UserUpdate,
 )
 
@@ -685,3 +687,65 @@ class TestQuickrollCreateConstraints:
 
         # Then: Description is None without validation errors
         assert request.description is None
+
+
+class TestUserApproveDTO:
+    """Tests for UserApproveDTO model."""
+
+    def test_valid_request(self):
+        """Verify creating approve request with valid fields."""
+        # When: Creating an approve request
+        request = UserApproveDTO(role="PLAYER", requesting_user_id="requester123")
+
+        # Then: Fields are set correctly
+        assert request.role == "PLAYER"
+        assert request.requesting_user_id == "requester123"
+
+    def test_all_roles_accepted(self):
+        """Verify all UserRole values are accepted."""
+        # When: Creating approve requests with each role
+        for role in ("ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"):
+            request = UserApproveDTO(role=role, requesting_user_id="requester123")
+
+            # Then: Role is set correctly
+            assert request.role == role
+
+    def test_invalid_role_rejected(self):
+        """Verify invalid role values are rejected."""
+        # When/Then: Creating request with invalid role raises error
+        with pytest.raises(PydanticValidationError):
+            UserApproveDTO(role="INVALID", requesting_user_id="requester123")
+
+    def test_model_dump(self):
+        """Verify model_dump produces correct output."""
+        # Given: An approve request
+        request = UserApproveDTO(role="STORYTELLER", requesting_user_id="requester123")
+
+        # When: Dumping the model
+        data = request.model_dump(mode="json")
+
+        # Then: All fields are present
+        assert data == {"role": "STORYTELLER", "requesting_user_id": "requester123"}
+
+
+class TestUserDenyDTO:
+    """Tests for UserDenyDTO model."""
+
+    def test_valid_request(self):
+        """Verify creating deny request with valid fields."""
+        # When: Creating a deny request
+        request = UserDenyDTO(requesting_user_id="requester123")
+
+        # Then: Field is set correctly
+        assert request.requesting_user_id == "requester123"
+
+    def test_model_dump(self):
+        """Verify model_dump produces correct output."""
+        # Given: A deny request
+        request = UserDenyDTO(requesting_user_id="requester123")
+
+        # When: Dumping the model
+        data = request.model_dump(mode="json")
+
+        # Then: All fields are present
+        assert data == {"requesting_user_id": "requester123"}
