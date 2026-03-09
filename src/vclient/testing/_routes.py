@@ -118,10 +118,13 @@ class Routes:
 
     # Users
     USERS_LIST = RouteSpec("GET", Endpoints.USERS, PAGINATED, User)
+    USERS_UNAPPROVED_LIST = RouteSpec("GET", Endpoints.USERS_UNAPPROVED_LIST, PAGINATED, User)
     USERS_GET = RouteSpec("GET", Endpoints.USER, SINGLE, User)
     USERS_CREATE = RouteSpec("POST", Endpoints.USERS, SINGLE, User)
     USERS_UPDATE = RouteSpec("PATCH", Endpoints.USER, SINGLE, User)
     USERS_DELETE = RouteSpec("DELETE", Endpoints.USER, NO_CONTENT, None)
+    USERS_APPROVE = RouteSpec("POST", Endpoints.USER_APPROVE, SINGLE, User)
+    USERS_DENY = RouteSpec("POST", Endpoints.USER_DENY, NO_CONTENT, None)
     USERS_STATISTICS = RouteSpec("GET", Endpoints.USER_STATISTICS, SINGLE, RollStatistics)
 
     # User assets
