@@ -61,58 +61,73 @@ with SyncFakeVClient() as client:
 
 ## Customizing Responses
 
-Use `add_route()` to override what a specific endpoint returns. Pass an endpoint pattern from `vclient.endpoints.Endpoints` along with the JSON body you want:
+Use `set_response()` to control what a specific endpoint returns. Pass a route constant from the `Routes` class and provide either `items` (for paginated endpoints) or `model` (for single-object endpoints). The method handles JSON serialization and envelope wrapping automatically.
+
+Return an empty list from a paginated endpoint:
 
 ```python
 from vclient import users_service
+from vclient.testing import FakeVClient, Routes
+
+async with FakeVClient() as client:
+    client.set_response(Routes.USERS_LIST, items=[])
+    result = await users_service().list_all()
+    assert result == []
+```
+
+Return a specific model instance from a single-object endpoint:
+
+```python
+from vclient import books_service
+from vclient.testing import CampaignBookFactory, FakeVClient, Routes
+
+async with FakeVClient() as client:
+    book = CampaignBookFactory.build(number=5)
+    client.set_response(Routes.BOOKS_RENUMBER, model=book)
+    result = await books_service("user123", "campaign123").renumber("book-id", number=5)
+    assert result.number == 5
+```
+
+### Simulating Errors
+
+Use `set_error()` to make an endpoint return an HTTP error. This is useful for testing error-handling paths in your application:
+
+```python
+from vclient.testing import FakeVClient, Routes
+
+async with FakeVClient() as client:
+    client.set_error(Routes.CAMPAIGNS_GET, status_code=404)
+```
+
+You can include a custom error message with the `detail` parameter:
+
+```python
+client.set_error(Routes.USERS_GET, status_code=403, detail="Insufficient permissions")
+```
+
+### Route Constants
+
+Every API endpoint has a named constant on the `Routes` class, exported from `vclient.testing`. Constants follow the naming convention `{SERVICE}_{OPERATION}` -- for example, `USERS_LIST`, `BOOKS_RENUMBER`, `CHAPTERS_NOTES_CREATE`. Nested resources include the parent in the name (e.g., `CHARACTERS_INVENTORY_LIST`, `CHAPTERS_ASSETS_UPLOAD`).
+
+### Advanced: Low-Level Route Overrides
+
+For cases that `set_response()` and `set_error()` don't cover, use `add_route()` to register a raw override. Pass an HTTP method, an endpoint pattern from `vclient.endpoints.Endpoints`, and a JSON body:
+
+```python
 from vclient.endpoints import Endpoints
 from vclient.testing import FakeVClient
 
 async with FakeVClient() as client:
     client.add_route(
         "GET",
-        Endpoints.USERS,
-        json={
-            "items": [
-                {
-                    "id": "user-1",
-                    "date_created": "2024-01-01T00:00:00Z",
-                    "date_modified": "2024-01-01T00:00:00Z",
-                    "name_first": "Ada",
-                    "name_last": "Lovelace",
-                    "username": "ada",
-                    "email": "ada@example.com",
-                    "role": "PLAYER",
-                    "company_id": "fake-company",
-                    "discord_profile": None,
-                    "campaign_experience": [],
-                    "asset_ids": [],
-                }
-            ],
-            "total": 1,
-            "limit": 10,
-            "offset": 0,
-        },
+        Endpoints.OPTIONS,
+        json={"game_systems": ["VTM5e", "WTA5e"]},
     )
-
-    result = await users_service().list_all()
-    assert result[0].name_first == "Ada"
-```
-
-You can also return error responses by setting `status_code`:
-
-```python
-client.add_route(
-    "GET",
-    Endpoints.CAMPAIGN,
-    json={"detail": "Not found"},
-    status_code=404,
-)
 ```
 
 ### Building Override Data with Factories
 
-Instead of writing JSON by hand, use the included model factories to generate valid data and customize only the fields you care about:
+Instead of writing JSON by hand, use the included model factories to generate valid data and customize only the fields you care about. Factories pair well with `set_response()` -- build one or more model instances and pass them directly:
 
 ```python
 from vclient.testing import CampaignFactory, FakeVClient

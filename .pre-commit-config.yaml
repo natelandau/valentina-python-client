@@ -103,6 +103,16 @@ repos:
 
   - repo: local
     hooks:
+      - id: generate-sync
+        name: generate-sync
+        entry: uv run duty generate_sync
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+          src/vclient/(?!_sync/).*\.py$
+          )
+
       - id: shellcheck
         name: shellcheck
         entry: shellcheck --check-sourced --severity=warning
