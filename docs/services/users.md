@@ -22,6 +22,7 @@ users = users_service(company_id="COMPANY_ID")
 | ----------------------------------------- | ------- | ---------------------- |
 | `get(user_id)`                            | `User`  | Retrieve a user by ID  |
 | `create(request=None, **kwargs)`          | `User`  | Create a new user      |
+| `register(request=None, **kwargs)`        | `User`  | Register via SSO       |
 | `update(user_id, request=None, **kwargs)` | `User`  | Update user properties |
 | `delete(user_id, requesting_user_id)`     | `None`  | Delete a user          |
 
@@ -42,6 +43,7 @@ users = users_service(company_id="COMPANY_ID")
 | `iter_all_unapproved(limit=100)`                        | `AsyncIterator[User]`     | Iterate through unapproved users    |
 | `approve_user(user_id, role, requesting_user_id)`        | `User`                    | Approve a user and assign a role    |
 | `deny_user(user_id, requesting_user_id)`                 | `None`                    | Deny an unapproved user             |
+| `merge(primary_user_id, secondary_user_id, requesting_user_id)` | `User`                    | Merge unapproved user into primary  |
 
 ### Statistics
 
@@ -285,6 +287,45 @@ await users.deny_user(
 )
 ```
 
+### Register a User via SSO
+
+Register a new user through an external auth provider flow (no requesting_user_id needed).
+
+```python
+from vclient.models import UserRegister
+
+# Option 1: Use a model object
+request = UserRegister(
+    username="jane_doe",
+    email="jane@example.com",
+    name_first="Jane",
+    name_last="Doe",
+)
+user = await users.register(request=request)
+
+# Option 2: Pass fields as keyword arguments
+user = await users.register(
+    username="jane_doe",
+    email="jane@example.com",
+    name_first="Jane",
+    name_last="Doe",
+)
+```
+
+### Merge Users
+
+Merge an unapproved user's data into an existing primary user.
+
+```python
+# Merge secondary user into primary user
+merged_user = await users.merge(
+    primary_user_id="primary_user_id",
+    secondary_user_id="unapproved_user_id",
+    requesting_user_id=admin_user_id,
+)
+print(f"Merged into: {merged_user.username}")
+```
+
 ## Related Documentation
 
-- [Response Models](../models/users.md) - View `User`, `UserApproveDTO`, `UserDenyDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [Response Models](../models/users.md) - View `User`, `UserRegister`, `UserMerge`, `UserApproveDTO`, `UserDenyDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
