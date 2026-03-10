@@ -172,7 +172,8 @@ class SyncUsersService(SyncBaseService):
             requesting_user_id=requesting_user_id,
         )
         response = self._post(
-            self._format_endpoint(Endpoints.USER_MERGE), json=body.model_dump(mode="json")
+            self._format_endpoint(Endpoints.USER_MERGE),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())
 

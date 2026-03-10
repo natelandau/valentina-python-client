@@ -201,7 +201,7 @@ class UsersService(BaseService):
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_MERGE),
-            json=body.model_dump(mode="json"),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())
 

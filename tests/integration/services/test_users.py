@@ -434,6 +434,16 @@ class TestUsersServiceRegister:
         assert route.called
         assert isinstance(result, User)
 
+        # Verify request body excludes unset optional fields
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body["username"] == "testuser"
+        assert body["email"] == "test@example.com"
+        assert "discord_profile" not in body
+        assert "google_profile" not in body
+        assert "github_profile" not in body
+
     @respx.mock
     async def test_register_user_validation_error(self, vclient):
         """Verify validation error on missing required fields raises RequestValidationError."""
