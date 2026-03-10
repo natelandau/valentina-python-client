@@ -975,7 +975,7 @@ wheels = [
 
 [[package]]
 name = "valentina-python-client"
-version = "1.13.0"
+version = "1.14.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },

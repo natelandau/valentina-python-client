@@ -1,3 +1,13 @@
+## v1.14.0 (2026-03-10)
+
+### Feat
+
+- **users**: add register and merge endpoints (#45)
+
+### Fix
+
+- **user**: add email filter to list endpoints
+
 ## v1.13.0 (2026-03-09)
 
 ### Feat
