@@ -23,6 +23,8 @@ from vclient.models import (
     UserApproveDTO,
     UserCreate,
     UserDenyDTO,
+    UserMergeDTO,
+    UserRegisterDTO,
     UserUpdate,
     _ExperienceAddRemove,
 )
@@ -146,6 +148,35 @@ class SyncUsersService(SyncBaseService):
             json=body.model_dump(mode="json"),
         )
 
+    def merge(self, primary_user_id: str, secondary_user_id: str, requesting_user_id: str) -> User:
+        """Merge an unapproved user into an existing primary user.
+
+        The secondary (unapproved) user's data is merged into the primary user,
+        and the secondary user is removed.
+
+        Args:
+            primary_user_id: The ID of the primary user to merge into.
+            secondary_user_id: The ID of the unapproved user to merge from.
+            requesting_user_id: ID of the user making the request (for permissions).
+
+        Returns:
+            The primary User object after the merge.
+
+        Raises:
+            NotFoundError: If either user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+        """
+        body = UserMergeDTO(
+            primary_user_id=primary_user_id,
+            secondary_user_id=secondary_user_id,
+            requesting_user_id=requesting_user_id,
+        )
+        response = self._post(
+            self._format_endpoint(Endpoints.USER_MERGE),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return User.model_validate(response.json())
+
     def get_page(
         self, *, user_role: UserRole | None = None, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
     ) -> PaginatedResponse[User]:
@@ -251,6 +282,35 @@ class SyncUsersService(SyncBaseService):
         body = request if request is not None else self._validate_request(UserCreate, **kwargs)
         response = self._post(
             self._format_endpoint(Endpoints.USERS),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return User.model_validate(response.json())
+
+    def register(self, request: UserRegisterDTO | None = None, **kwargs) -> User:
+        """Register a new user via SSO onboarding.
+
+        Unlike `create()`, this endpoint does not require a requesting_user_id
+        because it is used during external auth provider flows.
+
+        Args:
+            request: A UserRegisterDTO model, OR pass fields as keyword arguments.
+            **kwargs: Fields for UserRegisterDTO if request is not provided.
+                Accepts: username (str, required), email (str, required),
+                name_first (str | None), name_last (str | None),
+                discord_profile (DiscordProfile | None),
+                google_profile (GoogleProfile | None),
+                github_profile (GitHubProfile | None).
+
+        Returns:
+            The newly registered User object.
+
+        Raises:
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the request data is invalid.
+        """
+        body = request if request is not None else self._validate_request(UserRegisterDTO, **kwargs)
+        response = self._post(
+            self._format_endpoint(Endpoints.USER_REGISTER),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())

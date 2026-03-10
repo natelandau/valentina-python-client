@@ -99,6 +99,26 @@ class User(BaseModel):
 # -----------------------------------------------------------------------------
 
 
+class UserRegisterDTO(BaseModel):
+    """Register a new user via SSO onboarding (no requesting_user_id required)."""
+
+    name_first: str | None = None
+    name_last: str | None = None
+    username: str
+    email: str
+    discord_profile: DiscordProfile | None = None
+    google_profile: GoogleProfile | None = None
+    github_profile: GitHubProfile | None = None
+
+
+class UserMergeDTO(BaseModel):
+    """Merge an UNAPPROVED user into an existing primary user."""
+
+    primary_user_id: str
+    secondary_user_id: str
+    requesting_user_id: str
+
+
 class UserCreate(BaseModel):
     """Request body for creating a new user.
 
@@ -215,6 +235,8 @@ __all__ = [
     "QuickrollUpdate",
     "User",
     "UserCreate",
+    "UserMergeDTO",
+    "UserRegisterDTO",
     "UserUpdate",
     "_ExperienceAddRemove",
 ]
