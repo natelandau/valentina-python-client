@@ -21,6 +21,8 @@ from vclient.models import (
     UserApproveDTO,
     UserCreate,
     UserDenyDTO,
+    UserMerge,
+    UserRegister,
     UserUpdate,
     _ExperienceAddRemove,
 )
@@ -169,6 +171,40 @@ class UsersService(BaseService):
             json=body.model_dump(mode="json"),
         )
 
+    async def merge(
+        self,
+        primary_user_id: str,
+        secondary_user_id: str,
+        requesting_user_id: str,
+    ) -> User:
+        """Merge an unapproved user into an existing primary user.
+
+        The secondary (unapproved) user's data is merged into the primary user,
+        and the secondary user is removed.
+
+        Args:
+            primary_user_id: The ID of the primary user to merge into.
+            secondary_user_id: The ID of the unapproved user to merge from.
+            requesting_user_id: ID of the user making the request (for permissions).
+
+        Returns:
+            The primary User object after the merge.
+
+        Raises:
+            NotFoundError: If either user does not exist.
+            AuthorizationError: If you don't have appropriate access.
+        """
+        body = UserMerge(
+            primary_user_id=primary_user_id,
+            secondary_user_id=secondary_user_id,
+            requesting_user_id=requesting_user_id,
+        )
+        response = await self._post(
+            self._format_endpoint(Endpoints.USER_MERGE),
+            json=body.model_dump(mode="json"),
+        )
+        return User.model_validate(response.json())
+
     # -------------------------------------------------------------------------
     # User CRUD Methods
     # -------------------------------------------------------------------------
@@ -295,6 +331,39 @@ class UsersService(BaseService):
         body = request if request is not None else self._validate_request(UserCreate, **kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.USERS),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return User.model_validate(response.json())
+
+    async def register(
+        self,
+        request: UserRegister | None = None,
+        **kwargs,
+    ) -> User:
+        """Register a new user via SSO onboarding.
+
+        Unlike `create()`, this endpoint does not require a requesting_user_id
+        because it is used during external auth provider flows.
+
+        Args:
+            request: A UserRegister model, OR pass fields as keyword arguments.
+            **kwargs: Fields for UserRegister if request is not provided.
+                Accepts: username (str, required), email (str, required),
+                name_first (str | None), name_last (str | None),
+                discord_profile (DiscordProfile | None),
+                google_profile (GoogleProfile | None),
+                github_profile (GitHubProfile | None).
+
+        Returns:
+            The newly registered User object.
+
+        Raises:
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the request data is invalid.
+        """
+        body = request if request is not None else self._validate_request(UserRegister, **kwargs)
+        response = await self._post(
+            self._format_endpoint(Endpoints.USER_REGISTER),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())
