@@ -16,3 +16,5 @@ openapi.json
 tmp/
 docs/plans/
 _site/
+docs/superpowers/
+.superpowers/

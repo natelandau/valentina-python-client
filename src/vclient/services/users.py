@@ -213,6 +213,7 @@ class UsersService(BaseService):
         self,
         *,
         user_role: UserRole | None = None,
+        email: str | None = None,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
     ) -> PaginatedResponse[User]:
@@ -223,6 +224,7 @@ class UsersService(BaseService):
 
         Args:
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
+            email: Optional email filter.
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
 
@@ -234,13 +236,14 @@ class UsersService(BaseService):
             User,
             limit=limit,
             offset=offset,
-            params=self._build_params(user_role=user_role),
+            params=self._build_params(user_role=user_role, email=email),
         )
 
     async def list_all(
         self,
         *,
         user_role: UserRole | None = None,
+        email: str | None = None,
     ) -> list[User]:
         """Retrieve all users within a company.
 
@@ -249,16 +252,18 @@ class UsersService(BaseService):
 
         Args:
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
+            email: Optional email filter.
 
         Returns:
             A list of all User objects.
         """
-        return [user async for user in self.iter_all(user_role=user_role)]
+        return [user async for user in self.iter_all(user_role=user_role, email=email)]
 
     async def iter_all(
         self,
         *,
         user_role: UserRole | None = None,
+        email: str | None = None,
         limit: int = 100,
     ) -> AsyncIterator[User]:
         """Iterate through all users within a company.
@@ -268,6 +273,7 @@ class UsersService(BaseService):
 
         Args:
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
+            email: Optional email filter.
             limit: Items per page (default 100 for efficiency).
 
         Yields:
@@ -280,7 +286,7 @@ class UsersService(BaseService):
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.USERS),
             limit=limit,
-            params=self._build_params(user_role=user_role),
+            params=self._build_params(user_role=user_role, email=email),
         ):
             yield User.model_validate(item)
 

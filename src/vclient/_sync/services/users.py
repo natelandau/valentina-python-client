@@ -178,7 +178,12 @@ class SyncUsersService(SyncBaseService):
         return User.model_validate(response.json())
 
     def get_page(
-        self, *, user_role: UserRole | None = None, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+        self,
+        *,
+        user_role: UserRole | None = None,
+        email: str | None = None,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
     ) -> PaginatedResponse[User]:
         """Retrieve a paginated page of users within a company.
 
@@ -187,6 +192,7 @@ class SyncUsersService(SyncBaseService):
 
         Args:
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
+            email: Optional email filter.
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
 
@@ -198,10 +204,12 @@ class SyncUsersService(SyncBaseService):
             User,
             limit=limit,
             offset=offset,
-            params=self._build_params(user_role=user_role),
+            params=self._build_params(user_role=user_role, email=email),
         )
 
-    def list_all(self, *, user_role: UserRole | None = None) -> list[User]:
+    def list_all(
+        self, *, user_role: UserRole | None = None, email: str | None = None
+    ) -> list[User]:
         """Retrieve all users within a company.
 
         Automatically paginates through all results. Use `get_page()` for paginated access
@@ -209,13 +217,16 @@ class SyncUsersService(SyncBaseService):
 
         Args:
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
+            email: Optional email filter.
 
         Returns:
             A list of all User objects.
         """
-        return [user for user in self.iter_all(user_role=user_role)]
+        return [user for user in self.iter_all(user_role=user_role, email=email)]
 
-    def iter_all(self, *, user_role: UserRole | None = None, limit: int = 100) -> Iterator[User]:
+    def iter_all(
+        self, *, user_role: UserRole | None = None, email: str | None = None, limit: int = 100
+    ) -> Iterator[User]:
         """Iterate through all users within a company.
 
         Yields individual users, automatically fetching subsequent pages until
@@ -223,6 +234,7 @@ class SyncUsersService(SyncBaseService):
 
         Args:
             user_role: Optional role filter (ADMIN, STORYTELLER, PLAYER).
+            email: Optional email filter.
             limit: Items per page (default 100 for efficiency).
 
         Yields:
@@ -235,7 +247,7 @@ class SyncUsersService(SyncBaseService):
         for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.USERS),
             limit=limit,
-            params=self._build_params(user_role=user_role),
+            params=self._build_params(user_role=user_role, email=email),
         ):
             yield User.model_validate(item)
 
