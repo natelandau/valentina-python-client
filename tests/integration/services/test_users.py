@@ -14,7 +14,7 @@ from vclient.models import (
     Quickroll,
     RollStatistics,
     User,
-    UserRegister,
+    UserRegisterDTO,
 )
 
 pytestmark = pytest.mark.anyio
@@ -414,7 +414,7 @@ class TestUsersServiceRegister:
 
     @respx.mock
     async def test_register_user_with_model(self, vclient, base_url, user_response_data):
-        """Verify registering a user via UserRegister model."""
+        """Verify registering a user via UserRegisterDTO model."""
         # Given: A mocked register endpoint
         company_id = "company123"
         route = respx.post(
@@ -422,7 +422,7 @@ class TestUsersServiceRegister:
         ).respond(201, json=user_response_data)
 
         # When: Registering with a model object
-        request = UserRegister(
+        request = UserRegisterDTO(
             username="testuser",
             email="test@example.com",
             name_first="Test",

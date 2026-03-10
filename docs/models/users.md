@@ -67,7 +67,7 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `email`       | `str \| None` | GitHub email       |
 | `profile_url` | `str \| None` | GitHub profile URL |
 
-## UserRegister
+## UserRegisterDTO
 
 Request body for registering a user via SSO onboarding. Unlike `UserCreate`, no `requesting_user_id` is required.
 
@@ -81,7 +81,7 @@ Request body for registering a user via SSO onboarding. Unlike `UserCreate`, no 
 | `google_profile`   | `GoogleProfile \| None`  | Google account info      |
 | `github_profile`   | `GitHubProfile \| None`  | GitHub account info      |
 
-## UserMerge
+## UserMergeDTO
 
 Request body for merging an unapproved user into an existing primary user.
 

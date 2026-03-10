@@ -292,10 +292,10 @@ await users.deny_user(
 Register a new user through an external auth provider flow (no requesting_user_id needed).
 
 ```python
-from vclient.models import UserRegister
+from vclient.models import UserRegisterDTO
 
 # Option 1: Use a model object
-request = UserRegister(
+request = UserRegisterDTO(
     username="jane_doe",
     email="jane@example.com",
     name_first="Jane",
@@ -328,4 +328,4 @@ print(f"Merged into: {merged_user.username}")
 
 ## Related Documentation
 
-- [Response Models](../models/users.md) - View `User`, `UserRegister`, `UserMerge`, `UserApproveDTO`, `UserDenyDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [Response Models](../models/users.md) - View `User`, `UserRegisterDTO`, `UserMergeDTO`, `UserApproveDTO`, `UserDenyDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas

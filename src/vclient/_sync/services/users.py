@@ -23,8 +23,8 @@ from vclient.models import (
     UserApproveDTO,
     UserCreate,
     UserDenyDTO,
-    UserMerge,
-    UserRegister,
+    UserMergeDTO,
+    UserRegisterDTO,
     UserUpdate,
     _ExperienceAddRemove,
 )
@@ -166,7 +166,7 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If either user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        body = UserMerge(
+        body = UserMergeDTO(
             primary_user_id=primary_user_id,
             secondary_user_id=secondary_user_id,
             requesting_user_id=requesting_user_id,
@@ -286,15 +286,15 @@ class SyncUsersService(SyncBaseService):
         )
         return User.model_validate(response.json())
 
-    def register(self, request: UserRegister | None = None, **kwargs) -> User:
+    def register(self, request: UserRegisterDTO | None = None, **kwargs) -> User:
         """Register a new user via SSO onboarding.
 
         Unlike `create()`, this endpoint does not require a requesting_user_id
         because it is used during external auth provider flows.
 
         Args:
-            request: A UserRegister model, OR pass fields as keyword arguments.
-            **kwargs: Fields for UserRegister if request is not provided.
+            request: A UserRegisterDTO model, OR pass fields as keyword arguments.
+            **kwargs: Fields for UserRegisterDTO if request is not provided.
                 Accepts: username (str, required), email (str, required),
                 name_first (str | None), name_last (str | None),
                 discord_profile (DiscordProfile | None),
@@ -308,7 +308,7 @@ class SyncUsersService(SyncBaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """
-        body = request if request is not None else self._validate_request(UserRegister, **kwargs)
+        body = request if request is not None else self._validate_request(UserRegisterDTO, **kwargs)
         response = self._post(
             self._format_endpoint(Endpoints.USER_REGISTER),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),

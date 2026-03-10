@@ -99,7 +99,7 @@ class User(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class UserRegister(BaseModel):
+class UserRegisterDTO(BaseModel):
     """Register a new user via SSO onboarding (no requesting_user_id required)."""
 
     name_first: str | None = None
@@ -111,7 +111,7 @@ class UserRegister(BaseModel):
     github_profile: GitHubProfile | None = None
 
 
-class UserMerge(BaseModel):
+class UserMergeDTO(BaseModel):
     """Merge an UNAPPROVED user into an existing primary user."""
 
     primary_user_id: str
@@ -235,8 +235,8 @@ __all__ = [
     "QuickrollUpdate",
     "User",
     "UserCreate",
-    "UserMerge",
-    "UserRegister",
+    "UserMergeDTO",
+    "UserRegisterDTO",
     "UserUpdate",
     "_ExperienceAddRemove",
 ]
