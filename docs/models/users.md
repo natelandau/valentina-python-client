@@ -67,6 +67,30 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `email`       | `str \| None` | GitHub email       |
 | `profile_url` | `str \| None` | GitHub profile URL |
 
+## UserRegister
+
+Request body for registering a user via SSO onboarding. Unlike `UserCreate`, no `requesting_user_id` is required.
+
+| Field              | Type                     | Description              |
+| ------------------ | ------------------------ | ------------------------ |
+| `username`         | `str`                    | Username (required)      |
+| `email`            | `str`                    | Email address (required) |
+| `name_first`       | `str \| None`            | First name               |
+| `name_last`        | `str \| None`            | Last name                |
+| `discord_profile`  | `DiscordProfile \| None` | Discord information      |
+| `google_profile`   | `GoogleProfile \| None`  | Google account info      |
+| `github_profile`   | `GitHubProfile \| None`  | GitHub account info      |
+
+## UserMerge
+
+Request body for merging an unapproved user into an existing primary user.
+
+| Field                | Type  | Description                            |
+| -------------------- | ----- | -------------------------------------- |
+| `primary_user_id`    | `str` | ID of the primary user to merge into   |
+| `secondary_user_id`  | `str` | ID of the unapproved user to merge     |
+| `requesting_user_id` | `str` | ID of the user making the request      |
+
 ## Quickroll
 
 Pre-configured dice pool for frequently used trait combinations. Speed up gameplay by saving common rolls like "Strength + Brawl" or "Wits + Investigation".
