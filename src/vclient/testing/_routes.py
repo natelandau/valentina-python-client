@@ -125,6 +125,8 @@ class Routes:
     USERS_DELETE = RouteSpec("DELETE", Endpoints.USER, NO_CONTENT, None)
     USERS_APPROVE = RouteSpec("POST", Endpoints.USER_APPROVE, SINGLE, User)
     USERS_DENY = RouteSpec("POST", Endpoints.USER_DENY, NO_CONTENT, None)
+    USERS_REGISTER = RouteSpec("POST", Endpoints.USER_REGISTER, SINGLE, User)
+    USERS_MERGE = RouteSpec("POST", Endpoints.USER_MERGE, SINGLE, User)
     USERS_STATISTICS = RouteSpec("GET", Endpoints.USER_STATISTICS, SINGLE, RollStatistics)
 
     # User assets

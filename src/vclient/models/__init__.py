@@ -120,6 +120,8 @@ from .users import (
     UserApproveDTO,
     UserCreate,
     UserDenyDTO,
+    UserMerge,
+    UserRegister,
     UserUpdate,
     _ExperienceAddRemove as _ExperienceAddRemove,
 )
@@ -201,6 +203,8 @@ __all__ = [
     "UserApproveDTO",
     "UserCreate",
     "UserDenyDTO",
+    "UserMerge",
+    "UserRegister",
     "UserUpdate",
     "VampireAttributes",
     "VampireAttributesCreate",
