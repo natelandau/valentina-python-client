@@ -8,22 +8,24 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 
 ## User
 
-| Field                 | Type                       | Description                       |
-| --------------------- | -------------------------- | --------------------------------- |
-| `id`                  | `str`                      | Unique identifier                 |
-| `date_created`        | `datetime`                 | Creation timestamp                |
-| `date_modified`       | `datetime`                 | Last modified timestamp           |
-| `name_first`          | `str`                      | First name                        |
-| `name_last`           | `str`                      | Last name                         |
-| `username`            | `str`                      | Username                          |
-| `email`               | `str`                      | Email address                     |
-| `role`                | `UserRole`                 | Role (ADMIN, STORYTELLER, PLAYER, UNAPPROVED) |
-| `company_id`          | `str`                      | Company ID                        |
-| `discord_profile`     | `DiscordProfile \| None`   | Discord information               |
-| `google_profile`      | `GoogleProfile \| None`    | Google account information        |
-| `github_profile`      | `GitHubProfile \| None`    | GitHub account information        |
-| `campaign_experience` | `list[CampaignExperience]` | XP per campaign                   |
-| `asset_ids`           | `list[str]`                | Owned asset IDs                   |
+| Field                  | Type                       | Description                                   |
+| ---------------------- | -------------------------- | --------------------------------------------- |
+| `id`                   | `str`                      | Unique identifier                             |
+| `date_created`         | `datetime`                 | Creation timestamp                            |
+| `date_modified`        | `datetime`                 | Last modified timestamp                       |
+| `name_first`           | `str`                      | First name                                    |
+| `name_last`            | `str`                      | Last name                                     |
+| `username`             | `str`                      | Username                                      |
+| `email`                | `str`                      | Email address                                 |
+| `role`                 | `UserRole`                 | Role (ADMIN, STORYTELLER, PLAYER, UNAPPROVED) |
+| `company_id`           | `str`                      | Company ID                                    |
+| `discord_profile`      | `DiscordProfile \| None`   | Discord information                           |
+| `google_profile`       | `GoogleProfile \| None`    | Google account information                    |
+| `github_profile`       | `GitHubProfile \| None`    | GitHub account information                    |
+| `campaign_experience`  | `list[CampaignExperience]` | XP per campaign                               |
+| `asset_ids`            | `list[str]`                | Owned asset IDs                               |
+| `lifetime_xp`          | `int`                      | Lifetime XP earned                            |
+| `lifetime_cool_points` | `int`                      | Lifetime cool points earned                   |
 
 ## CampaignExperience
 
@@ -45,16 +47,16 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 
 ## GoogleProfile
 
-| Field            | Type           | Description              |
-| ---------------- | -------------- | ------------------------ |
-| `id`             | `str \| None`  | Google user ID           |
-| `email`          | `str \| None`  | Google email address     |
+| Field            | Type           | Description               |
+| ---------------- | -------------- | ------------------------- |
+| `id`             | `str \| None`  | Google user ID            |
+| `email`          | `str \| None`  | Google email address      |
 | `verified_email` | `bool \| None` | Whether email is verified |
-| `username`       | `str \| None`  | Google username          |
-| `name_first`     | `str \| None`  | First name               |
-| `name_last`      | `str \| None`  | Last name                |
-| `avatar_url`     | `str \| None`  | Avatar URL               |
-| `locale`         | `str \| None`  | Locale setting           |
+| `username`       | `str \| None`  | Google username           |
+| `name_first`     | `str \| None`  | First name                |
+| `name_last`      | `str \| None`  | Last name                 |
+| `avatar_url`     | `str \| None`  | Avatar URL                |
+| `locale`         | `str \| None`  | Locale setting            |
 
 ## GitHubProfile
 
@@ -71,25 +73,25 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 
 Request body for registering a user via SSO onboarding. Unlike `UserCreate`, no `requesting_user_id` is required.
 
-| Field              | Type                     | Description              |
-| ------------------ | ------------------------ | ------------------------ |
-| `username`         | `str`                    | Username (required)      |
-| `email`            | `str`                    | Email address (required) |
-| `name_first`       | `str \| None`            | First name               |
-| `name_last`        | `str \| None`            | Last name                |
-| `discord_profile`  | `DiscordProfile \| None` | Discord information      |
-| `google_profile`   | `GoogleProfile \| None`  | Google account info      |
-| `github_profile`   | `GitHubProfile \| None`  | GitHub account info      |
+| Field             | Type                     | Description              |
+| ----------------- | ------------------------ | ------------------------ |
+| `username`        | `str`                    | Username (required)      |
+| `email`           | `str`                    | Email address (required) |
+| `name_first`      | `str \| None`            | First name               |
+| `name_last`       | `str \| None`            | Last name                |
+| `discord_profile` | `DiscordProfile \| None` | Discord information      |
+| `google_profile`  | `GoogleProfile \| None`  | Google account info      |
+| `github_profile`  | `GitHubProfile \| None`  | GitHub account info      |
 
 ## UserMergeDTO
 
 Request body for merging an unapproved user into an existing primary user.
 
-| Field                | Type  | Description                            |
-| -------------------- | ----- | -------------------------------------- |
-| `primary_user_id`    | `str` | ID of the primary user to merge into   |
-| `secondary_user_id`  | `str` | ID of the unapproved user to merge     |
-| `requesting_user_id` | `str` | ID of the user making the request      |
+| Field                | Type  | Description                          |
+| -------------------- | ----- | ------------------------------------ |
+| `primary_user_id`    | `str` | ID of the primary user to merge into |
+| `secondary_user_id`  | `str` | ID of the unapproved user to merge   |
+| `requesting_user_id` | `str` | ID of the user making the request    |
 
 ## Quickroll
 
@@ -129,10 +131,10 @@ Request body for updating a quickroll. Only include fields that need to change.
 
 Request body for approving an unapproved user.
 
-| Field                | Type       | Description                        |
-| -------------------- | ---------- | ---------------------------------- |
+| Field                | Type       | Description                         |
+| -------------------- | ---------- | ----------------------------------- |
 | `role`               | `UserRole` | Role to assign to the approved user |
-| `requesting_user_id` | `str`      | ID of the user making the request  |
+| `requesting_user_id` | `str`      | ID of the user making the request   |
 
 ## UserDenyDTO
 
