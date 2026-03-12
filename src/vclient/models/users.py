@@ -92,6 +92,8 @@ class User(BaseModel):
     github_profile: GitHubProfile | None = None
     campaign_experience: list[CampaignExperience] = Field(default_factory=list)
     asset_ids: list[str] = Field(default_factory=list)
+    lifetime_xp: int = 0
+    lifetime_cool_points: int = 0
 
 
 # -----------------------------------------------------------------------------
