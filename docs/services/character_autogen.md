@@ -74,7 +74,7 @@ print(f"Characters available: {len(session.characters)}")
 
 # Finalize by selecting one of the generated characters
 final_character = await autogen.finalize_chargen_session(
-    session_id=session.session_id,
+    session_id=session.id,
     selected_character_id=session.characters[0].id
 )
 ```

@@ -12,7 +12,7 @@ from .characters import Character
 class ChargenSessionResponse(BaseModel):
     """Response containing generated character options."""
 
-    session_id: str
+    id: str
     expires_at: datetime
     requires_selection: bool
     characters: list[Character]

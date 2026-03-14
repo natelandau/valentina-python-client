@@ -14,7 +14,7 @@ pytestmark = pytest.mark.anyio
 def character_autogen_response_data(character_response_data: dict) -> dict:
     """Return sample character autogen response data."""
     return {
-        "session_id": "session123",
+        "id": "session123",
         "expires_at": "2024-01-15T10:30:00Z",
         "requires_selection": True,
         "characters": [character_response_data, character_response_data],
@@ -44,7 +44,7 @@ class TestCharacterAutogenService:
         # Then: The route was called with correct params
         assert route.called
         assert isinstance(result, ChargenSessionResponse)
-        assert result.session_id == "session123"
+        assert result.id == "session123"
 
 
 class TestCharacterAutogenServiceFinalizeChargenSession:
@@ -125,7 +125,7 @@ class TestCharacterAutogenServiceListSessions:
         assert isinstance(result, list)
         assert len(result) == 2
         assert all(isinstance(r, ChargenSessionResponse) for r in result)
-        assert result[0].session_id == "session123"
+        assert result[0].id == "session123"
 
     @respx.mock
     async def test_list_all_empty(self, vclient, base_url) -> None:
@@ -164,6 +164,6 @@ class TestCharacterAutogenServiceGetSession:
         # Then: The route was called and returned the session
         assert route.called
         assert isinstance(result, ChargenSessionResponse)
-        assert result.session_id == "session123"
+        assert result.id == "session123"
         assert result.requires_selection is True
         assert len(result.characters) == 2
