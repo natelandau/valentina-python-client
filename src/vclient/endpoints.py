@@ -110,6 +110,8 @@ class Endpoints:
     AUTOGENERATE = f"{CHARACTERS}/autogenerate"
     CHARGEN_START = f"{CHARACTERS}/chargen/start"
     CHARGEN_FINALIZE = f"{CHARACTERS}/chargen/finalize"
+    CHARGEN_SESSIONS = f"{CHARACTERS}/chargen/sessions"
+    CHARGEN_SESSION = f"{CHARGEN_SESSIONS}/{{session_id}}"
 
     # Character trait endpoints
     CHARACTER_TRAITS = f"{CHARACTER}/traits"

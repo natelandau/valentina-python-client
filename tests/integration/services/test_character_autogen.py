@@ -18,6 +18,8 @@ def character_autogen_response_data(character_response_data: dict) -> dict:
         "expires_at": "2024-01-15T10:30:00Z",
         "requires_selection": True,
         "characters": [character_response_data, character_response_data],
+        "user_id": "user123",
+        "campaign_id": "campaign123",
     }
 
 
@@ -96,3 +98,72 @@ class TestCharacterAutogenerateCharacter:
         assert isinstance(result, Character)
         assert result.id == "char123"
         assert result.name_first == "John"
+
+
+class TestCharacterAutogenServiceListSessions:
+    """Tests for CharacterAutogenService list_all."""
+
+    @respx.mock
+    async def test_list_all(self, vclient, base_url, character_autogen_response_data) -> None:
+        """Verify listing chargen sessions returns list of ChargenSessionResponse."""
+        # Given: A mocked endpoint returning a JSON array
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARGEN_SESSIONS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(
+            return_value=Response(
+                200, json=[character_autogen_response_data, character_autogen_response_data]
+            )
+        )
+
+        # When: Listing all chargen sessions
+        result = await vclient.character_autogen(
+            user_id="user123", campaign_id="campaign123", company_id="company123"
+        ).list_all()
+
+        # Then: The route was called and returned a list
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 2
+        assert all(isinstance(r, ChargenSessionResponse) for r in result)
+        assert result[0].session_id == "session123"
+
+    @respx.mock
+    async def test_list_all_empty(self, vclient, base_url) -> None:
+        """Verify listing chargen sessions with no results returns empty list."""
+        # Given: A mocked endpoint returning an empty JSON array
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARGEN_SESSIONS.format(company_id='company123', user_id='user123', campaign_id='campaign123')}"
+        ).mock(return_value=Response(200, json=[]))
+
+        # When: Listing all chargen sessions
+        result = await vclient.character_autogen(
+            user_id="user123", campaign_id="campaign123", company_id="company123"
+        ).list_all()
+
+        # Then: The route was called and returned an empty list
+        assert route.called
+        assert result == []
+
+
+class TestCharacterAutogenServiceGetSession:
+    """Tests for CharacterAutogenService get."""
+
+    @respx.mock
+    async def test_get(self, vclient, base_url, character_autogen_response_data) -> None:
+        """Verify getting a chargen session returns ChargenSessionResponse."""
+        # Given: A mocked endpoint returning a single session
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARGEN_SESSION.format(company_id='company123', user_id='user123', campaign_id='campaign123', session_id='session123')}"
+        ).mock(return_value=Response(200, json=character_autogen_response_data))
+
+        # When: Getting a specific chargen session
+        result = await vclient.character_autogen(
+            user_id="user123", campaign_id="campaign123", company_id="company123"
+        ).get("session123")
+
+        # Then: The route was called and returned the session
+        assert route.called
+        assert isinstance(result, ChargenSessionResponse)
+        assert result.session_id == "session123"
+        assert result.requires_selection is True
+        assert len(result.characters) == 2

@@ -20,11 +20,13 @@ autogen = character_autogen_service(
 
 ## Methods
 
-| Method                                                        | Returns                  | Description                     |
-| ------------------------------------------------------------- | ------------------------ | ------------------------------- |
-| `generate_character(*, character_type, ...)`                  | `Character`              | Generate a single character     |
-| `start_chargen_session()`                                     | `ChargenSessionResponse` | Start an interactive session    |
-| `finalize_chargen_session(session_id, selected_character_id)` | `Character`              | Finalize and select a character |
+| Method                                                        | Returns                        | Description                      |
+| ------------------------------------------------------------- | ------------------------------ | -------------------------------- |
+| `list_all()`                                                  | `list[ChargenSessionResponse]` | List all sessions for a campaign |
+| `get(session_id)`                                             | `ChargenSessionResponse`       | Retrieve a single session        |
+| `generate_character(*, character_type, ...)`                  | `Character`                    | Generate a single character      |
+| `start_chargen_session()`                                     | `ChargenSessionResponse`       | Start an interactive session     |
+| `finalize_chargen_session(session_id, selected_character_id)` | `Character`                    | Finalize and select a character  |
 
 ## Generate Character Parameters
 
@@ -42,6 +44,18 @@ autogen = character_autogen_service(
 !!! tip "Interactive Sessions"
 
     Use `start_chargen_session()` to generate multiple character options at once, allowing your users to choose their preferred character from several AI-generated alternatives.
+
+## List & Retrieve Sessions
+
+```python
+# List all active chargen sessions for this campaign
+sessions = await autogen.list_all()
+
+# Retrieve a specific session by ID
+session = await autogen.get(session_id="SESSION_ID")
+print(f"Session expires: {session.expires_at}")
+print(f"Characters available: {len(session.characters)}")
+```
 
 ## Example
 

@@ -86,7 +86,7 @@ from vclient.testing._factories import (
     WerewolfRiteFactory,
     WerewolfTribeFactory,
 )
-from vclient.testing._routes import NO_CONTENT, PAGINATED, RAW_JSON, Routes, RouteSpec
+from vclient.testing._routes import LIST, NO_CONTENT, PAGINATED, RAW_JSON, Routes, RouteSpec
 
 _FACTORY_MAP: dict[type, type] = {
     Asset: AssetFactory,
@@ -158,7 +158,7 @@ class _Route:
         model_class: type | None,
         style: str,
         *,
-        override_json: dict[str, Any] | None = None,
+        override_json: dict[str, Any] | list[dict[str, Any]] | None = None,
         override_status: int | None = None,
         match_params: dict[str, str] | None = None,
     ) -> None:
@@ -206,6 +206,9 @@ class _Route:
         instance = factory.build()  # type: ignore[unresolved-attribute]
         instance_data = instance.model_dump(mode="json")
 
+        if self.style == LIST:
+            return httpx.Response(status_code=200, json=[instance_data])
+
         if self.style == PAGINATED:
             body = {
                 "items": [instance_data],
@@ -242,7 +245,7 @@ class _FakeRouter:
         method: str,
         pattern: str,
         *,
-        json: dict[str, Any],
+        json: dict[str, Any] | list[dict[str, Any]],
         status_code: int = 200,
         params: dict[str, str] | None = None,
     ) -> None:

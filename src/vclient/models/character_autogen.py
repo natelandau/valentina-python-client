@@ -16,6 +16,8 @@ class ChargenSessionResponse(BaseModel):
     expires_at: datetime
     requires_selection: bool
     characters: list[Character]
+    user_id: str
+    campaign_id: str
 
 
 class ChargenSessionFinalizeDTO(BaseModel):
