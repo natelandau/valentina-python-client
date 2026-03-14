@@ -1,3 +1,9 @@
+## v1.15.1 (2026-03-14)
+
+### Fix
+
+- **models**: rename session_id to id in ChargenSessionResponse
+
 ## v1.15.0 (2026-03-14)
 
 ### Feat
