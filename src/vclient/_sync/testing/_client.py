@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 from vclient._sync.client import SyncVClient
 from vclient.testing._router import _FakeRouter
-from vclient.testing._routes import NO_CONTENT, PAGINATED
+from vclient.testing._routes import LIST, NO_CONTENT, PAGINATED
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -109,7 +109,7 @@ class SyncFakeVClient(SyncVClient):
 
         Args:
             route: A ``RouteSpec`` from the ``Routes`` class identifying the endpoint.
-            items: List of items for paginated routes. Mutually exclusive with ``model``.
+            items: List of items for paginated or list routes. Mutually exclusive with ``model``.
             model: A single model instance or dict for single-object routes.
                 Mutually exclusive with ``items``.
             params: Optional path parameter values to match against. When set,
@@ -119,7 +119,7 @@ class SyncFakeVClient(SyncVClient):
                 ``{campaign_id}`` is ``"abc"``.
 
         Raises:
-            TypeError: If ``model`` is passed to a paginated route or ``items`` is
+            TypeError: If ``model`` is passed to a paginated/list route or ``items`` is
                 passed to a single-object route.
         """
         method, pattern, style = (route.method, route.pattern, route.style)
@@ -135,6 +135,14 @@ class SyncFakeVClient(SyncVClient):
                 "offset": 0,
             }
             self._router.add_route(method, pattern, json=body, status_code=200, params=params)
+        elif style == LIST:
+            if model is not None:
+                msg = f"Route {pattern!r} returns a list; pass 'items' instead of 'model'"
+                raise TypeError(msg)
+            serialized_list: list[dict[str, Any]] = [self._serialize(item) for item in items or []]
+            self._router.add_route(
+                method, pattern, json=serialized_list, status_code=200, params=params
+            )
         elif style == NO_CONTENT:
             self._router.add_route(method, pattern, json={}, status_code=204, params=params)
         else:

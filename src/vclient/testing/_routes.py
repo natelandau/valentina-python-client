@@ -50,6 +50,7 @@ PAGINATED = "paginated"
 SINGLE = "single"
 NO_CONTENT = "no_content"
 RAW_JSON = "raw_json"
+LIST = "list"
 
 
 class RouteSpec(NamedTuple):
@@ -58,7 +59,7 @@ class RouteSpec(NamedTuple):
     Attributes:
         method: HTTP method (GET, POST, PATCH, PUT, DELETE).
         pattern: Endpoint URL pattern from the Endpoints class.
-        style: Response style — one of PAGINATED, SINGLE, NO_CONTENT, or RAW_JSON.
+        style: Response style — one of PAGINATED, SINGLE, LIST, NO_CONTENT, or RAW_JSON.
         model_class: The Pydantic model class used for auto-generating responses,
             or None for NO_CONTENT and RAW_JSON routes.
     """
@@ -326,6 +327,12 @@ class Routes:
         "POST", Endpoints.CHARGEN_START, SINGLE, ChargenSessionResponse
     )
     CHARACTERS_CHARGEN_FINALIZE = RouteSpec("POST", Endpoints.CHARGEN_FINALIZE, SINGLE, Character)
+    CHARACTERS_CHARGEN_SESSIONS_LIST = RouteSpec(
+        "GET", Endpoints.CHARGEN_SESSIONS, LIST, ChargenSessionResponse
+    )
+    CHARACTERS_CHARGEN_SESSION_GET = RouteSpec(
+        "GET", Endpoints.CHARGEN_SESSION, SINGLE, ChargenSessionResponse
+    )
 
     # Character traits
     CHARACTER_TRAITS_LIST = RouteSpec("GET", Endpoints.CHARACTER_TRAITS, PAGINATED, CharacterTrait)
