@@ -1,3 +1,13 @@
+## v1.15.0 (2026-03-14)
+
+### Feat
+
+- **chargen**: add list and get endpoints for chargen sessions (#47)
+
+### Fix
+
+- **user**: add lifetime experience to user model (#46)
+
 ## v1.14.0 (2026-03-10)
 
 ### Feat
