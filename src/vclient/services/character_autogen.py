@@ -114,3 +114,19 @@ class CharacterAutogenService(BaseService):
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return Character.model_validate(response.json())
+
+    async def list_all(self) -> list[ChargenSessionResponse]:
+        """List all chargen sessions for the current campaign."""
+        response = await self._get(self._format_endpoint(Endpoints.CHARGEN_SESSIONS))
+        return [ChargenSessionResponse.model_validate(item) for item in response.json()]
+
+    async def get(self, session_id: str) -> ChargenSessionResponse:
+        """Retrieve a single chargen session by ID.
+
+        Args:
+            session_id: The ID of the session to retrieve.
+        """
+        response = await self._get(
+            self._format_endpoint(Endpoints.CHARGEN_SESSION, session_id=session_id)
+        )
+        return ChargenSessionResponse.model_validate(response.json())
