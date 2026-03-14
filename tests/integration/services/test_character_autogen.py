@@ -18,6 +18,8 @@ def character_autogen_response_data(character_response_data: dict) -> dict:
         "expires_at": "2024-01-15T10:30:00Z",
         "requires_selection": True,
         "characters": [character_response_data, character_response_data],
+        "user_id": "user123",
+        "campaign_id": "campaign123",
     }
 
 
