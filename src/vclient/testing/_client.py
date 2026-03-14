@@ -82,7 +82,7 @@ class FakeVClient(VClient):
         method: str,
         pattern: str,
         *,
-        json: dict[str, Any],
+        json: dict[str, Any] | list[dict[str, Any]],
         status_code: int = 200,
     ) -> None:
         """Add a custom route override.

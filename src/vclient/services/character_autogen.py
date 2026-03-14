@@ -116,7 +116,11 @@ class CharacterAutogenService(BaseService):
         return Character.model_validate(response.json())
 
     async def list_all(self) -> list[ChargenSessionResponse]:
-        """List all chargen sessions for the current campaign."""
+        """List all chargen sessions for the current campaign.
+
+        Returns:
+            All chargen sessions associated with the current campaign.
+        """
         response = await self._get(self._format_endpoint(Endpoints.CHARGEN_SESSIONS))
         return [ChargenSessionResponse.model_validate(item) for item in response.json()]
 
@@ -125,6 +129,9 @@ class CharacterAutogenService(BaseService):
 
         Args:
             session_id: The ID of the session to retrieve.
+
+        Returns:
+            The chargen session matching the given session_id.
         """
         response = await self._get(
             self._format_endpoint(Endpoints.CHARGEN_SESSION, session_id=session_id)

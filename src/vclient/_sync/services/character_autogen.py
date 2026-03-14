@@ -113,7 +113,11 @@ class SyncCharacterAutogenService(SyncBaseService):
         return Character.model_validate(response.json())
 
     def list_all(self) -> list[ChargenSessionResponse]:
-        """List all chargen sessions for the current campaign."""
+        """List all chargen sessions for the current campaign.
+
+        Returns:
+            All chargen sessions associated with the current campaign.
+        """
         response = self._get(self._format_endpoint(Endpoints.CHARGEN_SESSIONS))
         return [ChargenSessionResponse.model_validate(item) for item in response.json()]
 
@@ -122,6 +126,9 @@ class SyncCharacterAutogenService(SyncBaseService):
 
         Args:
             session_id: The ID of the session to retrieve.
+
+        Returns:
+            The chargen session matching the given session_id.
         """
         response = self._get(
             self._format_endpoint(Endpoints.CHARGEN_SESSION, session_id=session_id)

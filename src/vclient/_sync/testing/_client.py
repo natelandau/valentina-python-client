@@ -79,7 +79,12 @@ class SyncFakeVClient(SyncVClient):
         return obj
 
     def add_route(
-        self, method: str, pattern: str, *, json: dict[str, Any], status_code: int = 200
+        self,
+        method: str,
+        pattern: str,
+        *,
+        json: dict[str, Any] | list[dict[str, Any]],
+        status_code: int = 200,
     ) -> None:
         """Add a custom route override.
 
