@@ -35,8 +35,6 @@ def options_response_data() -> dict:
             ],
             "_related": {
                 "concepts": "https://127.0.0.1:8000/api/v1/companies/{company_id}/characterblueprint/concepts",
-                "hunter_edges": "https://127.0.0.1:8000/api/v1/companies/{company_id}/characterblueprint/hunter-edges",
-                "hunter_edge_perks": "https://127.0.0.1:8000/api/v1/companies/{company_id}/characterblueprint/hunter-edges/{hunter_edge_id}/perks",
                 "traits": "https://127.0.0.1:8000/api/v1/companies/{company_id}/characterblueprint/traits",
                 "trait_sections": "https://127.0.0.1:8000/api/v1/companies/{company_id}/characterblueprint/{game_version}/sections",
                 "trait_categories": "https://127.0.0.1:8000/api/v1/companies/{company_id}/characterblueprint/{game_version}/sections/{section_id}/categories",
