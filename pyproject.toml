@@ -13,7 +13,7 @@
     version = "1.15.1"
 
     [project.optional-dependencies]
-        testing = ["polyfactory>=2.21.0"]
+        testing = ["polyfactory>=3.3.0"]
 
     [project.urls]
         Homepage   = "https://docs.valentina-noir.com/python-api-client/"
@@ -31,7 +31,7 @@
         "commitizen>=4.13.9",
         "coverage>=7.13.4",
         "duty>=1.9.0",
-        "prek>=0.3.4",
+        "prek>=0.3.6",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.0.0",
@@ -42,14 +42,14 @@
         "pytest-xdist>=3.8.0",
         "pytest>=9.0.2",
         "respx>=0.22.0",
-        "ruff>=0.15.5",
+        "ruff>=0.15.6",
         "shellcheck-py>=0.11.0.1",
-        "ty>=0.0.21",
+        "ty>=0.0.23",
         "typos>=1.44.0",
         "vulture>=2.15",
         "yamllint>=1.38.0",
     ]
-    docs = ["zensical>=0.0.24"]
+    docs = ["zensical>=0.0.27"]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"
