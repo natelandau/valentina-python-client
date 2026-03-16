@@ -37,6 +37,28 @@ Category within a sheet section. Groups related traits together, like "Physical 
 | `character_classes`       | `list[CharacterClass]` | Applicable classes         |
 | `order`                   | `int`                  | Display order              |
 
+## TraitSubcategory
+
+Subcategory within a trait category. Groups related traits together, like "Allies" or "Resources" within "Backgrounds".
+
+| Field                  | Type                   | Description                                     |
+| ---------------------- | ---------------------- | ----------------------------------------------- |
+| `id`                   | `str`                  | Unique identifier                               |
+| `name`                 | `str`                  | Subcategory name                                |
+| `description`          | `str \| None`          | Description                                     |
+| `date_created`         | `datetime`             | Creation timestamp                              |
+| `date_modified`        | `datetime`             | Last modified timestamp                         |
+| `game_versions`        | `list[GameVersion]`    | Available game versions                         |
+| `character_classes`    | `list[CharacterClass]` | Applicable classes                              |
+| `show_when_empty`      | `bool`                 | Whether to show when empty                      |
+| `initial_cost`         | `int`                  | Default initial cost for traits                 |
+| `upgrade_cost`         | `int`                  | Default upgrade cost multiplier                 |
+| `requires_parent`      | `bool`                 | Whether subcategory must be added before traits |
+| `pool`                 | `str \| None`          | Dice pool description                           |
+| `system`               | `str \| None`          | System/mechanical rules                         |
+| `parent_category_id`   | `str`                  | Parent category ID                              |
+| `parent_category_name` | `str`                  | Parent category name                            |
+
 ## CharacterConcept
 
 | Field             | Type          | Description             |

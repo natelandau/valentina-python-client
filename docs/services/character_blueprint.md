@@ -38,15 +38,36 @@ Nested within sections (e.g., "Physical", "Social", "Mental" within "Attributes"
 | `iter_all_categories(*, game_version, section_id, character_class?)`                  | `AsyncIterator[TraitCategory]`     | Iterate through categories |
 | `get_category(*, game_version, section_id, category_id)`                              | `TraitCategory`                    | Get a category by ID       |
 
+### Subcategories
+
+Nested within categories. Not all categories have subcategories — only those with grouped traits (e.g., "Backgrounds" may have "Allies", "Resources").
+
+| Method                                                                                                       | Returns                                | Description                    |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------- | ------------------------------ |
+| `get_subcategories_page(*, game_version, section_id, category_id, limit?, offset?, character_class?)`        | `PaginatedResponse[TraitSubcategory]`  | Get a page of subcategories    |
+| `list_all_subcategories(*, game_version, section_id, category_id, character_class?)`                         | `list[TraitSubcategory]`               | Get all subcategories          |
+| `iter_all_subcategories(*, game_version, section_id, category_id, character_class?)`                         | `AsyncIterator[TraitSubcategory]`      | Iterate through subcategories  |
+| `get_subcategory(*, game_version, section_id, category_id, subcategory_id)`                                  | `TraitSubcategory`                     | Get a subcategory by ID        |
+
+### Subcategory Traits
+
+Traits within a specific subcategory (requires section, category, and subcategory context).
+
+| Method                                                                                                                                    | Returns                    | Description                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------------------------------- |
+| `get_subcategory_traits_page(*, game_version, section_id, category_id, subcategory_id, limit?, offset?, character_class?)`                | `PaginatedResponse[Trait]` | Get a page of traits in a subcategory    |
+| `list_all_subcategory_traits(*, game_version, section_id, category_id, subcategory_id, character_class?)`                                 | `list[Trait]`              | Get all traits in a subcategory          |
+| `iter_all_subcategory_traits(*, game_version, section_id, category_id, subcategory_id, character_class?)`                                 | `AsyncIterator[Trait]`     | Iterate through subcategory traits       |
+
 ### Category Traits
 
 Traits within a specific category (requires section and category context).
 
 | Method                                                                                                                 | Returns                    | Description                        |
 | ---------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------------------------- |
-| `get_category_traits_page(*, game_version, section_id, category_id, limit?, offset?, character_class?, character_id?)` | `PaginatedResponse[Trait]` | Get a page of traits in a category |
-| `list_all_category_traits(*, game_version, section_id, category_id, character_class?, character_id?)`                  | `list[Trait]`              | Get all traits in a category       |
-| `iter_all_category_traits(*, game_version, section_id, category_id, character_class?, character_id?)`                  | `AsyncIterator[Trait]`     | Iterate through category traits    |
+| `get_category_traits_page(*, game_version, section_id, category_id, limit?, offset?, character_class?, character_id?, exclude_subcategory_traits?)` | `PaginatedResponse[Trait]` | Get a page of traits in a category |
+| `list_all_category_traits(*, game_version, section_id, category_id, character_class?, character_id?, exclude_subcategory_traits?)`                  | `list[Trait]`              | Get all traits in a category       |
+| `iter_all_category_traits(*, game_version, section_id, category_id, character_class?, character_id?, exclude_subcategory_traits?)`                  | `AsyncIterator[Trait]`     | Iterate through category traits    |
 
 ### All Traits
 
@@ -135,18 +156,40 @@ for section in sections:
     for category in categories:
         print(f"  Category: {category.name}")
 
-        # Get traits within this category
+        # Get top-level traits (excluding subcategory traits)
         traits = await blueprint.list_all_category_traits(
             game_version="V5",
             section_id=section.id,
-            category_id=category.id
+            category_id=category.id,
+            exclude_subcategory_traits=True,
         )
 
         for trait in traits:
             print(f"    Trait: {trait.name}")
 
+        # Get subcategories within this category
+        subcategories = await blueprint.list_all_subcategories(
+            game_version="V5",
+            section_id=section.id,
+            category_id=category.id,
+        )
+
+        for subcategory in subcategories:
+            print(f"    Subcategory: {subcategory.name}")
+
+            # Get traits within this subcategory
+            sub_traits = await blueprint.list_all_subcategory_traits(
+                game_version="V5",
+                section_id=section.id,
+                category_id=category.id,
+                subcategory_id=subcategory.id,
+            )
+
+            for trait in sub_traits:
+                print(f"      Trait: {trait.name}")
+
 # Search all traits directly
 all_traits = await blueprint.list_all_traits(game_version="V5")
 ```
 
-See [Response Models](../models/character_blueprint.md) for `SheetSection`, `TraitCategory`, `Trait`, and related types.
+See [Response Models](../models/character_blueprint.md) for `SheetSection`, `TraitCategory`, `TraitSubcategory`, `Trait`, and related types.
