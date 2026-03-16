@@ -16,6 +16,7 @@ from vclient.models import (
     SheetSection,
     Trait,
     TraitCategory,
+    TraitSubcategory,
     VampireClan,
     WerewolfAuspice,
     WerewolfGift,
@@ -172,6 +173,164 @@ class CharacterBlueprintService(BaseService):
         return TraitCategory.model_validate(response.json())
 
     # -----------------------------------------------------------------------------
+    # Character Sheet Category Subcategories
+    # -----------------------------------------------------------------------------
+    async def get_subcategories_page(
+        self,
+        *,
+        game_version: GameVersion,
+        section_id: str,
+        category_id: str,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        character_class: CharacterClass | None = None,
+    ) -> PaginatedResponse[TraitSubcategory]:
+        """Get a paginated page of character blueprint category subcategories."""
+        return await self._get_paginated_as(
+            self._format_endpoint(
+                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES,
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+            ),
+            TraitSubcategory,
+            limit=limit,
+            offset=offset,
+            params=self._build_params(character_class=character_class),
+        )
+
+    async def list_all_subcategories(
+        self,
+        *,
+        game_version: GameVersion,
+        section_id: str,
+        category_id: str,
+        character_class: CharacterClass | None = None,
+    ) -> list[TraitSubcategory]:
+        """List all character blueprint category subcategories."""
+        return [
+            subcategory
+            async for subcategory in self.iter_all_subcategories(
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+                character_class=character_class,
+            )
+        ]
+
+    async def iter_all_subcategories(
+        self,
+        *,
+        game_version: GameVersion,
+        section_id: str,
+        category_id: str,
+        character_class: CharacterClass | None = None,
+    ) -> AsyncIterator[TraitSubcategory]:
+        """Iterate through all character blueprint category subcategories."""
+        async for subcategory in self._iter_all_pages(
+            self._format_endpoint(
+                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES,
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+            ),
+            params=self._build_params(character_class=character_class),
+        ):
+            yield TraitSubcategory.model_validate(subcategory)
+
+    async def get_subcategory(
+        self,
+        *,
+        game_version: GameVersion,
+        section_id: str,
+        category_id: str,
+        subcategory_id: str,
+    ) -> TraitSubcategory:
+        """Get a character blueprint category subcategory by ID."""
+        response = await self._get(
+            self._format_endpoint(
+                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORY_DETAIL,
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+                subcategory_id=subcategory_id,
+            ),
+        )
+        return TraitSubcategory.model_validate(response.json())
+
+    # -----------------------------------------------------------------------------
+    # Character Sheet Subcategory Traits
+    # -----------------------------------------------------------------------------
+    async def get_subcategory_traits_page(
+        self,
+        *,
+        game_version: GameVersion,
+        section_id: str,
+        category_id: str,
+        subcategory_id: str,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        character_class: CharacterClass | None = None,
+    ) -> PaginatedResponse[Trait]:
+        """Get a paginated page of character blueprint subcategory traits."""
+        return await self._get_paginated_as(
+            self._format_endpoint(
+                Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS,
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+                subcategory_id=subcategory_id,
+            ),
+            Trait,
+            limit=limit,
+            offset=offset,
+            params=self._build_params(character_class=character_class),
+        )
+
+    async def list_all_subcategory_traits(
+        self,
+        *,
+        game_version: GameVersion,
+        section_id: str,
+        category_id: str,
+        subcategory_id: str,
+        character_class: CharacterClass | None = None,
+    ) -> list[Trait]:
+        """List all character blueprint subcategory traits."""
+        return [
+            trait
+            async for trait in self.iter_all_subcategory_traits(
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+                subcategory_id=subcategory_id,
+                character_class=character_class,
+            )
+        ]
+
+    async def iter_all_subcategory_traits(
+        self,
+        *,
+        game_version: GameVersion,
+        section_id: str,
+        category_id: str,
+        subcategory_id: str,
+        character_class: CharacterClass | None = None,
+    ) -> AsyncIterator[Trait]:
+        """Iterate through all character blueprint subcategory traits."""
+        async for trait in self._iter_all_pages(
+            self._format_endpoint(
+                Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS,
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+                subcategory_id=subcategory_id,
+            ),
+            params=self._build_params(character_class=character_class),
+        ):
+            yield Trait.model_validate(trait)
+
+    # -----------------------------------------------------------------------------
     # Character Sheet Category Traits
     # -----------------------------------------------------------------------------
 
@@ -185,6 +344,7 @@ class CharacterBlueprintService(BaseService):
         offset: int = 0,
         character_class: CharacterClass | None = None,
         character_id: str | None = None,
+        exclude_subcategory_traits: bool = False,
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of character blueprint category traits."""
         return await self._get_paginated_as(
@@ -197,7 +357,11 @@ class CharacterBlueprintService(BaseService):
             Trait,
             limit=limit,
             offset=offset,
-            params=self._build_params(character_class=character_class, character_id=character_id),
+            params=self._build_params(
+                character_class=character_class,
+                character_id=character_id,
+                exclude_subcategory_traits=exclude_subcategory_traits or None,
+            ),
         )
 
     async def list_all_category_traits(
@@ -208,6 +372,7 @@ class CharacterBlueprintService(BaseService):
         category_id: str,
         character_class: CharacterClass | None = None,
         character_id: str | None = None,
+        exclude_subcategory_traits: bool = False,
     ) -> list[Trait]:
         """List all character blueprint category traits."""
         return [
@@ -218,6 +383,7 @@ class CharacterBlueprintService(BaseService):
                 category_id=category_id,
                 character_class=character_class,
                 character_id=character_id,
+                exclude_subcategory_traits=exclude_subcategory_traits,
             )
         ]
 
@@ -229,6 +395,7 @@ class CharacterBlueprintService(BaseService):
         category_id: str,
         character_class: CharacterClass | None = None,
         character_id: str | None = None,
+        exclude_subcategory_traits: bool = False,
     ) -> AsyncIterator[Trait]:
         """Iterate through all character blueprint category traits."""
         async for trait in self._iter_all_pages(
@@ -238,7 +405,11 @@ class CharacterBlueprintService(BaseService):
                 section_id=section_id,
                 category_id=category_id,
             ),
-            params=self._build_params(character_class=character_class, character_id=character_id),
+            params=self._build_params(
+                character_class=character_class,
+                character_id=character_id,
+                exclude_subcategory_traits=exclude_subcategory_traits or None,
+            ),
         ):
             yield Trait.model_validate(trait)
 
