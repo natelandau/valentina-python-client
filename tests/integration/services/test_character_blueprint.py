@@ -12,6 +12,7 @@ from vclient.models import (
     SheetSection,
     Trait,
     TraitCategory,
+    TraitSubcategory,
     VampireClan,
     WerewolfAuspice,
     WerewolfGift,
@@ -73,6 +74,39 @@ def paginated_category_response(category_response_data: dict) -> dict:
     """Return a paginated response with categories."""
     return {
         "items": [category_response_data],
+        "limit": 10,
+        "offset": 0,
+        "total": 1,
+    }
+
+
+@pytest.fixture
+def subcategory_response_data() -> dict:
+    """Return sample character blueprint subcategory response data."""
+    return {
+        "id": "subcat123",
+        "name": "Allies",
+        "description": "People who support the character",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "game_versions": ["V5"],
+        "character_classes": ["VAMPIRE", "WEREWOLF"],
+        "show_when_empty": True,
+        "initial_cost": 1,
+        "upgrade_cost": 2,
+        "requires_parent": False,
+        "pool": None,
+        "system": None,
+        "parent_category_id": "category123",
+        "parent_category_name": "Backgrounds",
+    }
+
+
+@pytest.fixture
+def paginated_subcategory_response(subcategory_response_data: dict) -> dict:
+    """Return a paginated response with subcategories."""
+    return {
+        "items": [subcategory_response_data],
         "limit": 10,
         "offset": 0,
         "total": 1,
@@ -723,6 +757,375 @@ class TestCharacterBlueprintServiceCategoryTraits:
             trait
             async for trait in vclient.character_blueprint(company_id).iter_all_category_traits(
                 game_version=game_version, section_id=section_id, category_id=category_id
+            )
+        ]
+
+        # Then: All traits are yielded
+        assert route.called
+        assert len(traits) == 1
+        assert isinstance(traits[0], Trait)
+
+    @respx.mock
+    async def test_get_category_traits_page_exclude_subcategory_traits(
+        self, vclient, base_url, paginated_trait_response
+    ) -> None:
+        """Verify exclude_subcategory_traits=True sends the query parameter."""
+        # Given: A mocked endpoint expecting the exclude param
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            params={"limit": "10", "offset": "0", "exclude_subcategory_traits": "true"},
+        ).mock(return_value=Response(200, json=paginated_trait_response))
+
+        # When: Requesting with exclude_subcategory_traits=True
+        result = await vclient.character_blueprint(company_id).get_category_traits_page(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            exclude_subcategory_traits=True,
+        )
+
+        # Then: The route was called with the parameter
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
+    async def test_get_category_traits_page_exclude_subcategory_traits_default(
+        self, vclient, base_url, paginated_trait_response
+    ) -> None:
+        """Verify exclude_subcategory_traits=False does not send the query parameter."""
+        # Given: A mocked endpoint expecting no exclude param
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).mock(return_value=Response(200, json=paginated_trait_response))
+
+        # When: Requesting with default exclude_subcategory_traits (False)
+        result = await vclient.character_blueprint(company_id).get_category_traits_page(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+        )
+
+        # Then: The route was called without the exclude parameter
+        assert route.called
+        assert len(result.items) == 1
+
+
+class TestCharacterBlueprintServiceSubcategories:
+    """Tests for CharacterBlueprintService subcategory methods."""
+
+    @respx.mock
+    async def test_get_subcategories_page(
+        self, vclient, base_url, paginated_subcategory_response
+    ) -> None:
+        """Verify getting a page of character blueprint subcategories."""
+        # Given: A mocked subcategories endpoint
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).mock(return_value=Response(200, json=paginated_subcategory_response))
+
+        # When: Requesting a page of subcategories
+        result = await vclient.character_blueprint(company_id).get_subcategories_page(
+            game_version=game_version, section_id=section_id, category_id=category_id
+        )
+
+        # Then: The route was called and response is paginated
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], TraitSubcategory)
+        assert result.items[0].name == "Allies"
+        assert result.total == 1
+
+    @respx.mock
+    async def test_get_subcategories_page_with_character_class_filter(
+        self, vclient, base_url, paginated_subcategory_response
+    ) -> None:
+        """Verify get_subcategories_page passes character_class filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            params={"limit": "10", "offset": "0", "character_class": "VAMPIRE"},
+        ).mock(return_value=Response(200, json=paginated_subcategory_response))
+
+        # When: Requesting with character_class filter
+        result = await vclient.character_blueprint(company_id).get_subcategories_page(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            character_class="VAMPIRE",
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
+    async def test_list_all_subcategories(
+        self, vclient, base_url, subcategory_response_data
+    ) -> None:
+        """Verify list_all_subcategories returns all subcategories across pages."""
+        # Given: A mocked endpoint that returns paginated results
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        paginated_response = {
+            "items": [subcategory_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}"
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting all subcategories
+        result = await vclient.character_blueprint(company_id).list_all_subcategories(
+            game_version=game_version, section_id=section_id, category_id=category_id
+        )
+
+        # Then: All subcategories are returned as a list
+        assert route.called
+        assert len(result) == 1
+        assert isinstance(result[0], TraitSubcategory)
+        assert result[0].name == "Allies"
+
+    @respx.mock
+    async def test_iter_all_subcategories(
+        self, vclient, base_url, subcategory_response_data
+    ) -> None:
+        """Verify iter_all_subcategories yields subcategories across pages."""
+        # Given: A mocked endpoint
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        paginated_response = {
+            "items": [subcategory_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}"
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating through all subcategories
+        subcategories = [
+            subcategory
+            async for subcategory in vclient.character_blueprint(company_id).iter_all_subcategories(
+                game_version=game_version, section_id=section_id, category_id=category_id
+            )
+        ]
+
+        # Then: All subcategories are yielded
+        assert route.called
+        assert len(subcategories) == 1
+        assert isinstance(subcategories[0], TraitSubcategory)
+
+    @respx.mock
+    async def test_get_subcategory(self, vclient, base_url, subcategory_response_data) -> None:
+        """Verify getting a single subcategory by ID."""
+        # Given: A mocked subcategory detail endpoint
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        subcategory_id = "subcat123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORY_DETAIL.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}"
+        ).mock(return_value=Response(200, json=subcategory_response_data))
+
+        # When: Requesting a single subcategory
+        result = await vclient.character_blueprint(company_id).get_subcategory(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            subcategory_id=subcategory_id,
+        )
+
+        # Then: The correct subcategory is returned
+        assert route.called
+        assert isinstance(result, TraitSubcategory)
+        assert result.id == "subcat123"
+        assert result.name == "Allies"
+        assert result.parent_category_id == "category123"
+        assert result.initial_cost == 1
+        assert result.upgrade_cost == 2
+
+    @respx.mock
+    async def test_get_subcategory_not_found(self, vclient, base_url) -> None:
+        """Verify getting a non-existent subcategory raises NotFoundError."""
+        # Given: A mocked 404 response
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        subcategory_id = "nonexistent"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORY_DETAIL.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}"
+        ).mock(
+            return_value=Response(404, json={"detail": "Subcategory not found", "status_code": 404})
+        )
+
+        # When/Then: Requesting raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.character_blueprint(company_id).get_subcategory(
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+                subcategory_id=subcategory_id,
+            )
+
+        assert route.called
+
+
+class TestCharacterBlueprintServiceSubcategoryTraits:
+    """Tests for CharacterBlueprintService subcategory trait methods."""
+
+    @respx.mock
+    async def test_get_subcategory_traits_page(
+        self, vclient, base_url, paginated_trait_response
+    ) -> None:
+        """Verify getting a page of character blueprint subcategory traits."""
+        # Given: A mocked subcategory traits endpoint
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        subcategory_id = "subcat123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}",
+            params={"limit": "10", "offset": "0"},
+        ).mock(return_value=Response(200, json=paginated_trait_response))
+
+        # When: Requesting a page of subcategory traits
+        result = await vclient.character_blueprint(company_id).get_subcategory_traits_page(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            subcategory_id=subcategory_id,
+        )
+
+        # Then: The route was called and response is paginated
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], Trait)
+        assert result.items[0].name == "Strength"
+        assert result.total == 1
+
+    @respx.mock
+    async def test_get_subcategory_traits_page_with_character_class_filter(
+        self, vclient, base_url, paginated_trait_response
+    ) -> None:
+        """Verify get_subcategory_traits_page passes character_class filter correctly."""
+        # Given: A mocked endpoint expecting filter params
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        subcategory_id = "subcat123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}",
+            params={"limit": "10", "offset": "0", "character_class": "VAMPIRE"},
+        ).mock(return_value=Response(200, json=paginated_trait_response))
+
+        # When: Requesting with character_class filter
+        result = await vclient.character_blueprint(company_id).get_subcategory_traits_page(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            subcategory_id=subcategory_id,
+            character_class="VAMPIRE",
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
+    async def test_list_all_subcategory_traits(
+        self, vclient, base_url, trait_response_data
+    ) -> None:
+        """Verify list_all_subcategory_traits returns all traits across pages."""
+        # Given: A mocked endpoint that returns paginated results
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        subcategory_id = "subcat123"
+        paginated_response = {
+            "items": [trait_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}"
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting all subcategory traits
+        result = await vclient.character_blueprint(company_id).list_all_subcategory_traits(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            subcategory_id=subcategory_id,
+        )
+
+        # Then: All traits are returned as a list
+        assert route.called
+        assert len(result) == 1
+        assert isinstance(result[0], Trait)
+        assert result[0].name == "Strength"
+
+    @respx.mock
+    async def test_iter_all_subcategory_traits(
+        self, vclient, base_url, trait_response_data
+    ) -> None:
+        """Verify iter_all_subcategory_traits yields traits across pages."""
+        # Given: A mocked endpoint
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        subcategory_id = "subcat123"
+        paginated_response = {
+            "items": [trait_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}"
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating through all subcategory traits
+        traits = [
+            trait
+            async for trait in vclient.character_blueprint(company_id).iter_all_subcategory_traits(
+                game_version=game_version,
+                section_id=section_id,
+                category_id=category_id,
+                subcategory_id=subcategory_id,
             )
         ]
 

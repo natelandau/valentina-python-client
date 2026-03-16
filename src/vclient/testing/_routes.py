@@ -31,6 +31,7 @@ from vclient.models import (
     SystemHealth,
     Trait,
     TraitCategory,
+    TraitSubcategory,
     User,
     VampireClan,
     WerewolfAuspice,
@@ -336,6 +337,17 @@ class Routes:
     )
     BLUEPRINT_CATEGORIES_TRAITS = RouteSpec(
         "GET", Endpoints.BLUEPRINT_CATEGORY_TRAITS, PAGINATED, Trait
+    )
+
+    # Blueprint subcategories
+    BLUEPRINT_SUBCATEGORIES_LIST = RouteSpec(
+        "GET", Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES, PAGINATED, TraitSubcategory
+    )
+    BLUEPRINT_SUBCATEGORIES_GET = RouteSpec(
+        "GET", Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORY_DETAIL, SINGLE, TraitSubcategory
+    )
+    BLUEPRINT_SUBCATEGORIES_TRAITS = RouteSpec(
+        "GET", Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS, PAGINATED, Trait
     )
 
     # Blueprint traits
