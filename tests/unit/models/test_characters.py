@@ -6,7 +6,6 @@ from pydantic import ValidationError as PydanticValidationError
 from vclient.models import (
     Character,
     CharacterCreate,
-    CharacterHunterEdge,
     CharacterUpdate,
     HunterAttributes,
     MageAttributes,
@@ -462,19 +461,13 @@ class TestWerewolfAttributes:
 class TestHunterAttributes:
     """Tests for HunterAttributes model."""
 
-    def test_hunter_attributes_with_edges(self) -> None:
-        """Verify HunterAttributes with edges and perks."""
-        # When: Creating hunter attributes with edges
-        attrs = HunterAttributes(
-            creed="Defender",
-            edges=[CharacterHunterEdge(edge_id="edge123", perk_ids=["perk123"])],
-        )
+    def test_hunter_attributes_with_creed(self) -> None:
+        """Verify HunterAttributes with creed."""
+        # When: Creating hunter attributes with creed
+        attrs = HunterAttributes(creed="Defender")
 
-        # Then: All fields are set correctly
+        # Then: Creed is set correctly
         assert attrs.creed == "Defender"
-        assert len(attrs.edges) == 1
-        assert attrs.edges[0].edge_id == "edge123"
-        assert attrs.edges[0].perk_ids == ["perk123"]
 
 
 class TestMageAttributes:

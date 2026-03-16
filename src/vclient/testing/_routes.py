@@ -20,15 +20,11 @@ from vclient.models import (
     DeveloperWithApiKey,
     Diceroll,
     DictionaryTerm,
-    EdgeAndPerks,
-    HunterEdge,
-    HunterEdgePerk,
     InventoryItem,
     MeDeveloper,
     MeDeveloperWithApiKey,
     NewCompanyResponse,
     Note,
-    Perk,
     Quickroll,
     RollStatistics,
     SheetSection,
@@ -293,34 +289,6 @@ class Routes:
         "DELETE", Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL, NO_CONTENT, None
     )
 
-    # Character hunter edges
-    CHARACTERS_HUNTER_EDGES_LIST = RouteSpec(
-        "GET", Endpoints.CHARACTER_HUNTER_EDGES, PAGINATED, EdgeAndPerks
-    )
-    CHARACTERS_HUNTER_EDGES_GET = RouteSpec(
-        "GET", Endpoints.CHARACTER_HUNTER_EDGE_DETAIL, SINGLE, EdgeAndPerks
-    )
-    CHARACTERS_HUNTER_EDGES_CREATE = RouteSpec(
-        "POST", Endpoints.CHARACTER_HUNTER_EDGES, SINGLE, EdgeAndPerks
-    )
-    CHARACTERS_HUNTER_EDGES_DELETE = RouteSpec(
-        "DELETE", Endpoints.CHARACTER_HUNTER_EDGE_DETAIL, NO_CONTENT, None
-    )
-
-    # Character hunter edge perks
-    CHARACTERS_HUNTER_EDGE_PERKS_LIST = RouteSpec(
-        "GET", Endpoints.CHARACTER_HUNTER_EDGE_PERKS, PAGINATED, Perk
-    )
-    CHARACTERS_HUNTER_EDGE_PERKS_GET = RouteSpec(
-        "GET", Endpoints.CHARACTER_HUNTER_EDGE_PERK_DETAIL, SINGLE, Perk
-    )
-    CHARACTERS_HUNTER_EDGE_PERKS_CREATE = RouteSpec(
-        "POST", Endpoints.CHARACTER_HUNTER_EDGE_PERKS, SINGLE, Perk
-    )
-    CHARACTERS_HUNTER_EDGE_PERKS_DELETE = RouteSpec(
-        "DELETE", Endpoints.CHARACTER_HUNTER_EDGE_PERK_DETAIL, NO_CONTENT, None
-    )
-
     # Character generation
     CHARACTERS_AUTOGENERATE = RouteSpec("POST", Endpoints.AUTOGENERATE, SINGLE, Character)
     CHARACTERS_CHARGEN_START = RouteSpec(
@@ -414,18 +382,6 @@ class Routes:
     )
     BLUEPRINT_WEREWOLF_RITES_GET = RouteSpec(
         "GET", Endpoints.WEREWOLF_RITE_DETAIL, SINGLE, WerewolfRite
-    )
-
-    # Blueprint hunter edges
-    BLUEPRINT_HUNTER_EDGES_LIST = RouteSpec("GET", Endpoints.HUNTER_EDGES, PAGINATED, HunterEdge)
-    BLUEPRINT_HUNTER_EDGES_GET = RouteSpec("GET", Endpoints.HUNTER_EDGE_DETAIL, SINGLE, HunterEdge)
-
-    # Blueprint hunter edge perks
-    BLUEPRINT_HUNTER_EDGE_PERKS_LIST = RouteSpec(
-        "GET", Endpoints.HUNTER_EDGE_PERKS, PAGINATED, HunterEdgePerk
-    )
-    BLUEPRINT_HUNTER_EDGE_PERKS_GET = RouteSpec(
-        "GET", Endpoints.HUNTER_EDGE_PERK_DETAIL, SINGLE, HunterEdgePerk
     )
 
     # Dictionary

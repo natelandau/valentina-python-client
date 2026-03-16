@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from vclient.constants import CharacterClass, GameVersion, HunterEdgeType, WerewolfRenown
+from vclient.constants import CharacterClass, GameVersion, WerewolfRenown
 
 from .shared import CharacterSpecialty, NameDescriptionSubDocument
 
@@ -87,35 +87,6 @@ class WerewolfTribe(BaseModel):
     ban: str | None = None
     gift_ids: list[str] = Field(default_factory=list)
     link: str | None = None
-
-
-class HunterEdge(BaseModel):
-    """Hunter edge model."""
-
-    id: str
-    name: str
-    description: str | None = None
-    date_created: datetime
-    date_modified: datetime
-    game_versions: list[GameVersion] = Field(default_factory=list)
-
-    pool: str | None = None
-    system: str | None = None
-    type: HunterEdgeType | None = None
-    perk_ids: list[str] = Field(default_factory=list)
-
-
-class HunterEdgePerk(BaseModel):
-    """Hunter edge perk model."""
-
-    id: str
-    name: str
-    description: str | None = None
-    date_created: datetime
-    date_modified: datetime
-    game_versions: list[GameVersion] = Field(default_factory=list)
-
-    edge_id: str | None = None
 
 
 class CharacterConcept(BaseModel):

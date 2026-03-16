@@ -32,8 +32,10 @@ def trait_response_data() -> dict:
         "parent_category_name": "Physical",
         "parent_category_id": "cat123",
         "custom_for_character_id": None,
-        "advantage_category_id": None,
-        "advantage_category_name": None,
+        "trait_subcategory_id": None,
+        "trait_subcategory_name": None,
+        "pool": None,
+        "system": None,
         "character_classes": ["VAMPIRE", "WEREWOLF"],
         "game_versions": ["V5"],
     }
