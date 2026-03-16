@@ -40,6 +40,26 @@ class TraitCategory(BaseModel):
     show_when_empty: bool
 
 
+class TraitSubcategory(BaseModel):
+    """Response model for a character blueprint subcategory."""
+
+    id: str
+    name: str
+    description: str | None = None
+    date_created: datetime
+    date_modified: datetime
+    game_versions: list[GameVersion] = Field(default_factory=list)
+    character_classes: list[CharacterClass] = Field(default_factory=list)
+    show_when_empty: bool
+    initial_cost: int
+    upgrade_cost: int
+    requires_parent: bool
+    pool: str | None = None
+    system: str | None = None
+    parent_category_id: str
+    parent_category_name: str
+
+
 class VampireClan(BaseModel):
     """Response model for a vampire clan."""
 
