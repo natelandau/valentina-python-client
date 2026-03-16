@@ -17,17 +17,13 @@ from vclient.models import (
     DeveloperWithApiKey,
     Diceroll,
     DictionaryTerm,
-    EdgeAndPerks,
     GitHubProfile,
     GoogleProfile,
-    HunterEdge,
-    HunterEdgePerk,
     InventoryItem,
     MeDeveloper,
     MeDeveloperWithApiKey,
     NewCompanyResponse,
     Note,
-    Perk,
     Quickroll,
     RollStatistics,
     SheetSection,
@@ -127,11 +123,6 @@ class DictionaryTermFactory(ModelFactory[DictionaryTerm]):
     __use_defaults__ = True
 
 
-class EdgeAndPerksFactory(ModelFactory[EdgeAndPerks]):
-    __model__ = EdgeAndPerks
-    __use_defaults__ = True
-
-
 class GitHubProfileFactory(ModelFactory[GitHubProfile]):
     __model__ = GitHubProfile
     __use_defaults__ = True
@@ -139,16 +130,6 @@ class GitHubProfileFactory(ModelFactory[GitHubProfile]):
 
 class GoogleProfileFactory(ModelFactory[GoogleProfile]):
     __model__ = GoogleProfile
-    __use_defaults__ = True
-
-
-class HunterEdgeFactory(ModelFactory[HunterEdge]):
-    __model__ = HunterEdge
-    __use_defaults__ = True
-
-
-class HunterEdgePerkFactory(ModelFactory[HunterEdgePerk]):
-    __model__ = HunterEdgePerk
     __use_defaults__ = True
 
 
@@ -174,11 +155,6 @@ class NewCompanyResponseFactory(ModelFactory[NewCompanyResponse]):
 
 class NoteFactory(ModelFactory[Note]):
     __model__ = Note
-    __use_defaults__ = True
-
-
-class PerkFactory(ModelFactory[Perk]):
-    __model__ = Perk
     __use_defaults__ = True
 
 
@@ -260,17 +236,13 @@ __all__ = [
     "DeveloperWithApiKeyFactory",
     "DicerollFactory",
     "DictionaryTermFactory",
-    "EdgeAndPerksFactory",
     "GitHubProfileFactory",
     "GoogleProfileFactory",
-    "HunterEdgeFactory",
-    "HunterEdgePerkFactory",
     "InventoryItemFactory",
     "MeDeveloperFactory",
     "MeDeveloperWithApiKeyFactory",
     "NewCompanyResponseFactory",
     "NoteFactory",
-    "PerkFactory",
     "QuickrollFactory",
     "RollStatisticsFactory",
     "SheetSectionFactory",

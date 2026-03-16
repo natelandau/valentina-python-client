@@ -143,8 +143,10 @@ class Trait(BaseModel):
     parent_category_name: str | None = None
     parent_category_id: str
     custom_for_character_id: str | None = None
-    advantage_category_id: str | None = None
-    advantage_category_name: str | None = None
+    trait_subcategory_id: str | None = None
+    trait_subcategory_name: str | None = None
+    pool: str | None = None
+    system: str | None = None
 
     character_classes: list[CharacterClass] = Field(default_factory=list)
     game_versions: list[GameVersion] = Field(default_factory=list)

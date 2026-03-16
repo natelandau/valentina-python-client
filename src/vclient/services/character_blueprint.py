@@ -8,13 +8,10 @@ from vclient.constants import (
     BlueprintTraitOrderBy,
     CharacterClass,
     GameVersion,
-    HunterEdgeType,
 )
 from vclient.endpoints import Endpoints
 from vclient.models import (
     CharacterConcept,
-    HunterEdge,
-    HunterEdgePerk,
     PaginatedResponse,
     SheetSection,
     Trait,
@@ -584,91 +581,3 @@ class CharacterBlueprintService(BaseService):
             ),
         )
         return WerewolfRite.model_validate(response.json())
-
-    # -----------------------------------------------------------------------------
-    # Hunter Edges
-    # -----------------------------------------------------------------------------
-    async def get_hunter_edges_page(
-        self,
-        *,
-        limit: int = DEFAULT_PAGE_LIMIT,
-        offset: int = 0,
-        edge_type: HunterEdgeType | None = None,
-    ) -> PaginatedResponse[HunterEdge]:
-        """Get a paginated page of hunter edges."""
-        return await self._get_paginated_as(
-            self._format_endpoint(Endpoints.HUNTER_EDGES),
-            HunterEdge,
-            limit=limit,
-            offset=offset,
-            params=self._build_params(edge_type=edge_type),
-        )
-
-    async def list_all_hunter_edges(
-        self, *, edge_type: HunterEdgeType | None = None
-    ) -> list[HunterEdge]:
-        """List all hunter edges."""
-        return [edge async for edge in self.iter_all_hunter_edges(edge_type=edge_type)]
-
-    async def iter_all_hunter_edges(
-        self, *, edge_type: HunterEdgeType | None = None
-    ) -> AsyncIterator[HunterEdge]:
-        """Iterate through all hunter edges."""
-        async for edge in self._iter_all_pages(
-            self._format_endpoint(Endpoints.HUNTER_EDGES),
-            params=self._build_params(edge_type=edge_type),
-        ):
-            yield HunterEdge.model_validate(edge)
-
-    async def get_hunter_edge(self, *, hunter_edge_id: str) -> HunterEdge:
-        """Get a hunter edge by ID."""
-        response = await self._get(
-            self._format_endpoint(Endpoints.HUNTER_EDGE_DETAIL, hunter_edge_id=hunter_edge_id),
-        )
-        return HunterEdge.model_validate(response.json())
-
-    # -----------------------------------------------------------------------------
-    # Hunter Edge Perks
-    # -----------------------------------------------------------------------------
-    async def get_hunter_edge_perks_page(
-        self,
-        *,
-        hunter_edge_id: str,
-        limit: int = DEFAULT_PAGE_LIMIT,
-        offset: int = 0,
-    ) -> PaginatedResponse[HunterEdgePerk]:
-        """Get a paginated page of hunter edge perks."""
-        return await self._get_paginated_as(
-            self._format_endpoint(Endpoints.HUNTER_EDGE_PERKS, hunter_edge_id=hunter_edge_id),
-            HunterEdgePerk,
-            limit=limit,
-            offset=offset,
-        )
-
-    async def list_all_hunter_edge_perks(self, *, hunter_edge_id: str) -> list[HunterEdgePerk]:
-        """List all hunter edge perks."""
-        return [
-            perk async for perk in self.iter_all_hunter_edge_perks(hunter_edge_id=hunter_edge_id)
-        ]
-
-    async def iter_all_hunter_edge_perks(
-        self, *, hunter_edge_id: str
-    ) -> AsyncIterator[HunterEdgePerk]:
-        """Iterate through all hunter edge perks."""
-        async for perk in self._iter_all_pages(
-            self._format_endpoint(Endpoints.HUNTER_EDGE_PERKS, hunter_edge_id=hunter_edge_id),
-        ):
-            yield HunterEdgePerk.model_validate(perk)
-
-    async def get_hunter_edge_perk(
-        self, *, hunter_edge_id: str, hunter_edge_perk_id: str
-    ) -> HunterEdgePerk:
-        """Get a hunter edge perk by ID."""
-        response = await self._get(
-            self._format_endpoint(
-                Endpoints.HUNTER_EDGE_PERK_DETAIL,
-                hunter_edge_id=hunter_edge_id,
-                hunter_edge_perk_id=hunter_edge_perk_id,
-            ),
-        )
-        return HunterEdgePerk.model_validate(response.json())

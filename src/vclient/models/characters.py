@@ -11,7 +11,6 @@ from vclient.constants import (
     CharacterStatus,
     CharacterType,
     GameVersion,
-    HunterEdgeType,
 )
 
 from .character_trait import CharacterCreateTraitAssign
@@ -95,32 +94,22 @@ class MageAttributes(BaseModel):
     tradition: str | None = Field(default=None, description="Mage tradition.")
 
 
-class HunterEdge(BaseModel):
-    """Hunter edge model."""
-
-    edge_id: str
-    perk_ids: list[str] = Field(default_factory=list)
-
-
 class HunterAttributes(BaseModel):
     """Hunter-specific character attributes."""
 
     creed: str | None = Field(default=None, description="Hunter creed.")
-    edges: list[HunterEdge] = Field(default_factory=list, description="Hunter edges.")
 
 
 class HunterAttributesCreate(BaseModel):
     """Hunter-specific character attributes create request."""
 
     creed: str | None = None
-    edges: list[HunterEdge] | None = None
 
 
 class HunterAttributesUpdate(BaseModel):
     """Hunter-specific character attributes update request."""
 
     creed: str | None = None
-    edges: list[HunterEdge] | None = None
 
 
 # -----------------------------------------------------------------------------
@@ -331,45 +320,17 @@ class InventoryItemUpdate(BaseModel):
     description: str | None = Field(default=None, description="Description of the item.")
 
 
-# -----------------------------------------------------------------------------
-# Character Specific Hunter Edge Response Models
-# -----------------------------------------------------------------------------
-
-
-class Perk(BaseModel):
-    """Character perk DTO."""
-
-    id: str
-    name: str
-    description: str | None = None
-
-
-class EdgeAndPerks(BaseModel):
-    """Character edge and perks DTO."""
-
-    id: str
-    name: str
-    description: str | None = None
-    pool: str | None = None
-    system: str | None = None
-    type: HunterEdgeType | None = None
-    perks: list[Perk] = Field(default_factory=list)
-
-
 __all__ = [
     "Character",
     "CharacterCreate",
     "CharacterUpdate",
-    "EdgeAndPerks",
     "HunterAttributes",
     "HunterAttributesCreate",
     "HunterAttributesUpdate",
-    "HunterEdge",
     "InventoryItem",
     "InventoryItemCreate",
     "InventoryItemUpdate",
     "MageAttributes",
-    "Perk",
     "VampireAttributes",
     "VampireAttributesCreate",
     "VampireAttributesUpdate",

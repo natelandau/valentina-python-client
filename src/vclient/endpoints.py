@@ -101,11 +101,6 @@ class Endpoints:
     CHARACTER_WEREWOLF_GIFT_DETAIL = f"{CHARACTER_WEREWOLF_GIFTS}/{{werewolf_gift_id}}"
     CHARACTER_WEREWOLF_RITES = f"{CHARACTER}/rites"
     CHARACTER_WEREWOLF_RITE_DETAIL = f"{CHARACTER_WEREWOLF_RITES}/{{werewolf_rite_id}}"
-    CHARACTER_HUNTER_EDGES = f"{CHARACTER}/edges"
-    CHARACTER_HUNTER_EDGE_DETAIL = f"{CHARACTER_HUNTER_EDGES}/{{hunter_edge_id}}"
-    CHARACTER_HUNTER_EDGE_PERKS = f"{CHARACTER_HUNTER_EDGE_DETAIL}/perks"
-    CHARACTER_HUNTER_EDGE_PERK_DETAIL = f"{CHARACTER_HUNTER_EDGE_PERKS}/{{hunter_edge_perk_id}}"
-
     # Character RNG generation
     AUTOGENERATE = f"{CHARACTERS}/autogenerate"
     CHARGEN_START = f"{CHARACTERS}/chargen/start"
@@ -142,11 +137,6 @@ class Endpoints:
     WEREWOLF_GIFT_DETAIL = f"{WEREWOLF_GIFTS}/{{werewolf_gift_id}}"
     WEREWOLF_RITES = f"{BLUEPRINT_BASE}/werewolf-rites"
     WEREWOLF_RITE_DETAIL = f"{WEREWOLF_RITES}/{{werewolf_rite_id}}"
-    HUNTER_EDGES = f"{BLUEPRINT_BASE}/hunter-edges"
-    HUNTER_EDGE_DETAIL = f"{HUNTER_EDGES}/{{hunter_edge_id}}"
-    HUNTER_EDGE_PERKS = f"{HUNTER_EDGE_DETAIL}/perks"
-    HUNTER_EDGE_PERK_DETAIL = f"{HUNTER_EDGE_PERKS}/{{hunter_edge_perk_id}}"
-
     # Dictionary endpoints
     DICTIONARY_TERMS = f"{COMPANY}/dictionaries"
     DICTIONARY_TERM = f"{DICTIONARY_TERMS}/{{term_id}}"

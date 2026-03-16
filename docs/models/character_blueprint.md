@@ -104,25 +104,3 @@ Category within a sheet section. Groups related traits together, like "Physical 
 | `game_versions` | `list[GameVersion]` | Available game versions |
 | `pool`          | `str \| None`       | Dice pool               |
 
-## HunterEdge
-
-| Field           | Type                     | Description                      |
-| --------------- | ------------------------ | -------------------------------- |
-| `id`            | `str`                    | Unique identifier                |
-| `name`          | `str`                    | Edge name                        |
-| `description`   | `str \| None`            | Description                      |
-| `type`          | `HunterEdgeType \| None` | ASSETS, APTITUDES, or ENDOWMENTS |
-| `pool`          | `str \| None`            | Dice pool                        |
-| `system`        | `str \| None`            | System rules                     |
-| `game_versions` | `list[GameVersion]`      | Available game versions          |
-| `perk_ids`      | `list[str]`              | Perk IDs                         |
-
-## HunterEdgePerk
-
-| Field           | Type                | Description             |
-| --------------- | ------------------- | ----------------------- |
-| `id`            | `str`               | Unique identifier       |
-| `name`          | `str`               | Perk name               |
-| `description`   | `str \| None`       | Description             |
-| `game_versions` | `list[GameVersion]` | Available game versions |
-| `edge_id`       | `str \| None`       | Parent Edge ID          |

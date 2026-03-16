@@ -457,7 +457,7 @@ class SyncVClient:
         """Get a SyncCharacterBlueprintService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete character blueprint sections,
-        categories, traits, and edges.
+        categories, and traits.
 
         Args:
             company_id: The ID of the company to operate within. If not provided,
