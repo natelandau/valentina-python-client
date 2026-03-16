@@ -236,15 +236,11 @@ Every public response model has a corresponding factory. All factories are expor
 | `DeveloperWithApiKeyFactory`                   | `DeveloperWithApiKey`                |
 | `DicerollFactory`                              | `Diceroll`                           |
 | `DictionaryTermFactory`                        | `DictionaryTerm`                     |
-| `EdgeAndPerksFactory`                          | `EdgeAndPerks`                       |
-| `HunterEdgeFactory`                            | `HunterEdge`                         |
-| `HunterEdgePerkFactory`                        | `HunterEdgePerk`                     |
 | `InventoryItemFactory`                         | `InventoryItem`                      |
 | `MeDeveloperFactory`                           | `MeDeveloper`                        |
 | `MeDeveloperWithApiKeyFactory`                 | `MeDeveloperWithApiKey`              |
 | `NewCompanyResponseFactory`                    | `NewCompanyResponse`                 |
 | `NoteFactory`                                  | `Note`                               |
-| `PerkFactory`                                  | `Perk`                               |
 | `QuickrollFactory`                             | `Quickroll`                          |
 | `RollStatisticsFactory`                        | `RollStatistics`                     |
 | `SheetSectionFactory`                          | `SheetSection`                       |

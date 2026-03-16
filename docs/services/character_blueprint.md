@@ -117,24 +117,6 @@ Search across all traits without section/category context. All parameters are op
 | `iter_all_werewolf_rites()`                   | `AsyncIterator[WerewolfRite]`     | Iterate through rites |
 | `get_werewolf_rite(*, werewolf_rite_id)`      | `WerewolfRite`                    | Get a rite by ID      |
 
-### Hunter Edges
-
-| Method                                      | Returns                         | Description           |
-| ------------------------------------------- | ------------------------------- | --------------------- |
-| `get_hunter_edges_page(*, limit?, offset?)` | `PaginatedResponse[HunterEdge]` | Get a page of edges   |
-| `list_all_hunter_edges()`                   | `list[HunterEdge]`              | Get all edges         |
-| `iter_all_hunter_edges()`                   | `AsyncIterator[HunterEdge]`     | Iterate through edges |
-| `get_hunter_edge(*, hunter_edge_id)`        | `HunterEdge`                    | Get an edge by ID     |
-
-### Hunter Edge Perks
-
-| Method                                                           | Returns                             | Description               |
-| ---------------------------------------------------------------- | ----------------------------------- | ------------------------- |
-| `get_hunter_edge_perks_page(*, hunter_edge_id, limit?, offset?)` | `PaginatedResponse[HunterEdgePerk]` | Get a page of perks       |
-| `list_all_hunter_edge_perks(*, hunter_edge_id)`                  | `list[HunterEdgePerk]`              | Get all perks for an edge |
-| `iter_all_hunter_edge_perks(*, hunter_edge_id)`                  | `AsyncIterator[HunterEdgePerk]`     | Iterate through perks     |
-| `get_hunter_edge_perk(*, hunter_edge_id, hunter_edge_perk_id)`   | `HunterEdgePerk`                    | Get a perk by ID          |
-
 ## Example
 
 ```python

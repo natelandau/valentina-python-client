@@ -27,22 +27,26 @@ Request model for assigning a trait to an already-created character. Used by the
 
 ## Trait
 
-| Field                  | Type                   | Description             |
-| ---------------------- | ---------------------- | ----------------------- |
-| `id`                   | `str`                  | Unique identifier       |
-| `name`                 | `str`                  | Trait name              |
-| `description`          | `str \| None`          | Trait description       |
-| `max_value`            | `int`                  | Maximum value           |
-| `min_value`            | `int`                  | Minimum value           |
-| `is_custom`            | `bool`                 | Whether custom trait    |
-| `initial_cost`         | `int`                  | XP cost to acquire      |
-| `upgrade_cost`         | `int`                  | XP cost per upgrade     |
-| `parent_category_id`   | `str`                  | Parent category ID      |
-| `parent_category_name` | `str \| None`          | Parent category name    |
-| `sheet_section_id`     | `str`                  | Sheet section ID        |
-| `sheet_section_name`   | `str \| None`          | Sheet section name      |
-| `game_versions`        | `list[GameVersion]`    | Available game versions |
-| `character_classes`    | `list[CharacterClass]` | Applicable classes      |
+| Field                    | Type                   | Description              |
+| ------------------------ | ---------------------- | ------------------------ |
+| `id`                     | `str`                  | Unique identifier        |
+| `name`                   | `str`                  | Trait name               |
+| `description`            | `str \| None`          | Trait description        |
+| `max_value`              | `int`                  | Maximum value            |
+| `min_value`              | `int`                  | Minimum value            |
+| `is_custom`              | `bool`                 | Whether custom trait     |
+| `initial_cost`           | `int`                  | XP cost to acquire       |
+| `upgrade_cost`           | `int`                  | XP cost per upgrade      |
+| `parent_category_id`     | `str`                  | Parent category ID       |
+| `parent_category_name`   | `str \| None`          | Parent category name     |
+| `trait_subcategory_id`   | `str \| None`          | Trait subcategory ID     |
+| `trait_subcategory_name` | `str \| None`          | Trait subcategory name   |
+| `pool`                   | `str \| None`          | Dice pool                |
+| `system`                 | `str \| None`          | System rules             |
+| `sheet_section_id`       | `str`                  | Sheet section ID         |
+| `sheet_section_name`     | `str \| None`          | Sheet section name       |
+| `game_versions`          | `list[GameVersion]`    | Available game versions  |
+| `character_classes`      | `list[CharacterClass]` | Applicable classes       |
 
 ## CharacterTraitValueOptionsResponse
 

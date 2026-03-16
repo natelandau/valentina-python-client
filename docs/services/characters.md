@@ -104,28 +104,6 @@ characters = characters_service(
 | `add_rite(character_id, werewolf_rite_id)`      | `WerewolfRite`                    | Add a rite to character |
 | `remove_rite(character_id, werewolf_rite_id)`   | `WerewolfRite`                    | Remove a rite           |
 
-### Hunter Edges
-
-| Method                                          | Returns                           | Description              |
-| ----------------------------------------------- | --------------------------------- | ------------------------ |
-| `get_edges_page(character_id, limit?, offset?)` | `PaginatedResponse[EdgeAndPerks]` | Get a page of edges      |
-| `list_all_edges(character_id)`                  | `list[EdgeAndPerks]`              | Get all edges            |
-| `iter_all_edges(character_id, limit?)`          | `AsyncIterator[EdgeAndPerks]`     | Iterate through edges    |
-| `get_edge(character_id, hunter_edge_id)`        | `EdgeAndPerks`                    | Get an edge with perks   |
-| `add_edge(character_id, hunter_edge_id)`        | `EdgeAndPerks`                    | Add an edge to character |
-| `remove_edge(character_id, hunter_edge_id)`     | `EdgeAndPerks`                    | Remove an edge           |
-
-### Hunter Edge Perks
-
-| Method                                                                | Returns                   | Description           |
-| --------------------------------------------------------------------- | ------------------------- | --------------------- |
-| `get_edge_perks_page(character_id, hunter_edge_id, limit?, offset?)`  | `PaginatedResponse[Perk]` | Get a page of perks   |
-| `list_all_edge_perks(character_id, hunter_edge_id)`                   | `list[Perk]`              | Get all perks         |
-| `iter_all_edge_perks(character_id, hunter_edge_id, limit?)`           | `AsyncIterator[Perk]`     | Iterate through perks |
-| `get_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)`    | `Perk`                    | Get a perk            |
-| `add_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)`    | `Perk`                    | Add a perk            |
-| `remove_edge_perk(character_id, hunter_edge_id, hunter_edge_perk_id)` | `Perk`                    | Remove a perk         |
-
 ## Example
 
 ```python
@@ -172,4 +150,4 @@ note_request = NoteCreate(title="Background", content="Born in Victorian London.
 note = await characters.create_note(character.id, note_request)
 ```
 
-See [Response Models](../models/characters.md) for `Character`, `WerewolfGift`, `WerewolfRite`, `HunterEdge`, and related types.
+See [Response Models](../models/characters.md) for `Character`, `WerewolfGift`, `WerewolfRite`, and related types.
