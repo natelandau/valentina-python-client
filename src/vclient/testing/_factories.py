@@ -30,6 +30,7 @@ from vclient.models import (
     SystemHealth,
     Trait,
     TraitCategory,
+    TraitSubcategory,
     User,
     VampireClan,
     WerewolfAuspice,
@@ -183,6 +184,11 @@ class TraitCategoryFactory(ModelFactory[TraitCategory]):
     __use_defaults__ = True
 
 
+class TraitSubcategoryFactory(ModelFactory[TraitSubcategory]):
+    __model__ = TraitSubcategory
+    __use_defaults__ = True
+
+
 class TraitFactory(ModelFactory[Trait]):
     __model__ = Trait
     __use_defaults__ = True
@@ -249,6 +255,7 @@ __all__ = [
     "SystemHealthFactory",
     "TraitCategoryFactory",
     "TraitFactory",
+    "TraitSubcategoryFactory",
     "UserFactory",
     "VampireClanFactory",
     "WerewolfAuspiceFactory",
