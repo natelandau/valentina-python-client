@@ -49,13 +49,18 @@ characters = characters_service(
 
 ### Full Sheet
 
-| Method                         | Returns              | Description                                          |
-| ------------------------------ | -------------------- | ---------------------------------------------------- |
-| `get_full_sheet(character_id)` | `CharacterFullSheet` | Get hierarchical character sheet with all traits      |
+| Method                                                                          | Returns                  | Description                                     |
+| ------------------------------------------------------------------------------- | ------------------------ | ----------------------------------------------- |
+| `get_full_sheet(character_id, include_available_traits?)`                       | `CharacterFullSheet`     | Get hierarchical character sheet with all traits |
+| `get_full_sheet_category(character_id, category_id, include_available_traits?)` | `FullSheetTraitCategory` | Get a single category slice of the full sheet    |
 
 !!! info "Sheet Structure"
 
     The full sheet returns all traits organized as sections > categories > subcategories > character traits. The skeleton includes all structures for the character's class and game version, even if empty. Use this to render a complete character sheet UI.
+
+!!! info "Available Traits"
+
+    Set `include_available_traits=True` to populate the `available_traits` field on each category and subcategory with standard traits the character could add. When not set, these lists are always empty. Custom traits are excluded.
 
 ### Assets
 

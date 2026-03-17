@@ -14,6 +14,7 @@ from vclient.models import (
     CharacterCreate,
     CharacterFullSheet,
     CharacterUpdate,
+    FullSheetTraitCategory,
     InventoryItem,
     InventoryItemCreate,
     InventoryItemUpdate,
@@ -308,14 +309,19 @@ class SyncCharactersService(SyncBaseService):
         )
         return RollStatistics.model_validate(response.json())
 
-    def get_full_sheet(self, character_id: str) -> CharacterFullSheet:
+    def get_full_sheet(
+        self, character_id: str, *, include_available_traits: bool = False
+    ) -> CharacterFullSheet:
         """Retrieve the full character sheet with all traits organized hierarchically.
 
         Returns the character data along with the complete trait hierarchy organized as
-        sections > categories > subcategories > character traits.
+        sections > categories > subcategories > character traits. Optionally include
+        available traits the character could add.
 
         Args:
             character_id: The ID of the character to get the full sheet for.
+            include_available_traits: Include unassigned standard traits in each
+                category and subcategory. Defaults to False.
 
         Returns:
             CharacterFullSheet with nested trait hierarchy.
@@ -324,10 +330,44 @@ class SyncCharactersService(SyncBaseService):
             NotFoundError: If the character does not exist.
             AuthorizationError: If you don't have access.
         """
+        params = self._build_params(include_available_traits=include_available_traits or None)
         response = self._get(
-            self._format_endpoint(Endpoints.CHARACTER_FULL_SHEET, character_id=character_id)
+            self._format_endpoint(Endpoints.CHARACTER_FULL_SHEET, character_id=character_id),
+            params=params,
         )
         return CharacterFullSheet.model_validate(response.json())
+
+    def get_full_sheet_category(
+        self, character_id: str, category_id: str, *, include_available_traits: bool = False
+    ) -> FullSheetTraitCategory:
+        """Retrieve a single category slice of the character's full sheet.
+
+        Fetch one category with its subcategories and traits, enabling efficient
+        UI refreshes after a trait edit without rebuilding the entire sheet.
+
+        Args:
+            character_id: The ID of the character.
+            category_id: The ID of the trait category to retrieve.
+            include_available_traits: Include unassigned standard traits in the
+                category and its subcategories. Defaults to False.
+
+        Returns:
+            FullSheetTraitCategory with nested subcategories and traits.
+
+        Raises:
+            NotFoundError: If the character or category does not exist.
+            AuthorizationError: If you don't have access.
+        """
+        params = self._build_params(include_available_traits=include_available_traits or None)
+        response = self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_FULL_SHEET_CATEGORY,
+                character_id=character_id,
+                category_id=category_id,
+            ),
+            params=params,
+        )
+        return FullSheetTraitCategory.model_validate(response.json())
 
     def get_assets_page(
         self, character_id: str, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0

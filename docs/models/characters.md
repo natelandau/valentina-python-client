@@ -123,6 +123,7 @@ A trait category within a section (e.g., "Attributes", "Skills").
 | `order`            | `int`                              | Display order                            |
 | `subcategories`    | `list[FullSheetTraitSubcategory]`  | Subcategories in this category           |
 | `character_traits` | `list[CharacterTrait]`             | Direct traits (no subcategory)           |
+| `available_traits` | `list[Trait]`                      | Unassigned standard traits (empty unless requested) |
 
 ## FullSheetTraitSubcategory
 
@@ -141,4 +142,5 @@ A trait subcategory within a category (e.g., "Celerity", "Potence").
 | `system`           | `str \| None`               | System rules description                  |
 | `hunter_edge_type` | `HunterEdgeType \| None`    | Hunter edge type (ASSETS, APTITUDES, etc) |
 | `character_traits` | `list[CharacterTrait]`      | Traits in this subcategory                |
+| `available_traits` | `list[Trait]`               | Unassigned standard traits (empty unless requested) |
 

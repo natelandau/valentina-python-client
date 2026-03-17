@@ -89,6 +89,50 @@ class TestFullSheetTraitSubcategory:
                 character_traits=[],
             )
 
+    def test_available_traits_defaults_to_empty(self) -> None:
+        """Verify available_traits defaults to empty list."""
+        # When: Creating with required fields only
+        sub = FullSheetTraitSubcategory(
+            id="sub123",
+            name="Celerity",
+            initial_cost=1,
+            upgrade_cost=2,
+            show_when_empty=True,
+            requires_parent=False,
+            character_traits=[],
+        )
+
+        # Then: available_traits is an empty list
+        assert sub.available_traits == []
+
+    def test_available_traits_with_traits(self) -> None:
+        """Verify available_traits accepts a list of Trait objects."""
+        # Given: A trait dict matching the Trait model
+        trait_data = {
+            "id": "t1",
+            "name": "Celerity",
+            "date_created": "2024-01-01T00:00:00Z",
+            "date_modified": "2024-01-01T00:00:00Z",
+            "sheet_section_id": "sec1",
+            "parent_category_id": "cat1",
+        }
+
+        # When: Creating with available_traits populated
+        sub = FullSheetTraitSubcategory(
+            id="sub123",
+            name="Celerity",
+            initial_cost=1,
+            upgrade_cost=2,
+            show_when_empty=True,
+            requires_parent=False,
+            character_traits=[],
+            available_traits=[trait_data],
+        )
+
+        # Then: The trait is parsed correctly
+        assert len(sub.available_traits) == 1
+        assert sub.available_traits[0].name == "Celerity"
+
 
 class TestFullSheetTraitCategory:
     """Tests for FullSheetTraitCategory model."""
@@ -112,6 +156,52 @@ class TestFullSheetTraitCategory:
         assert cat.description is None
         assert cat.subcategories == []
         assert cat.character_traits == []
+
+    def test_available_traits_defaults_to_empty(self) -> None:
+        """Verify available_traits defaults to empty list."""
+        # When: Creating with required fields only
+        cat = FullSheetTraitCategory(
+            id="cat123",
+            name="Disciplines",
+            initial_cost=1,
+            upgrade_cost=2,
+            show_when_empty=True,
+            order=1,
+            subcategories=[],
+            character_traits=[],
+        )
+
+        # Then: available_traits is an empty list
+        assert cat.available_traits == []
+
+    def test_available_traits_with_traits(self) -> None:
+        """Verify available_traits accepts a list of Trait objects."""
+        # Given: A trait dict matching the Trait model
+        trait_data = {
+            "id": "t1",
+            "name": "Potence",
+            "date_created": "2024-01-01T00:00:00Z",
+            "date_modified": "2024-01-01T00:00:00Z",
+            "sheet_section_id": "sec1",
+            "parent_category_id": "cat123",
+        }
+
+        # When: Creating with available_traits populated
+        cat = FullSheetTraitCategory(
+            id="cat123",
+            name="Disciplines",
+            initial_cost=1,
+            upgrade_cost=2,
+            show_when_empty=True,
+            order=1,
+            subcategories=[],
+            character_traits=[],
+            available_traits=[trait_data],
+        )
+
+        # Then: The trait is parsed correctly
+        assert len(cat.available_traits) == 1
+        assert cat.available_traits[0].name == "Potence"
 
     def test_with_nested_subcategories(self) -> None:
         """Verify model with nested subcategories and traits."""

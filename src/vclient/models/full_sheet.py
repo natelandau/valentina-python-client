@@ -1,11 +1,12 @@
 """Response models for the character full sheet endpoint."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from vclient.constants import HunterEdgeType
 
 from .character_trait import CharacterTrait
 from .characters import Character
+from .shared import Trait
 
 
 class FullSheetTraitSubcategory(BaseModel):
@@ -22,6 +23,7 @@ class FullSheetTraitSubcategory(BaseModel):
     system: str | None = None
     hunter_edge_type: HunterEdgeType | None = None
     character_traits: list[CharacterTrait]
+    available_traits: list[Trait] = Field(default_factory=list)
 
 
 class FullSheetTraitCategory(BaseModel):
@@ -36,6 +38,7 @@ class FullSheetTraitCategory(BaseModel):
     order: int
     subcategories: list[FullSheetTraitSubcategory]
     character_traits: list[CharacterTrait]
+    available_traits: list[Trait] = Field(default_factory=list)
 
 
 class FullSheetTraitSection(BaseModel):
