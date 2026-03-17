@@ -1,3 +1,15 @@
+## v1.16.0 (2026-03-17)
+
+### Feat
+
+- **characters**: add available traits and category endpoint (#51)
+- **characters**: add full character sheet endpoint (#50)
+- add blueprint subcategory endpoints (#49)
+
+### Refactor
+
+- migrate hunter edges to trait system (#48)
+
 ## v1.15.1 (2026-03-14)
 
 ### Fix
