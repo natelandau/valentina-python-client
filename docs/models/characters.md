@@ -86,3 +86,59 @@ Represents an item in a character's inventory.
 | `date_created`  | `datetime`               | Creation timestamp      |
 | `date_modified` | `datetime`               | Last modified timestamp |
 
+## CharacterFullSheet
+
+Top-level response for the full character sheet endpoint.
+
+| Field       | Type                          | Description                            |
+| ----------- | ----------------------------- | -------------------------------------- |
+| `character` | `Character`                   | The character data                     |
+| `sections`  | `list[FullSheetTraitSection]` | Hierarchical trait sections            |
+
+## FullSheetTraitSection
+
+A section on the character sheet (e.g., "Physical", "Social", "Mental").
+
+| Field             | Type                            | Description                       |
+| ----------------- | ------------------------------- | --------------------------------- |
+| `id`              | `str`                           | Unique identifier                 |
+| `name`            | `str`                           | Section name                      |
+| `description`     | `str \| None`                   | Section description               |
+| `order`           | `int`                           | Display order                     |
+| `show_when_empty` | `bool`                          | Whether to show when no traits    |
+| `categories`      | `list[FullSheetTraitCategory]`  | Trait categories in this section  |
+
+## FullSheetTraitCategory
+
+A trait category within a section (e.g., "Attributes", "Skills").
+
+| Field              | Type                               | Description                              |
+| ------------------ | ---------------------------------- | ---------------------------------------- |
+| `id`               | `str`                              | Unique identifier                        |
+| `name`             | `str`                              | Category name                            |
+| `description`      | `str \| None`                      | Category description                     |
+| `initial_cost`     | `int`                              | XP cost for initial dot                  |
+| `upgrade_cost`     | `int`                              | XP cost per additional dot               |
+| `show_when_empty`  | `bool`                             | Whether to show when no traits           |
+| `order`            | `int`                              | Display order                            |
+| `subcategories`    | `list[FullSheetTraitSubcategory]`  | Subcategories in this category           |
+| `character_traits` | `list[CharacterTrait]`             | Direct traits (no subcategory)           |
+
+## FullSheetTraitSubcategory
+
+A trait subcategory within a category (e.g., "Celerity", "Potence").
+
+| Field              | Type                        | Description                               |
+| ------------------ | --------------------------- | ----------------------------------------- |
+| `id`               | `str`                       | Unique identifier                         |
+| `name`             | `str`                       | Subcategory name                          |
+| `description`      | `str \| None`               | Subcategory description                   |
+| `initial_cost`     | `int`                       | XP cost for initial dot                   |
+| `upgrade_cost`     | `int`                       | XP cost per additional dot                |
+| `show_when_empty`  | `bool`                      | Whether to show when no traits            |
+| `requires_parent`  | `bool`                      | Whether a parent trait is required         |
+| `pool`             | `str \| None`               | Dice pool formula                         |
+| `system`           | `str \| None`               | System rules description                  |
+| `hunter_edge_type` | `HunterEdgeType \| None`    | Hunter edge type (ASSETS, APTITUDES, etc) |
+| `character_traits` | `list[CharacterTrait]`      | Traits in this subcategory                |
+

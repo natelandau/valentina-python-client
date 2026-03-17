@@ -47,6 +47,16 @@ characters = characters_service(
 
     Statistics include success rates, critical frequencies, and most-used traits. Use this data to understand how a character performs in gameplay.
 
+### Full Sheet
+
+| Method                         | Returns              | Description                                          |
+| ------------------------------ | -------------------- | ---------------------------------------------------- |
+| `get_full_sheet(character_id)` | `CharacterFullSheet` | Get hierarchical character sheet with all traits      |
+
+!!! info "Sheet Structure"
+
+    The full sheet returns all traits organized as sections > categories > subcategories > character traits. The skeleton includes all structures for the character's class and game version, even if empty. Use this to render a complete character sheet UI.
+
 ### Assets
 
 | Method                                          | Returns                    | Description           |
