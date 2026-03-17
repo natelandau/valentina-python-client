@@ -7,7 +7,7 @@ from httpx import Response
 from vclient import SyncVClient, sync_system_service
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
-from vclient.models import SystemHealth
+from vclient.models import CharacterFullSheet, FullSheetTraitCategory, SystemHealth
 
 
 @pytest.fixture
@@ -168,6 +168,82 @@ class TestSyncClientRetry:
             assert result.version == "0.7.0"
         finally:
             client.close()
+
+
+class TestSyncClientFullSheet:
+    """Smoke tests for sync full sheet methods."""
+
+    @respx.mock
+    def test_sync_get_full_sheet(self, sync_client, base_url):
+        """Verify sync get_full_sheet returns CharacterFullSheet."""
+        # Given: A mocked full sheet endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "507f1f77bcf86cd799439011"
+        character_id = "char123"
+        response_data = {
+            "character": {
+                "id": "char123",
+                "character_class": "VAMPIRE",
+                "game_version": "V5",
+                "name_first": "Marcus",
+                "name_last": "Blackwood",
+                "name": "Marcus",
+                "name_full": "Marcus Blackwood",
+                "user_creator_id": "user123",
+                "user_player_id": "user123",
+                "company_id": "company123",
+                "campaign_id": "507f1f77bcf86cd799439011",
+            },
+            "sections": [],
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_FULL_SHEET.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(200, json=response_data)
+
+        # When: Calling sync get_full_sheet
+        result = sync_client.characters(user_id, campaign_id, company_id=company_id).get_full_sheet(
+            character_id
+        )
+
+        # Then: Returns CharacterFullSheet
+        assert route.called
+        assert isinstance(result, CharacterFullSheet)
+        assert result.character.name_first == "Marcus"
+
+    @respx.mock
+    def test_sync_get_full_sheet_category(self, sync_client, base_url):
+        """Verify sync get_full_sheet_category returns FullSheetTraitCategory."""
+        # Given: A mocked category endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "507f1f77bcf86cd799439011"
+        character_id = "char123"
+        category_id = "cat1"
+        category_data = {
+            "id": "cat1",
+            "name": "Attributes",
+            "initial_cost": 1,
+            "upgrade_cost": 2,
+            "show_when_empty": True,
+            "order": 1,
+            "subcategories": [],
+            "character_traits": [],
+            "available_traits": [],
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_FULL_SHEET_CATEGORY.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, category_id=category_id)}",
+        ).respond(200, json=category_data)
+
+        # When: Calling sync get_full_sheet_category
+        result = sync_client.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_full_sheet_category(character_id, category_id)
+
+        # Then: Returns FullSheetTraitCategory
+        assert route.called
+        assert isinstance(result, FullSheetTraitCategory)
+        assert result.name == "Attributes"
 
 
 class TestSyncFactoryFunctions:
