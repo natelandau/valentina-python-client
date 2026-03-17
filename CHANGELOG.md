@@ -1,3 +1,9 @@
+## v1.16.1 (2026-03-17)
+
+### Fix
+
+- **character**: add concept_name to character model
+
 ## v1.16.0 (2026-03-17)
 
 ### Feat
