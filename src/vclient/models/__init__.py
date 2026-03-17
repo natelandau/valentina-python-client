@@ -83,6 +83,12 @@ from .dictionary import (
     DictionaryTermCreate,
     DictionaryTermUpdate,
 )
+from .full_sheet import (
+    CharacterFullSheet,
+    FullSheetTraitCategory,
+    FullSheetTraitSection,
+    FullSheetTraitSubcategory,
+)
 from .global_admin import (
     Developer,
     DeveloperCompanyPermission,
@@ -138,6 +144,7 @@ __all__ = [
     "CharacterConcept",
     "CharacterCreate",
     "CharacterCreateTraitAssign",
+    "CharacterFullSheet",
     "CharacterSpecialty",
     "CharacterTrait",
     "CharacterTraitAdd",
@@ -162,6 +169,9 @@ __all__ = [
     "DictionaryTermCreate",
     "DictionaryTermUpdate",
     "DiscordProfile",
+    "FullSheetTraitCategory",
+    "FullSheetTraitSection",
+    "FullSheetTraitSubcategory",
     "GitHubProfile",
     "GoogleProfile",
     "HunterAttributes",

@@ -11,6 +11,7 @@ from vclient.exceptions import NotFoundError
 from vclient.models import (
     Asset,
     Character,
+    CharacterFullSheet,
     HunterAttributesCreate,
     HunterAttributesUpdate,
     InventoryItem,
@@ -56,6 +57,60 @@ def statistics_response_data() -> dict:
         "success_percentage": 50.0,
         "failure_percentage": 30.0,
         "botch_percentage": 5.0,
+    }
+
+
+@pytest.fixture
+def full_sheet_response_data() -> dict:
+    """Return sample full sheet response data."""
+    return {
+        "character": {
+            "id": "char123",
+            "character_class": "VAMPIRE",
+            "game_version": "V5",
+            "name_first": "Marcus",
+            "name_last": "Blackwood",
+            "name": "Marcus",
+            "name_full": "Marcus Blackwood",
+            "user_creator_id": "user123",
+            "user_player_id": "user123",
+            "company_id": "company123",
+            "campaign_id": "507f1f77bcf86cd799439011",
+        },
+        "sections": [
+            {
+                "id": "sec1",
+                "name": "Physical",
+                "order": 1,
+                "show_when_empty": True,
+                "categories": [
+                    {
+                        "id": "cat1",
+                        "name": "Attributes",
+                        "initial_cost": 1,
+                        "upgrade_cost": 2,
+                        "show_when_empty": True,
+                        "order": 1,
+                        "subcategories": [],
+                        "character_traits": [
+                            {
+                                "id": "ct1",
+                                "character_id": "char123",
+                                "value": 3,
+                                "trait": {
+                                    "id": "t1",
+                                    "name": "Strength",
+                                    "date_created": "2024-01-01T00:00:00Z",
+                                    "date_modified": "2024-01-01T00:00:00Z",
+                                    "sheet_section_id": "sec1",
+                                    "parent_category_id": "cat1",
+                                },
+                            }
+                        ],
+                    }
+                ],
+            }
+        ],
     }
 
 
@@ -1183,6 +1238,35 @@ class TestCharactersServiceGetStatistics:
         assert isinstance(result, RollStatistics)
         assert result.total_rolls == 100
         assert result.success_percentage == 50.0
+
+
+class TestCharactersServiceGetFullSheet:
+    """Tests for CharactersService.get_full_sheet method."""
+
+    @respx.mock
+    async def test_get_full_sheet(self, vclient, base_url, full_sheet_response_data):
+        """Verify getting character full sheet."""
+        # Given: A mocked full sheet endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "507f1f77bcf86cd799439011"
+        character_id = "char123"
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_FULL_SHEET.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id)}",
+        ).respond(200, json=full_sheet_response_data)
+
+        # When: Getting the full sheet
+        result = await vclient.characters(
+            user_id, campaign_id, company_id=company_id
+        ).get_full_sheet(character_id)
+
+        # Then: Returns CharacterFullSheet with correct hierarchy
+        assert route.called
+        assert isinstance(result, CharacterFullSheet)
+        assert result.character.name_first == "Marcus"
+        assert len(result.sections) == 1
+        assert result.sections[0].name == "Physical"
+        assert result.sections[0].categories[0].character_traits[0].value == 3
 
 
 class TestCharactersServiceInventory:
