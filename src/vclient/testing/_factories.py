@@ -9,6 +9,7 @@ from vclient.models import (
     CampaignChapter,
     Character,
     CharacterConcept,
+    CharacterFullSheet,
     CharacterTrait,
     CharacterTraitValueOptionsResponse,
     Company,
@@ -17,6 +18,9 @@ from vclient.models import (
     DeveloperWithApiKey,
     Diceroll,
     DictionaryTerm,
+    FullSheetTraitCategory,
+    FullSheetTraitSection,
+    FullSheetTraitSubcategory,
     GitHubProfile,
     GoogleProfile,
     InventoryItem,
@@ -77,6 +81,11 @@ class CharacterConceptFactory(ModelFactory[CharacterConcept]):
     __use_defaults__ = True
 
 
+class CharacterFullSheetFactory(ModelFactory[CharacterFullSheet]):
+    __model__ = CharacterFullSheet
+    __use_defaults__ = True
+
+
 class CharacterTraitFactory(ModelFactory[CharacterTrait]):
     __model__ = CharacterTrait
     __use_defaults__ = True
@@ -121,6 +130,21 @@ class DicerollFactory(ModelFactory[Diceroll]):
 
 class DictionaryTermFactory(ModelFactory[DictionaryTerm]):
     __model__ = DictionaryTerm
+    __use_defaults__ = True
+
+
+class FullSheetTraitCategoryFactory(ModelFactory[FullSheetTraitCategory]):
+    __model__ = FullSheetTraitCategory
+    __use_defaults__ = True
+
+
+class FullSheetTraitSectionFactory(ModelFactory[FullSheetTraitSection]):
+    __model__ = FullSheetTraitSection
+    __use_defaults__ = True
+
+
+class FullSheetTraitSubcategoryFactory(ModelFactory[FullSheetTraitSubcategory]):
+    __model__ = FullSheetTraitSubcategory
     __use_defaults__ = True
 
 
@@ -233,6 +257,7 @@ __all__ = [
     "CampaignFactory",
     "CharacterConceptFactory",
     "CharacterFactory",
+    "CharacterFullSheetFactory",
     "CharacterTraitFactory",
     "CharacterTraitValueOptionsResponseFactory",
     "ChargenSessionResponseFactory",
@@ -242,6 +267,9 @@ __all__ = [
     "DeveloperWithApiKeyFactory",
     "DicerollFactory",
     "DictionaryTermFactory",
+    "FullSheetTraitCategoryFactory",
+    "FullSheetTraitSectionFactory",
+    "FullSheetTraitSubcategoryFactory",
     "GitHubProfileFactory",
     "GoogleProfileFactory",
     "InventoryItemFactory",
