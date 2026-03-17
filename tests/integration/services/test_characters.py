@@ -1,5 +1,6 @@
 """Integration tests for CharactersService."""
 
+import copy
 from datetime import UTC, datetime
 
 import pytest
@@ -116,53 +117,64 @@ def full_sheet_response_data() -> dict:
 
 
 @pytest.fixture
-def full_sheet_response_data_with_available_traits() -> dict:
-    """Return sample full sheet response data with available traits."""
+def full_sheet_category_response_data() -> dict:
+    """Return sample full sheet category response data."""
     return {
-        "character": {
-            "id": "char123",
-            "character_class": "VAMPIRE",
-            "game_version": "V5",
-            "name_first": "Marcus",
-            "name_last": "Blackwood",
-            "name": "Marcus",
-            "name_full": "Marcus Blackwood",
-            "user_creator_id": "user123",
-            "user_player_id": "user123",
-            "company_id": "company123",
-            "campaign_id": "507f1f77bcf86cd799439011",
-        },
-        "sections": [
+        "id": "cat1",
+        "name": "Attributes",
+        "initial_cost": 1,
+        "upgrade_cost": 2,
+        "show_when_empty": True,
+        "order": 1,
+        "subcategories": [],
+        "character_traits": [
             {
-                "id": "sec1",
-                "name": "Physical",
-                "order": 1,
-                "show_when_empty": True,
-                "categories": [
-                    {
-                        "id": "cat1",
-                        "name": "Attributes",
-                        "initial_cost": 1,
-                        "upgrade_cost": 2,
-                        "show_when_empty": True,
-                        "order": 1,
-                        "subcategories": [],
-                        "character_traits": [],
-                        "available_traits": [
-                            {
-                                "id": "t2",
-                                "name": "Dexterity",
-                                "date_created": "2024-01-01T00:00:00Z",
-                                "date_modified": "2024-01-01T00:00:00Z",
-                                "sheet_section_id": "sec1",
-                                "parent_category_id": "cat1",
-                            }
-                        ],
-                    }
-                ],
+                "id": "ct1",
+                "character_id": "char123",
+                "value": 3,
+                "trait": {
+                    "id": "t1",
+                    "name": "Strength",
+                    "date_created": "2024-01-01T00:00:00Z",
+                    "date_modified": "2024-01-01T00:00:00Z",
+                    "sheet_section_id": "sec1",
+                    "parent_category_id": "cat1",
+                },
             }
         ],
+        "available_traits": [],
     }
+
+
+@pytest.fixture
+def full_sheet_category_response_data_with_available_traits(
+    full_sheet_category_response_data: dict,
+) -> dict:
+    """Return sample full sheet category response data with available traits."""
+    data = copy.deepcopy(full_sheet_category_response_data)
+    data["character_traits"] = []
+    data["available_traits"] = [
+        {
+            "id": "t2",
+            "name": "Dexterity",
+            "date_created": "2024-01-01T00:00:00Z",
+            "date_modified": "2024-01-01T00:00:00Z",
+            "sheet_section_id": "sec1",
+            "parent_category_id": "cat1",
+        }
+    ]
+    return data
+
+
+@pytest.fixture
+def full_sheet_response_data_with_available_traits(
+    full_sheet_response_data: dict,
+    full_sheet_category_response_data_with_available_traits: dict,
+) -> dict:
+    """Return sample full sheet response data with available traits."""
+    data = copy.deepcopy(full_sheet_response_data)
+    data["sections"][0]["categories"][0] = full_sheet_category_response_data_with_available_traits
+    return data
 
 
 @pytest.fixture
@@ -1350,7 +1362,9 @@ class TestCharactersServiceGetFullSheetCategory:
     """Tests for CharactersService.get_full_sheet_category method."""
 
     @respx.mock
-    async def test_get_full_sheet_category(self, vclient, base_url):
+    async def test_get_full_sheet_category(
+        self, vclient, base_url, full_sheet_category_response_data
+    ):
         """Verify getting a single category from the full sheet."""
         # Given: A mocked category endpoint
         company_id = "company123"
@@ -1358,34 +1372,9 @@ class TestCharactersServiceGetFullSheetCategory:
         campaign_id = "507f1f77bcf86cd799439011"
         character_id = "char123"
         category_id = "cat1"
-        category_data = {
-            "id": "cat1",
-            "name": "Attributes",
-            "initial_cost": 1,
-            "upgrade_cost": 2,
-            "show_when_empty": True,
-            "order": 1,
-            "subcategories": [],
-            "character_traits": [
-                {
-                    "id": "ct1",
-                    "character_id": "char123",
-                    "value": 3,
-                    "trait": {
-                        "id": "t1",
-                        "name": "Strength",
-                        "date_created": "2024-01-01T00:00:00Z",
-                        "date_modified": "2024-01-01T00:00:00Z",
-                        "sheet_section_id": "sec1",
-                        "parent_category_id": "cat1",
-                    },
-                }
-            ],
-            "available_traits": [],
-        }
         route = respx.get(
             f"{base_url}{Endpoints.CHARACTER_FULL_SHEET_CATEGORY.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, category_id=category_id)}",
-        ).respond(200, json=category_data)
+        ).respond(200, json=full_sheet_category_response_data)
 
         # When: Getting a single category
         result = await vclient.characters(
@@ -1401,7 +1390,9 @@ class TestCharactersServiceGetFullSheetCategory:
         assert result.character_traits[0].value == 3
 
     @respx.mock
-    async def test_get_full_sheet_category_with_available_traits(self, vclient, base_url):
+    async def test_get_full_sheet_category_with_available_traits(
+        self, vclient, base_url, full_sheet_category_response_data_with_available_traits
+    ):
         """Verify getting a category with available traits."""
         # Given: A mocked category endpoint expecting the query param
         company_id = "company123"
@@ -1409,30 +1400,10 @@ class TestCharactersServiceGetFullSheetCategory:
         campaign_id = "507f1f77bcf86cd799439011"
         character_id = "char123"
         category_id = "cat1"
-        category_data = {
-            "id": "cat1",
-            "name": "Attributes",
-            "initial_cost": 1,
-            "upgrade_cost": 2,
-            "show_when_empty": True,
-            "order": 1,
-            "subcategories": [],
-            "character_traits": [],
-            "available_traits": [
-                {
-                    "id": "t2",
-                    "name": "Dexterity",
-                    "date_created": "2024-01-01T00:00:00Z",
-                    "date_modified": "2024-01-01T00:00:00Z",
-                    "sheet_section_id": "sec1",
-                    "parent_category_id": "cat1",
-                }
-            ],
-        }
         route = respx.get(
             f"{base_url}{Endpoints.CHARACTER_FULL_SHEET_CATEGORY.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, character_id=character_id, category_id=category_id)}",
             params={"include_available_traits": "true"},
-        ).respond(200, json=category_data)
+        ).respond(200, json=full_sheet_category_response_data_with_available_traits)
 
         # When: Getting a category with available traits
         result = await vclient.characters(
