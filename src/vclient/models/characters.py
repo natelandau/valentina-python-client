@@ -163,6 +163,7 @@ class Character(BaseModel):
         default=None, description="Character's nature."
     )
     concept_id: str | None = Field(default=None, description="ID of the character concept.")
+    concept_name: str | None = Field(default=None, description="Name of the character concept.")
 
     # Relationships
     user_creator_id: str = Field(..., description="ID of the user who created the character.")

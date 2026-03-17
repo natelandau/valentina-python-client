@@ -29,6 +29,7 @@ Models for player and non-player characters, including class-specific attributes
 | `company_id`          | `str`                        | Company ID                                     |
 | `campaign_id`         | `str`                        | Campaign ID                                    |
 | `concept_id`          | `str \| None`                | Concept ID                                     |
+| `concept_name`        | `str \| None`                | Concept name                                   |
 | `starting_points`     | `int`                        | Starting experience points                     |
 | `demeanor`            | `str \| None`                | demeanor                                       |
 | `nature`              | `str \| None`                | nature                                         |
@@ -61,9 +62,9 @@ Models for player and non-player characters, including class-specific attributes
 
 ## HunterAttributes
 
-| Field   | Type               | Description  |
-| ------- | ------------------ | ------------ |
-| `creed` | `str \| None`      | Hunter creed |
+| Field   | Type          | Description  |
+| ------- | ------------- | ------------ |
+| `creed` | `str \| None` | Hunter creed |
 
 ## MageAttributes
 
@@ -90,57 +91,56 @@ Represents an item in a character's inventory.
 
 Top-level response for the full character sheet endpoint.
 
-| Field       | Type                          | Description                            |
-| ----------- | ----------------------------- | -------------------------------------- |
-| `character` | `Character`                   | The character data                     |
-| `sections`  | `list[FullSheetTraitSection]` | Hierarchical trait sections            |
+| Field       | Type                          | Description                 |
+| ----------- | ----------------------------- | --------------------------- |
+| `character` | `Character`                   | The character data          |
+| `sections`  | `list[FullSheetTraitSection]` | Hierarchical trait sections |
 
 ## FullSheetTraitSection
 
 A section on the character sheet (e.g., "Physical", "Social", "Mental").
 
-| Field             | Type                            | Description                       |
-| ----------------- | ------------------------------- | --------------------------------- |
-| `id`              | `str`                           | Unique identifier                 |
-| `name`            | `str`                           | Section name                      |
-| `description`     | `str \| None`                   | Section description               |
-| `order`           | `int`                           | Display order                     |
-| `show_when_empty` | `bool`                          | Whether to show when no traits    |
-| `categories`      | `list[FullSheetTraitCategory]`  | Trait categories in this section  |
+| Field             | Type                           | Description                      |
+| ----------------- | ------------------------------ | -------------------------------- |
+| `id`              | `str`                          | Unique identifier                |
+| `name`            | `str`                          | Section name                     |
+| `description`     | `str \| None`                  | Section description              |
+| `order`           | `int`                          | Display order                    |
+| `show_when_empty` | `bool`                         | Whether to show when no traits   |
+| `categories`      | `list[FullSheetTraitCategory]` | Trait categories in this section |
 
 ## FullSheetTraitCategory
 
 A trait category within a section (e.g., "Attributes", "Skills").
 
-| Field              | Type                               | Description                              |
-| ------------------ | ---------------------------------- | ---------------------------------------- |
-| `id`               | `str`                              | Unique identifier                        |
-| `name`             | `str`                              | Category name                            |
-| `description`      | `str \| None`                      | Category description                     |
-| `initial_cost`     | `int`                              | XP cost for initial dot                  |
-| `upgrade_cost`     | `int`                              | XP cost per additional dot               |
-| `show_when_empty`  | `bool`                             | Whether to show when no traits           |
-| `order`            | `int`                              | Display order                            |
-| `subcategories`    | `list[FullSheetTraitSubcategory]`  | Subcategories in this category           |
-| `character_traits` | `list[CharacterTrait]`             | Direct traits (no subcategory)           |
-| `available_traits` | `list[Trait]`                      | Unassigned standard traits (empty unless requested) |
+| Field              | Type                              | Description                                         |
+| ------------------ | --------------------------------- | --------------------------------------------------- |
+| `id`               | `str`                             | Unique identifier                                   |
+| `name`             | `str`                             | Category name                                       |
+| `description`      | `str \| None`                     | Category description                                |
+| `initial_cost`     | `int`                             | XP cost for initial dot                             |
+| `upgrade_cost`     | `int`                             | XP cost per additional dot                          |
+| `show_when_empty`  | `bool`                            | Whether to show when no traits                      |
+| `order`            | `int`                             | Display order                                       |
+| `subcategories`    | `list[FullSheetTraitSubcategory]` | Subcategories in this category                      |
+| `character_traits` | `list[CharacterTrait]`            | Direct traits (no subcategory)                      |
+| `available_traits` | `list[Trait]`                     | Unassigned standard traits (empty unless requested) |
 
 ## FullSheetTraitSubcategory
 
 A trait subcategory within a category (e.g., "Celerity", "Potence").
 
-| Field              | Type                        | Description                               |
-| ------------------ | --------------------------- | ----------------------------------------- |
-| `id`               | `str`                       | Unique identifier                         |
-| `name`             | `str`                       | Subcategory name                          |
-| `description`      | `str \| None`               | Subcategory description                   |
-| `initial_cost`     | `int`                       | XP cost for initial dot                   |
-| `upgrade_cost`     | `int`                       | XP cost per additional dot                |
-| `show_when_empty`  | `bool`                      | Whether to show when no traits            |
-| `requires_parent`  | `bool`                      | Whether a parent trait is required         |
-| `pool`             | `str \| None`               | Dice pool formula                         |
-| `system`           | `str \| None`               | System rules description                  |
-| `hunter_edge_type` | `HunterEdgeType \| None`    | Hunter edge type (ASSETS, APTITUDES, etc) |
-| `character_traits` | `list[CharacterTrait]`      | Traits in this subcategory                |
-| `available_traits` | `list[Trait]`               | Unassigned standard traits (empty unless requested) |
-
+| Field              | Type                     | Description                                         |
+| ------------------ | ------------------------ | --------------------------------------------------- |
+| `id`               | `str`                    | Unique identifier                                   |
+| `name`             | `str`                    | Subcategory name                                    |
+| `description`      | `str \| None`            | Subcategory description                             |
+| `initial_cost`     | `int`                    | XP cost for initial dot                             |
+| `upgrade_cost`     | `int`                    | XP cost per additional dot                          |
+| `show_when_empty`  | `bool`                   | Whether to show when no traits                      |
+| `requires_parent`  | `bool`                   | Whether a parent trait is required                  |
+| `pool`             | `str \| None`            | Dice pool formula                                   |
+| `system`           | `str \| None`            | System rules description                            |
+| `hunter_edge_type` | `HunterEdgeType \| None` | Hunter edge type (ASSETS, APTITUDES, etc)           |
+| `character_traits` | `list[CharacterTrait]`   | Traits in this subcategory                          |
+| `available_traits` | `list[Trait]`            | Unassigned standard traits (empty unless requested) |
