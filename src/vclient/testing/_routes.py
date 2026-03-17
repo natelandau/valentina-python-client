@@ -21,6 +21,7 @@ from vclient.models import (
     DeveloperWithApiKey,
     Diceroll,
     DictionaryTerm,
+    FullSheetTraitCategory,
     InventoryItem,
     MeDeveloper,
     MeDeveloperWithApiKey,
@@ -234,6 +235,9 @@ class Routes:
     CHARACTERS_STATISTICS = RouteSpec("GET", Endpoints.CHARACTER_STATISTICS, SINGLE, RollStatistics)
     CHARACTERS_FULL_SHEET = RouteSpec(
         "GET", Endpoints.CHARACTER_FULL_SHEET, SINGLE, CharacterFullSheet
+    )
+    CHARACTERS_FULL_SHEET_CATEGORY = RouteSpec(
+        "GET", Endpoints.CHARACTER_FULL_SHEET_CATEGORY, SINGLE, FullSheetTraitCategory
     )
 
     # Character assets
