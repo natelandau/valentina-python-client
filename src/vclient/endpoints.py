@@ -89,6 +89,7 @@ class Endpoints:
     CHARACTERS = f"{CAMPAIGN}/characters"
     CHARACTER = f"{CHARACTERS}/{{character_id}}"
     CHARACTER_STATISTICS = f"{CHARACTER}/statistics"
+    CHARACTER_FULL_SHEET = f"{CHARACTER}/full-sheet"
     CHARACTER_ASSETS = f"{CHARACTER}/assets"
     CHARACTER_ASSET = f"{CHARACTER_ASSETS}/{{asset_id}}"
     CHARACTER_ASSET_UPLOAD = f"{CHARACTER_ASSETS}/upload"
