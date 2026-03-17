@@ -15,6 +15,7 @@ from vclient.models import (
     Asset,
     Character,
     CharacterCreate,
+    CharacterFullSheet,
     CharacterUpdate,
     InventoryItem,
     InventoryItemCreate,
@@ -326,6 +327,27 @@ class CharactersService(BaseService):
             params={"num_top_traits": num_top_traits},
         )
         return RollStatistics.model_validate(response.json())
+
+    async def get_full_sheet(self, character_id: str) -> CharacterFullSheet:
+        """Retrieve the full character sheet with all traits organized hierarchically.
+
+        Returns the character data along with the complete trait hierarchy organized as
+        sections > categories > subcategories > character traits.
+
+        Args:
+            character_id: The ID of the character to get the full sheet for.
+
+        Returns:
+            CharacterFullSheet with nested trait hierarchy.
+
+        Raises:
+            NotFoundError: If the character does not exist.
+            AuthorizationError: If you don't have access.
+        """
+        response = await self._get(
+            self._format_endpoint(Endpoints.CHARACTER_FULL_SHEET, character_id=character_id),
+        )
+        return CharacterFullSheet.model_validate(response.json())
 
     # -------------------------------------------------------------------------
     # Asset Methods
