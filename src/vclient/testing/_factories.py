@@ -4,6 +4,9 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 
 from vclient.models import (
     Asset,
+    BulkAssignTraitFailure,
+    BulkAssignTraitResponse,
+    BulkAssignTraitSuccess,
     Campaign,
     CampaignBook,
     CampaignChapter,
@@ -48,6 +51,21 @@ from vclient.models.users import CampaignExperience
 
 class AssetFactory(ModelFactory[Asset]):
     __model__ = Asset
+    __use_defaults__ = True
+
+
+class BulkAssignTraitFailureFactory(ModelFactory[BulkAssignTraitFailure]):
+    __model__ = BulkAssignTraitFailure
+    __use_defaults__ = True
+
+
+class BulkAssignTraitResponseFactory(ModelFactory[BulkAssignTraitResponse]):
+    __model__ = BulkAssignTraitResponse
+    __use_defaults__ = True
+
+
+class BulkAssignTraitSuccessFactory(ModelFactory[BulkAssignTraitSuccess]):
+    __model__ = BulkAssignTraitSuccess
     __use_defaults__ = True
 
 
@@ -251,6 +269,9 @@ class WerewolfTribeFactory(ModelFactory[WerewolfTribe]):
 
 __all__ = [
     "AssetFactory",
+    "BulkAssignTraitFailureFactory",
+    "BulkAssignTraitResponseFactory",
+    "BulkAssignTraitSuccessFactory",
     "CampaignBookFactory",
     "CampaignChapterFactory",
     "CampaignExperienceFactory",

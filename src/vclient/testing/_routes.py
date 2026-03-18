@@ -7,6 +7,7 @@ from typing import NamedTuple
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Asset,
+    BulkAssignTraitResponse,
     Campaign,
     CampaignBook,
     CampaignChapter,
@@ -317,6 +318,9 @@ class Routes:
     CHARACTER_TRAITS_DELETE = RouteSpec("DELETE", Endpoints.CHARACTER_TRAIT, NO_CONTENT, None)
     CHARACTER_TRAITS_ASSIGN = RouteSpec(
         "POST", Endpoints.CHARACTER_TRAIT_ASSIGN, SINGLE, CharacterTrait
+    )
+    CHARACTER_TRAITS_BULK_ASSIGN = RouteSpec(
+        "POST", Endpoints.CHARACTER_TRAIT_BULK_ASSIGN, SINGLE, BulkAssignTraitResponse
     )
     CHARACTER_TRAITS_CREATE = RouteSpec(
         "POST", Endpoints.CHARACTER_TRAIT_CREATE, SINGLE, CharacterTrait

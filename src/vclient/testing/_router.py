@@ -10,6 +10,7 @@ import httpx
 
 from vclient.models import (
     Asset,
+    BulkAssignTraitResponse,
     Campaign,
     CampaignBook,
     CampaignChapter,
@@ -48,6 +49,7 @@ from vclient.models.character_autogen import ChargenSessionResponse
 from vclient.models.users import CampaignExperience
 from vclient.testing._factories import (
     AssetFactory,
+    BulkAssignTraitResponseFactory,
     CampaignBookFactory,
     CampaignChapterFactory,
     CampaignExperienceFactory,
@@ -88,6 +90,7 @@ from vclient.testing._routes import LIST, NO_CONTENT, PAGINATED, RAW_JSON, Route
 
 _FACTORY_MAP: dict[type, type] = {
     Asset: AssetFactory,
+    BulkAssignTraitResponse: BulkAssignTraitResponseFactory,
     Campaign: CampaignFactory,
     CampaignBook: CampaignBookFactory,
     CampaignChapter: CampaignChapterFactory,
