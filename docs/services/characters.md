@@ -31,11 +31,11 @@ characters = characters_service(
 
 ### Pagination
 
-| Method                                                                                   | Returns                        | Description                                |
-| ---------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------ |
-| `get_page(limit?, offset?, user_player_id?, character_class?, character_type?, status?)` | `PaginatedResponse[Character]` | Get a page of characters                   |
-| `list_all(...)`                                                                          | `list[Character]`              | Get all characters (supports same filters) |
-| `iter_all(limit?, ...)`                                                                  | `AsyncIterator[Character]`     | Iterate through all characters             |
+| Method                                                                                                  | Returns                        | Description                                    |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------------------------------------------- |
+| `get_page(limit?, offset?, user_player_id?, character_class?, character_type?, status?, is_temporary?)` | `PaginatedResponse[Character]` | Get a page of characters with optional filters |
+| `list_all(...)`                                                                                         | `list[Character]`              | Get all characters (supports same filters)     |
+| `iter_all(limit?, ...)`                                                                                 | `AsyncIterator[Character]`     | Iterate through all characters                 |
 
 ### Statistics
 
@@ -49,8 +49,8 @@ characters = characters_service(
 
 ### Full Sheet
 
-| Method                                                                          | Returns                  | Description                                     |
-| ------------------------------------------------------------------------------- | ------------------------ | ----------------------------------------------- |
+| Method                                                                          | Returns                  | Description                                      |
+| ------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------ |
 | `get_full_sheet(character_id, include_available_traits?)`                       | `CharacterFullSheet`     | Get hierarchical character sheet with all traits |
 | `get_full_sheet_category(character_id, category_id, include_available_traits?)` | `FullSheetTraitCategory` | Get a single category slice of the full sheet    |
 
@@ -64,14 +64,14 @@ characters = characters_service(
 
 ### Assets
 
-| Method                                          | Returns                    | Description           |
-| ----------------------------------------------- | -------------------------- | --------------------- |
-| `get_assets_page(character_id, limit?, offset?)`  | `PaginatedResponse[Asset]` | Get a page of assets   |
-| `list_all_assets(character_id)`                    | `list[Asset]`              | Get all assets         |
-| `iter_all_assets(character_id, limit?)`            | `AsyncIterator[Asset]`     | Iterate through assets |
-| `get_asset(character_id, asset_id)`                | `Asset`                    | Get an asset           |
-| `upload_asset(character_id, filename, content)`    | `Asset`                    | Upload an asset        |
-| `delete_asset(character_id, asset_id)`             | `None`                     | Delete an asset        |
+| Method                                           | Returns                    | Description            |
+| ------------------------------------------------ | -------------------------- | ---------------------- |
+| `get_assets_page(character_id, limit?, offset?)` | `PaginatedResponse[Asset]` | Get a page of assets   |
+| `list_all_assets(character_id)`                  | `list[Asset]`              | Get all assets         |
+| `iter_all_assets(character_id, limit?)`          | `AsyncIterator[Asset]`     | Iterate through assets |
+| `get_asset(character_id, asset_id)`              | `Asset`                    | Get an asset           |
+| `upload_asset(character_id, filename, content)`  | `Asset`                    | Upload an asset        |
+| `delete_asset(character_id, asset_id)`           | `None`                     | Delete an asset        |
 
 ### Notes
 

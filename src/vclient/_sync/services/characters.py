@@ -81,6 +81,7 @@ class SyncCharactersService(SyncBaseService):
         character_class: CharacterClass | None = None,
         character_type: CharacterType | None = None,
         status: CharacterStatus | None = None,
+        is_temporary: bool = False,
     ) -> PaginatedResponse[Character]:
         """Retrieve a paginated page of characters.
 
@@ -92,6 +93,7 @@ class SyncCharactersService(SyncBaseService):
             character_class: Filter by character class.
             character_type: Filter by character type.
             status: Filter by character status.
+            is_temporary: Filter for temporary characters.
 
         Returns:
             A PaginatedResponse containing Character objects and pagination metadata.
@@ -107,6 +109,7 @@ class SyncCharactersService(SyncBaseService):
                 character_class=character_class,
                 character_type=character_type,
                 status=status,
+                is_temporary=is_temporary,
             ),
         )
 
@@ -118,6 +121,7 @@ class SyncCharactersService(SyncBaseService):
         character_class: CharacterClass | None = None,
         character_type: CharacterType | None = None,
         status: CharacterStatus | None = None,
+        is_temporary: bool = False,
     ) -> list[Character]:
         """Retrieve all characters.
 
@@ -130,6 +134,7 @@ class SyncCharactersService(SyncBaseService):
             character_class: Filter by character class.
             character_type: Filter by character type.
             status: Filter by character status.
+            is_temporary: Filter for temporary characters.
 
         Returns:
             A list of all Character objects.
@@ -142,6 +147,7 @@ class SyncCharactersService(SyncBaseService):
                 character_class=character_class,
                 character_type=character_type,
                 status=status,
+                is_temporary=is_temporary,
             )
         ]
 
@@ -154,6 +160,7 @@ class SyncCharactersService(SyncBaseService):
         character_class: CharacterClass | None = None,
         character_type: CharacterType | None = None,
         status: CharacterStatus | None = None,
+        is_temporary: bool = False,
     ) -> Iterator[Character]:
         """Iterate through all characters.
 
@@ -167,6 +174,7 @@ class SyncCharactersService(SyncBaseService):
             character_class: Filter by character class.
             character_type: Filter by character type.
             status: Filter by character status.
+            is_temporary: Whether to filter for temporary characters.
 
         Yields:
             Individual Character objects.
@@ -184,6 +192,7 @@ class SyncCharactersService(SyncBaseService):
                 character_class=character_class,
                 character_type=character_type,
                 status=status,
+                is_temporary=is_temporary,
             ),
         ):
             yield Character.model_validate(item)

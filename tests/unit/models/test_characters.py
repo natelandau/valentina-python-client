@@ -43,6 +43,7 @@ class TestCharacter:
         assert character.type == "PLAYER"
         assert character.status == "ALIVE"
         assert character.starting_points == 0
+        assert character.is_temporary is False
         assert character.asset_ids == []
         assert character.character_trait_ids == []
         assert character.specialties == []
@@ -84,6 +85,7 @@ class TestCharacter:
                     "description": "Skilled with claws",
                 }
             ],
+            "is_temporary": True,
             "vampire_attributes": None,
             "werewolf_attributes": {
                 "tribe_id": "tribe123",
@@ -106,6 +108,7 @@ class TestCharacter:
         assert character.game_version == "V4"
         assert character.name_first == "Jane"
         assert character.age == 28
+        assert character.is_temporary is True
         assert character.werewolf_attributes is not None
         assert character.werewolf_attributes.tribe_name == "Glass Walkers"
         assert len(character.specialties) == 1
@@ -208,6 +211,7 @@ class TestCharacterCreate:
         assert request.game_version == "V5"
         assert request.name_first == "John"
         assert request.name_last == "Doe"
+        assert request.is_temporary is False
         assert request.type is None
         assert request.age is None
 
@@ -232,11 +236,13 @@ class TestCharacterCreate:
             nature="Protector",
             concept_id="concept123",
             user_player_id="user456",
+            is_temporary=True,
             traits=traits,
         )
 
         # Then: All fields are set correctly
         assert request.character_class == "WEREWOLF"
+        assert request.is_temporary is True
         assert request.type == "NPC"
         assert request.name_nick == "Wolf"
         assert request.age == 28
@@ -300,6 +306,7 @@ class TestCharacterUpdate:
 
         # Then: All fields are None
         assert request.character_class is None
+        assert request.is_temporary is None
         assert request.name_first is None
         assert request.status is None
 
@@ -309,11 +316,13 @@ class TestCharacterUpdate:
         request = CharacterUpdate(
             name_first="Jane",
             status="DEAD",
+            is_temporary=True,
         )
 
         # Then: Only specified fields are set
         assert request.name_first == "Jane"
         assert request.status == "DEAD"
+        assert request.is_temporary is True
         assert request.name_last is None
         assert request.character_class is None
 
