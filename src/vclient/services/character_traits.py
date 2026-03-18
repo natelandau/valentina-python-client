@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from vclient.constants import DEFAULT_PAGE_LIMIT, TraitModifyCurrency
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    BulkAssignTraitResponse,
     CharacterTrait,
     CharacterTraitAdd,
     CharacterTraitValueOptionsResponse,
@@ -203,6 +204,26 @@ class CharacterTraitsService(BaseService):
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return CharacterTrait.model_validate(response.json())
+
+    async def bulk_assign(self, items: list[CharacterTraitAdd]) -> BulkAssignTraitResponse:
+        """Assign multiple traits to a character in a single request.
+
+        Each assignment is processed independently with best-effort semantics —
+        successful traits are saved and failed ones are reported with error details.
+        Currency balances are tracked across the batch.
+
+        Args:
+            items: List of CharacterTraitAdd models, each specifying a trait_id,
+                value, and currency. Maximum 200 items (enforced server-side).
+
+        Returns:
+            BulkAssignTraitResponse with succeeded and failed lists.
+        """
+        response = await self._post(
+            self._format_endpoint(Endpoints.CHARACTER_TRAIT_BULK_ASSIGN),
+            json=[item.model_dump(mode="json") for item in items],
+        )
+        return BulkAssignTraitResponse.model_validate(response.json())
 
     async def create(
         self,

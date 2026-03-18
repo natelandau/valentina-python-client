@@ -1,12 +1,20 @@
 """Integration tests for CharacterTraitsService."""
 
+import json
+
 import pytest
 import respx
 from httpx import Response
 
 from vclient.endpoints import Endpoints
-from vclient.exceptions import NotFoundError
-from vclient.models import CharacterTrait, CharacterTraitValueOptionsResponse, PaginatedResponse
+from vclient.exceptions import NotFoundError, ValidationError
+from vclient.models import (
+    BulkAssignTraitResponse,
+    CharacterTrait,
+    CharacterTraitAdd,
+    CharacterTraitValueOptionsResponse,
+    PaginatedResponse,
+)
 
 pytestmark = pytest.mark.anyio
 
@@ -780,3 +788,148 @@ class TestCharacterTraitsServiceChangeValue:
         assert route.called
         assert isinstance(result, CharacterTrait)
         assert result.trait.name == "Strength"
+
+
+@pytest.fixture
+def bulk_assign_response_data(character_trait_response_data: dict) -> dict:
+    """Return sample bulk assign response data with mixed results."""
+    return {
+        "succeeded": [
+            {"trait_id": "trait1", "character_trait": character_trait_response_data},
+        ],
+        "failed": [
+            {"trait_id": "trait2", "error": "Not enough XP to add trait"},
+        ],
+    }
+
+
+@pytest.fixture
+def bulk_assign_all_success_response_data(character_trait_response_data: dict) -> dict:
+    """Return sample bulk assign response with all successes."""
+    return {
+        "succeeded": [
+            {"trait_id": "trait1", "character_trait": character_trait_response_data},
+            {
+                "trait_id": "trait2",
+                "character_trait": {**character_trait_response_data, "id": "ct456"},
+            },
+        ],
+        "failed": [],
+    }
+
+
+class TestCharacterTraitsServiceBulkAssign:
+    """Tests for CharacterTraitsService.bulk_assign method."""
+
+    @respx.mock
+    async def test_bulk_assign_success(
+        self, vclient, base_url, bulk_assign_all_success_response_data
+    ) -> None:
+        """Verify bulk assigning traits returns BulkAssignTraitResponse with all successes."""
+        # Given: A mocked bulk-assign endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_BULK_ASSIGN.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=bulk_assign_all_success_response_data))
+
+        # When: Bulk assigning traits
+        items = [
+            CharacterTraitAdd(trait_id="trait1", value=2, currency="NO_COST"),
+            CharacterTraitAdd(trait_id="trait2", value=1, currency="XP"),
+        ]
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).bulk_assign(items)
+
+        # Then: The route was called and response is parsed correctly
+        assert route.called
+        assert isinstance(result, BulkAssignTraitResponse)
+        assert len(result.succeeded) == 2
+        assert len(result.failed) == 0
+        assert result.succeeded[0].trait_id == "trait1"
+        assert isinstance(result.succeeded[0].character_trait, CharacterTrait)
+
+        # Verify request body is a JSON list
+        body = json.loads(route.calls[0].request.content)
+        assert isinstance(body, list)
+        assert len(body) == 2
+        assert body[0]["trait_id"] == "trait1"
+        assert body[0]["value"] == 2
+        assert body[0]["currency"] == "NO_COST"
+
+    @respx.mock
+    async def test_bulk_assign_mixed_results(
+        self, vclient, base_url, bulk_assign_response_data
+    ) -> None:
+        """Verify bulk assign with mixed succeeded and failed items."""
+        # Given: A mocked endpoint returning mixed results
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_BULK_ASSIGN.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=bulk_assign_response_data))
+
+        # When: Bulk assigning traits
+        items = [
+            CharacterTraitAdd(trait_id="trait1", value=2, currency="NO_COST"),
+            CharacterTraitAdd(trait_id="trait2", value=1, currency="XP"),
+        ]
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).bulk_assign(items)
+
+        # Then: Both succeeded and failed lists are populated
+        assert route.called
+        assert len(result.succeeded) == 1
+        assert len(result.failed) == 1
+        assert result.failed[0].trait_id == "trait2"
+        assert result.failed[0].error == "Not enough XP to add trait"
+
+    @respx.mock
+    async def test_bulk_assign_empty_list(self, vclient, base_url) -> None:
+        """Verify bulk assign with empty list returns empty response."""
+        # Given: A mocked endpoint returning empty results
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_BULK_ASSIGN.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json={"succeeded": [], "failed": []}))
+
+        # When: Bulk assigning an empty list
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).bulk_assign([])
+
+        # Then: Both lists are empty
+        assert route.called
+        assert result.succeeded == []
+        assert result.failed == []
+
+    @respx.mock
+    async def test_bulk_assign_validation_error(self, vclient, base_url) -> None:
+        """Verify bulk assign over batch limit raises ValidationError."""
+        # Given: A mocked 400 response for exceeding batch limit
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_BULK_ASSIGN.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(
+            return_value=Response(
+                400,
+                json={"detail": "Batch size must not exceed 200 items", "status_code": 400},
+            )
+        )
+
+        # When/Then: Bulk assigning raises ValidationError
+        items = [CharacterTraitAdd(trait_id="t1", value=1, currency="NO_COST")]
+        with pytest.raises(ValidationError):
+            await vclient.character_traits(
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
+            ).bulk_assign(items)
+
+        assert route.called
