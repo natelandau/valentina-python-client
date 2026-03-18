@@ -221,7 +221,10 @@ class CharacterTraitsService(BaseService):
         """
         response = await self._post(
             self._format_endpoint(Endpoints.CHARACTER_TRAIT_BULK_ASSIGN),
-            json=[item.model_dump(mode="json") for item in items],
+            json=[
+                item.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+                for item in items
+            ],
         )
         return BulkAssignTraitResponse.model_validate(response.json())
 

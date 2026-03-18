@@ -20,47 +20,6 @@ pytestmark = pytest.mark.anyio
 
 
 @pytest.fixture
-def trait_response_data() -> dict:
-    """Return sample trait response data."""
-    return {
-        "id": "trait123",
-        "name": "Strength",
-        "description": "Physical power and might",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "link": None,
-        "show_when_zero": True,
-        "max_value": 5,
-        "min_value": 0,
-        "is_custom": False,
-        "initial_cost": 1,
-        "upgrade_cost": 2,
-        "sheet_section_name": "Attributes",
-        "sheet_section_id": "section123",
-        "parent_category_name": "Physical",
-        "parent_category_id": "cat123",
-        "custom_for_character_id": None,
-        "trait_subcategory_id": None,
-        "trait_subcategory_name": None,
-        "pool": None,
-        "system": None,
-        "character_classes": ["VAMPIRE", "WEREWOLF"],
-        "game_versions": ["V5"],
-    }
-
-
-@pytest.fixture
-def character_trait_response_data(trait_response_data: dict) -> dict:
-    """Return sample character trait response data."""
-    return {
-        "id": "ct123",
-        "character_id": "char123",
-        "value": 3,
-        "trait": trait_response_data,
-    }
-
-
-@pytest.fixture
 def paginated_character_trait_response(character_trait_response_data: dict) -> dict:
     """Return a paginated response with character traits."""
     return {
@@ -399,8 +358,6 @@ class TestCharacterTraitsServiceAssign:
         assert result.value == 3
 
         # Verify request body
-        import json
-
         body = json.loads(route.calls[0].request.content)
         assert body["trait_id"] == "trait123"
         assert body["value"] == 3
