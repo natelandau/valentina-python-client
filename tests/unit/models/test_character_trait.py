@@ -2,12 +2,60 @@
 
 from datetime import UTC, datetime
 
+import pytest
+
+from vclient.models import (
+    BulkAssignTraitFailure,
+    BulkAssignTraitResponse,
+    BulkAssignTraitSuccess,
+)
 from vclient.models.character_trait import (
     CharacterTrait,
     CharacterTraitAdd,
     TraitCreate,
 )
 from vclient.models.shared import Trait
+
+
+@pytest.fixture
+def trait_response_data() -> dict:
+    """Return sample trait response data."""
+    return {
+        "id": "trait123",
+        "name": "Strength",
+        "description": "Physical power and might",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "link": None,
+        "show_when_zero": True,
+        "max_value": 5,
+        "min_value": 0,
+        "is_custom": False,
+        "initial_cost": 1,
+        "upgrade_cost": 2,
+        "sheet_section_name": "Attributes",
+        "sheet_section_id": "section123",
+        "parent_category_name": "Physical",
+        "parent_category_id": "cat123",
+        "custom_for_character_id": None,
+        "trait_subcategory_id": None,
+        "trait_subcategory_name": None,
+        "pool": None,
+        "system": None,
+        "character_classes": ["VAMPIRE", "WEREWOLF"],
+        "game_versions": ["V5"],
+    }
+
+
+@pytest.fixture
+def character_trait_response_data(trait_response_data: dict) -> dict:
+    """Return sample character trait response data."""
+    return {
+        "id": "ct123",
+        "character_id": "char123",
+        "value": 3,
+        "trait": trait_response_data,
+    }
 
 
 class TestCharacterTrait:
@@ -273,3 +321,38 @@ class TestTraitCreate:
 
         # Then: Value is accepted
         assert request.min_value == 0
+
+
+class TestBulkAssignTraitModels:
+    """Tests for bulk assign trait response models."""
+
+    def test_bulk_assign_trait_success_parses(self, character_trait_response_data: dict) -> None:
+        """Verify BulkAssignTraitSuccess parses valid data."""
+        data = {"trait_id": "abc123", "character_trait": character_trait_response_data}
+        result = BulkAssignTraitSuccess.model_validate(data)
+        assert result.trait_id == "abc123"
+        assert result.character_trait.id == character_trait_response_data["id"]
+
+    def test_bulk_assign_trait_failure_parses(self) -> None:
+        """Verify BulkAssignTraitFailure parses valid data."""
+        data = {"trait_id": "abc123", "error": "Trait not found"}
+        result = BulkAssignTraitFailure.model_validate(data)
+        assert result.trait_id == "abc123"
+        assert result.error == "Trait not found"
+
+    def test_bulk_assign_trait_response_parses(self, character_trait_response_data: dict) -> None:
+        """Verify BulkAssignTraitResponse parses mixed succeeded/failed."""
+        data = {
+            "succeeded": [{"trait_id": "t1", "character_trait": character_trait_response_data}],
+            "failed": [{"trait_id": "t2", "error": "Not enough XP"}],
+        }
+        result = BulkAssignTraitResponse.model_validate(data)
+        assert len(result.succeeded) == 1
+        assert len(result.failed) == 1
+
+    def test_bulk_assign_trait_response_empty(self) -> None:
+        """Verify BulkAssignTraitResponse handles empty lists."""
+        data = {"succeeded": [], "failed": []}
+        result = BulkAssignTraitResponse.model_validate(data)
+        assert result.succeeded == []
+        assert result.failed == []
