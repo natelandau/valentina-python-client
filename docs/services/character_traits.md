@@ -27,6 +27,7 @@ traits = character_traits_service(
 | --------------------------------------- | ---------------- | --------------------------------------------------------------------------- |
 | `get(character_trait_id)`               | `CharacterTrait` | Get a character trait by ID                                                 |
 | `assign(trait_id, value, currency)`     | `CharacterTrait` | Assign an existing trait to the character with `TraitModifyCurrency`        |
+| `bulk_assign(list[CharacterTraitAdd])` | `BulkAssignTraitResponse` | Assign multiple traits at once with best-effort semantics |
 | `create(TraitCreate, **kwargs)`         | `CharacterTrait` | Create a custom trait                                                       |
 | `delete(character_trait_id, currency?)` | `None`           | Delete a character trait. Optional `TraitModifyCurrency` to recoup the cost |
 
@@ -82,5 +83,32 @@ print(f"Current value: {options.current_value}")
 # Change the trait value
 updated = await traits.change_value(trait.id, new_value=4, currency="XP")
 ```
+
+## Bulk Assignment
+
+Assign multiple traits in a single request. Each item is processed independently — successful assignments are saved and failed ones are reported with error details.
+
+```python
+from vclient.models import CharacterTraitAdd
+
+items = [
+    CharacterTraitAdd(trait_id="strength_id", value=3, currency="XP"),
+    CharacterTraitAdd(trait_id="dexterity_id", value=2, currency="NO_COST"),
+    CharacterTraitAdd(trait_id="stamina_id", value=1, currency="STARTING_POINTS"),
+]
+result = await traits.bulk_assign(items)
+
+for success in result.succeeded:
+    print(f"Assigned: {success.character_trait.trait.name}")
+
+for failure in result.failed:
+    print(f"Failed {failure.trait_id}: {failure.error}")
+```
+
+!!! warning "Running Currency Balance"
+
+    Currency balances are tracked across the batch. If early traits spend XP or starting points, later traits in the same request see the reduced balance. Order items strategically — place flaw traits (which grant currency) before traits that spend it.
+
+Maximum batch size is 200 items. Exceeding this raises `ValidationError`.
 
 See [Response Models](../models/character_traits.md) for `CharacterTrait`, `Trait`, and related types.

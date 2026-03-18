@@ -33,6 +33,9 @@ from .character_blueprint import (
     WerewolfTribe,
 )
 from .character_trait import (
+    BulkAssignTraitFailure,
+    BulkAssignTraitResponse,
+    BulkAssignTraitSuccess,
     CharacterCreateTraitAssign,
     CharacterTrait,
     CharacterTraitAdd,
@@ -132,6 +135,9 @@ __all__ = [
     "Asset",
     "BookCreate",
     "BookUpdate",
+    "BulkAssignTraitFailure",
+    "BulkAssignTraitResponse",
+    "BulkAssignTraitSuccess",
     "Campaign",
     "CampaignBook",
     "CampaignChapter",

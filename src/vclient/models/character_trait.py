@@ -79,9 +79,34 @@ class CharacterTraitValueOptionsResponse(BaseModel):
     options: dict[str, CharacterTraitValueOption]
 
 
+class BulkAssignTraitSuccess(BaseModel):
+    """Single successfully assigned trait in a bulk operation."""
+
+    trait_id: str
+    character_trait: CharacterTrait
+
+
+class BulkAssignTraitFailure(BaseModel):
+    """Single failed trait assignment in a bulk operation."""
+
+    trait_id: str
+    error: str
+
+
+class BulkAssignTraitResponse(BaseModel):
+    """Response for bulk trait assignment."""
+
+    succeeded: list[BulkAssignTraitSuccess]
+    failed: list[BulkAssignTraitFailure]
+
+
 __all__ = [
+    "BulkAssignTraitFailure",
+    "BulkAssignTraitResponse",
+    "BulkAssignTraitSuccess",
     "CharacterCreateTraitAssign",
     "CharacterTrait",
+    "CharacterTraitAdd",
     "CharacterTraitValueOption",
     "CharacterTraitValueOptionsResponse",
     "TraitCreate",

@@ -25,6 +25,29 @@ Request model for assigning a trait to an already-created character. Used by the
 | `value`    | `int`                 | Value to set for the trait           |
 | `currency` | `TraitModifyCurrency` | Currency to use to pay for the trait |
 
+## BulkAssignTraitResponse
+
+Response from `bulk_assign()`. Contains results grouped by outcome.
+
+| Field       | Type                          | Description                       |
+| ----------- | ----------------------------- | --------------------------------- |
+| `succeeded` | `list[BulkAssignTraitSuccess]` | Successfully assigned traits      |
+| `failed`    | `list[BulkAssignTraitFailure]` | Traits that failed to be assigned |
+
+## BulkAssignTraitSuccess
+
+| Field             | Type             | Description                           |
+| ----------------- | ---------------- | ------------------------------------- |
+| `trait_id`        | `str`            | ID of the trait that was assigned     |
+| `character_trait` | `CharacterTrait` | The resulting character trait instance |
+
+## BulkAssignTraitFailure
+
+| Field      | Type  | Description                    |
+| ---------- | ----- | ------------------------------ |
+| `trait_id` | `str` | ID of the trait that failed    |
+| `error`    | `str` | Human-readable error message   |
+
 ## Trait
 
 | Field                    | Type                   | Description              |
