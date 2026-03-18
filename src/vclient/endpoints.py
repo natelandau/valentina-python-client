@@ -113,6 +113,7 @@ class Endpoints:
     # Character trait endpoints
     CHARACTER_TRAITS = f"{CHARACTER}/traits"
     CHARACTER_TRAIT_ASSIGN = f"{CHARACTER_TRAITS}/assign"
+    CHARACTER_TRAIT_BULK_ASSIGN = f"{CHARACTER_TRAITS}/bulk-assign"
     CHARACTER_TRAIT_CREATE = f"{CHARACTER_TRAITS}/create"
     CHARACTER_TRAIT = f"{CHARACTER_TRAITS}/{{character_trait_id}}"
     CHARACTER_TRAIT_VALUE_OPTIONS = f"{CHARACTER_TRAIT}/value-options"
