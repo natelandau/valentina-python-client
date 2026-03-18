@@ -51,6 +51,7 @@ def character_response_data() -> dict:
         "werewolf_attributes": None,
         "mage_attributes": None,
         "hunter_attributes": None,
+        "is_temporary": False,
     }
 
 

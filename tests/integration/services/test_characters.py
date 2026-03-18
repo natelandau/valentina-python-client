@@ -375,13 +375,14 @@ class TestCharactersServiceGetPage:
                 "offset": "0",
                 "character_class": "VAMPIRE",
                 "status": "ALIVE",
+                "is_temporary": "true",
             },
         ).mock(return_value=Response(200, json=paginated_character_response))
 
         # When: Requesting with filters
         result = await vclient.characters(
             "user123", "campaign123", company_id="company123"
-        ).get_page(character_class="VAMPIRE", status="ALIVE")
+        ).get_page(character_class="VAMPIRE", status="ALIVE", is_temporary=True)
 
         # Then: The route was called with correct params
         assert route.called
