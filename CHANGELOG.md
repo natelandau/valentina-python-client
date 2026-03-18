@@ -1,3 +1,9 @@
+## v1.17.0 (2026-03-18)
+
+### Feat
+
+- **characters**: add is_temporary field and filter (#52)
+
 ## v1.16.1 (2026-03-17)
 
 ### Fix
