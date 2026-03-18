@@ -13,6 +13,7 @@ Models for player and non-player characters, including class-specific attributes
 | `id`                  | `str`                        | Unique identifier                              |
 | `date_created`        | `datetime`                   | Creation timestamp                             |
 | `date_modified`       | `datetime`                   | Last modified timestamp                        |
+| `is_temporary`        | `bool`                       | Whether the character is temporary             |
 | `character_class`     | `CharacterClass`             | VAMPIRE, WEREWOLF, MAGE, HUNTER, GHOUL, MORTAL |
 | `type`                | `CharacterType`              | PLAYER, NPC, STORYTELLER, DEVELOPER            |
 | `game_version`        | `GameVersion`                | V4 or V5                                       |

@@ -141,6 +141,7 @@ class Character(BaseModel):
     game_version: GameVersion = Field(..., description="Game version for character sheet.")
     status: CharacterStatus = Field(default="ALIVE", description="Character status.")
     starting_points: int = Field(default=0, description="Starting experience points.")
+    is_temporary: bool = Field(default=False, description="Whether the character is temporary.")
 
     # Identity
     name_first: str = Field(..., min_length=3, description="Character's first name.")
@@ -213,6 +214,7 @@ class CharacterCreate(BaseModel):
 
     # Optional fields
     type: CharacterType | None = Field(default=None, description="Character type.")
+    is_temporary: bool = Field(default=False, description="Whether the character is temporary.")
     name_nick: Annotated[str, Field(min_length=3, max_length=50)] | None = Field(
         default=None, description="Character's nickname."
     )
@@ -257,6 +259,7 @@ class CharacterUpdate(BaseModel):
     type: CharacterType | None = None
     game_version: GameVersion | None = None
     status: CharacterStatus | None = None
+    is_temporary: bool | None = None
 
     name_first: Annotated[str, Field(min_length=3)] | None = Field(
         default=None, description="Character's first name."
