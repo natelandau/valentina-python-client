@@ -1,3 +1,9 @@
+## v1.18.0 (2026-03-18)
+
+### Feat
+
+- **character-traits**: add bulk_assign() method (#53)
+
 ## v1.17.0 (2026-03-18)
 
 ### Feat
