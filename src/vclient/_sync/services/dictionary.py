@@ -94,7 +94,7 @@ class SyncDictionaryService(SyncBaseService):
                 link (str | None), synonyms (list[str] | None).
         """
         body = request if request is not None else DictionaryTermUpdate(**kwargs)
-        response = self._put(
+        response = self._patch(
             self._format_endpoint(Endpoints.DICTIONARY_TERM, term_id=term_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )

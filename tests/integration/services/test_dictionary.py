@@ -258,7 +258,7 @@ class TestDictionaryServiceUpdate:
         # Given: A mocked dictionary endpoint
         company_id = "company123"
         term_id = "term123"
-        route = respx.put(
+        route = respx.patch(
             f"{base_url}{Endpoints.DICTIONARY_TERM.format(company_id=company_id, term_id=term_id)}",
         ).respond(200, json=dictionary_term_response_data)
 
