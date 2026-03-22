@@ -1,3 +1,9 @@
+## v1.18.1 (2026-03-22)
+
+### Fix
+
+- **dictionary**: update method from put to patch
+
 ## v1.18.0 (2026-03-18)
 
 ### Feat

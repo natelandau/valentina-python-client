@@ -105,4 +105,4 @@ __all__ = (
     "users_service",
 )
 
-__version__ = "1.18.0"
+__version__ = "1.18.1"

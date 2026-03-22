@@ -10,7 +10,7 @@
     name = "valentina-python-client"
     readme = "README.md"
     requires-python = ">=3.13"
-    version = "1.18.0"
+    version = "1.18.1"
 
     [project.optional-dependencies]
         testing = ["polyfactory>=3.3.0"]
