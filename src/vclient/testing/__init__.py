@@ -55,8 +55,6 @@ from vclient.testing._factories import (
     UserFactory,
     VampireClanFactory,
     WerewolfAuspiceFactory,
-    WerewolfGiftFactory,
-    WerewolfRiteFactory,
     WerewolfTribeFactory,
 )
 from vclient.testing._routes import Routes, RouteSpec
@@ -106,7 +104,5 @@ __all__ = [
     "UserFactory",
     "VampireClanFactory",
     "WerewolfAuspiceFactory",
-    "WerewolfGiftFactory",
-    "WerewolfRiteFactory",
     "WerewolfTribeFactory",
 ]

@@ -16,8 +16,6 @@ from vclient.models import (
     TraitSubcategory,
     VampireClan,
     WerewolfAuspice,
-    WerewolfGift,
-    WerewolfRite,
     WerewolfTribe,
 )
 
@@ -593,88 +591,3 @@ class SyncCharacterBlueprintService(SyncBaseService):
             )
         )
         return WerewolfTribe.model_validate(response.json())
-
-    def get_werewolf_gifts_page(
-        self,
-        *,
-        limit: int = DEFAULT_PAGE_LIMIT,
-        offset: int = 0,
-        game_version: GameVersion | None = None,
-        auspice_id: str | None = None,
-        tribe_id: str | None = None,
-    ) -> PaginatedResponse[WerewolfGift]:
-        """Get a paginated page of werewolf gifts."""
-        return self._get_paginated_as(
-            self._format_endpoint(Endpoints.WEREWOLF_GIFTS),
-            WerewolfGift,
-            limit=limit,
-            offset=offset,
-            params=self._build_params(
-                game_version=game_version, auspice_id=auspice_id, tribe_id=tribe_id
-            ),
-        )
-
-    def list_all_werewolf_gifts(
-        self,
-        *,
-        game_version: GameVersion | None = None,
-        auspice_id: str | None = None,
-        tribe_id: str | None = None,
-    ) -> list[WerewolfGift]:
-        """List all werewolf gifts."""
-        return [
-            gift
-            for gift in self.iter_all_werewolf_gifts(
-                game_version=game_version, auspice_id=auspice_id, tribe_id=tribe_id
-            )
-        ]
-
-    def iter_all_werewolf_gifts(
-        self,
-        *,
-        game_version: GameVersion | None = None,
-        auspice_id: str | None = None,
-        tribe_id: str | None = None,
-    ) -> Iterator[WerewolfGift]:
-        """Iterate through all werewolf gifts."""
-        for gift in self._iter_all_pages(
-            self._format_endpoint(Endpoints.WEREWOLF_GIFTS),
-            params=self._build_params(
-                game_version=game_version, auspice_id=auspice_id, tribe_id=tribe_id
-            ),
-        ):
-            yield WerewolfGift.model_validate(gift)
-
-    def get_werewolf_gift(self, *, werewolf_gift_id: str) -> WerewolfGift:
-        """Get a werewolf gift by ID."""
-        response = self._get(
-            self._format_endpoint(Endpoints.WEREWOLF_GIFT_DETAIL, werewolf_gift_id=werewolf_gift_id)
-        )
-        return WerewolfGift.model_validate(response.json())
-
-    def get_werewolf_rites_page(
-        self, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
-    ) -> PaginatedResponse[WerewolfRite]:
-        """Get a paginated page of werewolf rites."""
-        return self._get_paginated_as(
-            self._format_endpoint(Endpoints.WEREWOLF_RITES),
-            WerewolfRite,
-            limit=limit,
-            offset=offset,
-        )
-
-    def list_all_werewolf_rites(self) -> list[WerewolfRite]:
-        """List all werewolf rites."""
-        return [rite for rite in self.iter_all_werewolf_rites()]
-
-    def iter_all_werewolf_rites(self) -> Iterator[WerewolfRite]:
-        """Iterate through all werewolf rites."""
-        for rite in self._iter_all_pages(self._format_endpoint(Endpoints.WEREWOLF_RITES)):
-            yield WerewolfRite.model_validate(rite)
-
-    def get_werewolf_rite(self, *, werewolf_rite_id: str) -> WerewolfRite:
-        """Get a werewolf rite by ID."""
-        response = self._get(
-            self._format_endpoint(Endpoints.WEREWOLF_RITE_DETAIL, werewolf_rite_id=werewolf_rite_id)
-        )
-        return WerewolfRite.model_validate(response.json())

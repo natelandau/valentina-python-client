@@ -5,10 +5,12 @@ from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models.shared import (
     Asset,
+    GiftAttributes,
     Note,
     NoteCreate,
     NoteUpdate,
     RollStatistics,
+    Trait,
 )
 
 
@@ -238,3 +240,79 @@ class TestRollStatistics:
         assert stats.average_difficulty is None
         assert stats.average_pool is None
         assert stats.top_traits == []
+
+
+class TestGiftAttributes:
+    """Tests for GiftAttributes model."""
+
+    def test_valid_gift_attributes(self):
+        """Verify valid GiftAttributes creation with all fields."""
+        attrs = GiftAttributes(
+            renown="HONOR",
+            cost="1 Rage",
+            duration="1 scene",
+            dice_pool=["Charisma", "Primal-Urge"],
+            opposing_pool=["Composure", "Resolve"],
+            minimum_renown=2,
+            is_native_gift=True,
+            notes="Test notes",
+            tribe_id="tribe123",
+            auspice_id="auspice123",
+        )
+
+        assert attrs.renown == "HONOR"
+        assert attrs.cost == "1 Rage"
+        assert attrs.duration == "1 scene"
+        assert attrs.dice_pool == ["Charisma", "Primal-Urge"]
+        assert attrs.opposing_pool == ["Composure", "Resolve"]
+        assert attrs.minimum_renown == 2
+        assert attrs.is_native_gift is True
+        assert attrs.notes == "Test notes"
+        assert attrs.tribe_id == "tribe123"
+        assert attrs.auspice_id == "auspice123"
+
+    def test_gift_attributes_defaults(self):
+        """Verify GiftAttributes optional fields default correctly."""
+        attrs = GiftAttributes(renown="GLORY")
+
+        assert attrs.renown == "GLORY"
+        assert attrs.cost is None
+        assert attrs.duration is None
+        assert attrs.dice_pool == []
+        assert attrs.opposing_pool == []
+        assert attrs.minimum_renown is None
+        assert attrs.is_native_gift is False
+        assert attrs.notes is None
+        assert attrs.tribe_id is None
+        assert attrs.auspice_id is None
+
+
+class TestTraitGiftAttributes:
+    """Tests for Trait.gift_attributes field."""
+
+    def test_trait_gift_attributes_none_by_default(self):
+        """Verify Trait.gift_attributes defaults to None."""
+        trait = Trait(
+            id="trait123",
+            name="Strength",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            sheet_section_id="section123",
+            parent_category_id="category123",
+        )
+        assert trait.gift_attributes is None
+
+    def test_trait_with_gift_attributes(self):
+        """Verify Trait accepts GiftAttributes."""
+        attrs = GiftAttributes(renown="WISDOM")
+        trait = Trait(
+            id="trait123",
+            name="Spirit Sight",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            sheet_section_id="section123",
+            parent_category_id="category123",
+            gift_attributes=attrs,
+        )
+        assert trait.gift_attributes is not None
+        assert trait.gift_attributes.renown == "WISDOM"

@@ -103,14 +103,13 @@ from .pagination import PaginatedResponse
 from .shared import (
     Asset,
     CharacterSpecialty,
+    GiftAttributes,
     NameDescriptionSubDocument,
     Note,
     NoteCreate,
     NoteUpdate,
     RollStatistics,
     Trait,
-    WerewolfGift,
-    WerewolfRite,
 )
 from .system import SystemHealth
 from .users import (
@@ -178,6 +177,7 @@ __all__ = [
     "FullSheetTraitCategory",
     "FullSheetTraitSection",
     "FullSheetTraitSubcategory",
+    "GiftAttributes",
     "GitHubProfile",
     "GoogleProfile",
     "HunterAttributes",
@@ -222,7 +222,5 @@ __all__ = [
     "WerewolfAttributesCreate",
     "WerewolfAttributesUpdate",
     "WerewolfAuspice",
-    "WerewolfGift",
-    "WerewolfRite",
     "WerewolfTribe",
 ]

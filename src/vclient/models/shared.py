@@ -119,6 +119,21 @@ class RollStatistics(BaseModel):
 # -----------------------------------------------------------------------------
 
 
+class GiftAttributes(BaseModel):
+    """Werewolf gift-specific attributes embedded on a Trait."""
+
+    renown: WerewolfRenown
+    cost: str | None = None
+    duration: str | None = None
+    dice_pool: list[str] = Field(default_factory=list)
+    opposing_pool: list[str] = Field(default_factory=list)
+    minimum_renown: int | None = None
+    is_native_gift: bool = False
+    notes: str | None = None
+    tribe_id: str | None = None
+    auspice_id: str | None = None
+
+
 class Trait(BaseModel):
     """Response model for a trait.
 
@@ -147,47 +162,10 @@ class Trait(BaseModel):
     trait_subcategory_name: str | None = None
     pool: str | None = None
     system: str | None = None
+    gift_attributes: GiftAttributes | None = None
 
     character_classes: list[CharacterClass] = Field(default_factory=list)
     game_versions: list[GameVersion] = Field(default_factory=list)
-
-
-# -----------------------------------------------------------------------------
-# Character Special Models
-# -----------------------------------------------------------------------------
-
-
-class WerewolfGift(BaseModel):
-    """Response model for a werewolf gift."""
-
-    id: str
-    name: str
-    description: str | None = None
-    game_versions: list[GameVersion] = Field(default_factory=list)
-    date_created: datetime
-    date_modified: datetime
-    renown: WerewolfRenown
-    cost: str | None = None
-    duration: str | None = None
-    dice_pool: list[str] = Field(default_factory=list)
-    opposing_pool: list[str] = Field(default_factory=list)
-    minimum_renown: int | None = None
-    is_native_gift: bool = False
-    notes: str | None = None
-    tribe_id: str | None = None
-    auspice_id: str | None = None
-
-
-class WerewolfRite(BaseModel):
-    """Response model for a werewolf gift."""
-
-    id: str
-    name: str
-    description: str | None = None
-    game_versions: list[GameVersion] = Field(default_factory=list)
-    date_created: datetime
-    date_modified: datetime
-    pool: str | None = None
 
 
 class CharacterSpecialty(BaseModel):
@@ -201,12 +179,11 @@ class CharacterSpecialty(BaseModel):
 __all__ = [
     "Asset",
     "CharacterSpecialty",
+    "GiftAttributes",
     "NameDescriptionSubDocument",
     "Note",
     "NoteCreate",
     "NoteUpdate",
     "RollStatistics",
     "Trait",
-    "WerewolfGift",
-    "WerewolfRite",
 ]

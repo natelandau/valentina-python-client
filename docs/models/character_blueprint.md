@@ -87,8 +87,8 @@ Subcategory within a trait category. Groups related traits together, like "Allie
 | `description`   | `str \| None`       | Description             |
 | `game_versions` | `list[GameVersion]` | Available game versions |
 | `renown`        | `WerewolfRenown`    | HONOR, GLORY, or WISDOM |
-| `gift_ids`      | `list[str]`         | Native gift IDs         |
-| `link`          | `str \| None`       | Link to tribe page      |
+| `gift_trait_ids` | `list[str]`         | Native gift trait IDs   |
+| `link`           | `str \| None`       | Link to tribe page      |
 | `patron_spirit` | `str \| None`       | Patron spirit name      |
 | `favor`         | `str \| None`       | Favor name              |
 | `ban`           | `str \| None`       | Ban name                |
@@ -101,28 +101,23 @@ Subcategory within a trait category. Groups related traits together, like "Allie
 | `name`          | `str`               | Auspice name            |
 | `description`   | `str \| None`       | Description             |
 | `game_versions` | `list[GameVersion]` | Available game versions |
-| `gift_ids`      | `list[str]`         | Native gift IDs         |
-| `link`          | `str \| None`       | Link to auspice page    |
+| `gift_trait_ids` | `list[str]`         | Native gift trait IDs   |
+| `link`           | `str \| None`       | Link to auspice page    |
 
-## WerewolfGift
+## GiftAttributes
 
-| Field            | Type                | Description             |
-| ---------------- | ------------------- | ----------------------- |
-| `id`             | `str`               | Unique identifier       |
-| `name`           | `str`               | Gift name               |
-| `description`    | `str \| None`       | Description             |
-| `game_versions`  | `list[GameVersion]` | Available game versions |
-| `renown`         | `WerewolfRenown`    | HONOR, GLORY, or WISDOM |
-| `cost`           | `str \| None`       | Activation cost         |
-| `minimum_renown` | `int \| None`       | Required renown level   |
+Werewolf gift-specific attributes embedded on a `Trait`. Present on traits that represent werewolf gifts; `None` on all other traits.
 
-## WerewolfRite
-
-| Field           | Type                | Description             |
-| --------------- | ------------------- | ----------------------- |
-| `id`            | `str`               | Unique identifier       |
-| `name`          | `str`               | Rite name               |
-| `description`   | `str \| None`       | Description             |
-| `game_versions` | `list[GameVersion]` | Available game versions |
-| `pool`          | `str \| None`       | Dice pool               |
+| Field            | Type              | Description                  |
+| ---------------- | ----------------- | ---------------------------- |
+| `renown`         | `WerewolfRenown`  | HONOR, GLORY, or WISDOM      |
+| `cost`           | `str \| None`     | Activation cost              |
+| `duration`       | `str \| None`     | Effect duration              |
+| `dice_pool`      | `list[str]`       | Dice pool components         |
+| `opposing_pool`  | `list[str]`       | Opposing pool components     |
+| `minimum_renown` | `int \| None`     | Required renown level        |
+| `is_native_gift` | `bool`            | Whether gift is native       |
+| `notes`          | `str \| None`     | Additional notes             |
+| `tribe_id`       | `str \| None`     | Associated tribe ID          |
+| `auspice_id`     | `str \| None`     | Associated auspice ID        |
 

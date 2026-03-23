@@ -97,28 +97,6 @@ characters = characters_service(
 | `update_inventory_item(character_id, item_id, InventoryItemUpdate, **kwargs)` | `InventoryItem`                    | Update an item                |
 | `delete_inventory_item(character_id, item_id)`                                | `None`                             | Delete an item                |
 
-### Werewolf Gifts
-
-| Method                                          | Returns                           | Description             |
-| ----------------------------------------------- | --------------------------------- | ----------------------- |
-| `get_gifts_page(character_id, limit?, offset?)` | `PaginatedResponse[WerewolfGift]` | Get a page of gifts     |
-| `list_all_gifts(character_id)`                  | `list[WerewolfGift]`              | Get all gifts           |
-| `iter_all_gifts(character_id, limit?)`          | `AsyncIterator[WerewolfGift]`     | Iterate through gifts   |
-| `get_gift(character_id, werewolf_gift_id)`      | `WerewolfGift`                    | Get a gift              |
-| `add_gift(character_id, werewolf_gift_id)`      | `WerewolfGift`                    | Add a gift to character |
-| `remove_gift(character_id, werewolf_gift_id)`   | `WerewolfGift`                    | Remove a gift           |
-
-### Werewolf Rites
-
-| Method                                          | Returns                           | Description             |
-| ----------------------------------------------- | --------------------------------- | ----------------------- |
-| `get_rites_page(character_id, limit?, offset?)` | `PaginatedResponse[WerewolfRite]` | Get a page of rites     |
-| `list_all_rites(character_id)`                  | `list[WerewolfRite]`              | Get all rites           |
-| `iter_all_rites(character_id, limit?)`          | `AsyncIterator[WerewolfRite]`     | Iterate through rites   |
-| `get_rite(character_id, werewolf_rite_id)`      | `WerewolfRite`                    | Get a rite              |
-| `add_rite(character_id, werewolf_rite_id)`      | `WerewolfRite`                    | Add a rite to character |
-| `remove_rite(character_id, werewolf_rite_id)`   | `WerewolfRite`                    | Remove a rite           |
-
 ## Example
 
 ```python
@@ -165,4 +143,4 @@ note_request = NoteCreate(title="Background", content="Born in Victorian London.
 note = await characters.create_note(character.id, note_request)
 ```
 
-See [Response Models](../models/characters.md) for `Character`, `WerewolfGift`, `WerewolfRite`, and related types.
+See [Response Models](../models/characters.md) for `Character` and related types.

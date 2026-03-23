@@ -120,24 +120,6 @@ Search across all traits without section/category context. All parameters are op
 | `iter_all_werewolf_auspices(*, game_version?)`                  | `AsyncIterator[WerewolfAuspice]`     | Iterate through auspices |
 | `get_werewolf_auspice(*, werewolf_auspice_id)`                  | `WerewolfAuspice`                    | Get an auspice by ID     |
 
-### Werewolf Gifts
-
-| Method                                                                               | Returns                           | Description           |
-| ------------------------------------------------------------------------------------ | --------------------------------- | --------------------- |
-| `get_werewolf_gifts_page(*, limit?, offset?, game_version?, tribe_id?, auspice_id?)` | `PaginatedResponse[WerewolfGift]` | Get a page of gifts   |
-| `list_all_werewolf_gifts(*, game_version?, tribe_id?, auspice_id?)`                  | `list[WerewolfGift]`              | Get all gifts         |
-| `iter_all_werewolf_gifts(*, game_version?, tribe_id?, auspice_id?)`                  | `AsyncIterator[WerewolfGift]`     | Iterate through gifts |
-| `get_werewolf_gift(*, werewolf_gift_id)`                                             | `WerewolfGift`                    | Get a gift by ID      |
-
-### Werewolf Rites
-
-| Method                                        | Returns                           | Description           |
-| --------------------------------------------- | --------------------------------- | --------------------- |
-| `get_werewolf_rites_page(*, limit?, offset?)` | `PaginatedResponse[WerewolfRite]` | Get a page of rites   |
-| `list_all_werewolf_rites()`                   | `list[WerewolfRite]`              | Get all rites         |
-| `iter_all_werewolf_rites()`                   | `AsyncIterator[WerewolfRite]`     | Iterate through rites |
-| `get_werewolf_rite(*, werewolf_rite_id)`      | `WerewolfRite`                    | Get a rite by ID      |
-
 ## Example
 
 ```python
