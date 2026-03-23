@@ -98,11 +98,6 @@ class Endpoints:
     CHARACTER_NOTE = f"{CHARACTER_NOTES}/{{note_id}}"
     CHARACTER_INVENTORY = f"{CHARACTER}/inventory"
     CHARACTER_INVENTORY_ITEM = f"{CHARACTER_INVENTORY}/{{item_id}}"
-    # Character Specials
-    CHARACTER_WEREWOLF_GIFTS = f"{CHARACTER}/gifts"
-    CHARACTER_WEREWOLF_GIFT_DETAIL = f"{CHARACTER_WEREWOLF_GIFTS}/{{werewolf_gift_id}}"
-    CHARACTER_WEREWOLF_RITES = f"{CHARACTER}/rites"
-    CHARACTER_WEREWOLF_RITE_DETAIL = f"{CHARACTER_WEREWOLF_RITES}/{{werewolf_rite_id}}"
     # Character RNG generation
     AUTOGENERATE = f"{CHARACTERS}/autogenerate"
     CHARGEN_START = f"{CHARACTERS}/chargen/start"
@@ -139,10 +134,6 @@ class Endpoints:
     WEREWOLF_TRIBE_DETAIL = f"{WEREWOLF_TRIBES}/{{werewolf_tribe_id}}"
     WEREWOLF_AUSPICES = f"{BLUEPRINT_BASE}/werewolf-auspices"
     WEREWOLF_AUSPICE_DETAIL = f"{WEREWOLF_AUSPICES}/{{werewolf_auspice_id}}"
-    WEREWOLF_GIFTS = f"{BLUEPRINT_BASE}/werewolf-gifts"
-    WEREWOLF_GIFT_DETAIL = f"{WEREWOLF_GIFTS}/{{werewolf_gift_id}}"
-    WEREWOLF_RITES = f"{BLUEPRINT_BASE}/werewolf-rites"
-    WEREWOLF_RITE_DETAIL = f"{WEREWOLF_RITES}/{{werewolf_rite_id}}"
     # Dictionary endpoints
     DICTIONARY_TERMS = f"{COMPANY}/dictionaries"
     DICTIONARY_TERM = f"{DICTIONARY_TERMS}/{{term_id}}"
