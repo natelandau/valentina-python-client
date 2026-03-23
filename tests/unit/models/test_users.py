@@ -7,6 +7,7 @@ from vclient.models import (
     Asset,
     CampaignExperience,
     DiscordProfile,
+    DiscordProfileUpdate,
     GitHubProfile,
     GoogleProfile,
     Note,
@@ -365,7 +366,7 @@ class TestUserCreate:
     def test_full_request(self):
         """Verify creating request with all fields."""
         # Given: Profile objects
-        discord = DiscordProfile(id="discord123", username="testuser")
+        discord = DiscordProfileUpdate(id="discord123", username="testuser")
         google = GoogleProfile(id="google123", email="user@gmail.com")
         github = GitHubProfile(id="github123", login="testuser")
 

@@ -115,6 +115,7 @@ from .system import SystemHealth
 from .users import (
     CampaignExperience,
     DiscordProfile,
+    DiscordProfileUpdate,
     GitHubProfile,
     GoogleProfile,
     Quickroll,
@@ -174,6 +175,7 @@ __all__ = [
     "DictionaryTermCreate",
     "DictionaryTermUpdate",
     "DiscordProfile",
+    "DiscordProfileUpdate",
     "FullSheetTraitCategory",
     "FullSheetTraitSection",
     "FullSheetTraitSubcategory",

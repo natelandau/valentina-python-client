@@ -8,7 +8,7 @@ from vclient.exceptions import NotFoundError, RequestValidationError
 from vclient.models import (
     Asset,
     CampaignExperience,
-    DiscordProfile,
+    DiscordProfileUpdate,
     Note,
     PaginatedResponse,
     Quickroll,
@@ -338,7 +338,7 @@ class TestUsersServiceCreate:
         )
 
         # When: Creating a user with Discord profile
-        discord = DiscordProfile(id="discord123", username="testuser")
+        discord = DiscordProfileUpdate(id="discord123", username="testuser")
         result = await vclient.users(company_id).create(
             name_first="Test",
             name_last="User",

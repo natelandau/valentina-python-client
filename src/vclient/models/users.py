@@ -101,6 +101,22 @@ class User(BaseModel):
 # -----------------------------------------------------------------------------
 
 
+class DiscordProfileUpdate(BaseModel):
+    """Request body for creating or updating a user's Discord profile.
+
+    Contains Discord account details for integration with Discord bots.
+    All fields are optional as not all users have Discord linked.
+    """
+
+    id: str | None = None
+    username: str | None = None
+    global_name: str | None = None
+    avatar_id: str | None = None
+    discriminator: str | None = None
+    email: str | None = None
+    verified: bool | None = None
+
+
 class UserRegisterDTO(BaseModel):
     """Register a new user via SSO onboarding (no requesting_user_id required)."""
 
@@ -108,7 +124,7 @@ class UserRegisterDTO(BaseModel):
     name_last: str | None = None
     username: str
     email: str
-    discord_profile: DiscordProfile | None = None
+    discord_profile: DiscordProfileUpdate | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
 
@@ -132,7 +148,7 @@ class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50)
     email: str
     role: UserRole
-    discord_profile: DiscordProfile | None = None
+    discord_profile: DiscordProfileUpdate | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
     requesting_user_id: str
@@ -149,7 +165,7 @@ class UserUpdate(BaseModel):
     username: Annotated[str, Field(min_length=3, max_length=50)] | None = None
     email: str | None = None
     role: UserRole | None = None
-    discord_profile: DiscordProfile | None = None
+    discord_profile: DiscordProfileUpdate | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
     requesting_user_id: str
