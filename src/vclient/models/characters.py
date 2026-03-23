@@ -62,8 +62,6 @@ class WerewolfAttributes(BaseModel):
     auspice_id: str | None = Field(default=None, description="ID of the werewolf auspice.")
     auspice_name: str | None = Field(default=None, description="Name of the werewolf auspice.")
     pack_name: str | None = Field(default=None, description="Name of the werewolf's pack.")
-    rite_ids: list[str] = Field(default_factory=list, description="List of werewolf rite IDs.")
-    gift_ids: list[str] = Field(default_factory=list, description="List of werewolf gift IDs.")
     total_renown: int = Field(default=0, description="Total renown.")
 
 
@@ -73,8 +71,6 @@ class WerewolfAttributesCreate(BaseModel):
     tribe_id: str
     auspice_id: str | None = None
     pack_name: str | None = None
-    rite_ids: list[str] | None = None
-    gift_ids: list[str] | None = None
 
 
 class WerewolfAttributesUpdate(BaseModel):
@@ -83,8 +79,6 @@ class WerewolfAttributesUpdate(BaseModel):
     tribe_id: str | None = None
     auspice_id: str | None = None
     pack_name: str | None = None
-    rite_ids: list[str] | None = None
-    gift_ids: list[str] | None = None
 
 
 class MageAttributes(BaseModel):
