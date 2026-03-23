@@ -225,7 +225,7 @@ def werewolf_auspice_response_data() -> dict:
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
         "game_versions": ["V5"],
-        "gift_ids": ["gift123", "gift456"],
+        "gift_trait_ids": ["gift123", "gift456"],
         "link": "https://example.com/auspice123",
     }
 
@@ -255,7 +255,7 @@ def werewolf_tribe_response_data() -> dict:
         "patron_spirit": "Spirit Name",
         "favor": "Favor Name",
         "ban": "Ban Name",
-        "gift_ids": ["gift123", "gift456"],
+        "gift_trait_ids": ["gift123", "gift456"],
         "link": "https://example.com/tribe123",
     }
 

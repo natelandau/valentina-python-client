@@ -87,7 +87,7 @@ class WerewolfAuspice(BaseModel):
     date_modified: datetime
     game_versions: list[GameVersion] = Field(default_factory=list)
 
-    gift_ids: list[str] = Field(default_factory=list)
+    gift_trait_ids: list[str] = Field(default_factory=list)
     link: str | None = None
 
 
@@ -105,7 +105,7 @@ class WerewolfTribe(BaseModel):
     patron_spirit: str | None = None
     favor: str | None = None
     ban: str | None = None
-    gift_ids: list[str] = Field(default_factory=list)
+    gift_trait_ids: list[str] = Field(default_factory=list)
     link: str | None = None
 
 
