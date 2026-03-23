@@ -103,6 +103,7 @@ from .pagination import PaginatedResponse
 from .shared import (
     Asset,
     CharacterSpecialty,
+    GiftAttributes,
     NameDescriptionSubDocument,
     Note,
     NoteCreate,
@@ -178,6 +179,7 @@ __all__ = [
     "FullSheetTraitCategory",
     "FullSheetTraitSection",
     "FullSheetTraitSubcategory",
+    "GiftAttributes",
     "GitHubProfile",
     "GoogleProfile",
     "HunterAttributes",
