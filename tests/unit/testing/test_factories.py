@@ -33,8 +33,6 @@ from vclient.testing._factories import (
     UserFactory,
     VampireClanFactory,
     WerewolfAuspiceFactory,
-    WerewolfGiftFactory,
-    WerewolfRiteFactory,
     WerewolfTribeFactory,
 )
 
@@ -75,8 +73,6 @@ class TestFactoriesBuildValidModels:
             UserFactory,
             VampireClanFactory,
             WerewolfAuspiceFactory,
-            WerewolfGiftFactory,
-            WerewolfRiteFactory,
             WerewolfTribeFactory,
         ],
     )

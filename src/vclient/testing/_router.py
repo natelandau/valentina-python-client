@@ -41,8 +41,6 @@ from vclient.models import (
     User,
     VampireClan,
     WerewolfAuspice,
-    WerewolfGift,
-    WerewolfRite,
     WerewolfTribe,
 )
 from vclient.models.character_autogen import ChargenSessionResponse
@@ -82,8 +80,6 @@ from vclient.testing._factories import (
     UserFactory,
     VampireClanFactory,
     WerewolfAuspiceFactory,
-    WerewolfGiftFactory,
-    WerewolfRiteFactory,
     WerewolfTribeFactory,
 )
 from vclient.testing._routes import LIST, NO_CONTENT, PAGINATED, RAW_JSON, Routes, RouteSpec
@@ -123,8 +119,6 @@ _FACTORY_MAP: dict[type, type] = {
     User: UserFactory,
     VampireClan: VampireClanFactory,
     WerewolfAuspice: WerewolfAuspiceFactory,
-    WerewolfGift: WerewolfGiftFactory,
-    WerewolfRite: WerewolfRiteFactory,
     WerewolfTribe: WerewolfTribeFactory,
 }
 

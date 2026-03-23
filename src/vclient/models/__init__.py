@@ -110,8 +110,6 @@ from .shared import (
     NoteUpdate,
     RollStatistics,
     Trait,
-    WerewolfGift,
-    WerewolfRite,
 )
 from .system import SystemHealth
 from .users import (
@@ -224,7 +222,5 @@ __all__ = [
     "WerewolfAttributesCreate",
     "WerewolfAttributesUpdate",
     "WerewolfAuspice",
-    "WerewolfGift",
-    "WerewolfRite",
     "WerewolfTribe",
 ]

@@ -38,8 +38,6 @@ from vclient.models import (
     User,
     VampireClan,
     WerewolfAuspice,
-    WerewolfGift,
-    WerewolfRite,
     WerewolfTribe,
 )
 from vclient.models.character_autogen import ChargenSessionResponse
@@ -271,34 +269,6 @@ class Routes:
         "DELETE", Endpoints.CHARACTER_INVENTORY_ITEM, NO_CONTENT, None
     )
 
-    # Character werewolf gifts
-    CHARACTERS_WEREWOLF_GIFTS_LIST = RouteSpec(
-        "GET", Endpoints.CHARACTER_WEREWOLF_GIFTS, PAGINATED, WerewolfGift
-    )
-    CHARACTERS_WEREWOLF_GIFTS_GET = RouteSpec(
-        "GET", Endpoints.CHARACTER_WEREWOLF_GIFT_DETAIL, SINGLE, WerewolfGift
-    )
-    CHARACTERS_WEREWOLF_GIFTS_CREATE = RouteSpec(
-        "POST", Endpoints.CHARACTER_WEREWOLF_GIFTS, SINGLE, WerewolfGift
-    )
-    CHARACTERS_WEREWOLF_GIFTS_DELETE = RouteSpec(
-        "DELETE", Endpoints.CHARACTER_WEREWOLF_GIFT_DETAIL, NO_CONTENT, None
-    )
-
-    # Character werewolf rites
-    CHARACTERS_WEREWOLF_RITES_LIST = RouteSpec(
-        "GET", Endpoints.CHARACTER_WEREWOLF_RITES, PAGINATED, WerewolfRite
-    )
-    CHARACTERS_WEREWOLF_RITES_GET = RouteSpec(
-        "GET", Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL, SINGLE, WerewolfRite
-    )
-    CHARACTERS_WEREWOLF_RITES_CREATE = RouteSpec(
-        "POST", Endpoints.CHARACTER_WEREWOLF_RITES, SINGLE, WerewolfRite
-    )
-    CHARACTERS_WEREWOLF_RITES_DELETE = RouteSpec(
-        "DELETE", Endpoints.CHARACTER_WEREWOLF_RITE_DETAIL, NO_CONTENT, None
-    )
-
     # Character generation
     CHARACTERS_AUTOGENERATE = RouteSpec("POST", Endpoints.AUTOGENERATE, SINGLE, Character)
     CHARACTERS_CHARGEN_START = RouteSpec(
@@ -390,22 +360,6 @@ class Routes:
     )
     BLUEPRINT_WEREWOLF_AUSPICES_GET = RouteSpec(
         "GET", Endpoints.WEREWOLF_AUSPICE_DETAIL, SINGLE, WerewolfAuspice
-    )
-
-    # Blueprint werewolf gifts
-    BLUEPRINT_WEREWOLF_GIFTS_LIST = RouteSpec(
-        "GET", Endpoints.WEREWOLF_GIFTS, PAGINATED, WerewolfGift
-    )
-    BLUEPRINT_WEREWOLF_GIFTS_GET = RouteSpec(
-        "GET", Endpoints.WEREWOLF_GIFT_DETAIL, SINGLE, WerewolfGift
-    )
-
-    # Blueprint werewolf rites
-    BLUEPRINT_WEREWOLF_RITES_LIST = RouteSpec(
-        "GET", Endpoints.WEREWOLF_RITES, PAGINATED, WerewolfRite
-    )
-    BLUEPRINT_WEREWOLF_RITES_GET = RouteSpec(
-        "GET", Endpoints.WEREWOLF_RITE_DETAIL, SINGLE, WerewolfRite
     )
 
     # Dictionary

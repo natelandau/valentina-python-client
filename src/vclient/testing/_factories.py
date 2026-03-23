@@ -41,8 +41,6 @@ from vclient.models import (
     User,
     VampireClan,
     WerewolfAuspice,
-    WerewolfGift,
-    WerewolfRite,
     WerewolfTribe,
 )
 from vclient.models.character_autogen import ChargenSessionResponse
@@ -252,16 +250,6 @@ class WerewolfAuspiceFactory(ModelFactory[WerewolfAuspice]):
     __use_defaults__ = True
 
 
-class WerewolfGiftFactory(ModelFactory[WerewolfGift]):
-    __model__ = WerewolfGift
-    __use_defaults__ = True
-
-
-class WerewolfRiteFactory(ModelFactory[WerewolfRite]):
-    __model__ = WerewolfRite
-    __use_defaults__ = True
-
-
 class WerewolfTribeFactory(ModelFactory[WerewolfTribe]):
     __model__ = WerewolfTribe
     __use_defaults__ = True
@@ -308,7 +296,5 @@ __all__ = [
     "UserFactory",
     "VampireClanFactory",
     "WerewolfAuspiceFactory",
-    "WerewolfGiftFactory",
-    "WerewolfRiteFactory",
     "WerewolfTribeFactory",
 ]
