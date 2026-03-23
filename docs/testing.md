@@ -249,9 +249,8 @@ Every public response model has a corresponding factory. All factories are expor
 | `TraitFactory`                                 | `Trait`                              |
 | `UserFactory`                                  | `User`                               |
 | `VampireClanFactory`                           | `VampireClan`                        |
+| `GiftAttributesFactory`                        | `GiftAttributes`                     |
 | `WerewolfAuspiceFactory`                       | `WerewolfAuspice`                    |
-| `WerewolfGiftFactory`                          | `WerewolfGift`                       |
-| `WerewolfRiteFactory`                          | `WerewolfRite`                       |
 | `WerewolfTribeFactory`                         | `WerewolfTribe`                      |
 
 ## How It Works
