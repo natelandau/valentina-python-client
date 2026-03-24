@@ -61,6 +61,7 @@ class CharacterTraitsService(BaseService):
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
     ) -> PaginatedResponse[CharacterTrait]:
         """Retrieve a paginated page of character traits.
 
@@ -68,6 +69,7 @@ class CharacterTraitsService(BaseService):
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
             parent_category_id: Filter by parent category ID.
+            is_rollable: Filter by whether the trait is rollable.
 
         Returns:
             A PaginatedResponse containing CharacterTrait objects and pagination metadata.
@@ -75,6 +77,8 @@ class CharacterTraitsService(BaseService):
         params: dict[str, str | int] = {}
         if parent_category_id is not None:
             params["parent_category_id"] = parent_category_id
+        if is_rollable is not None:
+            params["is_rollable"] = is_rollable
 
         return await self._get_paginated_as(
             self._format_endpoint(Endpoints.CHARACTER_TRAITS),
@@ -88,28 +92,37 @@ class CharacterTraitsService(BaseService):
         self,
         *,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
     ) -> list[CharacterTrait]:
         """Retrieve all character traits.
 
         Args:
             parent_category_id: Filter by parent category ID.
+            is_rollable: Filter by whether the trait is rollable.
 
         Returns:
             A list of all CharacterTrait objects.
         """
-        return [trait async for trait in self.iter_all(parent_category_id=parent_category_id)]
+        return [
+            trait
+            async for trait in self.iter_all(
+                parent_category_id=parent_category_id, is_rollable=is_rollable
+            )
+        ]
 
     async def iter_all(
         self,
         *,
         limit: int = 100,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
     ) -> AsyncIterator[CharacterTrait]:
         """Iterate through all character traits.
 
         Args:
             limit: Maximum number of items to return (0-100, default 10).
             parent_category_id: Filter by parent category ID.
+            is_rollable: Filter by whether the trait is rollable.
 
         Yields:
             Individual CharacterTrait objects.
@@ -121,6 +134,8 @@ class CharacterTraitsService(BaseService):
         params: dict[str, str | int] = {}
         if parent_category_id is not None:
             params["parent_category_id"] = parent_category_id
+        if is_rollable is not None:
+            params["is_rollable"] = is_rollable
 
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.CHARACTER_TRAITS),

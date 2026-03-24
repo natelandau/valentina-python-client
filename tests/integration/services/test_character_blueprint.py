@@ -703,6 +703,60 @@ class TestCharacterBlueprintServiceCategoryTraits:
         assert isinstance(traits[0], Trait)
 
     @respx.mock
+    async def test_get_category_traits_page_with_is_rollable_filter(
+        self, vclient, base_url, paginated_trait_response
+    ) -> None:
+        """Verify get_category_traits_page passes is_rollable filter correctly."""
+        # Given: A mocked endpoint expecting is_rollable param
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            params={"limit": "10", "offset": "0", "is_rollable": "true"},
+        ).mock(return_value=Response(200, json=paginated_trait_response))
+
+        # When: Requesting with is_rollable filter
+        result = await vclient.character_blueprint(company_id).get_category_traits_page(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            is_rollable=True,
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
+    async def test_get_category_traits_page_with_is_rollable_false(
+        self, vclient, base_url, paginated_trait_response
+    ) -> None:
+        """Verify get_category_traits_page passes is_rollable=False filter correctly."""
+        # Given: A mocked endpoint expecting is_rollable=False param
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            params={"limit": "10", "offset": "0", "is_rollable": "false"},
+        ).mock(return_value=Response(200, json=paginated_trait_response))
+
+        # When: Requesting with is_rollable=False filter
+        result = await vclient.character_blueprint(company_id).get_category_traits_page(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            is_rollable=False,
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
     async def test_get_category_traits_page_exclude_subcategory_traits(
         self, vclient, base_url, paginated_trait_response
     ) -> None:
@@ -1000,6 +1054,35 @@ class TestCharacterBlueprintServiceSubcategoryTraits:
         assert len(result.items) == 1
 
     @respx.mock
+    async def test_get_subcategory_traits_page_with_is_rollable_filter(
+        self, vclient, base_url, paginated_trait_response
+    ) -> None:
+        """Verify get_subcategory_traits_page passes is_rollable filter correctly."""
+        # Given: A mocked endpoint expecting is_rollable param
+        company_id = "company123"
+        game_version = "V5"
+        section_id = "section123"
+        category_id = "category123"
+        subcategory_id = "subcat123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}",
+            params={"limit": "10", "offset": "0", "is_rollable": "true"},
+        ).mock(return_value=Response(200, json=paginated_trait_response))
+
+        # When: Requesting with is_rollable filter
+        result = await vclient.character_blueprint(company_id).get_subcategory_traits_page(
+            game_version=game_version,
+            section_id=section_id,
+            category_id=category_id,
+            subcategory_id=subcategory_id,
+            is_rollable=True,
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
     async def test_list_all_subcategory_traits(
         self, vclient, base_url, trait_response_data
     ) -> None:
@@ -1119,6 +1202,27 @@ class TestCharacterBlueprintServiceTraits:
             character_class="VAMPIRE",
             parent_category_id="category123",
             order_by=None,
+        )
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
+    async def test_get_traits_page_with_is_rollable_filter(
+        self, vclient, base_url, paginated_trait_response
+    ) -> None:
+        """Verify get_traits_page passes is_rollable filter correctly."""
+        # Given: A mocked endpoint expecting is_rollable param
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
+            params={"limit": "10", "offset": "0", "is_rollable": "true"},
+        ).mock(return_value=Response(200, json=paginated_trait_response))
+
+        # When: Requesting with is_rollable filter
+        result = await vclient.character_blueprint(company_id).get_traits_page(
+            is_rollable=True,
         )
 
         # Then: The route was called with correct params

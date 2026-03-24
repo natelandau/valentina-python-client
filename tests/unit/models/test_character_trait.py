@@ -44,6 +44,37 @@ class TestCharacterTrait:
         assert character_trait.value == 3
         assert character_trait.trait.name == "Strength"
 
+    def test_character_trait_is_rollable_default(self) -> None:
+        """Verify Trait.is_rollable defaults to True."""
+        # Given: A trait with minimal fields
+        trait = Trait(
+            id="trait123",
+            name="Strength",
+            date_created=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
+            date_modified=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
+            parent_category_id="cat123",
+            sheet_section_id="section123",
+        )
+
+        # Then: is_rollable defaults to True
+        assert trait.is_rollable is True
+
+    def test_character_trait_is_rollable_false(self) -> None:
+        """Verify Trait.is_rollable can be set to False."""
+        # Given: A trait with is_rollable=False
+        trait = Trait(
+            id="trait123",
+            name="Humanity",
+            date_created=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
+            date_modified=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
+            parent_category_id="cat123",
+            sheet_section_id="section123",
+            is_rollable=False,
+        )
+
+        # Then: is_rollable is False
+        assert trait.is_rollable is False
+
     def test_character_trait_from_api_response(self) -> None:
         """Verify CharacterTrait model validates from API response format."""
         # Given: API response data

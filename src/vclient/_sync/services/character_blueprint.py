@@ -241,6 +241,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of character blueprint subcategory traits."""
         return self._get_paginated_as(
@@ -254,7 +255,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             Trait,
             limit=limit,
             offset=offset,
-            params=self._build_params(character_class=character_class),
+            params=self._build_params(character_class=character_class, is_rollable=is_rollable),
         )
 
     def list_all_subcategory_traits(
@@ -265,6 +266,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         category_id: str,
         subcategory_id: str,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
     ) -> list[Trait]:
         """List all character blueprint subcategory traits."""
         return [
@@ -275,6 +277,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
                 category_id=category_id,
                 subcategory_id=subcategory_id,
                 character_class=character_class,
+                is_rollable=is_rollable,
             )
         ]
 
@@ -286,6 +289,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         category_id: str,
         subcategory_id: str,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
     ) -> Iterator[Trait]:
         """Iterate through all character blueprint subcategory traits."""
         for trait in self._iter_all_pages(
@@ -296,7 +300,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
                 category_id=category_id,
                 subcategory_id=subcategory_id,
             ),
-            params=self._build_params(character_class=character_class),
+            params=self._build_params(character_class=character_class, is_rollable=is_rollable),
         ):
             yield Trait.model_validate(trait)
 
@@ -309,6 +313,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
         character_id: str | None = None,
         exclude_subcategory_traits: bool = False,
     ) -> PaginatedResponse[Trait]:
@@ -324,6 +329,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             limit=limit,
             offset=offset,
             params=self._build_params(
+                is_rollable=is_rollable,
                 character_class=character_class,
                 character_id=character_id,
                 exclude_subcategory_traits=exclude_subcategory_traits or None,
@@ -337,6 +343,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         section_id: str,
         category_id: str,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
         character_id: str | None = None,
         exclude_subcategory_traits: bool = False,
     ) -> list[Trait]:
@@ -348,6 +355,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
                 section_id=section_id,
                 category_id=category_id,
                 character_class=character_class,
+                is_rollable=is_rollable,
                 character_id=character_id,
                 exclude_subcategory_traits=exclude_subcategory_traits,
             )
@@ -360,6 +368,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         section_id: str,
         category_id: str,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
         character_id: str | None = None,
         exclude_subcategory_traits: bool = False,
     ) -> Iterator[Trait]:
@@ -373,6 +382,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             ),
             params=self._build_params(
                 character_class=character_class,
+                is_rollable=is_rollable,
                 character_id=character_id,
                 exclude_subcategory_traits=exclude_subcategory_traits or None,
             ),
@@ -387,6 +397,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         game_version: GameVersion | None = None,
         character_class: CharacterClass | None = None,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
         order_by: BlueprintTraitOrderBy | None = None,
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of all character blueprint traits."""
@@ -398,6 +409,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             params=self._build_params(
                 character_class=character_class,
                 parent_category_id=parent_category_id,
+                is_rollable=is_rollable,
                 order_by=order_by,
                 game_version=game_version,
             ),
@@ -409,6 +421,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         game_version: GameVersion | None = None,
         character_class: CharacterClass | None = None,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
         order_by: BlueprintTraitOrderBy | None = None,
     ) -> list[Trait]:
         """List all character blueprint traits."""
@@ -418,6 +431,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
                 game_version=game_version,
                 character_class=character_class,
                 parent_category_id=parent_category_id,
+                is_rollable=is_rollable,
                 order_by=order_by,
             )
         ]
@@ -428,6 +442,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         game_version: GameVersion | None = None,
         character_class: CharacterClass | None = None,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
         order_by: BlueprintTraitOrderBy | None = None,
     ) -> Iterator[Trait]:
         """Iterate through all character blueprint traits."""
@@ -436,6 +451,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             params=self._build_params(
                 character_class=character_class,
                 parent_category_id=parent_category_id,
+                is_rollable=is_rollable,
                 order_by=order_by,
                 game_version=game_version,
             ),

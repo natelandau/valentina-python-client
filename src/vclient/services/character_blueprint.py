@@ -48,9 +48,8 @@ class CharacterBlueprintService(BaseService):
             **kwargs,
         )
 
-    # -----------------------------------------------------------------------------
     # Character Sheet Sections
-    # -----------------------------------------------------------------------------
+
     async def get_sections_page(
         self,
         game_version: GameVersion,
@@ -100,9 +99,8 @@ class CharacterBlueprintService(BaseService):
         )
         return SheetSection.model_validate(response.json())
 
-    # -----------------------------------------------------------------------------
     # Character Sheet Categories
-    # -----------------------------------------------------------------------------
+
     async def get_categories_page(
         self,
         *,
@@ -170,9 +168,8 @@ class CharacterBlueprintService(BaseService):
         )
         return TraitCategory.model_validate(response.json())
 
-    # -----------------------------------------------------------------------------
     # Character Sheet Category Subcategories
-    # -----------------------------------------------------------------------------
+
     async def get_subcategories_page(
         self,
         *,
@@ -256,9 +253,8 @@ class CharacterBlueprintService(BaseService):
         )
         return TraitSubcategory.model_validate(response.json())
 
-    # -----------------------------------------------------------------------------
     # Character Sheet Subcategory Traits
-    # -----------------------------------------------------------------------------
+
     async def get_subcategory_traits_page(
         self,
         *,
@@ -269,6 +265,7 @@ class CharacterBlueprintService(BaseService):
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of character blueprint subcategory traits."""
         return await self._get_paginated_as(
@@ -282,7 +279,7 @@ class CharacterBlueprintService(BaseService):
             Trait,
             limit=limit,
             offset=offset,
-            params=self._build_params(character_class=character_class),
+            params=self._build_params(character_class=character_class, is_rollable=is_rollable),
         )
 
     async def list_all_subcategory_traits(
@@ -293,6 +290,7 @@ class CharacterBlueprintService(BaseService):
         category_id: str,
         subcategory_id: str,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
     ) -> list[Trait]:
         """List all character blueprint subcategory traits."""
         return [
@@ -303,6 +301,7 @@ class CharacterBlueprintService(BaseService):
                 category_id=category_id,
                 subcategory_id=subcategory_id,
                 character_class=character_class,
+                is_rollable=is_rollable,
             )
         ]
 
@@ -314,6 +313,7 @@ class CharacterBlueprintService(BaseService):
         category_id: str,
         subcategory_id: str,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
     ) -> AsyncIterator[Trait]:
         """Iterate through all character blueprint subcategory traits."""
         async for trait in self._iter_all_pages(
@@ -324,13 +324,11 @@ class CharacterBlueprintService(BaseService):
                 category_id=category_id,
                 subcategory_id=subcategory_id,
             ),
-            params=self._build_params(character_class=character_class),
+            params=self._build_params(character_class=character_class, is_rollable=is_rollable),
         ):
             yield Trait.model_validate(trait)
 
-    # -----------------------------------------------------------------------------
     # Character Sheet Category Traits
-    # -----------------------------------------------------------------------------
 
     async def get_category_traits_page(
         self,
@@ -341,6 +339,7 @@ class CharacterBlueprintService(BaseService):
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
         character_id: str | None = None,
         exclude_subcategory_traits: bool = False,
     ) -> PaginatedResponse[Trait]:
@@ -356,6 +355,7 @@ class CharacterBlueprintService(BaseService):
             limit=limit,
             offset=offset,
             params=self._build_params(
+                is_rollable=is_rollable,
                 character_class=character_class,
                 character_id=character_id,
                 exclude_subcategory_traits=exclude_subcategory_traits or None,
@@ -369,6 +369,7 @@ class CharacterBlueprintService(BaseService):
         section_id: str,
         category_id: str,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
         character_id: str | None = None,
         exclude_subcategory_traits: bool = False,
     ) -> list[Trait]:
@@ -380,6 +381,7 @@ class CharacterBlueprintService(BaseService):
                 section_id=section_id,
                 category_id=category_id,
                 character_class=character_class,
+                is_rollable=is_rollable,
                 character_id=character_id,
                 exclude_subcategory_traits=exclude_subcategory_traits,
             )
@@ -392,6 +394,7 @@ class CharacterBlueprintService(BaseService):
         section_id: str,
         category_id: str,
         character_class: CharacterClass | None = None,
+        is_rollable: bool | None = None,
         character_id: str | None = None,
         exclude_subcategory_traits: bool = False,
     ) -> AsyncIterator[Trait]:
@@ -405,15 +408,15 @@ class CharacterBlueprintService(BaseService):
             ),
             params=self._build_params(
                 character_class=character_class,
+                is_rollable=is_rollable,
                 character_id=character_id,
                 exclude_subcategory_traits=exclude_subcategory_traits or None,
             ),
         ):
             yield Trait.model_validate(trait)
 
-    # -----------------------------------------------------------------------------
     # All Character Traits
-    # -----------------------------------------------------------------------------
+
     async def get_traits_page(
         self,
         *,
@@ -422,6 +425,7 @@ class CharacterBlueprintService(BaseService):
         game_version: GameVersion | None = None,
         character_class: CharacterClass | None = None,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
         order_by: BlueprintTraitOrderBy | None = None,
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of all character blueprint traits."""
@@ -433,6 +437,7 @@ class CharacterBlueprintService(BaseService):
             params=self._build_params(
                 character_class=character_class,
                 parent_category_id=parent_category_id,
+                is_rollable=is_rollable,
                 order_by=order_by,
                 game_version=game_version,
             ),
@@ -444,6 +449,7 @@ class CharacterBlueprintService(BaseService):
         game_version: GameVersion | None = None,
         character_class: CharacterClass | None = None,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
         order_by: BlueprintTraitOrderBy | None = None,
     ) -> list[Trait]:
         """List all character blueprint traits."""
@@ -453,6 +459,7 @@ class CharacterBlueprintService(BaseService):
                 game_version=game_version,
                 character_class=character_class,
                 parent_category_id=parent_category_id,
+                is_rollable=is_rollable,
                 order_by=order_by,
             )
         ]
@@ -463,6 +470,7 @@ class CharacterBlueprintService(BaseService):
         game_version: GameVersion | None = None,
         character_class: CharacterClass | None = None,
         parent_category_id: str | None = None,
+        is_rollable: bool | None = None,
         order_by: BlueprintTraitOrderBy | None = None,
     ) -> AsyncIterator[Trait]:
         """Iterate through all character blueprint traits."""
@@ -471,6 +479,7 @@ class CharacterBlueprintService(BaseService):
             params=self._build_params(
                 character_class=character_class,
                 parent_category_id=parent_category_id,
+                is_rollable=is_rollable,
                 order_by=order_by,
                 game_version=game_version,
             ),
@@ -484,9 +493,8 @@ class CharacterBlueprintService(BaseService):
         )
         return Trait.model_validate(response.json())
 
-    # -----------------------------------------------------------------------------
     # Character Concepts
-    # -----------------------------------------------------------------------------
+
     async def get_concepts_page(
         self,
         *,
