@@ -28,6 +28,7 @@ def trait_response_data() -> dict:
         "trait_subcategory_name": None,
         "pool": None,
         "system": None,
+        "is_rollable": True,
         "character_classes": ["VAMPIRE", "WEREWOLF"],
         "game_versions": ["V5"],
     }

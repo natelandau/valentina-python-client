@@ -150,6 +150,52 @@ class TestCharacterTraitsServiceGetPage:
         assert route.called
         assert len(result.items) == 1
 
+    @respx.mock
+    async def test_get_page_with_is_rollable_true(
+        self, vclient, base_url, paginated_character_trait_response
+    ) -> None:
+        """Verify get_page passes is_rollable=True filter correctly."""
+        # Given: A mocked endpoint expecting is_rollable param
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_TRAITS.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}",
+            params={"limit": "10", "offset": "0", "is_rollable": "true"},
+        ).mock(return_value=Response(200, json=paginated_character_trait_response))
+
+        # When: Requesting with is_rollable filter
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).get_page(is_rollable=True)
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
+    @respx.mock
+    async def test_get_page_with_is_rollable_false(
+        self, vclient, base_url, paginated_character_trait_response
+    ) -> None:
+        """Verify get_page passes is_rollable=False filter correctly."""
+        # Given: A mocked endpoint expecting is_rollable=False param
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_TRAITS.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}",
+            params={"limit": "10", "offset": "0", "is_rollable": "false"},
+        ).mock(return_value=Response(200, json=paginated_character_trait_response))
+
+        # When: Requesting with is_rollable=False filter
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).get_page(is_rollable=False)
+
+        # Then: The route was called with correct params
+        assert route.called
+        assert len(result.items) == 1
+
 
 class TestCharacterTraitsServiceGet:
     """Tests for CharacterTraitsService.get method."""
@@ -263,6 +309,35 @@ class TestCharacterTraitsServiceListAll:
         assert route.called
         assert len(result) == 1
 
+    @respx.mock
+    async def test_list_all_with_is_rollable_filter(
+        self, vclient, base_url, character_trait_response_data
+    ) -> None:
+        """Verify list_all filters by is_rollable."""
+        # Given: A mocked endpoint expecting is_rollable param
+        paginated_response = {
+            "items": [character_trait_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_TRAITS.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}",
+            params={"limit": "100", "offset": "0", "is_rollable": "true"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Requesting with is_rollable filter
+        result = await vclient.character_traits(
+            user_id="user123",
+            campaign_id="campaign123",
+            character_id="char123",
+            company_id="company123",
+        ).list_all(is_rollable=True)
+
+        # Then: Filtered results are returned
+        assert route.called
+        assert len(result) == 1
+
 
 class TestCharacterTraitsServiceIterAll:
     """Tests for CharacterTraitsService.iter_all method."""
@@ -325,6 +400,38 @@ class TestCharacterTraitsServiceIterAll:
                 character_id="char123",
                 company_id="company123",
             ).iter_all(parent_category_id="cat456")
+        ]
+
+        # Then: Filtered results are yielded
+        assert route.called
+        assert len(traits) == 1
+
+    @respx.mock
+    async def test_iter_all_with_is_rollable_filter(
+        self, vclient, base_url, character_trait_response_data
+    ) -> None:
+        """Verify iter_all filters by is_rollable."""
+        # Given: A mocked endpoint expecting is_rollable param
+        paginated_response = {
+            "items": [character_trait_response_data],
+            "limit": 100,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER_TRAITS.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}",
+            params={"limit": "100", "offset": "0", "is_rollable": "false"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating with is_rollable filter
+        traits = [
+            trait
+            async for trait in vclient.character_traits(
+                user_id="user123",
+                campaign_id="campaign123",
+                character_id="char123",
+                company_id="company123",
+            ).iter_all(is_rollable=False)
         ]
 
         # Then: Filtered results are yielded

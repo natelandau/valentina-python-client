@@ -67,6 +67,7 @@ Response from `bulk_assign()`. Contains results grouped by outcome.
 | `pool`                   | `str \| None`            | Traits that contribute to the pool |
 | `opposing_pool`          | `str \| None`            | Traits to counter this trait       |
 | `system`                 | `str \| None`            | System rules                       |
+| `is_rollable`            | `bool`                   | Whether the trait is rollable      |
 | `sheet_section_id`       | `str`                    | Sheet section ID                   |
 | `sheet_section_name`     | `str \| None`            | Sheet section name                 |
 | `game_versions`          | `list[GameVersion]`      | Available game versions            |
