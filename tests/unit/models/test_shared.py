@@ -251,11 +251,8 @@ class TestGiftAttributes:
             renown="HONOR",
             cost="1 Rage",
             duration="1 scene",
-            dice_pool=["Charisma", "Primal-Urge"],
-            opposing_pool=["Composure", "Resolve"],
             minimum_renown=2,
             is_native_gift=True,
-            notes="Test notes",
             tribe_id="tribe123",
             auspice_id="auspice123",
         )
@@ -263,11 +260,8 @@ class TestGiftAttributes:
         assert attrs.renown == "HONOR"
         assert attrs.cost == "1 Rage"
         assert attrs.duration == "1 scene"
-        assert attrs.dice_pool == ["Charisma", "Primal-Urge"]
-        assert attrs.opposing_pool == ["Composure", "Resolve"]
         assert attrs.minimum_renown == 2
         assert attrs.is_native_gift is True
-        assert attrs.notes == "Test notes"
         assert attrs.tribe_id == "tribe123"
         assert attrs.auspice_id == "auspice123"
 
@@ -278,11 +272,8 @@ class TestGiftAttributes:
         assert attrs.renown == "GLORY"
         assert attrs.cost is None
         assert attrs.duration is None
-        assert attrs.dice_pool == []
-        assert attrs.opposing_pool == []
         assert attrs.minimum_renown is None
         assert attrs.is_native_gift is False
-        assert attrs.notes is None
         assert attrs.tribe_id is None
         assert attrs.auspice_id is None
 

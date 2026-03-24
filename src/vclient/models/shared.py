@@ -125,11 +125,8 @@ class GiftAttributes(BaseModel):
     renown: WerewolfRenown
     cost: str | None = None
     duration: str | None = None
-    dice_pool: list[str] = Field(default_factory=list)
-    opposing_pool: list[str] = Field(default_factory=list)
     minimum_renown: int | None = None
     is_native_gift: bool = False
-    notes: str | None = None
     tribe_id: str | None = None
     auspice_id: str | None = None
 
@@ -161,6 +158,7 @@ class Trait(BaseModel):
     trait_subcategory_id: str | None = None
     trait_subcategory_name: str | None = None
     pool: str | None = None
+    opposing_pool: str | None = None
     system: str | None = None
     gift_attributes: GiftAttributes | None = None
 

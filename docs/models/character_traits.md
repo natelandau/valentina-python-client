@@ -29,47 +29,49 @@ Request model for assigning a trait to an already-created character. Used by the
 
 Response from `bulk_assign()`. Contains results grouped by outcome.
 
-| Field       | Type                          | Description                       |
-| ----------- | ----------------------------- | --------------------------------- |
+| Field       | Type                           | Description                       |
+| ----------- | ------------------------------ | --------------------------------- |
 | `succeeded` | `list[BulkAssignTraitSuccess]` | Successfully assigned traits      |
 | `failed`    | `list[BulkAssignTraitFailure]` | Traits that failed to be assigned |
 
 ## BulkAssignTraitSuccess
 
-| Field             | Type             | Description                           |
-| ----------------- | ---------------- | ------------------------------------- |
-| `trait_id`        | `str`            | ID of the trait that was assigned     |
+| Field             | Type             | Description                            |
+| ----------------- | ---------------- | -------------------------------------- |
+| `trait_id`        | `str`            | ID of the trait that was assigned      |
 | `character_trait` | `CharacterTrait` | The resulting character trait instance |
 
 ## BulkAssignTraitFailure
 
-| Field      | Type  | Description                    |
-| ---------- | ----- | ------------------------------ |
-| `trait_id` | `str` | ID of the trait that failed    |
-| `error`    | `str` | Human-readable error message   |
+| Field      | Type  | Description                  |
+| ---------- | ----- | ---------------------------- |
+| `trait_id` | `str` | ID of the trait that failed  |
+| `error`    | `str` | Human-readable error message |
 
 ## Trait
 
-| Field                    | Type                   | Description              |
-| ------------------------ | ---------------------- | ------------------------ |
-| `id`                     | `str`                  | Unique identifier        |
-| `name`                   | `str`                  | Trait name               |
-| `description`            | `str \| None`          | Trait description        |
-| `max_value`              | `int`                  | Maximum value            |
-| `min_value`              | `int`                  | Minimum value            |
-| `is_custom`              | `bool`                 | Whether custom trait     |
-| `initial_cost`           | `int`                  | XP cost to acquire       |
-| `upgrade_cost`           | `int`                  | XP cost per upgrade      |
-| `parent_category_id`     | `str`                  | Parent category ID       |
-| `parent_category_name`   | `str \| None`          | Parent category name     |
-| `trait_subcategory_id`   | `str \| None`          | Trait subcategory ID     |
-| `trait_subcategory_name` | `str \| None`          | Trait subcategory name   |
-| `pool`                   | `str \| None`          | Dice pool                |
-| `system`                 | `str \| None`          | System rules             |
-| `sheet_section_id`       | `str`                  | Sheet section ID         |
-| `sheet_section_name`     | `str \| None`          | Sheet section name       |
-| `game_versions`          | `list[GameVersion]`    | Available game versions  |
-| `character_classes`      | `list[CharacterClass]` | Applicable classes       |
+| Field                    | Type                     | Description                        |
+| ------------------------ | ------------------------ | ---------------------------------- |
+| `id`                     | `str`                    | Unique identifier                  |
+| `name`                   | `str`                    | Trait name                         |
+| `description`            | `str \| None`            | Trait description                  |
+| `max_value`              | `int`                    | Maximum value                      |
+| `min_value`              | `int`                    | Minimum value                      |
+| `is_custom`              | `bool`                   | Whether custom trait               |
+| `initial_cost`           | `int`                    | XP cost to acquire                 |
+| `upgrade_cost`           | `int`                    | XP cost per upgrade                |
+| `parent_category_id`     | `str`                    | Parent category ID                 |
+| `parent_category_name`   | `str \| None`            | Parent category name               |
+| `trait_subcategory_id`   | `str \| None`            | Trait subcategory ID               |
+| `trait_subcategory_name` | `str \| None`            | Trait subcategory name             |
+| `pool`                   | `str \| None`            | Traits that contribute to the pool |
+| `opposing_pool`          | `str \| None`            | Traits to counter this trait       |
+| `system`                 | `str \| None`            | System rules                       |
+| `sheet_section_id`       | `str`                    | Sheet section ID                   |
+| `sheet_section_name`     | `str \| None`            | Sheet section name                 |
+| `game_versions`          | `list[GameVersion]`      | Available game versions            |
+| `character_classes`      | `list[CharacterClass]`   | Applicable classes                 |
+| `gift_attributes`        | `GiftAttributes \| None` | Werewolf gift attributes           |
 
 ## CharacterTraitValueOptionsResponse
 
