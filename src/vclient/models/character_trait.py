@@ -47,6 +47,7 @@ class TraitCreate(BaseModel):
     parent_category_id: str
     initial_cost: int | None = None
     upgrade_cost: int | None = None
+    count_based_cost_multiplier: int | None = None
     value: int | None = None
 
 

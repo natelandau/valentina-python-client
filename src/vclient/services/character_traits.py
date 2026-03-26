@@ -51,9 +51,7 @@ class CharacterTraitsService(BaseService):
             **kwargs,
         )
 
-    # -------------------------------------------------------------------------
     # Character Trait CRUD Methods
-    # -------------------------------------------------------------------------
 
     async def get_page(
         self,
@@ -265,10 +263,7 @@ class CharacterTraitsService(BaseService):
         )
         return CharacterTrait.model_validate(response.json())
 
-    # -------------------------------------------------------------------------
     # Trait Value Modification Methods
-    # -------------------------------------------------------------------------
-
     async def get_value_options(
         self, character_trait_id: str
     ) -> CharacterTraitValueOptionsResponse:

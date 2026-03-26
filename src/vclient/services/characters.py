@@ -71,9 +71,7 @@ class CharactersService(BaseService):
             **kwargs,
         )
 
-    # -------------------------------------------------------------------------
     # Character CRUD Methods
-    # -------------------------------------------------------------------------
 
     async def get_page(
         self,
@@ -407,9 +405,7 @@ class CharactersService(BaseService):
         )
         return FullSheetTraitCategory.model_validate(response.json())
 
-    # -------------------------------------------------------------------------
     # Asset Methods
-    # -------------------------------------------------------------------------
 
     async def get_assets_page(
         self,
@@ -570,9 +566,7 @@ class CharactersService(BaseService):
         )
         return Asset.model_validate(response.json())
 
-    # -------------------------------------------------------------------------
     # Notes Methods
-    # -------------------------------------------------------------------------
 
     async def get_notes_page(
         self,
@@ -767,9 +761,7 @@ class CharactersService(BaseService):
             )
         )
 
-    # -------------------------------------------------------------------------
     # Character Inventory Methods
-    # -------------------------------------------------------------------------
 
     async def get_inventory_page(
         self,

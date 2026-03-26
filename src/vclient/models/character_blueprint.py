@@ -36,6 +36,7 @@ class TraitCategory(BaseModel):
     parent_sheet_section_id: str
     initial_cost: int
     upgrade_cost: int
+    count_based_cost_multiplier: int | None = None
     order: int
     show_when_empty: bool
 
@@ -53,6 +54,7 @@ class TraitSubcategory(BaseModel):
     show_when_empty: bool
     initial_cost: int
     upgrade_cost: int
+    count_based_cost_multiplier: int | None = None
     requires_parent: bool
     pool: str | None = None
     system: str | None = None

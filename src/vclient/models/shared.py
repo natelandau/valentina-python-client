@@ -149,6 +149,7 @@ class Trait(BaseModel):
     is_custom: bool = False
     initial_cost: int = 1
     upgrade_cost: int = 2
+    count_based_cost_multiplier: int | None = None
     is_rollable: bool = True
 
     sheet_section_name: str | None = None
