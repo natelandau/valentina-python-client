@@ -595,7 +595,7 @@ class TestCharacterBlueprintServiceCategoryTraits:
         section_id = "section123"
         category_id = "category123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0"},
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
@@ -623,7 +623,7 @@ class TestCharacterBlueprintServiceCategoryTraits:
         section_id = "section123"
         category_id = "category123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={
                 "limit": "10",
                 "offset": "0",
@@ -660,7 +660,7 @@ class TestCharacterBlueprintServiceCategoryTraits:
             "total": 1,
         }
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}"
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}"
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all traits
@@ -689,7 +689,7 @@ class TestCharacterBlueprintServiceCategoryTraits:
             "total": 1,
         }
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}"
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}"
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Iterating through all traits
@@ -716,7 +716,7 @@ class TestCharacterBlueprintServiceCategoryTraits:
         section_id = "section123"
         category_id = "category123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0", "is_rollable": "true"},
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
@@ -743,7 +743,7 @@ class TestCharacterBlueprintServiceCategoryTraits:
         section_id = "section123"
         category_id = "category123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0", "is_rollable": "false"},
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
@@ -770,7 +770,7 @@ class TestCharacterBlueprintServiceCategoryTraits:
         section_id = "section123"
         category_id = "category123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0", "exclude_subcategory_traits": "true"},
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
@@ -797,7 +797,7 @@ class TestCharacterBlueprintServiceCategoryTraits:
         section_id = "section123"
         category_id = "category123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0"},
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
@@ -827,7 +827,7 @@ class TestCharacterBlueprintServiceSubcategories:
         section_id = "section123"
         category_id = "category123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORIES.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0"},
         ).mock(return_value=Response(200, json=paginated_subcategory_response))
 
@@ -855,7 +855,7 @@ class TestCharacterBlueprintServiceSubcategories:
         section_id = "section123"
         category_id = "category123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORIES.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0", "character_class": "VAMPIRE"},
         ).mock(return_value=Response(200, json=paginated_subcategory_response))
 
@@ -888,7 +888,7 @@ class TestCharacterBlueprintServiceSubcategories:
             "total": 1,
         }
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}"
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORIES.format(company_id=company_id)}"
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all subcategories
@@ -919,7 +919,7 @@ class TestCharacterBlueprintServiceSubcategories:
             "total": 1,
         }
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id)}"
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORIES.format(company_id=company_id)}"
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Iterating through all subcategories
@@ -945,7 +945,7 @@ class TestCharacterBlueprintServiceSubcategories:
         category_id = "category123"
         subcategory_id = "subcat123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORY_DETAIL.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}"
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_DETAIL.format(company_id=company_id, subcategory_id=subcategory_id)}"
         ).mock(return_value=Response(200, json=subcategory_response_data))
 
         # When: Requesting a single subcategory
@@ -975,7 +975,7 @@ class TestCharacterBlueprintServiceSubcategories:
         category_id = "category123"
         subcategory_id = "nonexistent"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORY_DETAIL.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}"
+            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_DETAIL.format(company_id=company_id, subcategory_id=subcategory_id)}"
         ).mock(
             return_value=Response(404, json={"detail": "Subcategory not found", "status_code": 404})
         )
@@ -1007,7 +1007,7 @@ class TestCharacterBlueprintServiceSubcategoryTraits:
         category_id = "category123"
         subcategory_id = "subcat123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0"},
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
@@ -1039,7 +1039,7 @@ class TestCharacterBlueprintServiceSubcategoryTraits:
         category_id = "category123"
         subcategory_id = "subcat123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0", "character_class": "VAMPIRE"},
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
@@ -1068,7 +1068,7 @@ class TestCharacterBlueprintServiceSubcategoryTraits:
         category_id = "category123"
         subcategory_id = "subcat123"
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}",
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}",
             params={"limit": "10", "offset": "0", "is_rollable": "true"},
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
@@ -1103,7 +1103,7 @@ class TestCharacterBlueprintServiceSubcategoryTraits:
             "total": 1,
         }
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}"
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}"
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all subcategory traits
@@ -1138,7 +1138,7 @@ class TestCharacterBlueprintServiceSubcategoryTraits:
             "total": 1,
         }
         route = respx.get(
-            f"{base_url}{Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS.format(company_id=company_id, game_version=game_version, section_id=section_id, category_id=category_id, subcategory_id=subcategory_id)}"
+            f"{base_url}{Endpoints.BLUEPRINT_TRAITS.format(company_id=company_id)}"
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Iterating through all subcategory traits

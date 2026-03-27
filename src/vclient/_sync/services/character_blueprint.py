@@ -165,12 +165,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
     ) -> PaginatedResponse[TraitSubcategory]:
         """Get a paginated page of character blueprint category subcategories."""
         return self._get_paginated_as(
-            self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-            ),
+            self._format_endpoint(Endpoints.BLUEPRINT_SUBCATEGORIES),
             TraitSubcategory,
             limit=limit,
             offset=offset,
@@ -206,12 +201,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
     ) -> Iterator[TraitSubcategory]:
         """Iterate through all character blueprint category subcategories."""
         for subcategory in self._iter_all_pages(
-            self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-            ),
+            self._format_endpoint(Endpoints.BLUEPRINT_SUBCATEGORIES),
             params=self._build_params(character_class=character_class),
         ):
             yield TraitSubcategory.model_validate(subcategory)
@@ -222,11 +212,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
         """Get a character blueprint category subcategory by ID."""
         response = self._get(
             self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORY_DETAIL,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-                subcategory_id=subcategory_id,
+                Endpoints.BLUEPRINT_SUBCATEGORY_DETAIL, subcategory_id=subcategory_id
             )
         )
         return TraitSubcategory.model_validate(response.json())
@@ -245,13 +231,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of character blueprint subcategory traits."""
         return self._get_paginated_as(
-            self._format_endpoint(
-                Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-                subcategory_id=subcategory_id,
-            ),
+            self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
             Trait,
             limit=limit,
             offset=offset,
@@ -293,13 +273,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
     ) -> Iterator[Trait]:
         """Iterate through all character blueprint subcategory traits."""
         for trait in self._iter_all_pages(
-            self._format_endpoint(
-                Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-                subcategory_id=subcategory_id,
-            ),
+            self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
             params=self._build_params(character_class=character_class, is_rollable=is_rollable),
         ):
             yield Trait.model_validate(trait)
@@ -319,12 +293,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
     ) -> PaginatedResponse[Trait]:
         """Get a paginated page of character blueprint category traits."""
         return self._get_paginated_as(
-            self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_TRAITS,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-            ),
+            self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
             Trait,
             limit=limit,
             offset=offset,
@@ -374,12 +343,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
     ) -> Iterator[Trait]:
         """Iterate through all character blueprint category traits."""
         for trait in self._iter_all_pages(
-            self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_TRAITS,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-            ),
+            self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
             params=self._build_params(
                 character_class=character_class,
                 is_rollable=is_rollable,

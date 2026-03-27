@@ -131,6 +131,7 @@
             "TD003",  # Missing issue link on the line following this TODO
         ]
         per-file-ignores = { "src/vclient/_sync/**" = [
+            "ARG002",  # Unused method argument (noqa comments don't survive AST codegen)
             "C416",    # Unnecessary list comprehension (AST unparser artifact)
             "D",       # Docstring formatting (AST unparser doesn't preserve style)
             "E501",    # Line too long

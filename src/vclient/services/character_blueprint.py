@@ -173,9 +173,9 @@ class CharacterBlueprintService(BaseService):
     async def get_subcategories_page(
         self,
         *,
-        game_version: GameVersion,
-        section_id: str,
-        category_id: str,
+        game_version: GameVersion,  # noqa: ARG002
+        section_id: str,  # noqa: ARG002
+        category_id: str,  # noqa: ARG002
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         character_class: CharacterClass | None = None,
@@ -183,10 +183,7 @@ class CharacterBlueprintService(BaseService):
         """Get a paginated page of character blueprint category subcategories."""
         return await self._get_paginated_as(
             self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
+                Endpoints.BLUEPRINT_SUBCATEGORIES,
             ),
             TraitSubcategory,
             limit=limit,
@@ -216,18 +213,15 @@ class CharacterBlueprintService(BaseService):
     async def iter_all_subcategories(
         self,
         *,
-        game_version: GameVersion,
-        section_id: str,
-        category_id: str,
+        game_version: GameVersion,  # noqa: ARG002
+        section_id: str,  # noqa: ARG002
+        category_id: str,  # noqa: ARG002
         character_class: CharacterClass | None = None,
     ) -> AsyncIterator[TraitSubcategory]:
         """Iterate through all character blueprint category subcategories."""
         async for subcategory in self._iter_all_pages(
             self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORIES,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
+                Endpoints.BLUEPRINT_SUBCATEGORIES,
             ),
             params=self._build_params(character_class=character_class),
         ):
@@ -236,18 +230,15 @@ class CharacterBlueprintService(BaseService):
     async def get_subcategory(
         self,
         *,
-        game_version: GameVersion,
-        section_id: str,
-        category_id: str,
+        game_version: GameVersion,  # noqa: ARG002
+        section_id: str,  # noqa: ARG002
+        category_id: str,  # noqa: ARG002
         subcategory_id: str,
     ) -> TraitSubcategory:
         """Get a character blueprint category subcategory by ID."""
         response = await self._get(
             self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_SUBCATEGORY_DETAIL,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
+                Endpoints.BLUEPRINT_SUBCATEGORY_DETAIL,
                 subcategory_id=subcategory_id,
             ),
         )
@@ -258,10 +249,10 @@ class CharacterBlueprintService(BaseService):
     async def get_subcategory_traits_page(
         self,
         *,
-        game_version: GameVersion,
-        section_id: str,
-        category_id: str,
-        subcategory_id: str,
+        game_version: GameVersion,  # noqa: ARG002
+        section_id: str,  # noqa: ARG002
+        category_id: str,  # noqa: ARG002
+        subcategory_id: str,  # noqa: ARG002
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         character_class: CharacterClass | None = None,
@@ -270,11 +261,7 @@ class CharacterBlueprintService(BaseService):
         """Get a paginated page of character blueprint subcategory traits."""
         return await self._get_paginated_as(
             self._format_endpoint(
-                Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-                subcategory_id=subcategory_id,
+                Endpoints.BLUEPRINT_TRAITS,
             ),
             Trait,
             limit=limit,
@@ -308,21 +295,17 @@ class CharacterBlueprintService(BaseService):
     async def iter_all_subcategory_traits(
         self,
         *,
-        game_version: GameVersion,
-        section_id: str,
-        category_id: str,
-        subcategory_id: str,
+        game_version: GameVersion,  # noqa: ARG002
+        section_id: str,  # noqa: ARG002
+        category_id: str,  # noqa: ARG002
+        subcategory_id: str,  # noqa: ARG002
         character_class: CharacterClass | None = None,
         is_rollable: bool | None = None,
     ) -> AsyncIterator[Trait]:
         """Iterate through all character blueprint subcategory traits."""
         async for trait in self._iter_all_pages(
             self._format_endpoint(
-                Endpoints.BLUEPRINT_SUBCATEGORY_TRAITS,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
-                subcategory_id=subcategory_id,
+                Endpoints.BLUEPRINT_TRAITS,
             ),
             params=self._build_params(character_class=character_class, is_rollable=is_rollable),
         ):
@@ -333,9 +316,9 @@ class CharacterBlueprintService(BaseService):
     async def get_category_traits_page(
         self,
         *,
-        game_version: GameVersion,
-        section_id: str,
-        category_id: str,
+        game_version: GameVersion,  # noqa: ARG002
+        section_id: str,  # noqa: ARG002
+        category_id: str,  # noqa: ARG002
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         character_class: CharacterClass | None = None,
@@ -346,10 +329,7 @@ class CharacterBlueprintService(BaseService):
         """Get a paginated page of character blueprint category traits."""
         return await self._get_paginated_as(
             self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_TRAITS,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
+                Endpoints.BLUEPRINT_TRAITS,
             ),
             Trait,
             limit=limit,
@@ -390,9 +370,9 @@ class CharacterBlueprintService(BaseService):
     async def iter_all_category_traits(
         self,
         *,
-        game_version: GameVersion,
-        section_id: str,
-        category_id: str,
+        game_version: GameVersion,  # noqa: ARG002
+        section_id: str,  # noqa: ARG002
+        category_id: str,  # noqa: ARG002
         character_class: CharacterClass | None = None,
         is_rollable: bool | None = None,
         character_id: str | None = None,
@@ -401,10 +381,7 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all character blueprint category traits."""
         async for trait in self._iter_all_pages(
             self._format_endpoint(
-                Endpoints.BLUEPRINT_CATEGORY_TRAITS,
-                game_version=game_version,
-                section_id=section_id,
-                category_id=category_id,
+                Endpoints.BLUEPRINT_TRAITS,
             ),
             params=self._build_params(
                 character_class=character_class,
