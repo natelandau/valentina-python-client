@@ -15,8 +15,9 @@ class DictionaryTerm(BaseModel):
     synonyms: list[str] = Field(default_factory=list)
     date_created: datetime
     date_modified: datetime
-    is_global: bool = False
     company_id: str | None = None
+    source_type: str | None = None
+    source_id: str | None = None
 
 
 class DictionaryTermCreate(BaseModel):
