@@ -42,7 +42,7 @@ class CharacterBlueprintService(BaseService):
         self._company_id = company_id
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
-        """Format an endpoint with the scoped company_id, user_id, and campaign_id plus any extra params."""
+        """Format an endpoint with the scoped company_id plus any extra params."""
         return endpoint.format(
             company_id=self._company_id,
             **kwargs,
