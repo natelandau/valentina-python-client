@@ -997,6 +997,7 @@ dependencies = [
     { name = "anyio" },
     { name = "httpx" },
     { name = "loguru" },
+    { name = "polyfactory" },
     { name = "pydantic", extra = ["email"] },
 ]
 
@@ -1037,6 +1038,7 @@ requires-dist = [
     { name = "anyio", specifier = ">=4.12.1" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "loguru", specifier = ">=0.7.3" },
+    { name = "polyfactory", specifier = ">=3.3.0" },
     { name = "polyfactory", marker = "extra == 'testing'", specifier = ">=3.3.0" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.12.5" },
 ]

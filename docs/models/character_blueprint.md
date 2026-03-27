@@ -31,6 +31,7 @@ Category within a sheet section. Groups related traits together, like "Physical 
 | `description`                 | `str \| None`          | Description                            |
 | `game_versions`               | `list[GameVersion]`    | Available game versions                |
 | `parent_sheet_section_id`     | `str`                  | Parent section ID                      |
+| `parent_sheet_section_name`   | `str`                  | Parent section name                    |
 | `initial_cost`                | `int`                  | XP cost to acquire                     |
 | `upgrade_cost`                | `int`                  | XP cost per upgrade                    |
 | `count_based_cost_multiplier` | `int \| None`          | Count-based cost multiplier for traits |
@@ -60,6 +61,8 @@ Subcategory within a trait category. Groups related traits together, like "Allie
 | `system`                      | `str \| None`          | System/mechanical rules                         |
 | `parent_category_id`          | `str`                  | Parent category ID                              |
 | `parent_category_name`        | `str`                  | Parent category name                            |
+| `sheet_section_id`            | `str`                  | Sheet section ID                                |
+| `sheet_section_name`          | `str`                  | Sheet section name                              |
 
 ## CharacterConcept
 

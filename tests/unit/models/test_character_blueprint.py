@@ -24,6 +24,8 @@ class TestTraitSubcategory:
             system=None,
             parent_category_id="category123",
             parent_category_name="Backgrounds",
+            sheet_section_id="section123",
+            sheet_section_name="Backgrounds",
         )
 
         assert subcategory.id == "subcat123"
@@ -45,6 +47,8 @@ class TestTraitSubcategory:
             requires_parent=False,
             parent_category_id="category123",
             parent_category_name="Backgrounds",
+            sheet_section_id="section123",
+            sheet_section_name="Backgrounds",
         )
 
         assert subcategory.description is None
@@ -71,6 +75,8 @@ class TestTraitSubcategory:
             system="Requires edge activation",
             parent_category_id="category456",
             parent_category_name="Edges",
+            sheet_section_id="section456",
+            sheet_section_name="Edges",
         )
 
         assert subcategory.pool == "Resolve + Composure"

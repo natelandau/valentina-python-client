@@ -60,6 +60,7 @@ def category_response_data() -> dict:
         "date_modified": "2024-01-15T10:30:00Z",
         "game_versions": ["V5"],
         "parent_sheet_section_id": "section123",
+        "parent_sheet_section_name": "Attributes",
         "initial_cost": 1,
         "upgrade_cost": 5,
         "order": 1,
@@ -97,6 +98,8 @@ def subcategory_response_data() -> dict:
         "system": None,
         "parent_category_id": "category123",
         "parent_category_name": "Backgrounds",
+        "sheet_section_id": "section123",
+        "sheet_section_name": "Backgrounds",
     }
 
 

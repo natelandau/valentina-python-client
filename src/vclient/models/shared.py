@@ -128,7 +128,9 @@ class GiftAttributes(BaseModel):
     minimum_renown: int | None = None
     is_native_gift: bool = False
     tribe_id: str | None = None
+    tribe_name: str | None = None
     auspice_id: str | None = None
+    auspice_name: str | None = None
 
 
 class Trait(BaseModel):
