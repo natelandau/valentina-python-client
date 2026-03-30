@@ -2,6 +2,7 @@
 
 import pytest
 
+from vclient.constants import REQUEST_ID_HEADER
 from vclient.exceptions import NotFoundError
 from vclient.models import CampaignBook, PaginatedResponse, User
 from vclient.registry import books_service, campaigns_service, users_service
@@ -259,8 +260,8 @@ class TestRequestIdHeader:
             response = await client._http.get("/api/v1/companies")
 
             # Then X-Request-Id header is present and starts with req_
-            assert "X-Request-Id" in response.headers
-            assert response.headers["X-Request-Id"].startswith("req_")
+            assert REQUEST_ID_HEADER in response.headers
+            assert response.headers[REQUEST_ID_HEADER].startswith("req_")
 
     async def test_error_response_has_request_id_header(self):
         """Verify error responses include X-Request-Id header."""
@@ -274,8 +275,8 @@ class TestRequestIdHeader:
             )
 
             # Then X-Request-Id header is present
-            assert "X-Request-Id" in response.headers
-            assert response.headers["X-Request-Id"].startswith("req_")
+            assert REQUEST_ID_HEADER in response.headers
+            assert response.headers[REQUEST_ID_HEADER].startswith("req_")
 
     async def test_error_body_includes_request_id(self):
         """Verify error response bodies include request_id matching the header."""
@@ -291,7 +292,7 @@ class TestRequestIdHeader:
             # Then body request_id matches header
             body = response.json()
             assert "request_id" in body
-            assert body["request_id"] == response.headers["X-Request-Id"]
+            assert body["request_id"] == response.headers[REQUEST_ID_HEADER]
 
     async def test_unique_request_ids_per_response(self):
         """Verify each response gets a unique request ID."""
@@ -301,4 +302,4 @@ class TestRequestIdHeader:
             response2 = await client._http.get("/api/v1/companies")
 
             # Then the request IDs are different
-            assert response1.headers["X-Request-Id"] != response2.headers["X-Request-Id"]
+            assert response1.headers[REQUEST_ID_HEADER] != response2.headers[REQUEST_ID_HEADER]

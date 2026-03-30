@@ -9,6 +9,7 @@ from typing import Any
 
 import httpx
 
+from vclient.constants import REQUEST_ID_HEADER
 from vclient.models import (
     Asset,
     BulkAssignTraitResponse,
@@ -322,7 +323,7 @@ class _FakeRouter:
             existing = None
 
         request_id = existing or f"req_{secrets.token_urlsafe(16)}"
-        response.headers["X-Request-Id"] = request_id
+        response.headers[REQUEST_ID_HEADER] = request_id
         return response
 
     def _finalize(self, response: httpx.Response) -> httpx.Response:
