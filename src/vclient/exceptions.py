@@ -69,6 +69,9 @@ class APIError(Exception):
         if self.instance:
             parts.append(f"Instance: {self.instance}")
 
+        if self.request_id:
+            parts.append(f"Request-ID: {self.request_id}")
+
         return " | ".join(parts) if parts else "Unknown API error"
 
     @property
@@ -85,6 +88,11 @@ class APIError(Exception):
     def instance(self) -> str | None:
         """Get the RFC 9457 instance field - URI reference to this occurrence."""
         return self.response_data.get("instance")
+
+    @property
+    def request_id(self) -> str | None:
+        """Get the server-generated request ID for error correlation."""
+        return self.response_data.get("request_id")
 
 
 class AuthenticationError(APIError):

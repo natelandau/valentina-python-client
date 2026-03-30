@@ -130,6 +130,36 @@ class TestAPIError:
         # When/Then: String uses message as fallback
         assert str(error) == "[500] Error occurred"
 
+    def test_str_includes_request_id(self):
+        """Verify string representation includes request ID when present."""
+        # Given: An error with request_id in response data
+        error = APIError(
+            message="Not found",
+            status_code=404,
+            response_data={
+                "title": "Not Found",
+                "detail": "Company not found",
+                "instance": "/api/v1/companies/abc123",
+                "request_id": "req_abc123xyz",
+            },
+        )
+
+        # When/Then: String includes Request-ID
+        result = str(error)
+        assert "Request-ID: req_abc123xyz" in result
+
+    def test_str_omits_request_id_when_absent(self):
+        """Verify string representation omits Request-ID when not present."""
+        # Given: An error without request_id
+        error = APIError(
+            message="Not found",
+            status_code=404,
+            response_data={"title": "Not Found"},
+        )
+
+        # When/Then: String does not include Request-ID
+        assert "Request-ID" not in str(error)
+
 
 class TestRFC9457Properties:
     """Tests for RFC 9457 Problem Details properties on APIError."""
@@ -194,6 +224,32 @@ class TestRFC9457Properties:
         assert error.title is None
         assert error.detail is None
         assert error.instance is None
+
+    def test_request_id_property(self):
+        """Verify request_id property extracts from response_data."""
+        # Given: An error with request_id in response data
+        error = APIError(
+            message="Not found",
+            status_code=404,
+            response_data={
+                "status": 404,
+                "title": "Not Found",
+                "detail": "Company 'abc123' not found",
+                "instance": "/api/v1/companies/abc123",
+                "request_id": "req_7H2kB9xQ4mN1pL5w3nR2Yg",
+            },
+        )
+
+        # Then: request_id property returns the correct value
+        assert error.request_id == "req_7H2kB9xQ4mN1pL5w3nR2Yg"
+
+    def test_request_id_returns_none_when_missing(self):
+        """Verify request_id returns None when not in response_data."""
+        # Given: An error without request_id
+        error = APIError(message="Error", status_code=500, response_data={})
+
+        # Then: request_id returns None
+        assert error.request_id is None
 
 
 class TestValidationError:
