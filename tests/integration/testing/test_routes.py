@@ -2,6 +2,7 @@
 
 import pytest
 
+from vclient.constants import REQUEST_ID_HEADER
 from vclient.exceptions import NotFoundError
 from vclient.models import CampaignBook, PaginatedResponse, User
 from vclient.registry import books_service, campaigns_service, users_service
@@ -247,3 +248,58 @@ class TestSetResponseValidation:
             # Then a TypeError is raised
             with pytest.raises(TypeError, match=r"single object.*model"):
                 client.set_response(Routes.CAMPAIGNS_GET, items=[CampaignFactory.build()])
+
+
+class TestRequestIdHeader:
+    """FakeVClient should include X-Request-Id header on all responses."""
+
+    async def test_success_response_has_request_id_header(self):
+        """Verify successful responses include X-Request-Id header."""
+        async with FakeVClient() as client:
+            # When fetching companies (default route)
+            response = await client._http.get("/api/v1/companies")
+
+            # Then X-Request-Id header is present and starts with req_
+            assert REQUEST_ID_HEADER in response.headers
+            assert response.headers[REQUEST_ID_HEADER].startswith("req_")
+
+    async def test_error_response_has_request_id_header(self):
+        """Verify error responses include X-Request-Id header."""
+        async with FakeVClient() as client:
+            # Given a route set to return 404
+            client.set_error(Routes.CAMPAIGNS_GET, status_code=404)
+
+            # When fetching a campaign
+            response = await client._http.get(
+                "/api/v1/companies/fake-company/users/user1/campaigns/camp1"
+            )
+
+            # Then X-Request-Id header is present
+            assert REQUEST_ID_HEADER in response.headers
+            assert response.headers[REQUEST_ID_HEADER].startswith("req_")
+
+    async def test_error_body_includes_request_id(self):
+        """Verify error response bodies include request_id matching the header."""
+        async with FakeVClient() as client:
+            # Given a route set to return 404
+            client.set_error(Routes.CAMPAIGNS_GET, status_code=404)
+
+            # When fetching a campaign
+            response = await client._http.get(
+                "/api/v1/companies/fake-company/users/user1/campaigns/camp1"
+            )
+
+            # Then body request_id matches header
+            body = response.json()
+            assert "request_id" in body
+            assert body["request_id"] == response.headers[REQUEST_ID_HEADER]
+
+    async def test_unique_request_ids_per_response(self):
+        """Verify each response gets a unique request ID."""
+        async with FakeVClient() as client:
+            # When making two requests
+            response1 = await client._http.get("/api/v1/companies")
+            response2 = await client._http.get("/api/v1/companies")
+
+            # Then the request IDs are different
+            assert response1.headers[REQUEST_ID_HEADER] != response2.headers[REQUEST_ID_HEADER]

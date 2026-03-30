@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import datetime
 import re
+import secrets
 from typing import Any
 
 import httpx
 
+from vclient.constants import REQUEST_ID_HEADER
 from vclient.models import (
     Asset,
     BulkAssignTraitResponse,
@@ -284,17 +286,17 @@ class _FakeRouter:
         # Parameterized overrides first so specific matches beat generic ones
         for route in self._overrides:
             if route.match_params and route.matches(method, path):
-                return self._with_elapsed(route.respond())
+                return self._finalize(route.respond())
 
         for route in self._overrides:
             if not route.match_params and route.matches(method, path):
-                return self._with_elapsed(route.respond())
+                return self._finalize(route.respond())
 
         for route in self._defaults:
             if route.matches(method, path):
-                return self._with_elapsed(route.respond())
+                return self._finalize(route.respond())
 
-        return self._with_elapsed(
+        return self._finalize(
             httpx.Response(
                 status_code=404,
                 json={"detail": f"No route matched: {method} {path}"},
@@ -302,7 +304,28 @@ class _FakeRouter:
         )
 
     @staticmethod
-    def _with_elapsed(response: httpx.Response) -> httpx.Response:
+    def _with_elapsed(response: httpx.Response) -> None:
         """Set the elapsed time on a response so BaseService._request can log it."""
         response.elapsed = datetime.timedelta(milliseconds=1)
+
+    @staticmethod
+    def _with_request_id(response: httpx.Response) -> None:
+        """Inject an X-Request-Id header into the response.
+
+        Reuse an existing request_id from the response body when present so that
+        the header and error body stay in sync (e.g. for set_error overrides).
+        """
+        try:
+            body = response.json()
+            existing = body.get("request_id") if isinstance(body, dict) else None
+        except Exception:  # noqa: BLE001
+            existing = None
+
+        request_id = existing or f"req_{secrets.token_urlsafe(16)}"
+        response.headers[REQUEST_ID_HEADER] = request_id
+
+    def _finalize(self, response: httpx.Response) -> httpx.Response:
+        """Apply elapsed time and request ID header to a response."""
+        self._with_elapsed(response)
+        self._with_request_id(response)
         return response

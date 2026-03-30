@@ -9,6 +9,7 @@ import respx
 from loguru import logger
 
 from vclient import VClient
+from vclient.exceptions import NotFoundError
 from vclient.services.base import BaseService
 
 pytestmark = pytest.mark.anyio
@@ -364,3 +365,131 @@ class TestClientLifecycleLogging:
         assert record is not None
         assert record.levelno == logging.INFO
         assert record.extra["base_url"] == base_url
+
+
+class TestRequestIdLogging:
+    """Tests for request_id in structured log output."""
+
+    @respx.mock
+    async def test_success_response_logs_request_id(
+        self, base_url, api_key, caplog, enable_vclient_logging
+    ):
+        """Verify request_id from X-Request-Id header appears in success log."""
+        # Given: An endpoint that returns 200 with X-Request-Id header
+        respx.get(f"{base_url}/test").respond(
+            200,
+            json={"ok": True},
+            headers={"X-Request-Id": "req_success123"},
+        )
+
+        with caplog.at_level(logging.DEBUG, logger="vclient"):
+            # When: Making a successful request
+            async with VClient(base_url=base_url, api_key=api_key) as client:
+                service = ConcreteService(client)
+                await service._get("/test")
+
+        # Then: Receive response log includes request_id
+        record = _find_record(caplog, "Receive response")
+        assert record is not None
+        assert record.extra["request_id"] == "req_success123"
+
+    @respx.mock
+    async def test_success_response_without_request_id_header(
+        self, base_url, api_key, caplog, enable_vclient_logging
+    ):
+        """Verify success log omits request_id when header is absent."""
+        # Given: An endpoint that returns 200 without X-Request-Id header
+        respx.get(f"{base_url}/test").respond(200, json={"ok": True})
+
+        with caplog.at_level(logging.DEBUG, logger="vclient"):
+            # When: Making a successful request
+            async with VClient(base_url=base_url, api_key=api_key) as client:
+                service = ConcreteService(client)
+                await service._get("/test")
+
+        # Then: Receive response log does not include request_id
+        record = _find_record(caplog, "Receive response")
+        assert record is not None
+        assert "request_id" not in record.extra
+
+    @respx.mock
+    async def test_error_response_logs_request_id(
+        self, base_url, api_key, caplog, enable_vclient_logging
+    ):
+        """Verify request_id appears in error log for 404 via header fallback."""
+        # Given: An endpoint that returns 404 with X-Request-Id header but no body request_id
+        respx.get(f"{base_url}/test").respond(
+            404,
+            json={"detail": "Not found"},
+            headers={"X-Request-Id": "req_error456"},
+        )
+
+        with caplog.at_level(logging.DEBUG, logger="vclient"):
+            # When: Making a request that returns 404
+            async with VClient(base_url=base_url, api_key=api_key) as client:
+                service = ConcreteService(client)
+                with pytest.raises(Exception):  # noqa: B017
+                    await service._get("/test")
+
+        # Then: Error log includes request_id
+        record = _find_record(caplog, "Return 404")
+        assert record is not None
+        assert record.extra["request_id"] == "req_error456"
+
+    @respx.mock
+    async def test_error_exception_has_request_id_from_body(self, base_url, api_key):
+        """Verify raised exception has request_id from response body."""
+        # Given: An endpoint that returns 404 with request_id in body
+        respx.get(f"{base_url}/test").respond(
+            404,
+            json={
+                "detail": "Not found",
+                "request_id": "req_body789",
+            },
+        )
+
+        # When: Making a request that returns 404
+        async with VClient(base_url=base_url, api_key=api_key) as client:
+            service = ConcreteService(client)
+            with pytest.raises(NotFoundError) as exc_info:
+                await service._get("/test")
+
+        # Then: Exception has request_id from body
+        assert exc_info.value.request_id == "req_body789"
+
+    @respx.mock
+    async def test_error_exception_falls_back_to_header(self, base_url, api_key):
+        """Verify raised exception gets request_id from header when body lacks it."""
+        # Given: An endpoint that returns 404 with header but no body request_id
+        respx.get(f"{base_url}/test").respond(
+            404,
+            json={"detail": "Not found"},
+            headers={"X-Request-Id": "req_header_fallback"},
+        )
+
+        # When: Making a request that returns 404
+        async with VClient(base_url=base_url, api_key=api_key) as client:
+            service = ConcreteService(client)
+            with pytest.raises(NotFoundError) as exc_info:
+                await service._get("/test")
+
+        # Then: Exception has request_id from header fallback
+        assert exc_info.value.request_id == "req_header_fallback"
+
+    @respx.mock
+    async def test_error_exception_no_request_id(self, base_url, api_key):
+        """Verify raised exception has no request_id when neither body nor header has it."""
+        # Given: An endpoint that returns 404 without any request_id
+        respx.get(f"{base_url}/test").respond(
+            404,
+            json={"detail": "Not found"},
+        )
+
+        # When: Making a request that returns 404
+        async with VClient(base_url=base_url, api_key=api_key) as client:
+            service = ConcreteService(client)
+            with pytest.raises(NotFoundError) as exc_info:
+                await service._get("/test")
+
+        # Then: Exception has no request_id
+        assert exc_info.value.request_id is None
