@@ -63,6 +63,7 @@ Subcategory within a trait category. Groups related traits together, like "Allie
 | `parent_category_name`        | `str`                  | Parent category name                            |
 | `sheet_section_id`            | `str`                  | Sheet section ID                                |
 | `sheet_section_name`          | `str`                  | Sheet section name                              |
+| `hunter_edge_type`            | `str \| None`          | Hunter edge type (ASSETS, APTITUDES, etc)       |
 
 ## CharacterConcept
 

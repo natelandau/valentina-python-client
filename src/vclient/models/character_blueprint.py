@@ -63,6 +63,7 @@ class TraitSubcategory(BaseModel):
     parent_category_name: str
     sheet_section_id: str
     sheet_section_name: str
+    hunter_edge_type: str | None = None
 
 
 class VampireClan(BaseModel):
