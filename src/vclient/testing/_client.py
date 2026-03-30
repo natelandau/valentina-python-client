@@ -6,6 +6,7 @@ instead of real HTTP. All real service classes work unmodified.
 
 from __future__ import annotations
 
+import secrets
 from typing import TYPE_CHECKING, Any
 
 import httpx
@@ -184,5 +185,9 @@ class FakeVClient(VClient):
                 match all specified values.
         """
         method, pattern = route.method, route.pattern
-        body: dict[str, Any] = {"detail": detail or f"Error {status_code}"}
+        request_id = f"req_{secrets.token_urlsafe(16)}"
+        body: dict[str, Any] = {
+            "detail": detail or f"Error {status_code}",
+            "request_id": request_id,
+        }
         self._router.add_route(method, pattern, json=body, status_code=status_code, params=params)
