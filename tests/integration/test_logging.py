@@ -416,14 +416,11 @@ class TestRequestIdLogging:
     async def test_error_response_logs_request_id(
         self, base_url, api_key, caplog, enable_vclient_logging
     ):
-        """Verify request_id appears in error log for 404."""
-        # Given: An endpoint that returns 404 with request_id in body
+        """Verify request_id appears in error log for 404 via header fallback."""
+        # Given: An endpoint that returns 404 with X-Request-Id header but no body request_id
         respx.get(f"{base_url}/test").respond(
             404,
-            json={
-                "detail": "Not found",
-                "request_id": "req_error456",
-            },
+            json={"detail": "Not found"},
             headers={"X-Request-Id": "req_error456"},
         )
 

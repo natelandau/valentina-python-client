@@ -194,15 +194,7 @@ class SyncBaseService:
                 continue
             try:
                 self._raise_for_status(response, method, path)
-                elapsed_ms = response.elapsed.total_seconds() * 1000
-                success_bind: dict[str, Any] = {
-                    "status": response.status_code,
-                    "elapsed_ms": elapsed_ms,
-                }
-                header_request_id = response.headers.get(REQUEST_ID_HEADER)
-                if header_request_id:
-                    success_bind["request_id"] = header_request_id
-                request_logger.bind(**success_bind).debug("Receive response")
+                self._log_success_response(response, request_logger)
                 return response
             except RateLimitError as e:
                 last_error = e
@@ -235,6 +227,36 @@ class SyncBaseService:
         msg = "Unexpected state: no response or error"
         raise RuntimeError(msg)
 
+    @staticmethod
+    def _log_success_response(response: httpx.Response, request_logger: Any) -> None:
+        """Log a successful HTTP response with elapsed time and optional request_id.
+
+        Args:
+            response: The successful HTTP response to log.
+            request_logger: A bound loguru logger to emit the log record on.
+        """
+        elapsed_ms = response.elapsed.total_seconds() * 1000
+        success_bind: dict[str, Any] = {"status": response.status_code, "elapsed_ms": elapsed_ms}
+        header_request_id = response.headers.get(REQUEST_ID_HEADER)
+        if header_request_id:
+            success_bind["request_id"] = header_request_id
+        request_logger.bind(**success_bind).debug("Receive response")
+
+    @staticmethod
+    def _inject_request_id_fallback(
+        response_data: dict[str, Any], response: httpx.Response
+    ) -> None:
+        """Inject request_id from X-Request-Id header when the response body omits it.
+
+        Args:
+            response_data: The parsed response JSON body (mutated in place).
+            response: The HTTP response to read the header from.
+        """
+        if "request_id" not in response_data:
+            header_id = response.headers.get(REQUEST_ID_HEADER)
+            if header_id:
+                response_data["request_id"] = header_id
+
     def _raise_for_status(self, response: httpx.Response, method: str, url: str) -> None:
         """Raise appropriate exception for error responses.
 
@@ -262,10 +284,7 @@ class SyncBaseService:
         except (ValueError, KeyError, TypeError):
             response_data = {}
             message = response.text or f"HTTP {status_code}"
-        if "request_id" not in response_data:
-            header_id = response.headers.get(REQUEST_ID_HEADER)
-            if header_id:
-                response_data["request_id"] = header_id
+        self._inject_request_id_fallback(response_data, response)
         error_logger = logger.bind(
             method=method, url=url, status=status_code, request_id=response_data.get("request_id")
         )
