@@ -19,6 +19,7 @@ from vclient.constants import (
     IDEMPOTENT_HTTP_METHODS,
     MAX_PAGE_LIMIT,
     RATE_LIMIT_HEADER,
+    REQUEST_ID_HEADER,
 )
 from vclient.exceptions import (
     APIError,
@@ -194,9 +195,14 @@ class SyncBaseService:
             try:
                 self._raise_for_status(response, method, path)
                 elapsed_ms = response.elapsed.total_seconds() * 1000
-                request_logger.bind(status=response.status_code, elapsed_ms=elapsed_ms).debug(
-                    "Receive response"
-                )
+                success_bind: dict[str, Any] = {
+                    "status": response.status_code,
+                    "elapsed_ms": elapsed_ms,
+                }
+                header_request_id = response.headers.get(REQUEST_ID_HEADER)
+                if header_request_id:
+                    success_bind["request_id"] = header_request_id
+                request_logger.bind(**success_bind).debug("Receive response")
                 return response
             except RateLimitError as e:
                 last_error = e
@@ -256,7 +262,13 @@ class SyncBaseService:
         except (ValueError, KeyError, TypeError):
             response_data = {}
             message = response.text or f"HTTP {status_code}"
-        error_logger = logger.bind(method=method, url=url, status=status_code)
+        if "request_id" not in response_data:
+            header_id = response.headers.get(REQUEST_ID_HEADER)
+            if header_id:
+                response_data["request_id"] = header_id
+        error_logger = logger.bind(
+            method=method, url=url, status=status_code, request_id=response_data.get("request_id")
+        )
         if status_code == 429:
             retry_after = self._parse_retry_after(response)
             remaining = self._parse_remaining_tokens(response)
