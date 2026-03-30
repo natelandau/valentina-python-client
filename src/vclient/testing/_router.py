@@ -304,13 +304,12 @@ class _FakeRouter:
         )
 
     @staticmethod
-    def _with_elapsed(response: httpx.Response) -> httpx.Response:
+    def _with_elapsed(response: httpx.Response) -> None:
         """Set the elapsed time on a response so BaseService._request can log it."""
         response.elapsed = datetime.timedelta(milliseconds=1)
-        return response
 
     @staticmethod
-    def _with_request_id(response: httpx.Response) -> httpx.Response:
+    def _with_request_id(response: httpx.Response) -> None:
         """Inject an X-Request-Id header into the response.
 
         Reuse an existing request_id from the response body when present so that
@@ -324,7 +323,6 @@ class _FakeRouter:
 
         request_id = existing or f"req_{secrets.token_urlsafe(16)}"
         response.headers[REQUEST_ID_HEADER] = request_id
-        return response
 
     def _finalize(self, response: httpx.Response) -> httpx.Response:
         """Apply elapsed time and request ID header to a response."""

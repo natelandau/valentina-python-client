@@ -310,7 +310,6 @@ class BaseService:
             response_data = {}
             message = response.text or f"HTTP {status_code}"
 
-        # Fall back to X-Request-Id header when body doesn't carry request_id
         self._inject_request_id_fallback(response_data, response)
 
         error_logger = logger.bind(
