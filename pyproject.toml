@@ -208,3 +208,6 @@
     paths             = ["src/"]
     sort_by_size      = true
     verbose           = false
+
+[tool.ty.terminal]
+    error-on-warning = true

@@ -69,7 +69,11 @@ def asset_response_data() -> dict:
         "public_url": "https://example.com/campaign.png",
         "uploaded_by": "user123",
         "company_id": "company123",
-        "parent_type": "campaign",
+        "campaign_id": "campaign123",
+        "character_id": None,
+        "book_id": None,
+        "chapter_id": None,
+        "user_parent_id": None,
     }
 
 

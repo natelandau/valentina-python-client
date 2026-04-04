@@ -133,15 +133,6 @@ class TestValidate:
             },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -198,15 +189,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -265,15 +247,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -333,15 +306,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -398,15 +362,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -463,15 +418,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -496,7 +442,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "22/22 constants in sync" in captured.out
+        assert "21/21 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""

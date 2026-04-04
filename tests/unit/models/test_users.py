@@ -584,7 +584,7 @@ class TestAsset:
             public_url="https://example.com/avatar.png",
             uploaded_by="user123",
             company_id="company123",
-            parent_type="user",
+            user_parent_id="user123",
         )
 
         # Then: All fields are set correctly
@@ -595,7 +595,7 @@ class TestAsset:
         assert asset.public_url == "https://example.com/avatar.png"
         assert asset.uploaded_by == "user123"
         assert asset.company_id == "company123"
-        assert asset.parent_type == "user"
+        assert asset.user_parent_id == "user123"
 
     def test_invalid_asset_type_rejected(self):
         """Verify invalid asset type is rejected."""

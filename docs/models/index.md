@@ -111,7 +111,6 @@ from vclient.constants import CharacterClass, UserRole, GameVersion
 | Enum              | Values                                                                                   |
 | ----------------- | ---------------------------------------------------------------------------------------- |
 | `AssetType`       | `image`, `text`, `audio`, `video`, `document`, `archive`, `other`                        |
-| `AssetParentType` | `character`, `campaign`, `campaignbook`, `campaignchapter`, `user`, `company`, `unknown` |
 
 ### Trait Enums
 

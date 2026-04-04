@@ -56,9 +56,6 @@ HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
 RollResultType = Literal["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"]
-AssetParentType = Literal[
-    "character", "campaign", "campaignbook", "campaignchapter", "user", "company", "unknown"
-]
 AssetType = Literal["image", "text", "audio", "video", "document", "archive", "other"]
 SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
 UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]
