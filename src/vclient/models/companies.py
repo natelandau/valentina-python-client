@@ -40,7 +40,7 @@ class Company(BaseModel):
     name: str
     description: str | None
     email: str
-    resources_modified_at: datetime
+    resources_modified_at: datetime | None
     settings: CompanySettings | None
 
 
