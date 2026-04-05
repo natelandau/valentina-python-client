@@ -95,6 +95,7 @@ class TestValidate:
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
                 "BlueprintTraitOrderBy": ["NAME", "SHEET"],
                 "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterInclude": ["traits", "inventory", "notes", "assets"],
                 "CharacterStatus": ["ALIVE", "DEAD"],
                 "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
                 "GameVersion": ["V4", "V5"],
@@ -153,6 +154,7 @@ class TestValidate:
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
                 "BlueprintTraitOrderBy": ["NAME", "SHEET"],
                 "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterInclude": ["traits", "inventory", "notes", "assets"],
                 "CharacterStatus": ["ALIVE", "DEAD", "UNDEAD"],
                 "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
                 "GameVersion": ["V4", "V5"],
@@ -211,6 +213,7 @@ class TestValidate:
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
                 "BlueprintTraitOrderBy": ["NAME", "SHEET"],
                 "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL"],
+                "CharacterInclude": ["traits", "inventory", "notes", "assets"],
                 "CharacterStatus": ["ALIVE", "DEAD"],
                 "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
                 "GameVersion": ["V4", "V5"],
@@ -269,6 +272,7 @@ class TestValidate:
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
                 "BlueprintTraitOrderBy": ["NAME", "SHEET"],
                 "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterInclude": ["traits", "inventory", "notes", "assets"],
                 "CharacterStatus": ["ALIVE", "DEAD"],
                 "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
                 "GameVersion": ["V4", "V5"],
@@ -325,6 +329,7 @@ class TestValidate:
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
                 "BlueprintTraitOrderBy": ["NAME", "SHEET"],
                 "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterInclude": ["traits", "inventory", "notes", "assets"],
                 "CharacterStatus": ["ALIVE", "DEAD"],
                 "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
                 "GameVersion": ["V4", "V5"],
@@ -381,6 +386,7 @@ class TestValidate:
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
                 "BlueprintTraitOrderBy": ["NAME", "SHEET"],
                 "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
+                "CharacterInclude": ["traits", "inventory", "notes", "assets"],
                 "CharacterStatus": ["ALIVE", "DEAD"],
                 "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
                 "GameVersion": ["V4", "V5"],
@@ -442,7 +448,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "21/21 constants in sync" in captured.out
+        assert "22/22 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""

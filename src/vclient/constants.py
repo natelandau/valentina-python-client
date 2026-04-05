@@ -37,6 +37,7 @@ RATE_LIMIT_POLICY_HEADER = "RateLimit-Policy"
 AbilityFocus = Literal["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"]
 AutoGenExperienceLevel = Literal["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"]
 CharacterClass = Literal["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"]
+CharacterInclude = Literal["traits", "inventory", "notes", "assets"]
 CharacterInventoryType = Literal[
     "BOOK",
     "CONSUMABLE",

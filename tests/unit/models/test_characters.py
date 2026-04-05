@@ -1,6 +1,13 @@
 """Unit tests for character models."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
+
+if TYPE_CHECKING:
+    from vclient.constants import CharacterInclude
 from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models import (
@@ -489,3 +496,15 @@ class TestMageAttributes:
 
         # Then: Field is set
         assert attrs.sphere == "Forces"
+
+
+class TestCharacterInclude:
+    """Tests for CharacterInclude Literal type."""
+
+    def test_character_include_valid_values(self) -> None:
+        """Verify CharacterInclude accepts all valid include values."""
+        # Given: The valid include values
+        valid: list[CharacterInclude] = ["traits", "inventory", "notes", "assets"]
+
+        # Then: All values are accepted by the type
+        assert len(valid) == 4

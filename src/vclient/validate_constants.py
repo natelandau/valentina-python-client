@@ -65,6 +65,7 @@ CONSTANT_MAP: dict[str, ConstantMapping] = {
     "AutoGenExperienceLevel": ConstantMapping("characters", "AutoGenExperienceLevel"),
     "BlueprintTraitOrderBy": ConstantMapping("characters", "BlueprintTraitOrderBy"),
     "CharacterClass": ConstantMapping("characters", "CharacterClass"),
+    "CharacterInclude": ConstantMapping("characters", "CharacterInclude"),
     "CharacterInventoryType": ConstantMapping("characters", "InventoryItemType"),
     "CharacterStatus": ConstantMapping("characters", "CharacterStatus"),
     "CharacterType": ConstantMapping("characters", "CharacterType"),
