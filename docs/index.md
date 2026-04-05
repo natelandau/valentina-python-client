@@ -92,6 +92,43 @@ with SyncVClient(
 
 You can also set `VALENTINA_CLIENT_BASE_URL` and `VALENTINA_CLIENT_API_KEY` as [environment variables](configuration.md#environment-variables) and create either client with no arguments.
 
+## Embedding Child Resources
+
+When fetching a single character, you can embed related resources directly in the response using the `include` parameter. This avoids extra API calls when you need character data along with their traits, inventory, notes, or assets.
+
+### Async
+
+```python
+async with VClient(base_url="...", api_key="...") as client:
+    svc = client.characters(user_id="USER_ID", campaign_id="CAMPAIGN_ID")
+
+    # Fetch character with embedded traits and inventory
+    detail = await svc.get("CHARACTER_ID", include=["traits", "inventory"])
+
+    # Embedded resources are available directly
+    if detail.traits is not None:
+        for trait in detail.traits:
+            print(f"{trait.trait.name}: {trait.value}")
+
+    if detail.inventory is not None:
+        for item in detail.inventory:
+            print(f"{item.name} ({item.type})")
+
+    # Without include, embedded fields are None
+    basic = await svc.get("CHARACTER_ID")
+    assert basic.traits is None  # not requested
+```
+
+### Sync
+
+```python
+with SyncVClient(base_url="...", api_key="...") as client:
+    svc = client.characters(user_id="USER_ID", campaign_id="CAMPAIGN_ID")
+    detail = svc.get("CHARACTER_ID", include=["traits", "notes"])
+```
+
+Valid `include` values: `"traits"`, `"inventory"`, `"notes"`, `"assets"`. The `CharacterDetail` return type is a subclass of `Character`, so existing code that expects `Character` continues to work.
+
 ## Learn More
 
 Detailed guides are available for each aspect of the client:
