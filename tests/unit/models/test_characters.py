@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import get_args
 
 import pytest
-
-if TYPE_CHECKING:
-    from vclient.constants import CharacterInclude
 from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models import (
@@ -640,9 +637,14 @@ class TestCharacterInclude:
     """Tests for CharacterInclude Literal type."""
 
     def test_character_include_valid_values(self) -> None:
-        """Verify CharacterInclude accepts all valid include values."""
-        # Given: The valid include values
-        valid: list[CharacterInclude] = ["traits", "inventory", "notes", "assets"]
+        """Verify CharacterInclude contains the expected literal values."""
+        # Given: The expected include values
+        from vclient.constants import CharacterInclude
 
-        # Then: All values are accepted by the type
-        assert len(valid) == 4
+        expected = {"traits", "inventory", "notes", "assets"}
+
+        # When: Extracting the Literal args
+        actual = set(get_args(CharacterInclude))
+
+        # Then: They match exactly
+        assert actual == expected
