@@ -12,6 +12,7 @@ from vclient.exceptions import NotFoundError
 from vclient.models import (
     Asset,
     Character,
+    CharacterDetail,
     CharacterFullSheet,
     FullSheetTraitCategory,
     HunterAttributesCreate,
@@ -372,6 +373,7 @@ class TestCharactersServiceGet:
 
         # Then: The route was called and character is returned
         assert route.called
+        assert isinstance(result, CharacterDetail)
         assert isinstance(result, Character)
         assert result.id == "char123"
         assert result.name_first == "John"
@@ -396,6 +398,77 @@ class TestCharactersServiceGet:
             )
 
         assert route.called
+
+
+@pytest.fixture
+def character_detail_response_data(
+    character_response_data: dict,
+    character_trait_response_data: dict,
+    inventory_item_response_data: dict,
+    note_response_data: dict,
+    asset_response_data: dict,
+) -> dict:
+    """Return sample character detail response with embedded resources."""
+    return {
+        **character_response_data,
+        "traits": [character_trait_response_data],
+        "inventory": [inventory_item_response_data],
+        "notes": [note_response_data],
+        "assets": [asset_response_data],
+    }
+
+
+class TestCharactersServiceGetWithInclude:
+    """Tests for CharactersService.get method with include parameter."""
+
+    @respx.mock
+    async def test_get_character_with_include(
+        self, vclient, base_url, character_detail_response_data
+    ) -> None:
+        """Verify getting a character with include returns CharacterDetail with embedded resources."""
+        # Given: A mocked character endpoint expecting include params
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}",
+            params=[("include", "traits"), ("include", "notes")],
+        ).mock(return_value=Response(200, json=character_detail_response_data))
+
+        # When: Requesting a character with include
+        result = await vclient.characters("user123", "campaign123", company_id="company123").get(
+            "char123", include=["traits", "notes"]
+        )
+
+        # Then: The route was called with include params and detail is returned
+        assert route.called
+        assert isinstance(result, CharacterDetail)
+        assert isinstance(result, Character)
+        assert result.id == "char123"
+        assert result.traits is not None
+        assert len(result.traits) == 1
+        assert result.notes is not None
+        assert len(result.notes) == 1
+
+    @respx.mock
+    async def test_get_character_without_include_returns_detail(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify getting a character without include still returns CharacterDetail."""
+        # Given: A mocked character endpoint with no include params
+        route = respx.get(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=character_response_data))
+
+        # When: Requesting a character without include
+        result = await vclient.characters("user123", "campaign123", company_id="company123").get(
+            "char123"
+        )
+
+        # Then: Returns CharacterDetail with None embedded fields
+        assert route.called
+        assert isinstance(result, CharacterDetail)
+        assert result.traits is None
+        assert result.inventory is None
+        assert result.notes is None
+        assert result.assets is None
 
 
 class TestCharactersServiceCreate:

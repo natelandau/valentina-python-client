@@ -1,12 +1,13 @@
 """Service for interacting with the Characters API."""
 
 import mimetypes
-from collections.abc import AsyncIterator
-from typing import TYPE_CHECKING
+from collections.abc import AsyncIterator, Sequence
+from typing import TYPE_CHECKING, Any
 
 from vclient.constants import (
     DEFAULT_PAGE_LIMIT,
     CharacterClass,
+    CharacterInclude,
     CharacterStatus,
     CharacterType,
 )
@@ -15,6 +16,7 @@ from vclient.models import (
     Asset,
     Character,
     CharacterCreate,
+    CharacterDetail,
     CharacterFullSheet,
     CharacterUpdate,
     FullSheetTraitCategory,
@@ -199,25 +201,38 @@ class CharactersService(BaseService):
         ):
             yield Character.model_validate(item)
 
-    async def get(self, character_id: str) -> Character:
+    async def get(
+        self,
+        character_id: str,
+        *,
+        include: Sequence[CharacterInclude] | None = None,
+    ) -> CharacterDetail:
         """Retrieve detailed information about a specific character.
 
         Fetches the character including traits, status, and biographical data.
+        Optionally embed child resources directly in the response.
 
         Args:
             character_id: The ID of the character to retrieve.
+            include: Child resources to embed in the response. Valid values are
+                ``"traits"``, ``"inventory"``, ``"notes"``, and ``"assets"``.
 
         Returns:
-            The Character object with full details.
+            The CharacterDetail object with full details and any requested embeds.
 
         Raises:
             NotFoundError: If the character does not exist.
             AuthorizationError: If you don't have access.
         """
+        params: dict[str, Any] = {}
+        if include:
+            params["include"] = list(include)
+
         response = await self._get(
-            self._format_endpoint(Endpoints.CHARACTER, character_id=character_id)
+            self._format_endpoint(Endpoints.CHARACTER, character_id=character_id),
+            params=params or None,
         )
-        return Character.model_validate(response.json())
+        return CharacterDetail.model_validate(response.json())
 
     async def create(
         self,
