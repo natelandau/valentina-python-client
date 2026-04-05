@@ -81,7 +81,6 @@ class TestCompany:
             resources_modified_at="2024-01-15T10:30:00Z",
             description=None,
             email="test@example.com",
-            user_ids=[],
             settings=None,
         )
 
@@ -92,7 +91,6 @@ class TestCompany:
         assert company.name == "Test"
         assert company.email == "test@example.com"
         assert company.description is None
-        assert company.user_ids == []
         assert company.settings is None
 
     def test_full_company(self):
@@ -108,7 +106,6 @@ class TestCompany:
             name="Full Company",
             description="A complete company",
             email="full@example.com",
-            user_ids=["user1", "user2"],
             resources_modified_at="2024-01-15T10:30:00Z",
             settings=settings,
         )
@@ -120,7 +117,6 @@ class TestCompany:
         assert company.name == "Full Company"
         assert company.description == "A complete company"
         assert company.email == "full@example.com"
-        assert company.user_ids == ["user1", "user2"]
         assert company.settings is not None
         assert company.settings.character_autogen_xp_cost == 15
 
@@ -134,7 +130,6 @@ class TestCompany:
             "name": "API Company",
             "description": "From API",
             "email": "api@example.com",
-            "user_ids": ["u1"],
             "resources_modified_at": "2024-01-15T10:30:00Z",
             "settings": {
                 "character_autogen_xp_cost": 10,
@@ -165,7 +160,7 @@ class TestCompany:
                 name="Test",
                 resources_modified_at="2024-01-15T10:30:00Z",
                 email="test@example.com",
-                # Missing: description, user_ids, settings
+                # Missing: description, settings
             )
 
 

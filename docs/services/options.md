@@ -76,7 +76,6 @@ Character-related enumerations:
 | Key               | Description                                |
 | ----------------- | ------------------------------------------ |
 | `AssetType`       | Types of uploadable assets                 |
-| `AssetParentType` | Entity types that can have assets attached |
 
 ## Example
 

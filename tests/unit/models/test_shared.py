@@ -29,7 +29,7 @@ class TestAsset:
             public_url="https://example.com/avatar.png",
             uploaded_by="user123",
             company_id="company123",
-            parent_type="user",
+            user_parent_id="user123",
         )
 
         assert asset.id == "asset123"
@@ -39,10 +39,10 @@ class TestAsset:
         assert asset.public_url == "https://example.com/avatar.png"
         assert asset.uploaded_by == "user123"
         assert asset.company_id == "company123"
-        assert asset.parent_type == "user"
+        assert asset.user_parent_id == "user123"
 
-    def test_parent_type_defaults_to_none(self):
-        """Verify parent_type defaults to None."""
+    def test_parent_fk_fields_default_to_none(self):
+        """Verify parent FK fields default to None."""
         asset = Asset(
             id="asset123",
             date_created="2024-01-15T10:30:00Z",
@@ -55,7 +55,11 @@ class TestAsset:
             company_id="company123",
         )
 
-        assert asset.parent_type is None
+        assert asset.character_id is None
+        assert asset.campaign_id is None
+        assert asset.book_id is None
+        assert asset.chapter_id is None
+        assert asset.user_parent_id is None
 
     def test_all_asset_types(self):
         """Verify all asset types are valid."""
@@ -74,33 +78,6 @@ class TestAsset:
                 company_id="company123",
             )
             assert asset.asset_type == asset_type
-
-    def test_all_parent_types(self):
-        """Verify all parent types are valid."""
-        parent_types = [
-            "character",
-            "campaign",
-            "campaignbook",
-            "campaignchapter",
-            "user",
-            "company",
-            "unknown",
-        ]
-
-        for parent_type in parent_types:
-            asset = Asset(
-                id="asset123",
-                date_created="2024-01-15T10:30:00Z",
-                date_modified="2024-01-15T10:30:00Z",
-                asset_type="image",
-                mime_type="image/png",
-                original_filename="file.png",
-                public_url="https://example.com/file.png",
-                uploaded_by="user123",
-                company_id="company123",
-                parent_type=parent_type,
-            )
-            assert asset.parent_type == parent_type
 
 
 class TestNote:

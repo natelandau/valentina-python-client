@@ -1,11 +1,16 @@
 """Unit tests for character models."""
 
+from __future__ import annotations
+
+from typing import get_args
+
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models import (
     Character,
     CharacterCreate,
+    CharacterDetail,
     CharacterUpdate,
     HunterAttributes,
     MageAttributes,
@@ -489,3 +494,157 @@ class TestMageAttributes:
 
         # Then: Field is set
         assert attrs.sphere == "Forces"
+
+
+class TestCharacterDetail:
+    """Tests for CharacterDetail response model."""
+
+    def test_character_detail_without_includes(self) -> None:
+        """Verify CharacterDetail works identically to Character when no includes are present."""
+        # Given: Standard character data with no embedded resources
+        detail = CharacterDetail(
+            id="char123",
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            name="Johnny",
+            name_full="John Doe",
+            user_creator_id="user123",
+            user_player_id="user456",
+            company_id="company123",
+            campaign_id="campaign123",
+        )
+
+        # Then: Embedded fields default to None
+        assert detail.traits is None
+        assert detail.inventory is None
+        assert detail.notes is None
+        assert detail.assets is None
+
+        # Then: It is a subclass of Character
+        assert isinstance(detail, Character)
+
+    def test_character_detail_with_all_includes(self) -> None:
+        """Verify CharacterDetail accepts embedded child resources."""
+        # Given: Character data with all embedded resources
+        detail = CharacterDetail(
+            id="char123",
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            name="Johnny",
+            name_full="John Doe",
+            user_creator_id="user123",
+            user_player_id="user456",
+            company_id="company123",
+            campaign_id="campaign123",
+            traits=[
+                {
+                    "id": "ct1",
+                    "character_id": "char123",
+                    "value": 3,
+                    "trait": {
+                        "id": "t1",
+                        "name": "Strength",
+                        "date_created": "2024-01-15T10:30:00Z",
+                        "date_modified": "2024-01-15T10:30:00Z",
+                        "max_value": 5,
+                        "min_value": 0,
+                        "is_custom": False,
+                        "show_when_zero": True,
+                        "sheet_section_id": "sec1",
+                        "parent_category_id": "cat1",
+                        "is_rollable": True,
+                        "character_classes": ["VAMPIRE"],
+                        "game_versions": ["V5"],
+                    },
+                }
+            ],
+            inventory=[
+                {
+                    "id": "item1",
+                    "character_id": "char123",
+                    "name": "Silver Knife",
+                    "type": "WEAPON",
+                    "date_created": "2024-01-15T10:30:00Z",
+                    "date_modified": "2024-01-15T10:30:00Z",
+                }
+            ],
+            notes=[
+                {
+                    "id": "note1",
+                    "date_created": "2024-01-15T10:30:00Z",
+                    "date_modified": "2024-01-15T10:30:00Z",
+                    "title": "Session Log",
+                    "content": "Met the prince.",
+                }
+            ],
+            assets=[
+                {
+                    "id": "asset1",
+                    "date_created": "2024-01-15T10:30:00Z",
+                    "date_modified": "2024-01-15T10:30:00Z",
+                    "asset_type": "image",
+                    "mime_type": "image/png",
+                    "original_filename": "portrait.png",
+                    "public_url": "https://example.com/portrait.png",
+                    "uploaded_by": "user123",
+                    "company_id": "company123",
+                }
+            ],
+        )
+
+        # Then: Embedded resources are populated
+        assert len(detail.traits) == 1
+        assert detail.traits[0].trait.name == "Strength"
+        assert len(detail.inventory) == 1
+        assert detail.inventory[0].name == "Silver Knife"
+        assert len(detail.notes) == 1
+        assert detail.notes[0].title == "Session Log"
+        assert len(detail.assets) == 1
+        assert detail.assets[0].original_filename == "portrait.png"
+
+    def test_character_detail_from_json_missing_keys(self) -> None:
+        """Verify CharacterDetail handles absent embedded keys from JSON."""
+        # Given: JSON response with no embedded resource keys
+        data = {
+            "id": "char123",
+            "character_class": "VAMPIRE",
+            "game_version": "V5",
+            "name_first": "John",
+            "name_last": "Doe",
+            "name": "Johnny",
+            "name_full": "John Doe",
+            "user_creator_id": "user123",
+            "user_player_id": "user456",
+            "company_id": "company123",
+            "campaign_id": "campaign123",
+        }
+
+        # When: Validating from raw JSON
+        detail = CharacterDetail.model_validate(data)
+
+        # Then: Embedded fields are None
+        assert detail.traits is None
+        assert detail.inventory is None
+        assert detail.notes is None
+        assert detail.assets is None
+
+
+class TestCharacterInclude:
+    """Tests for CharacterInclude Literal type."""
+
+    def test_character_include_valid_values(self) -> None:
+        """Verify CharacterInclude contains the expected literal values."""
+        # Given: The expected include values
+        from vclient.constants import CharacterInclude
+
+        expected = {"traits", "inventory", "notes", "assets"}
+
+        # When: Extracting the Literal args
+        actual = set(get_args(CharacterInclude))
+
+        # Then: They match exactly
+        assert actual == expected

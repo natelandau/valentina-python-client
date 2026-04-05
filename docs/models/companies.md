@@ -16,8 +16,7 @@ Models for managing companies, their settings, and developer access permissions.
 | `name`                  | `str`                     | Company name                                |
 | `description`           | `str \| None`             | Company description                         |
 | `email`                 | `str`                     | Contact email                               |
-| `user_ids`              | `list[str]`               | Associated user IDs                         |
-| `resources_modified_at` | `datetime`                | Last modified timestamp for child resources |
+| `resources_modified_at` | `datetime \| None`        | Last modified timestamp for child resources |
 | `settings`              | `CompanySettings \| None` | Company configuration                       |
 
 ## NewCompanyResponse

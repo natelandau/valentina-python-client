@@ -2,16 +2,23 @@
 """Service for interacting with the Characters API."""
 
 import mimetypes
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import TYPE_CHECKING
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT, CharacterClass, CharacterStatus, CharacterType
+from vclient.constants import (
+    DEFAULT_PAGE_LIMIT,
+    CharacterClass,
+    CharacterInclude,
+    CharacterStatus,
+    CharacterType,
+)
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Asset,
     Character,
     CharacterCreate,
+    CharacterDetail,
     CharacterFullSheet,
     CharacterUpdate,
     FullSheetTraitCategory,
@@ -195,23 +202,31 @@ class SyncCharactersService(SyncBaseService):
         ):
             yield Character.model_validate(item)
 
-    def get(self, character_id: str) -> Character:
+    def get(
+        self, character_id: str, *, include: Sequence[CharacterInclude] | None = None
+    ) -> CharacterDetail:
         """Retrieve detailed information about a specific character.
 
         Fetches the character including traits, status, and biographical data.
+        Optionally embed child resources directly in the response.
 
         Args:
             character_id: The ID of the character to retrieve.
+            include: Child resources to embed in the response. Valid values are
+                ``"traits"``, ``"inventory"``, ``"notes"``, and ``"assets"``.
 
         Returns:
-            The Character object with full details.
+            The CharacterDetail object with full details and any requested embeds.
 
         Raises:
             NotFoundError: If the character does not exist.
             AuthorizationError: If you don't have access.
         """
-        response = self._get(self._format_endpoint(Endpoints.CHARACTER, character_id=character_id))
-        return Character.model_validate(response.json())
+        response = self._get(
+            self._format_endpoint(Endpoints.CHARACTER, character_id=character_id),
+            params=self._build_params(include=list(include) if include else None),
+        )
+        return CharacterDetail.model_validate(response.json())
 
     def create(self, request: CharacterCreate | None = None, **kwargs) -> Character:
         """Create a new character within the campaign.

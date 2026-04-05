@@ -65,6 +65,9 @@ class TestConstantMap:
 
         from vclient import constants
 
+        # Client-only Literal types that don't correspond to an API /options value
+        client_only = {"CharacterInclude"}
+
         literal_names = [
             name
             for name in dir(constants)
@@ -73,7 +76,8 @@ class TestConstantMap:
             and getattr(constants, name).__origin__ is typing.Literal
         ]
         for name in literal_names:
-            assert name in CONSTANT_MAP, f"Constant '{name}' is not in CONSTANT_MAP"
+            if name not in client_only:
+                assert name in CONSTANT_MAP, f"Constant '{name}' is not in CONSTANT_MAP"
 
     def test_map_has_no_extra_entries(self):
         """Verify CONSTANT_MAP has no entries for non-existent constants."""
@@ -133,15 +137,6 @@ class TestValidate:
             },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -198,15 +193,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -265,15 +251,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -333,15 +310,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -398,15 +366,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -463,15 +422,6 @@ class TestValidate:
             "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"]},
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
-                "AssetParentType": [
-                    "character",
-                    "campaign",
-                    "campaignbook",
-                    "campaignchapter",
-                    "user",
-                    "company",
-                    "unknown",
-                ],
             },
         }
 
@@ -496,7 +446,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "22/22 constants in sync" in captured.out
+        assert "21/21 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""

@@ -27,7 +27,6 @@ def company_response_data() -> dict:
         "name": "Test Company",
         "description": "A test company",
         "email": "test@example.com",
-        "user_ids": ["user1", "user2"],
         "resources_modified_at": "2024-01-15T10:30:00Z",
         "settings": {
             "character_autogen_xp_cost": 10,

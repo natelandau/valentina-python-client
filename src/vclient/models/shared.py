@@ -6,7 +6,6 @@ from typing import Annotated, Any
 from pydantic import BaseModel, Field
 
 from vclient.constants import (
-    AssetParentType,
     AssetType,
     CharacterClass,
     GameVersion,
@@ -46,8 +45,11 @@ class Asset(BaseModel):
     public_url: str
     uploaded_by: str
     company_id: str
-    parent_type: AssetParentType | None = None
-    parent_id: str | None = None
+    character_id: str | None = None
+    campaign_id: str | None = None
+    book_id: str | None = None
+    chapter_id: str | None = None
+    user_parent_id: str | None = None
 
 
 # -----------------------------------------------------------------------------
