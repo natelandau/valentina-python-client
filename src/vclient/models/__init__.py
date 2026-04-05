@@ -46,6 +46,7 @@ from .character_trait import (
 from .characters import (
     Character,
     CharacterCreate,
+    CharacterDetail,
     CharacterUpdate,
     HunterAttributes,
     HunterAttributesCreate,
@@ -150,6 +151,7 @@ __all__ = [
     "CharacterConcept",
     "CharacterCreate",
     "CharacterCreateTraitAssign",
+    "CharacterDetail",
     "CharacterFullSheet",
     "CharacterSpecialty",
     "CharacterTrait",

@@ -13,8 +13,8 @@ from vclient.constants import (
     GameVersion,
 )
 
-from .character_trait import CharacterCreateTraitAssign
-from .shared import CharacterSpecialty, NameDescriptionSubDocument
+from .character_trait import CharacterCreateTraitAssign, CharacterTrait
+from .shared import Asset, CharacterSpecialty, NameDescriptionSubDocument, Note
 
 # -----------------------------------------------------------------------------
 # Nested Models
@@ -107,6 +107,39 @@ class HunterAttributesUpdate(BaseModel):
 
 
 # -----------------------------------------------------------------------------
+# Character Inventory Models
+# -----------------------------------------------------------------------------
+
+
+class InventoryItem(BaseModel):
+    """A character inventory item."""
+
+    id: str = Field(..., description="MongoDB document ObjectID.")
+    character_id: str = Field(..., description="ID of the character.")
+    name: str = Field(..., description="Name of the item.")
+    type: CharacterInventoryType = Field(..., description="Type of the item.")
+    description: str | None = Field(default=None, description="Description of the item.")
+    date_created: datetime = Field(..., description="Timestamp when the item was created.")
+    date_modified: datetime = Field(..., description="Timestamp when the item was last modified.")
+
+
+class InventoryItemCreate(BaseModel):
+    """Request body for creating a new character inventory item."""
+
+    name: str = Field(..., description="Name of the item.")
+    type: CharacterInventoryType = Field(..., description="Type of the item.")
+    description: str | None = Field(default=None, description="Description of the item.")
+
+
+class InventoryItemUpdate(BaseModel):
+    """Request body for updating a character inventory item."""
+
+    name: str | None = Field(default=None, description="Name of the item.")
+    type: CharacterInventoryType | None = Field(default=None, description="Type of the item.")
+    description: str | None = Field(default=None, description="Description of the item.")
+
+
+# -----------------------------------------------------------------------------
 # Character Response Model
 # -----------------------------------------------------------------------------
 
@@ -187,6 +220,28 @@ class Character(BaseModel):
     )
     hunter_attributes: HunterAttributes | None = Field(
         default=None, description="Hunter-specific attributes."
+    )
+
+
+class CharacterDetail(Character):
+    """Character response with optional embedded child resources.
+
+    Returned by the single-character endpoint when the ``include`` query parameter
+    is used. Absent resources default to ``None``; present resources are full arrays
+    of the same DTOs returned by the dedicated child endpoints.
+    """
+
+    traits: list[CharacterTrait] | None = Field(
+        default=None, description="Embedded character traits, when requested via include."
+    )
+    inventory: list[InventoryItem] | None = Field(
+        default=None, description="Embedded inventory items, when requested via include."
+    )
+    notes: list[Note] | None = Field(
+        default=None, description="Embedded notes, when requested via include."
+    )
+    assets: list[Asset] | None = Field(
+        default=None, description="Embedded assets, when requested via include."
     )
 
 
@@ -285,42 +340,10 @@ class CharacterUpdate(BaseModel):
     mage_attributes: MageAttributes | None = None
 
 
-# -----------------------------------------------------------------------------
-# Character Inventory Request Models
-# -----------------------------------------------------------------------------
-
-
-class InventoryItem(BaseModel):
-    """A character inventory item."""
-
-    id: str = Field(..., description="MongoDB document ObjectID.")
-    character_id: str = Field(..., description="ID of the character.")
-    name: str = Field(..., description="Name of the item.")
-    type: CharacterInventoryType = Field(..., description="Type of the item.")
-    description: str | None = Field(default=None, description="Description of the item.")
-    date_created: datetime = Field(..., description="Timestamp when the item was created.")
-    date_modified: datetime = Field(..., description="Timestamp when the item was last modified.")
-
-
-class InventoryItemCreate(BaseModel):
-    """Request body for creating a new character inventory item."""
-
-    name: str = Field(..., description="Name of the item.")
-    type: CharacterInventoryType = Field(..., description="Type of the item.")
-    description: str | None = Field(default=None, description="Description of the item.")
-
-
-class InventoryItemUpdate(BaseModel):
-    """Request body for updating a character inventory item."""
-
-    name: str | None = Field(default=None, description="Name of the item.")
-    type: CharacterInventoryType | None = Field(default=None, description="Type of the item.")
-    description: str | None = Field(default=None, description="Description of the item.")
-
-
 __all__ = [
     "Character",
     "CharacterCreate",
+    "CharacterDetail",
     "CharacterUpdate",
     "HunterAttributes",
     "HunterAttributesCreate",
