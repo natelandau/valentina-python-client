@@ -38,55 +38,13 @@ def paginated_campaigns_response(campaign_response_data) -> dict:
 
 
 @pytest.fixture
-def statistics_response_data() -> dict:
-    """Return sample statistics response data."""
-    return {
-        "botches": 5,
-        "successes": 50,
-        "failures": 30,
-        "criticals": 15,
-        "total_rolls": 100,
-        "average_difficulty": 6.5,
-        "average_pool": 4.2,
-        "top_traits": [{"name": "Strength", "count": 20}],
-        "criticals_percentage": 15.0,
-        "success_percentage": 50.0,
-        "failure_percentage": 30.0,
-        "botch_percentage": 5.0,
-    }
-
-
-@pytest.fixture
-def asset_response_data() -> dict:
-    """Return sample asset response data."""
-    return {
-        "id": "asset123",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "asset_type": "image",
-        "mime_type": "image/png",
-        "original_filename": "campaign.png",
-        "public_url": "https://example.com/campaign.png",
-        "uploaded_by": "user123",
-        "company_id": "company123",
-        "campaign_id": "campaign123",
-        "character_id": None,
-        "book_id": None,
-        "chapter_id": None,
-        "user_parent_id": None,
-    }
-
-
-@pytest.fixture
-def note_response_data() -> dict:
-    """Return sample note response data."""
-    return {
-        "id": "note123",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "title": "Test Note",
-        "content": "This is test content",
-    }
+def asset_response_data(asset_response_data_factory) -> dict:
+    """Return sample asset response data for a campaign."""
+    return asset_response_data_factory(
+        original_filename="campaign.png",
+        public_url="https://example.com/campaign.png",
+        campaign_id="campaign123",
+    )
 
 
 class TestCampaignsServiceGetPage:

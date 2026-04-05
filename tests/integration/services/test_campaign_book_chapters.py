@@ -37,36 +37,13 @@ def paginated_chapters_response(chapter_response_data) -> dict:
 
 
 @pytest.fixture
-def asset_response_data() -> dict:
-    """Return sample asset response data."""
-    return {
-        "id": "asset123",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "asset_type": "image",
-        "mime_type": "image/png",
-        "original_filename": "chapter.png",
-        "public_url": "https://example.com/chapter.png",
-        "uploaded_by": "user123",
-        "company_id": "company123",
-        "chapter_id": "chapter123",
-        "character_id": None,
-        "campaign_id": None,
-        "book_id": None,
-        "user_parent_id": None,
-    }
-
-
-@pytest.fixture
-def note_response_data() -> dict:
-    """Return sample note response data."""
-    return {
-        "id": "note123",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "title": "Test Note",
-        "content": "This is test content",
-    }
+def asset_response_data(asset_response_data_factory) -> dict:
+    """Return sample asset response data for a chapter."""
+    return asset_response_data_factory(
+        original_filename="chapter.png",
+        public_url="https://example.com/chapter.png",
+        chapter_id="chapter123",
+    )
 
 
 class TestChaptersServiceGetPage:

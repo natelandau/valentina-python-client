@@ -58,25 +58,6 @@ def new_company_response_data(company_response_data: dict, user_response_data: d
     }
 
 
-@pytest.fixture
-def statistics_response_data() -> dict:
-    """Return sample statistics response data."""
-    return {
-        "botches": 5,
-        "successes": 50,
-        "failures": 30,
-        "criticals": 15,
-        "total_rolls": 100,
-        "average_difficulty": 6.5,
-        "average_pool": 4.2,
-        "top_traits": [{"name": "Strength", "count": 20}],
-        "criticals_percentage": 15.0,
-        "success_percentage": 50.0,
-        "failure_percentage": 30.0,
-        "botch_percentage": 5.0,
-    }
-
-
 class TestCompaniesServiceGetPage:
     """Tests for CompaniesService.get_page method."""
 

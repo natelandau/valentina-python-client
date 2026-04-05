@@ -32,43 +32,13 @@ def paginated_users_response(user_response_data) -> dict:
 
 
 @pytest.fixture
-def statistics_response_data() -> dict:
-    """Return sample statistics response data."""
-    return {
-        "botches": 5,
-        "successes": 50,
-        "failures": 30,
-        "criticals": 15,
-        "total_rolls": 100,
-        "average_difficulty": 6.5,
-        "average_pool": 4.2,
-        "top_traits": [{"name": "Strength", "count": 20}],
-        "criticals_percentage": 15.0,
-        "success_percentage": 50.0,
-        "failure_percentage": 30.0,
-        "botch_percentage": 5.0,
-    }
-
-
-@pytest.fixture
-def asset_response_data() -> dict:
-    """Return sample asset response data."""
-    return {
-        "id": "asset123",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "asset_type": "image",
-        "mime_type": "image/png",
-        "original_filename": "avatar.png",
-        "public_url": "https://example.com/avatar.png",
-        "uploaded_by": "user123",
-        "company_id": "company123",
-        "user_parent_id": "user123",
-        "character_id": None,
-        "campaign_id": None,
-        "book_id": None,
-        "chapter_id": None,
-    }
+def asset_response_data(asset_response_data_factory) -> dict:
+    """Return sample asset response data for a user."""
+    return asset_response_data_factory(
+        original_filename="avatar.png",
+        public_url="https://example.com/avatar.png",
+        user_parent_id="user123",
+    )
 
 
 @pytest.fixture
@@ -79,18 +49,6 @@ def experience_response_data() -> dict:
         "xp_current": 50,
         "xp_total": 100,
         "cool_points": 5,
-    }
-
-
-@pytest.fixture
-def note_response_data() -> dict:
-    """Return sample note response data."""
-    return {
-        "id": "note123",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "title": "Test Note",
-        "content": "This is test content",
     }
 
 
