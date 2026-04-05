@@ -3,7 +3,7 @@
 
 import mimetypes
 from collections.abc import Iterator, Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from vclient._sync.services.base import SyncBaseService
 from vclient.constants import (
@@ -222,12 +222,9 @@ class SyncCharactersService(SyncBaseService):
             NotFoundError: If the character does not exist.
             AuthorizationError: If you don't have access.
         """
-        params: dict[str, Any] = {}
-        if include:
-            params["include"] = list(include)
         response = self._get(
             self._format_endpoint(Endpoints.CHARACTER, character_id=character_id),
-            params=params or None,
+            params=self._build_params(include=list(include) if include else None),
         )
         return CharacterDetail.model_validate(response.json())
 

@@ -2,7 +2,7 @@
 
 import mimetypes
 from collections.abc import AsyncIterator, Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from vclient.constants import (
     DEFAULT_PAGE_LIMIT,
@@ -224,13 +224,9 @@ class CharactersService(BaseService):
             NotFoundError: If the character does not exist.
             AuthorizationError: If you don't have access.
         """
-        params: dict[str, Any] = {}
-        if include:
-            params["include"] = list(include)
-
         response = await self._get(
             self._format_endpoint(Endpoints.CHARACTER, character_id=character_id),
-            params=params or None,
+            params=self._build_params(include=list(include) if include else None),
         )
         return CharacterDetail.model_validate(response.json())
 
