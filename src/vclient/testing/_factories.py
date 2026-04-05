@@ -12,6 +12,7 @@ from vclient.models import (
     CampaignChapter,
     Character,
     CharacterConcept,
+    CharacterDetail,
     CharacterFullSheet,
     CharacterTrait,
     CharacterTraitValueOptionsResponse,
@@ -89,6 +90,11 @@ class CampaignExperienceFactory(ModelFactory[CampaignExperience]):
 
 class CharacterFactory(ModelFactory[Character]):
     __model__ = Character
+    __use_defaults__ = True
+
+
+class CharacterDetailFactory(ModelFactory[CharacterDetail]):
+    __model__ = CharacterDetail
     __use_defaults__ = True
 
 
@@ -265,6 +271,7 @@ __all__ = [
     "CampaignExperienceFactory",
     "CampaignFactory",
     "CharacterConceptFactory",
+    "CharacterDetailFactory",
     "CharacterFactory",
     "CharacterFullSheetFactory",
     "CharacterTraitFactory",

@@ -13,6 +13,7 @@ from vclient.models import (
     CampaignChapter,
     Character,
     CharacterConcept,
+    CharacterDetail,
     CharacterFullSheet,
     CharacterTrait,
     CharacterTraitValueOptionsResponse,
@@ -227,7 +228,7 @@ class Routes:
 
     # Characters
     CHARACTERS_LIST = RouteSpec("GET", Endpoints.CHARACTERS, PAGINATED, Character)
-    CHARACTERS_GET = RouteSpec("GET", Endpoints.CHARACTER, SINGLE, Character)
+    CHARACTERS_GET = RouteSpec("GET", Endpoints.CHARACTER, SINGLE, CharacterDetail)
     CHARACTERS_CREATE = RouteSpec("POST", Endpoints.CHARACTERS, SINGLE, Character)
     CHARACTERS_UPDATE = RouteSpec("PATCH", Endpoints.CHARACTER, SINGLE, Character)
     CHARACTERS_DELETE = RouteSpec("DELETE", Endpoints.CHARACTER, NO_CONTENT, None)
