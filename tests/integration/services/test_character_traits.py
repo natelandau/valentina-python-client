@@ -128,7 +128,7 @@ class TestCharacterTraitsServiceGetPage:
         assert isinstance(result, PaginatedResponse)
 
     @respx.mock
-    async def test_get_page_with_parent_category_filter(
+    async def test_get_page_with_category_filter(
         self, vclient, base_url, paginated_character_trait_response
     ) -> None:
         """Verify get_page filters by category_id."""
@@ -281,7 +281,7 @@ class TestCharacterTraitsServiceListAll:
         assert result[0].trait.name == "Strength"
 
     @respx.mock
-    async def test_list_all_with_parent_category_filter(
+    async def test_list_all_with_category_filter(
         self, vclient, base_url, character_trait_response_data
     ) -> None:
         """Verify list_all filters by category_id."""
