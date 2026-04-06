@@ -62,7 +62,7 @@ def asset_response_data_factory() -> Callable[..., dict]:
             "mime_type": "image/png",
             "original_filename": original_filename,
             "public_url": public_url,
-            "uploaded_by": "user123",
+            "uploaded_by_id": "user123",
             "company_id": "company123",
             "character_id": character_id,
             "campaign_id": campaign_id,

@@ -59,8 +59,8 @@ def category_response_data() -> dict:
         "date_created": "2024-01-15T10:30:00Z",
         "date_modified": "2024-01-15T10:30:00Z",
         "game_versions": ["V5"],
-        "parent_sheet_section_id": "section123",
-        "parent_sheet_section_name": "Attributes",
+        "sheet_section_id": "section123",
+        "sheet_section_name": "Attributes",
         "initial_cost": 1,
         "upgrade_cost": 5,
         "order": 1,
@@ -561,7 +561,7 @@ class TestCharacterBlueprintServiceCategories:
         assert isinstance(result, TraitCategory)
         assert result.id == "category123"
         assert result.name == "Physical"
-        assert result.parent_sheet_section_id == "section123"
+        assert result.sheet_section_id == "section123"
         assert result.initial_cost == 1
         assert result.upgrade_cost == 5
 

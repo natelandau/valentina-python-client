@@ -43,7 +43,7 @@ class Asset(BaseModel):
     mime_type: str
     original_filename: str
     public_url: str
-    uploaded_by: str
+    uploaded_by_id: str
     company_id: str
     character_id: str | None = None
     campaign_id: str | None = None

@@ -30,8 +30,8 @@ Category within a sheet section. Groups related traits together, like "Physical 
 | `name`                        | `str`                  | Category name                          |
 | `description`                 | `str \| None`          | Description                            |
 | `game_versions`               | `list[GameVersion]`    | Available game versions                |
-| `parent_sheet_section_id`     | `str`                  | Parent section ID                      |
-| `parent_sheet_section_name`   | `str`                  | Parent section name                    |
+| `sheet_section_id`            | `str`                  | Parent section ID                      |
+| `sheet_section_name`          | `str`                  | Parent section name                    |
 | `initial_cost`                | `int`                  | XP cost to acquire                     |
 | `upgrade_cost`                | `int`                  | XP cost per upgrade                    |
 | `count_based_cost_multiplier` | `int \| None`          | Count-based cost multiplier for traits |

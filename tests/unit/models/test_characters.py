@@ -590,7 +590,7 @@ class TestCharacterDetail:
                     "mime_type": "image/png",
                     "original_filename": "portrait.png",
                     "public_url": "https://example.com/portrait.png",
-                    "uploaded_by": "user123",
+                    "uploaded_by_id": "user123",
                     "company_id": "company123",
                 }
             ],

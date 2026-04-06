@@ -582,7 +582,7 @@ class TestAsset:
             mime_type="image/png",
             original_filename="avatar.png",
             public_url="https://example.com/avatar.png",
-            uploaded_by="user123",
+            uploaded_by_id="user123",
             company_id="company123",
             user_parent_id="user123",
         )
@@ -593,7 +593,7 @@ class TestAsset:
         assert asset.mime_type == "image/png"
         assert asset.original_filename == "avatar.png"
         assert asset.public_url == "https://example.com/avatar.png"
-        assert asset.uploaded_by == "user123"
+        assert asset.uploaded_by_id == "user123"
         assert asset.company_id == "company123"
         assert asset.user_parent_id == "user123"
 
@@ -609,7 +609,7 @@ class TestAsset:
                 mime_type="application/octet-stream",
                 original_filename="file.txt",
                 public_url="https://example.com/file.txt",
-                uploaded_by="user123",
+                uploaded_by_id="user123",
                 company_id="company123",
             )
 

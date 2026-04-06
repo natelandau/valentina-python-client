@@ -33,8 +33,8 @@ class TraitCategory(BaseModel):
     date_created: datetime
     date_modified: datetime
     game_versions: list[GameVersion] = Field(default_factory=list)
-    parent_sheet_section_id: str
-    parent_sheet_section_name: str
+    sheet_section_id: str
+    sheet_section_name: str
     initial_cost: int
     upgrade_cost: int
     count_based_cost_multiplier: int | None = None
