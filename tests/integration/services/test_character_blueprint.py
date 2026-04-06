@@ -96,8 +96,8 @@ def subcategory_response_data() -> dict:
         "requires_parent": False,
         "pool": None,
         "system": None,
-        "parent_category_id": "category123",
-        "parent_category_name": "Backgrounds",
+        "category_id": "category123",
+        "category_name": "Backgrounds",
         "sheet_section_id": "section123",
         "sheet_section_name": "Backgrounds",
     }
@@ -132,11 +132,11 @@ def trait_response_data() -> dict:
         "upgrade_cost": 5,
         "sheet_section_name": "Attributes",
         "sheet_section_id": "section123",
-        "parent_category_name": "Physical",
-        "parent_category_id": "category123",
+        "category_name": "Physical",
+        "category_id": "category123",
         "custom_for_character_id": None,
-        "trait_subcategory_id": None,
-        "trait_subcategory_name": None,
+        "subcategory_id": None,
+        "subcategory_name": None,
         "pool": None,
         "system": None,
         "character_classes": ["VAMPIRE", "WEREWOLF"],
@@ -728,7 +728,7 @@ class TestCharacterBlueprintServiceSubcategories:
         assert isinstance(result, TraitSubcategory)
         assert result.id == "subcat123"
         assert result.name == "Allies"
-        assert result.parent_category_id == "category123"
+        assert result.category_id == "category123"
         assert result.initial_cost == 1
         assert result.upgrade_cost == 2
 
@@ -791,14 +791,14 @@ class TestCharacterBlueprintServiceTraits:
                 "limit": "10",
                 "offset": "0",
                 "character_class": "VAMPIRE",
-                "parent_category_id": "category123",
+                "category_id": "category123",
             },
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
         # When: Requesting with filters
         result = await vclient.character_blueprint(company_id).get_traits_page(
             character_class="VAMPIRE",
-            parent_category_id="category123",
+            category_id="category123",
             order_by=None,
         )
 
@@ -940,7 +940,7 @@ class TestCharacterBlueprintServiceTraits:
         assert result.id == "trait123"
         assert result.name == "Strength"
         assert result.max_value == 5
-        assert result.parent_category_id == "category123"
+        assert result.category_id == "category123"
 
     @respx.mock
     async def test_get_trait_not_found(self, vclient, base_url) -> None:

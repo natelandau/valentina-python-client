@@ -266,7 +266,7 @@ class TestTraitGiftAttributes:
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
             sheet_section_id="section123",
-            parent_category_id="category123",
+            category_id="category123",
         )
         assert trait.gift_attributes is None
 
@@ -279,7 +279,7 @@ class TestTraitGiftAttributes:
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
             sheet_section_id="section123",
-            parent_category_id="category123",
+            category_id="category123",
             gift_attributes=attrs,
         )
         assert trait.gift_attributes is not None

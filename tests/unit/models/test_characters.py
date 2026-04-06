@@ -555,7 +555,7 @@ class TestCharacterDetail:
                         "is_custom": False,
                         "show_when_zero": True,
                         "sheet_section_id": "sec1",
-                        "parent_category_id": "cat1",
+                        "category_id": "cat1",
                         "is_rollable": True,
                         "character_classes": ["VAMPIRE"],
                         "game_versions": ["V5"],

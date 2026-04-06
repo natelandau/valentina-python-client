@@ -85,7 +85,7 @@ def full_sheet_response_data() -> dict:
                                     "date_created": "2024-01-01T00:00:00Z",
                                     "date_modified": "2024-01-01T00:00:00Z",
                                     "sheet_section_id": "sec1",
-                                    "parent_category_id": "cat1",
+                                    "category_id": "cat1",
                                 },
                             }
                         ],
@@ -118,7 +118,7 @@ def full_sheet_category_response_data() -> dict:
                     "date_created": "2024-01-01T00:00:00Z",
                     "date_modified": "2024-01-01T00:00:00Z",
                     "sheet_section_id": "sec1",
-                    "parent_category_id": "cat1",
+                    "category_id": "cat1",
                 },
             }
         ],
@@ -140,7 +140,7 @@ def full_sheet_category_response_data_with_available_traits(
             "date_created": "2024-01-01T00:00:00Z",
             "date_modified": "2024-01-01T00:00:00Z",
             "sheet_section_id": "sec1",
-            "parent_category_id": "cat1",
+            "category_id": "cat1",
         }
     ]
     return data
