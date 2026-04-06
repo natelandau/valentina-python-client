@@ -59,8 +59,8 @@ class TraitSubcategory(BaseModel):
     requires_parent: bool
     pool: str | None = None
     system: str | None = None
-    parent_category_id: str
-    parent_category_name: str
+    category_id: str
+    category_name: str
     sheet_section_id: str
     sheet_section_name: str
     hunter_edge_type: str | None = None
