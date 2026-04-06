@@ -62,7 +62,7 @@ class SyncCharacterTraitsService(SyncBaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
-        parent_category_id: str | None = None,
+        category_id: str | None = None,
         is_rollable: bool | None = None,
     ) -> PaginatedResponse[CharacterTrait]:
         """Retrieve a paginated page of character traits.
@@ -70,15 +70,15 @@ class SyncCharacterTraitsService(SyncBaseService):
         Args:
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
-            parent_category_id: Filter by parent category ID.
+            category_id: Filter by category ID.
             is_rollable: Filter by whether the trait is rollable.
 
         Returns:
             A PaginatedResponse containing CharacterTrait objects and pagination metadata.
         """
         params: dict[str, str | int] = {}
-        if parent_category_id is not None:
-            params["parent_category_id"] = parent_category_id
+        if category_id is not None:
+            params["category_id"] = category_id
         if is_rollable is not None:
             params["is_rollable"] = is_rollable
         return self._get_paginated_as(
@@ -90,36 +90,27 @@ class SyncCharacterTraitsService(SyncBaseService):
         )
 
     def list_all(
-        self, *, parent_category_id: str | None = None, is_rollable: bool | None = None
+        self, *, category_id: str | None = None, is_rollable: bool | None = None
     ) -> list[CharacterTrait]:
         """Retrieve all character traits.
 
         Args:
-            parent_category_id: Filter by parent category ID.
+            category_id: Filter by category ID.
             is_rollable: Filter by whether the trait is rollable.
 
         Returns:
             A list of all CharacterTrait objects.
         """
-        return [
-            trait
-            for trait in self.iter_all(
-                parent_category_id=parent_category_id, is_rollable=is_rollable
-            )
-        ]
+        return [trait for trait in self.iter_all(category_id=category_id, is_rollable=is_rollable)]
 
     def iter_all(
-        self,
-        *,
-        limit: int = 100,
-        parent_category_id: str | None = None,
-        is_rollable: bool | None = None,
+        self, *, limit: int = 100, category_id: str | None = None, is_rollable: bool | None = None
     ) -> Iterator[CharacterTrait]:
         """Iterate through all character traits.
 
         Args:
             limit: Maximum number of items to return (0-100, default 10).
-            parent_category_id: Filter by parent category ID.
+            category_id: Filter by category ID.
             is_rollable: Filter by whether the trait is rollable.
 
         Yields:
@@ -130,8 +121,8 @@ class SyncCharacterTraitsService(SyncBaseService):
             ...     print(trait.name)
         """
         params: dict[str, str | int] = {}
-        if parent_category_id is not None:
-            params["parent_category_id"] = parent_category_id
+        if category_id is not None:
+            params["category_id"] = category_id
         if is_rollable is not None:
             params["is_rollable"] = is_rollable
         for item in self._iter_all_pages(
@@ -236,7 +227,7 @@ class SyncCharacterTraitsService(SyncBaseService):
         Args:
             request: A TraitCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for TraitCreate if request is not provided.
-                Required: name (str), parent_category_id (str).
+                Required: name (str), category_id (str).
                 Optional: description (str | None), max_value (int), min_value (int),
                 show_when_zero (bool), initial_cost (int | None),
                 upgrade_cost (int | None), value (int | None).

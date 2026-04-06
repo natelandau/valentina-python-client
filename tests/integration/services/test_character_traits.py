@@ -128,14 +128,14 @@ class TestCharacterTraitsServiceGetPage:
         assert isinstance(result, PaginatedResponse)
 
     @respx.mock
-    async def test_get_page_with_parent_category_filter(
+    async def test_get_page_with_category_filter(
         self, vclient, base_url, paginated_character_trait_response
     ) -> None:
-        """Verify get_page filters by parent_category_id."""
+        """Verify get_page filters by category_id."""
         # Given: A mocked endpoint expecting filter params
         route = respx.get(
             f"{base_url}{Endpoints.CHARACTER_TRAITS.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}",
-            params={"limit": "10", "offset": "0", "parent_category_id": "cat123"},
+            params={"limit": "10", "offset": "0", "category_id": "cat123"},
         ).mock(return_value=Response(200, json=paginated_character_trait_response))
 
         # When: Requesting with filter
@@ -144,7 +144,7 @@ class TestCharacterTraitsServiceGetPage:
             campaign_id="campaign123",
             character_id="char123",
             company_id="company123",
-        ).get_page(parent_category_id="cat123")
+        ).get_page(category_id="cat123")
 
         # Then: The route was called with correct params
         assert route.called
@@ -281,10 +281,10 @@ class TestCharacterTraitsServiceListAll:
         assert result[0].trait.name == "Strength"
 
     @respx.mock
-    async def test_list_all_with_parent_category_filter(
+    async def test_list_all_with_category_filter(
         self, vclient, base_url, character_trait_response_data
     ) -> None:
-        """Verify list_all filters by parent_category_id."""
+        """Verify list_all filters by category_id."""
         # Given: A mocked endpoint expecting filter params
         paginated_response = {
             "items": [character_trait_response_data],
@@ -294,7 +294,7 @@ class TestCharacterTraitsServiceListAll:
         }
         route = respx.get(
             f"{base_url}{Endpoints.CHARACTER_TRAITS.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}",
-            params={"limit": "100", "offset": "0", "parent_category_id": "cat123"},
+            params={"limit": "100", "offset": "0", "category_id": "cat123"},
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting with filter
@@ -303,7 +303,7 @@ class TestCharacterTraitsServiceListAll:
             campaign_id="campaign123",
             character_id="char123",
             company_id="company123",
-        ).list_all(parent_category_id="cat123")
+        ).list_all(category_id="cat123")
 
         # Then: Filtered results are returned
         assert route.called
@@ -378,7 +378,7 @@ class TestCharacterTraitsServiceIterAll:
     async def test_iter_all_with_filter(
         self, vclient, base_url, character_trait_response_data
     ) -> None:
-        """Verify iter_all filters by parent_category_id."""
+        """Verify iter_all filters by category_id."""
         # Given: A mocked endpoint expecting filter params
         paginated_response = {
             "items": [character_trait_response_data],
@@ -388,7 +388,7 @@ class TestCharacterTraitsServiceIterAll:
         }
         route = respx.get(
             f"{base_url}{Endpoints.CHARACTER_TRAITS.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}",
-            params={"limit": "100", "offset": "0", "parent_category_id": "cat456"},
+            params={"limit": "100", "offset": "0", "category_id": "cat456"},
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Iterating with filter
@@ -399,7 +399,7 @@ class TestCharacterTraitsServiceIterAll:
                 campaign_id="campaign123",
                 character_id="char123",
                 company_id="company123",
-            ).iter_all(parent_category_id="cat456")
+            ).iter_all(category_id="cat456")
         ]
 
         # Then: Filtered results are yielded
@@ -542,7 +542,7 @@ class TestCharacterTraitsServiceCreate:
             company_id="company123",
         ).create(
             name="Custom Skill",
-            parent_category_id="cat123",
+            category_id="cat123",
         )
 
         # Then: The route was called and character trait is returned
@@ -555,7 +555,7 @@ class TestCharacterTraitsServiceCreate:
 
         body = json.loads(route.calls[0].request.content)
         assert body["name"] == "Custom Skill"
-        assert body["parent_category_id"] == "cat123"
+        assert body["category_id"] == "cat123"
         # max_value and min_value have defaults but are not sent when not explicitly set
 
     @respx.mock
@@ -591,7 +591,7 @@ class TestCharacterTraitsServiceCreate:
             company_id="company123",
         ).create(
             name="Custom Background",
-            parent_category_id="backgrounds_cat",
+            category_id="backgrounds_cat",
             description="A custom background trait",
             max_value=10,
             min_value=1,
@@ -612,7 +612,7 @@ class TestCharacterTraitsServiceCreate:
 
         body = json.loads(route.calls[0].request.content)
         assert body["name"] == "Custom Background"
-        assert body["parent_category_id"] == "backgrounds_cat"
+        assert body["category_id"] == "backgrounds_cat"
         assert body["description"] == "A custom background trait"
         assert body["max_value"] == 10
         assert body["min_value"] == 1
@@ -640,7 +640,7 @@ class TestCharacterTraitsServiceCreate:
             company_id="company123",
         ).create(
             name="Custom Trait",
-            parent_category_id="cat123",
+            category_id="cat123",
             value=2,
         )
 
@@ -669,7 +669,7 @@ class TestCharacterTraitsServiceCreate:
                 company_id="company123",
             ).create(
                 name="Custom Trait",
-                parent_category_id="nonexistent_cat",
+                category_id="nonexistent_cat",
             )
 
         assert route.called

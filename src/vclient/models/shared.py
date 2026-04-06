@@ -158,11 +158,11 @@ class Trait(BaseModel):
 
     sheet_section_name: str | None = None
     sheet_section_id: str
-    parent_category_name: str | None = None
-    parent_category_id: str
+    category_name: str | None = None
+    category_id: str
     custom_for_character_id: str | None = None
-    trait_subcategory_id: str | None = None
-    trait_subcategory_name: str | None = None
+    subcategory_id: str | None = None
+    subcategory_name: str | None = None
     pool: str | None = None
     opposing_pool: str | None = None
     system: str | None = None

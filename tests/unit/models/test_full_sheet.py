@@ -48,7 +48,7 @@ class TestFullSheetTraitSubcategory:
                 "date_created": "2024-01-01T00:00:00Z",
                 "date_modified": "2024-01-01T00:00:00Z",
                 "sheet_section_id": "sec1",
-                "parent_category_id": "cat1",
+                "category_id": "cat1",
             },
         }
 
@@ -114,7 +114,7 @@ class TestFullSheetTraitSubcategory:
             "date_created": "2024-01-01T00:00:00Z",
             "date_modified": "2024-01-01T00:00:00Z",
             "sheet_section_id": "sec1",
-            "parent_category_id": "cat1",
+            "category_id": "cat1",
         }
 
         # When: Creating with available_traits populated
@@ -183,7 +183,7 @@ class TestFullSheetTraitCategory:
             "date_created": "2024-01-01T00:00:00Z",
             "date_modified": "2024-01-01T00:00:00Z",
             "sheet_section_id": "sec1",
-            "parent_category_id": "cat123",
+            "category_id": "cat123",
         }
 
         # When: Creating with available_traits populated
@@ -224,7 +224,7 @@ class TestFullSheetTraitCategory:
                         "date_created": "2024-01-01T00:00:00Z",
                         "date_modified": "2024-01-01T00:00:00Z",
                         "sheet_section_id": "sec1",
-                        "parent_category_id": "cat1",
+                        "category_id": "cat1",
                     },
                 }
             ],
@@ -314,7 +314,7 @@ class TestCharacterFullSheet:
                                         "date_created": "2024-01-01T00:00:00Z",
                                         "date_modified": "2024-01-01T00:00:00Z",
                                         "sheet_section_id": "sec1",
-                                        "parent_category_id": "cat1",
+                                        "category_id": "cat1",
                                     },
                                 }
                             ],

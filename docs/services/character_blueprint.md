@@ -55,13 +55,13 @@ Search across all traits without section/category context. All parameters are op
 
 !!! note "Direct Trait Access"
 
-    Use these methods to search all traits directly without navigating the section/category hierarchy. Category-scoped and subcategory-scoped traits are accessed via the `parent_category_id` and `subcategory_id` filter params.
+    Use these methods to search all traits directly without navigating the section/category hierarchy. Category-scoped and subcategory-scoped traits are accessed via the `category_id` and `subcategory_id` filter params.
 
 | Method                                                                                                                                                    | Returns                    | Description                |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------------- |
-| `get_traits_page(*, limit?, offset?, game_version?, character_class?, parent_category_id?, subcategory_id?, is_rollable?, order_by?, exclude_subcategory_traits?)` | `PaginatedResponse[Trait]` | Get a page of all traits   |
-| `list_all_traits(*, game_version?, character_class?, parent_category_id?, subcategory_id?, is_rollable?, order_by?, exclude_subcategory_traits?)`           | `list[Trait]`              | Get all traits             |
-| `iter_all_traits(*, game_version?, character_class?, parent_category_id?, subcategory_id?, is_rollable?, order_by?, exclude_subcategory_traits?)`           | `AsyncIterator[Trait]`     | Iterate through all traits |
+| `get_traits_page(*, limit?, offset?, game_version?, character_class?, category_id?, subcategory_id?, is_rollable?, order_by?, exclude_subcategory_traits?)` | `PaginatedResponse[Trait]` | Get a page of all traits   |
+| `list_all_traits(*, game_version?, character_class?, category_id?, subcategory_id?, is_rollable?, order_by?, exclude_subcategory_traits?)`           | `list[Trait]`              | Get all traits             |
+| `iter_all_traits(*, game_version?, character_class?, category_id?, subcategory_id?, is_rollable?, order_by?, exclude_subcategory_traits?)`           | `AsyncIterator[Trait]`     | Iterate through all traits |
 | `get_trait(*, trait_id)`                                                                                                                                   | `Trait`                    | Get a trait by ID          |
 
 ### Character Concepts
@@ -117,7 +117,7 @@ for section in sections:
 
         # Get top-level traits (excluding subcategory traits)
         traits = await blueprint.list_all_traits(
-            parent_category_id=category.id,
+            category_id=category.id,
             exclude_subcategory_traits=True,
         )
 

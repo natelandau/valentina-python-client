@@ -1,6 +1,77 @@
 """Shared response fixtures."""
 
+from collections.abc import Callable
+
 import pytest
+
+
+@pytest.fixture
+def note_response_data() -> dict:
+    """Return sample note response data."""
+    return {
+        "id": "note123",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "title": "Test Note",
+        "content": "This is test content",
+    }
+
+
+@pytest.fixture
+def statistics_response_data() -> dict:
+    """Return sample statistics response data."""
+    return {
+        "botches": 5,
+        "successes": 50,
+        "failures": 30,
+        "criticals": 15,
+        "total_rolls": 100,
+        "average_difficulty": 6.5,
+        "average_pool": 4.2,
+        "top_traits": [{"name": "Strength", "count": 20}],
+        "criticals_percentage": 15.0,
+        "success_percentage": 50.0,
+        "failure_percentage": 30.0,
+        "botch_percentage": 5.0,
+    }
+
+
+@pytest.fixture
+def asset_response_data_factory() -> Callable[..., dict]:
+    """Return a factory for creating sample asset response data.
+
+    Call with keyword arguments to set context-specific fields like filename
+    and parent IDs. All parent ID fields default to None.
+    """
+
+    def _create(
+        *,
+        original_filename: str = "test.png",
+        public_url: str = "https://example.com/test.png",
+        character_id: str | None = None,
+        campaign_id: str | None = None,
+        book_id: str | None = None,
+        chapter_id: str | None = None,
+        user_parent_id: str | None = None,
+    ) -> dict:
+        return {
+            "id": "asset123",
+            "date_created": "2024-01-15T10:30:00Z",
+            "date_modified": "2024-01-15T10:30:00Z",
+            "asset_type": "image",
+            "mime_type": "image/png",
+            "original_filename": original_filename,
+            "public_url": public_url,
+            "uploaded_by": "user123",
+            "company_id": "company123",
+            "character_id": character_id,
+            "campaign_id": campaign_id,
+            "book_id": book_id,
+            "chapter_id": chapter_id,
+            "user_parent_id": user_parent_id,
+        }
+
+    return _create
 
 
 @pytest.fixture
@@ -21,11 +92,11 @@ def trait_response_data() -> dict:
         "upgrade_cost": 2,
         "sheet_section_name": "Attributes",
         "sheet_section_id": "section123",
-        "parent_category_name": "Physical",
-        "parent_category_id": "cat123",
+        "category_name": "Physical",
+        "category_id": "cat123",
         "custom_for_character_id": None,
-        "trait_subcategory_id": None,
-        "trait_subcategory_name": None,
+        "subcategory_id": None,
+        "subcategory_name": None,
         "pool": None,
         "system": None,
         "is_rollable": True,

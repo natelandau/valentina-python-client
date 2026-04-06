@@ -35,9 +35,9 @@ traits = character_traits_service(
 
 | Method                                           | Returns                             | Description              |
 | ------------------------------------------------ | ----------------------------------- | ------------------------ |
-| `get_page(limit?, offset?, parent_category_id?)` | `PaginatedResponse[CharacterTrait]` | Get a page of traits     |
-| `list_all(parent_category_id?)`                  | `list[CharacterTrait]`              | Get all character traits |
-| `iter_all(limit?, parent_category_id?)`          | `AsyncIterator[CharacterTrait]`     | Iterate through traits   |
+| `get_page(limit?, offset?, category_id?)`        | `PaginatedResponse[CharacterTrait]` | Get a page of traits     |
+| `list_all(category_id?)`                         | `list[CharacterTrait]`              | Get all character traits |
+| `iter_all(limit?, category_id?)`                 | `AsyncIterator[CharacterTrait]`     | Iterate through traits   |
 
 ### Value Modification
 
@@ -61,7 +61,7 @@ trait = await traits.assign(trait_id="strength_trait_id", value=3, currency="XP"
 # Create a custom trait (preferred method: use model object)
 request = TraitCreate(
     name="Street Smarts",
-    parent_category_id="skills_category_id",
+    category_id="skills_category_id",
     max_value=5,
     value=2
 )
@@ -70,7 +70,7 @@ custom = await traits.create(request)
 # Alternative: pass fields as keyword arguments
 custom = await traits.create(
     name="Street Smarts",
-    parent_category_id="skills_category_id",
+    category_id="skills_category_id",
     max_value=5,
     value=2
 )

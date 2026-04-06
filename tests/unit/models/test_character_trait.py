@@ -26,7 +26,7 @@ class TestCharacterTrait:
             name="Strength",
             date_created=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
             date_modified=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
-            parent_category_id="cat123",
+            category_id="cat123",
             sheet_section_id="section123",
         )
 
@@ -52,7 +52,7 @@ class TestCharacterTrait:
             name="Strength",
             date_created=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
             date_modified=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
-            parent_category_id="cat123",
+            category_id="cat123",
             sheet_section_id="section123",
         )
 
@@ -67,7 +67,7 @@ class TestCharacterTrait:
             name="Humanity",
             date_created=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
             date_modified=datetime(2024, 1, 15, 10, 30, 0, tzinfo=UTC),
-            parent_category_id="cat123",
+            category_id="cat123",
             sheet_section_id="section123",
             is_rollable=False,
         )
@@ -88,7 +88,7 @@ class TestCharacterTrait:
                 "description": "Physical agility and coordination",
                 "date_created": "2024-01-15T10:30:00Z",
                 "date_modified": "2024-01-15T10:30:00Z",
-                "parent_category_id": "cat456",
+                "category_id": "cat456",
                 "show_when_zero": True,
                 "sheet_section_id": "section123",
                 "max_value": 5,
@@ -133,8 +133,8 @@ class TestCharacterTrait:
                 "upgrade_cost": 3,
                 "sheet_section_name": "Skills",
                 "sheet_section_id": "section123",
-                "parent_category_name": "Physical Skills",
-                "parent_category_id": "cat789",
+                "category_name": "Physical Skills",
+                "category_id": "cat789",
                 "character_classes": ["VAMPIRE", "HUNTER"],
                 "game_versions": ["V5"],
             },
@@ -146,7 +146,7 @@ class TestCharacterTrait:
         # Then: All trait details are accessible
         assert character_trait.trait.link == "https://wiki.example.com/firearms"
         assert character_trait.trait.sheet_section_name == "Skills"
-        assert character_trait.trait.parent_category_name == "Physical Skills"
+        assert character_trait.trait.category_name == "Physical Skills"
         assert character_trait.trait.character_classes == ["VAMPIRE", "HUNTER"]
         assert character_trait.trait.game_versions == ["V5"]
 
@@ -207,12 +207,12 @@ class TestTraitCreate:
         # When: Creating a request with required fields
         request = TraitCreate(
             name="Custom Skill",
-            parent_category_id="cat123",
+            category_id="cat123",
         )
 
         # Then: Required fields are set, defaults applied
         assert request.name == "Custom Skill"
-        assert request.parent_category_id == "cat123"
+        assert request.category_id == "cat123"
         assert request.max_value == 5
         assert request.min_value == 0
         assert request.show_when_zero is True
@@ -226,7 +226,7 @@ class TestTraitCreate:
         # When: Creating a request with all fields
         request = TraitCreate(
             name="Custom Background",
-            parent_category_id="backgrounds_cat",
+            category_id="backgrounds_cat",
             description="A custom background trait",
             max_value=10,
             min_value=1,
@@ -238,7 +238,7 @@ class TestTraitCreate:
 
         # Then: All fields are set correctly
         assert request.name == "Custom Background"
-        assert request.parent_category_id == "backgrounds_cat"
+        assert request.category_id == "backgrounds_cat"
         assert request.description == "A custom background trait"
         assert request.max_value == 10
         assert request.min_value == 1
@@ -252,7 +252,7 @@ class TestTraitCreate:
         # Given: A create request with required fields only
         request = TraitCreate(
             name="Stealth",
-            parent_category_id="skills_cat",
+            category_id="skills_cat",
         )
 
         # When: Dumping to JSON with exclude_none and exclude_unset
@@ -260,7 +260,7 @@ class TestTraitCreate:
 
         # Then: Required fields and unset fields without defaults are in the output
         assert data["name"] == "Stealth"
-        assert data["parent_category_id"] == "skills_cat"
+        assert data["category_id"] == "skills_cat"
         assert "description" not in data
         assert "initial_cost" not in data
         assert "upgrade_cost" not in data
@@ -271,7 +271,7 @@ class TestTraitCreate:
         # Given: A create request with optional fields
         request = TraitCreate(
             name="Lore",
-            parent_category_id="knowledge_cat",
+            category_id="knowledge_cat",
             description="Knowledge of ancient texts",
             initial_cost=2,
             value=3,
@@ -291,7 +291,7 @@ class TestTraitCreate:
         # When: Creating a request with valid max_value
         request = TraitCreate(
             name="Test Trait",
-            parent_category_id="cat123",
+            category_id="cat123",
             max_value=100,
         )
 
@@ -303,7 +303,7 @@ class TestTraitCreate:
         # When: Creating a request with valid min_value
         request = TraitCreate(
             name="Test Trait",
-            parent_category_id="cat123",
+            category_id="cat123",
             min_value=0,
         )
 

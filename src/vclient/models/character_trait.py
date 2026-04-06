@@ -44,7 +44,7 @@ class TraitCreate(BaseModel):
     max_value: Annotated[int, Field(ge=0, le=100, default=5)] = 5
     min_value: Annotated[int, Field(ge=0, le=100, default=0)] = 0
     show_when_zero: bool | None = True
-    parent_category_id: str
+    category_id: str
     initial_cost: int | None = None
     upgrade_cost: int | None = None
     count_based_cost_multiplier: int | None = None
