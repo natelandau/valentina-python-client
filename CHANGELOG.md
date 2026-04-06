@@ -1,3 +1,27 @@
+## v1.19.0 (2026-04-06)
+
+### Feat
+
+- add CharacterDetail model with include parameter (#59)
+- add X-Request-Id support to client (#57)
+- **trait**: support count_based_cost_multiplier
+- **trait**: add is_rollable field and filter support (#55)
+- **users**: add DiscordProfileUpdate model
+- migrate werewolf gifts/rites to trait model (#54)
+
+### Fix
+
+- **blueprint**: add hunter edge type to subcategory model
+- **blueprint**: update models to match api
+- **dictionary**: update fields
+- **trait**: simplify the trait model
+
+### Refactor
+
+- **models**: rename fields to match API
+- rename category and subcategory fields to match API (#60)
+- **blueprint**: flatten endpoint hierarchy to match upstream API (#56)
+
 ## v1.18.1 (2026-03-22)
 
 ### Fix
