@@ -65,7 +65,7 @@ repos:
         entry: yamllint --strict --config-file .yamllint.yml
 
   - repo: "https://github.com/astral-sh/ruff-pre-commit"
-    rev: v0.15.6
+    rev: v0.15.9
     hooks:
       - id: ruff-check
       - id: ruff-format
@@ -73,7 +73,7 @@ repos:
         exclude: ^src/vclient/_sync/
 
   - repo: "https://github.com/adhtruong/mirrors-typos"
-    rev: v1.44.0
+    rev: v1.45.0
     hooks:
       - id: typos
         args: ["--force-exclude"]
@@ -85,7 +85,7 @@ repos:
       - id: gitleaks
 
   - repo: "https://github.com/python-jsonschema/check-jsonschema"
-    rev: 0.37.0
+    rev: 0.37.1
     hooks:
       - id: check-github-workflows
         args: ["--verbose"]

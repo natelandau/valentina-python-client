@@ -5,9 +5,12 @@ from __future__ import annotations
 import datetime
 import re
 import secrets
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
+
+if TYPE_CHECKING:
+    from polyfactory.factories.pydantic_factory import ModelFactory
 
 from vclient.constants import REQUEST_ID_HEADER
 from vclient.models import (
@@ -88,7 +91,7 @@ from vclient.testing._factories import (
 )
 from vclient.testing._routes import LIST, NO_CONTENT, PAGINATED, RAW_JSON, Routes, RouteSpec
 
-_FACTORY_MAP: dict[type, type] = {
+_FACTORY_MAP: dict[type, type[ModelFactory]] = {
     Asset: AssetFactory,
     BulkAssignTraitResponse: BulkAssignTraitResponseFactory,
     Campaign: CampaignFactory,
@@ -201,8 +204,11 @@ class _Route:
         if self.style == RAW_JSON:
             return httpx.Response(status_code=200, json={})
 
-        factory = _FACTORY_MAP[self.model_class]  # type: ignore[index]
-        instance = factory.build()  # type: ignore[unresolved-attribute]
+        if self.model_class is None:
+            msg = f"model_class required for style {self.style}"
+            raise RuntimeError(msg)
+        factory = _FACTORY_MAP[self.model_class]
+        instance = factory.build()
         instance_data = instance.model_dump(mode="json")
 
         if self.style == LIST:
