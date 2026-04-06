@@ -61,10 +61,10 @@ Response from `bulk_assign()`. Contains results grouped by outcome.
 | `initial_cost`                | `int`                    | XP cost to acquire                     |
 | `upgrade_cost`                | `int`                    | XP cost per upgrade                    |
 | `count_based_cost_multiplier` | `int \| None`            | Count-based cost multiplier for traits |
-| `parent_category_id`          | `str`                    | Parent category ID                     |
-| `parent_category_name`        | `str \| None`            | Parent category name                   |
-| `trait_subcategory_id`        | `str \| None`            | Trait subcategory ID                   |
-| `trait_subcategory_name`      | `str \| None`            | Trait subcategory name                 |
+| `category_id`                 | `str`                    | Category ID                            |
+| `category_name`               | `str \| None`            | Category name                          |
+| `subcategory_id`              | `str \| None`            | Subcategory ID                         |
+| `subcategory_name`            | `str \| None`            | Subcategory name                       |
 | `pool`                        | `str \| None`            | Traits that contribute to the pool     |
 | `opposing_pool`               | `str \| None`            | Traits to counter this trait           |
 | `system`                      | `str \| None`            | System rules                           |

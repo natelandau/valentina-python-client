@@ -59,8 +59,8 @@ Subcategory within a trait category. Groups related traits together, like "Allie
 | `requires_parent`             | `bool`                 | Whether subcategory must be added before traits |
 | `pool`                        | `str \| None`          | Dice pool description                           |
 | `system`                      | `str \| None`          | System/mechanical rules                         |
-| `parent_category_id`          | `str`                  | Parent category ID                              |
-| `parent_category_name`        | `str`                  | Parent category name                            |
+| `category_id`                 | `str`                  | Category ID                                     |
+| `category_name`               | `str`                  | Category name                                   |
 | `sheet_section_id`            | `str`                  | Sheet section ID                                |
 | `sheet_section_name`          | `str`                  | Sheet section name                              |
 | `hunter_edge_type`            | `str \| None`          | Hunter edge type (ASSETS, APTITUDES, etc)       |
