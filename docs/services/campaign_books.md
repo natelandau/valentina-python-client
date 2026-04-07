@@ -20,13 +20,33 @@ books = books_service(user_id="USER_ID", campaign_id="CAMPAIGN_ID", company_id="
 
 ### CRUD Operations
 
-| Method                                  | Returns        | Description              |
-| --------------------------------------- | -------------- | ------------------------ |
-| `get(book_id)`                          | `CampaignBook` | Get a book by ID         |
-| `create(BookCreate, **kwargs)`          | `CampaignBook` | Create a new book        |
-| `update(book_id, BookUpdate, **kwargs)` | `CampaignBook` | Update a book            |
-| `delete(book_id)`                       | `None`         | Delete a book            |
-| `renumber(book_id, number)`             | `CampaignBook` | Change a book's position |
+| Method                                        | Returns              | Description                                                                    |
+| --------------------------------------------- | -------------------- | ------------------------------------------------------------------------------ |
+| `get(book_id, *, include=None)`               | `CampaignBookDetail` | Get a book by ID, optionally embedding `chapters`, `notes`, or `assets`        |
+| `create(BookCreate, **kwargs)`                | `CampaignBook`       | Create a new book                                                              |
+| `update(book_id, BookUpdate, **kwargs)`       | `CampaignBook`       | Update a book                                                                  |
+| `delete(book_id)`                             | `None`               | Delete a book                                                                  |
+| `renumber(book_id, number)`                   | `CampaignBook`       | Change a book's position                                                       |
+
+### Embedding Child Resources
+
+The `get()` method accepts an optional `include` parameter that embeds child resources directly in the response, eliminating the need for follow-up requests.
+
+**Valid values** (`BookInclude` type alias): `"chapters"`, `"notes"`, `"assets"`
+
+When a value is not included in the request, the corresponding field on `CampaignBookDetail` is `None`. When requested, the field contains a list of fully populated objects — the same DTOs returned by the dedicated child endpoints.
+
+```python
+from vclient import books_service
+
+books = books_service(user_id="...", campaign_id="...", company_id="...")
+
+# Embed chapters and notes in a single request
+book = await books.get("book_id", include=["chapters", "notes"])
+assert book.chapters is not None  # list[CampaignChapter]
+assert book.notes is not None     # list[Note]
+assert book.assets is None        # not requested
+```
 
 ### Pagination
 

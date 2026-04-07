@@ -5,7 +5,7 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError, RequestValidationError
-from vclient.models import Asset, CampaignBook, Note, PaginatedResponse
+from vclient.models import Asset, CampaignBook, CampaignBookDetail, Note, PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 
@@ -231,6 +231,61 @@ class TestBooksServiceGet:
         # When/Then: Getting the book raises NotFoundError
         with pytest.raises(NotFoundError):
             await vclient.books(user_id, campaign_id, company_id=company_id).get(book_id)
+
+    @respx.mock
+    async def test_get_book_without_include_returns_detail_with_none_embeds(
+        self, vclient, base_url, book_response_data
+    ):
+        """Verify get() without include returns CampaignBookDetail with all embeds None."""
+        # Given: A mocked book endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        book_id = book_response_data["id"]
+        route = respx.get(
+            f"{base_url}{Endpoints.CAMPAIGN_BOOK.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, book_id=book_id)}"
+        ).respond(200, json=book_response_data)
+
+        # When: Getting the book without include
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).get(book_id)
+
+        # Then: Returns CampaignBookDetail with None embedded fields
+        assert route.called
+        assert isinstance(result, CampaignBookDetail)
+        assert isinstance(result, CampaignBook)
+        assert result.chapters is None
+        assert result.notes is None
+        assert result.assets is None
+
+    @respx.mock
+    async def test_get_book_with_include_sends_repeated_query_params(
+        self, vclient, base_url, book_response_data
+    ):
+        """Verify get(include=[...]) sends repeated include query params and parses embeds."""
+        # Given: A mocked book endpoint with embedded resources in response
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        book_id = book_response_data["id"]
+        payload = {**book_response_data, "chapters": [], "notes": []}
+        route = respx.get(
+            f"{base_url}{Endpoints.CAMPAIGN_BOOK.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, book_id=book_id)}"
+        ).respond(200, json=payload)
+
+        # When: Getting the book with include params
+        result = await vclient.books(user_id, campaign_id, company_id=company_id).get(
+            book_id, include=["chapters", "notes"]
+        )
+
+        # Then: Request contains repeated include params and embeds are parsed
+        assert route.called
+        sent_url = str(route.calls.last.request.url)
+        assert "include=chapters" in sent_url
+        assert "include=notes" in sent_url
+        assert isinstance(result, CampaignBookDetail)
+        assert result.chapters == []
+        assert result.notes == []
+        assert result.assets is None
 
 
 class TestBooksServiceCreate:

@@ -881,3 +881,53 @@ class TestUserDenyDTO:
 
         # Then: All fields are present
         assert data == {"requesting_user_id": "requester123"}
+
+
+_VALID_USER_PAYLOAD = {
+    "id": "user_1",
+    "date_created": "2024-01-15T10:30:00Z",
+    "date_modified": "2024-01-15T10:30:00Z",
+    "username": "testuser",
+    "email": "test@example.com",
+    "role": "PLAYER",
+    "company_id": "company_1",
+}
+
+
+class TestUserDetail:
+    """Tests for UserDetail model."""
+
+    def test_user_detail_defaults_embeds_to_none(self) -> None:
+        """Verify all embed fields default to None when not provided."""
+        from vclient.models import UserDetail
+
+        detail = UserDetail.model_validate(_VALID_USER_PAYLOAD)
+        assert detail.quickrolls is None
+        assert detail.notes is None
+        assert detail.assets is None
+        assert detail.characters is None
+        assert isinstance(detail, User)
+
+    def test_user_detail_accepts_embedded_lists(self) -> None:
+        """Verify UserDetail accepts embedded list resources."""
+        from vclient.models import UserDetail
+
+        payload = _VALID_USER_PAYLOAD | {
+            "quickrolls": [],
+            "notes": [],
+            "assets": [],
+            "characters": [],
+        }
+        detail = UserDetail.model_validate(payload)
+        assert detail.quickrolls == []
+        assert detail.notes == []
+        assert detail.assets == []
+        assert detail.characters == []
+
+    def test_user_detail_rejects_wrong_embed_type(self) -> None:
+        """Verify UserDetail rejects non-list embed values."""
+        from vclient.models import UserDetail
+
+        payload = _VALID_USER_PAYLOAD | {"quickrolls": "not-a-list"}
+        with pytest.raises(PydanticValidationError):
+            UserDetail.model_validate(payload)

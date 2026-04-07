@@ -1,16 +1,17 @@
 """Service for interacting with the Campaign Books API."""
 
 import mimetypes
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import DEFAULT_PAGE_LIMIT, BookInclude
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Asset,
     BookCreate,
     BookUpdate,
     CampaignBook,
+    CampaignBookDetail,
     Note,
     NoteCreate,
     NoteUpdate,
@@ -125,23 +126,34 @@ class BooksService(BaseService):
         ):
             yield CampaignBook.model_validate(item)
 
-    async def get(self, book_id: str) -> CampaignBook:
+    async def get(
+        self,
+        book_id: str,
+        *,
+        include: Sequence[BookInclude] | None = None,
+    ) -> CampaignBookDetail:
         """Retrieve detailed information about a specific campaign book.
 
-        Fetches the book including its notes and assets.
+        Fetches the book and optionally embeds child resources directly in the
+        response, avoiding follow-up requests.
 
         Args:
             book_id: The ID of the book to retrieve.
+            include: Child resources to embed in the response. Valid values are
+                ``"chapters"``, ``"notes"``, and ``"assets"``.
 
         Returns:
-            The CampaignBook object with full details.
+            The CampaignBookDetail object with full details and any requested embeds.
 
         Raises:
             NotFoundError: If the book does not exist.
             AuthorizationError: If you don't have access.
         """
-        response = await self._get(self._format_endpoint(Endpoints.CAMPAIGN_BOOK, book_id=book_id))
-        return CampaignBook.model_validate(response.json())
+        response = await self._get(
+            self._format_endpoint(Endpoints.CAMPAIGN_BOOK, book_id=book_id),
+            params=self._build_params(include=list(include) if include else None),
+        )
+        return CampaignBookDetail.model_validate(response.json())
 
     async def create(
         self,

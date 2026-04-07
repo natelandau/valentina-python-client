@@ -199,6 +199,68 @@ class TestChaptersServiceIterAll:
         assert chapters[1].name == "Chapter 2"
 
 
+class TestChaptersServiceGetWithInclude:
+    """Tests for ChaptersService.get() with include parameter."""
+
+    @respx.mock
+    async def test_get_chapter_without_include_returns_detail_with_none_embeds(
+        self, vclient, base_url, chapter_response_data
+    ):
+        """Verify get() without include returns CampaignChapterDetail with all embeds None."""
+        from vclient.models import CampaignChapterDetail
+
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        book_id = "book123"
+        chapter_id = chapter_response_data["id"]
+        route = respx.get(
+            f"{base_url}{Endpoints.BOOK_CHAPTER.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, book_id=book_id, chapter_id=chapter_id)}"
+        ).respond(200, json=chapter_response_data)
+
+        # When: Getting the chapter without include
+        result = await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).get(
+            chapter_id
+        )
+
+        # Then: Returns CampaignChapterDetail with embeds all None
+        assert route.called
+        assert isinstance(result, CampaignChapterDetail)
+        assert result.notes is None
+        assert result.assets is None
+
+    @respx.mock
+    async def test_get_chapter_with_include_sends_repeated_query_params(
+        self, vclient, base_url, chapter_response_data
+    ):
+        """Verify get(include=[...]) sends repeated include query params and parses embeds."""
+        from vclient.models import CampaignChapterDetail
+
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        book_id = "book123"
+        chapter_id = chapter_response_data["id"]
+        payload = {**chapter_response_data, "notes": [], "assets": []}
+        route = respx.get(
+            f"{base_url}{Endpoints.BOOK_CHAPTER.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, book_id=book_id, chapter_id=chapter_id)}"
+        ).respond(200, json=payload)
+
+        # When: Getting the chapter with include
+        result = await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).get(
+            chapter_id, include=["notes", "assets"]
+        )
+
+        # Then: Request sent with repeated include params and embeds are parsed
+        assert route.called
+        sent_url = str(route.calls.last.request.url)
+        assert "include=notes" in sent_url
+        assert "include=assets" in sent_url
+        assert isinstance(result, CampaignChapterDetail)
+        assert result.notes == []
+        assert result.assets == []
+
+
 class TestChaptersServiceGet:
     """Tests for ChaptersService.get method."""
 

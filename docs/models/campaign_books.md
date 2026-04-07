@@ -18,3 +18,15 @@ Models for campaign books, which organize campaign content into sequentially num
 | `number`        | `int`         | Position in campaign    |
 | `campaign_id`   | `str`         | Parent campaign ID      |
 | `asset_ids`     | `list[str]`   | Associated asset IDs    |
+
+## CampaignBookDetail
+
+Subclass of `CampaignBook` returned by `get()` when the `include` query parameter is used. All base fields are inherited; the three embed fields default to `None` when the corresponding resource was not requested.
+
+Use the `BookInclude` type alias from `vclient.constants` to get editor autocompletion for valid include values.
+
+| Field      | Type                       | Description                                        |
+| ---------- | -------------------------- | -------------------------------------------------- |
+| `chapters` | `list[CampaignChapter] \| None` | Embedded chapters, present only when requested |
+| `notes`    | `list[Note] \| None`       | Embedded notes, present only when requested        |
+| `assets`   | `list[Asset] \| None`      | Embedded assets, present only when requested       |

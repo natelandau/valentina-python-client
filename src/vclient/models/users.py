@@ -6,6 +6,8 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 
 from vclient.constants import UserRole
+from vclient.models.characters import Character
+from vclient.models.shared import Asset, Note
 
 # -----------------------------------------------------------------------------
 # Nested/Shared Models
@@ -94,6 +96,30 @@ class User(BaseModel):
     asset_ids: list[str] = Field(default_factory=list)
     lifetime_xp: int = 0
     lifetime_cool_points: int = 0
+
+
+class UserDetail(User):
+    """User response with optional embedded child resources.
+
+    Returned by the single-user endpoint when the ``include`` query parameter
+    is used. Absent resources default to ``None``; present resources are full arrays.
+
+    Note: ``assets`` returns assets attached to the user (not assets the user
+    uploaded), and ``characters`` returns only characters the user plays.
+    """
+
+    quickrolls: list["Quickroll"] | None = Field(
+        default=None, description="Embedded quickrolls, when requested via include."
+    )
+    notes: list[Note] | None = Field(
+        default=None, description="Embedded notes attached to the user."
+    )
+    assets: list[Asset] | None = Field(
+        default=None, description="Embedded assets attached to the user."
+    )
+    characters: list[Character] | None = Field(
+        default=None, description="Embedded characters the user plays."
+    )
 
 
 # -----------------------------------------------------------------------------
@@ -205,6 +231,9 @@ class Quickroll(BaseModel):
     trait_ids: list[str] = Field(default_factory=list)
 
 
+UserDetail.model_rebuild()
+
+
 class QuickrollCreate(BaseModel):
     """Request body for creating a new quickroll.
 
@@ -253,6 +282,7 @@ __all__ = [
     "QuickrollUpdate",
     "User",
     "UserCreate",
+    "UserDetail",
     "UserMergeDTO",
     "UserRegisterDTO",
     "UserUpdate",

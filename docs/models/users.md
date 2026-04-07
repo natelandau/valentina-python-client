@@ -27,6 +27,24 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `lifetime_xp`          | `int`                      | Lifetime XP earned                            |
 | `lifetime_cool_points` | `int`                      | Lifetime cool points earned                   |
 
+## UserDetail
+
+Subclass of `User` returned by `get()` when the `include` query parameter is used. All base fields are inherited; the four embed fields default to `None` when the corresponding resource was not requested.
+
+Use the `UserInclude` type alias from `vclient.constants` to get editor autocompletion for valid include values.
+
+!!! note "Semantic nuances"
+
+    - `assets` returns assets **attached to** the user, not assets the user uploaded.
+    - `characters` returns only the characters the user **plays** (not characters they created for others).
+
+| Field        | Type                    | Description                                                     |
+| ------------ | ----------------------- | --------------------------------------------------------------- |
+| `quickrolls` | `list[Quickroll] \| None` | Embedded quickrolls, present only when requested              |
+| `notes`      | `list[Note] \| None`    | Embedded notes, present only when requested                     |
+| `assets`     | `list[Asset] \| None`   | Assets attached to the user, present only when requested        |
+| `characters` | `list[Character] \| None` | Characters the user plays, present only when requested        |
+
 ## CampaignExperience
 
 | Field         | Type  | Description        |

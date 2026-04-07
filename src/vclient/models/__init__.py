@@ -5,6 +5,7 @@ from .books import (
     BookCreate,
     BookUpdate,
     CampaignBook,
+    CampaignBookDetail,
     _BookRenumber as _BookRenumber,
 )
 from .campaigns import (
@@ -14,6 +15,7 @@ from .campaigns import (
 )
 from .chapters import (
     CampaignChapter,
+    CampaignChapterDetail,
     ChapterCreate,
     ChapterUpdate,
     _ChapterRenumber as _ChapterRenumber,
@@ -126,6 +128,7 @@ from .users import (
     UserApproveDTO,
     UserCreate,
     UserDenyDTO,
+    UserDetail,
     UserMergeDTO,
     UserRegisterDTO,
     UserUpdate,
@@ -141,7 +144,9 @@ __all__ = [
     "BulkAssignTraitSuccess",
     "Campaign",
     "CampaignBook",
+    "CampaignBookDetail",
     "CampaignChapter",
+    "CampaignChapterDetail",
     "CampaignCreate",
     "CampaignExperience",
     "CampaignUpdate",
@@ -215,6 +220,7 @@ __all__ = [
     "UserApproveDTO",
     "UserCreate",
     "UserDenyDTO",
+    "UserDetail",
     "UserMergeDTO",
     "UserRegisterDTO",
     "UserUpdate",

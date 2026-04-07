@@ -1,14 +1,15 @@
 """Service for interacting with the Campaign Books Chapters API."""
 
 import mimetypes
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import DEFAULT_PAGE_LIMIT, ChapterInclude
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Asset,
     CampaignChapter,
+    CampaignChapterDetail,
     ChapterCreate,
     ChapterUpdate,
     Note,
@@ -80,12 +81,34 @@ class ChaptersService(BaseService):
         ):
             yield CampaignChapter.model_validate(item)
 
-    async def get(self, chapter_id: str) -> CampaignChapter:
-        """Retrieve a specific campaign book chapter."""
+    async def get(
+        self,
+        chapter_id: str,
+        *,
+        include: Sequence[ChapterInclude] | None = None,
+    ) -> CampaignChapterDetail:
+        """Retrieve detailed information about a specific campaign book chapter.
+
+        Fetches the chapter and optionally embeds child resources directly in the
+        response, avoiding follow-up requests.
+
+        Args:
+            chapter_id: The ID of the chapter to retrieve.
+            include: Child resources to embed in the response. Valid values are
+                ``"notes"`` and ``"assets"``.
+
+        Returns:
+            The CampaignChapterDetail object with full details and any requested embeds.
+
+        Raises:
+            NotFoundError: If the chapter does not exist.
+            AuthorizationError: If you don't have access.
+        """
         response = await self._get(
-            self._format_endpoint(Endpoints.BOOK_CHAPTER, chapter_id=chapter_id)
+            self._format_endpoint(Endpoints.BOOK_CHAPTER, chapter_id=chapter_id),
+            params=self._build_params(include=list(include) if include else None),
         )
-        return CampaignChapter.model_validate(response.json())
+        return CampaignChapterDetail.model_validate(response.json())
 
     async def create(
         self,

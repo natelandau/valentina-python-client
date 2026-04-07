@@ -18,13 +18,39 @@ users = users_service(company_id="COMPANY_ID")
 
 ### CRUD Operations
 
-| Method                                    | Returns | Description            |
-| ----------------------------------------- | ------- | ---------------------- |
-| `get(user_id)`                            | `User`  | Retrieve a user by ID  |
-| `create(request=None, **kwargs)`          | `User`  | Create a new user      |
-| `register(request=None, **kwargs)`        | `User`  | Register via SSO       |
-| `update(user_id, request=None, **kwargs)` | `User`  | Update user properties |
-| `delete(user_id, requesting_user_id)`     | `None`  | Delete a user          |
+| Method                                    | Returns      | Description                                                                              |
+| ----------------------------------------- | ------------ | ---------------------------------------------------------------------------------------- |
+| `get(user_id, *, include=None)`           | `UserDetail` | Retrieve a user by ID, optionally embedding `quickrolls`, `notes`, `assets`, `characters`|
+| `create(request=None, **kwargs)`          | `User`       | Create a new user                                                                        |
+| `register(request=None, **kwargs)`        | `User`       | Register via SSO                                                                         |
+| `update(user_id, request=None, **kwargs)` | `User`       | Update user properties                                                                   |
+| `delete(user_id, requesting_user_id)`     | `None`       | Delete a user                                                                            |
+
+### Embedding Child Resources
+
+The `get()` method accepts an optional `include` parameter that embeds child resources directly in the response, eliminating the need for follow-up requests.
+
+**Valid values** (`UserInclude` type alias): `"quickrolls"`, `"notes"`, `"assets"`, `"characters"`
+
+!!! note "Semantic nuances"
+
+    - `"assets"` returns assets **attached to** the user, not assets the user uploaded.
+    - `"characters"` returns only the characters the user **plays** (not characters they created for others).
+
+When a value is not included in the request, the corresponding field on `UserDetail` is `None`. When requested, the field contains a list of fully populated objects — the same DTOs returned by the dedicated child endpoints.
+
+```python
+from vclient import users_service
+
+users = users_service(company_id="...")
+
+# Embed quickrolls and characters in a single request
+user = await users.get("user_id", include=["quickrolls", "characters"])
+assert user.quickrolls is not None  # list[Quickroll]
+assert user.characters is not None  # list[Character] — only characters the user plays
+assert user.notes is None           # not requested
+assert user.assets is None          # not requested
+```
 
 ### Pagination Methods
 

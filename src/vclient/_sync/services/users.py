@@ -2,11 +2,11 @@
 """Service for interacting with the Users API."""
 
 import mimetypes
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import TYPE_CHECKING
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT, UserRole
+from vclient.constants import DEFAULT_PAGE_LIMIT, UserInclude, UserRole
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Asset,
@@ -23,6 +23,7 @@ from vclient.models import (
     UserApproveDTO,
     UserCreate,
     UserDenyDTO,
+    UserDetail,
     UserMergeDTO,
     UserRegisterDTO,
     UserUpdate,
@@ -251,23 +252,31 @@ class SyncUsersService(SyncBaseService):
         ):
             yield User.model_validate(item)
 
-    def get(self, user_id: str) -> User:
+    def get(self, user_id: str, *, include: Sequence[UserInclude] | None = None) -> UserDetail:
         """Retrieve detailed information about a specific user.
 
-        Fetches the user including their role, experience, and Discord profile.
+        Fetches the user and optionally embeds child resources directly in the
+        response, avoiding follow-up requests.
 
         Args:
             user_id: The ID of the user to retrieve.
+            include: Child resources to embed in the response. Valid values are
+                ``"quickrolls"``, ``"notes"``, ``"assets"``, and ``"characters"``.
+                ``"assets"`` returns assets attached to the user (not assets the user
+                uploaded). ``"characters"`` returns only characters the user plays.
 
         Returns:
-            The User object with full details.
+            The UserDetail object with full details and any requested embeds.
 
         Raises:
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have access to the company.
         """
-        response = self._get(self._format_endpoint(Endpoints.USER, user_id=user_id))
-        return User.model_validate(response.json())
+        response = self._get(
+            self._format_endpoint(Endpoints.USER, user_id=user_id),
+            params=self._build_params(include=list(include) if include else None),
+        )
+        return UserDetail.model_validate(response.json())
 
     def create(self, request: UserCreate | None = None, **kwargs) -> User:
         """Create a new user within a company.

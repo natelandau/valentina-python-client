@@ -10,7 +10,9 @@ from vclient.models import (
     BulkAssignTraitResponse,
     Campaign,
     CampaignBook,
+    CampaignBookDetail,
     CampaignChapter,
+    CampaignChapterDetail,
     Character,
     CharacterConcept,
     CharacterDetail,
@@ -37,6 +39,7 @@ from vclient.models import (
     TraitCategory,
     TraitSubcategory,
     User,
+    UserDetail,
     VampireClan,
     WerewolfAuspice,
     WerewolfTribe,
@@ -119,7 +122,7 @@ class Routes:
     # Users
     USERS_LIST = RouteSpec("GET", Endpoints.USERS, PAGINATED, User)
     USERS_UNAPPROVED_LIST = RouteSpec("GET", Endpoints.USERS_UNAPPROVED_LIST, PAGINATED, User)
-    USERS_GET = RouteSpec("GET", Endpoints.USER, SINGLE, User)
+    USERS_GET = RouteSpec("GET", Endpoints.USER, SINGLE, UserDetail)
     USERS_CREATE = RouteSpec("POST", Endpoints.USERS, SINGLE, User)
     USERS_UPDATE = RouteSpec("PATCH", Endpoints.USER, SINGLE, User)
     USERS_DELETE = RouteSpec("DELETE", Endpoints.USER, NO_CONTENT, None)
@@ -186,7 +189,7 @@ class Routes:
 
     # Books
     BOOKS_LIST = RouteSpec("GET", Endpoints.CAMPAIGN_BOOKS, PAGINATED, CampaignBook)
-    BOOKS_GET = RouteSpec("GET", Endpoints.CAMPAIGN_BOOK, SINGLE, CampaignBook)
+    BOOKS_GET = RouteSpec("GET", Endpoints.CAMPAIGN_BOOK, SINGLE, CampaignBookDetail)
     BOOKS_CREATE = RouteSpec("POST", Endpoints.CAMPAIGN_BOOKS, SINGLE, CampaignBook)
     BOOKS_UPDATE = RouteSpec("PATCH", Endpoints.CAMPAIGN_BOOK, SINGLE, CampaignBook)
     BOOKS_DELETE = RouteSpec("DELETE", Endpoints.CAMPAIGN_BOOK, NO_CONTENT, None)
@@ -207,7 +210,7 @@ class Routes:
 
     # Chapters
     CHAPTERS_LIST = RouteSpec("GET", Endpoints.BOOK_CHAPTERS, PAGINATED, CampaignChapter)
-    CHAPTERS_GET = RouteSpec("GET", Endpoints.BOOK_CHAPTER, SINGLE, CampaignChapter)
+    CHAPTERS_GET = RouteSpec("GET", Endpoints.BOOK_CHAPTER, SINGLE, CampaignChapterDetail)
     CHAPTERS_CREATE = RouteSpec("POST", Endpoints.BOOK_CHAPTERS, SINGLE, CampaignChapter)
     CHAPTERS_UPDATE = RouteSpec("PATCH", Endpoints.BOOK_CHAPTER, SINGLE, CampaignChapter)
     CHAPTERS_DELETE = RouteSpec("DELETE", Endpoints.BOOK_CHAPTER, NO_CONTENT, None)
