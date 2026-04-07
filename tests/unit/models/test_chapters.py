@@ -1,14 +1,52 @@
 """Tests for vclient.models.chapters."""
 
-import pytest
-from pydantic import ValidationError as PydanticValidationError
+from datetime import UTC, datetime
 
+import pytest
+from pydantic import ValidationError, ValidationError as PydanticValidationError
+
+from vclient.models import CampaignChapter, CampaignChapterDetail
 from vclient.models.chapters import (
-    CampaignChapter,
     ChapterCreate,
     ChapterUpdate,
     _ChapterRenumber,
 )
+
+
+def _chapter_payload() -> dict:
+    return {
+        "id": "chap_1",
+        "date_created": datetime.now(UTC).isoformat(),
+        "date_modified": datetime.now(UTC).isoformat(),
+        "name": "Chapter 1",
+        "description": None,
+        "asset_ids": [],
+        "number": 1,
+        "book_id": "book_1",
+    }
+
+
+def test_campaign_chapter_detail_defaults_embeds_to_none() -> None:
+    """Verify embed fields default to None and subclass relationship holds."""
+    detail = CampaignChapterDetail.model_validate(_chapter_payload())
+    assert detail.notes is None
+    assert detail.assets is None
+    assert isinstance(detail, CampaignChapter)
+
+
+def test_campaign_chapter_detail_accepts_embedded_lists() -> None:
+    """Verify embedded lists are accepted and parsed correctly."""
+    payload = _chapter_payload() | {"notes": [], "assets": []}
+    detail = CampaignChapterDetail.model_validate(payload)
+    assert detail.notes == []
+    assert detail.assets == []
+
+
+def test_campaign_chapter_detail_rejects_wrong_embed_type() -> None:
+    """Verify a non-list value for an embed field raises ValidationError."""
+    payload = _chapter_payload() | {"notes": "not-a-list"}
+    with pytest.raises(ValidationError):
+        CampaignChapterDetail.model_validate(payload)
 
 
 class TestCampaignChapter:

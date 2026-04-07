@@ -15,6 +15,7 @@ from .campaigns import (
 )
 from .chapters import (
     CampaignChapter,
+    CampaignChapterDetail,
     ChapterCreate,
     ChapterUpdate,
     _ChapterRenumber as _ChapterRenumber,
@@ -144,6 +145,7 @@ __all__ = [
     "CampaignBook",
     "CampaignBookDetail",
     "CampaignChapter",
+    "CampaignChapterDetail",
     "CampaignCreate",
     "CampaignExperience",
     "CampaignUpdate",
