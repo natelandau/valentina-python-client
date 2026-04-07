@@ -1,3 +1,10 @@
+## v1.20.0 (2026-04-07)
+
+### Feat
+
+- **companies**: add permission_recoup_xp setting (#62)
+- support include query param on book, chapter, user get (#61)
+
 ## v1.19.0 (2026-04-06)
 
 ### Feat
