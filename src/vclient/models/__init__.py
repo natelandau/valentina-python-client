@@ -5,6 +5,7 @@ from .books import (
     BookCreate,
     BookUpdate,
     CampaignBook,
+    CampaignBookDetail,
     _BookRenumber as _BookRenumber,
 )
 from .campaigns import (
@@ -141,6 +142,7 @@ __all__ = [
     "BulkAssignTraitSuccess",
     "Campaign",
     "CampaignBook",
+    "CampaignBookDetail",
     "CampaignChapter",
     "CampaignCreate",
     "CampaignExperience",

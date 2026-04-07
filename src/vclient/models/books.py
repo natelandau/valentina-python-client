@@ -4,6 +4,9 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from vclient.models.chapters import CampaignChapter
+from vclient.models.shared import Asset, Note
+
 
 class CampaignBook(BaseModel):
     """Response model for a campaign book.
@@ -19,6 +22,25 @@ class CampaignBook(BaseModel):
     asset_ids: list[str] = Field(default_factory=list, description="List of associated asset IDs.")
     number: int = Field(..., description="Book number within the campaign.")
     campaign_id: str = Field(..., description="ID of the parent campaign.")
+
+
+class CampaignBookDetail(CampaignBook):
+    """Campaign book response with optional embedded child resources.
+
+    Returned by the single-book endpoint when the ``include`` query parameter
+    is used. Absent resources default to ``None``; present resources are full arrays
+    of the same DTOs returned by the dedicated child endpoints.
+    """
+
+    chapters: list[CampaignChapter] | None = Field(
+        default=None, description="Embedded chapters, when requested via include."
+    )
+    notes: list[Note] | None = Field(
+        default=None, description="Embedded notes, when requested via include."
+    )
+    assets: list[Asset] | None = Field(
+        default=None, description="Embedded assets, when requested via include."
+    )
 
 
 class BookCreate(BaseModel):
@@ -60,5 +82,6 @@ __all__ = [
     "BookCreate",
     "BookUpdate",
     "CampaignBook",
+    "CampaignBookDetail",
     "_BookRenumber",
 ]
