@@ -9,7 +9,9 @@ from vclient.models import (
     BulkAssignTraitSuccess,
     Campaign,
     CampaignBook,
+    CampaignBookDetail,
     CampaignChapter,
+    CampaignChapterDetail,
     Character,
     CharacterConcept,
     CharacterDetail,
@@ -40,6 +42,7 @@ from vclient.models import (
     TraitCategory,
     TraitSubcategory,
     User,
+    UserDetail,
     VampireClan,
     WerewolfAuspice,
     WerewolfTribe,
@@ -78,8 +81,18 @@ class CampaignBookFactory(ModelFactory[CampaignBook]):
     __use_defaults__ = True
 
 
+class CampaignBookDetailFactory(ModelFactory[CampaignBookDetail]):
+    __model__ = CampaignBookDetail
+    __use_defaults__ = True
+
+
 class CampaignChapterFactory(ModelFactory[CampaignChapter]):
     __model__ = CampaignChapter
+    __use_defaults__ = True
+
+
+class CampaignChapterDetailFactory(ModelFactory[CampaignChapterDetail]):
+    __model__ = CampaignChapterDetail
     __use_defaults__ = True
 
 
@@ -246,6 +259,12 @@ class UserFactory(ModelFactory[User]):
     role = "PLAYER"
 
 
+class UserDetailFactory(ModelFactory[UserDetail]):
+    __model__ = UserDetail
+    __use_defaults__ = True
+    role = "PLAYER"
+
+
 class VampireClanFactory(ModelFactory[VampireClan]):
     __model__ = VampireClan
     __use_defaults__ = True
@@ -266,7 +285,9 @@ __all__ = [
     "BulkAssignTraitFailureFactory",
     "BulkAssignTraitResponseFactory",
     "BulkAssignTraitSuccessFactory",
+    "CampaignBookDetailFactory",
     "CampaignBookFactory",
+    "CampaignChapterDetailFactory",
     "CampaignChapterFactory",
     "CampaignExperienceFactory",
     "CampaignFactory",
@@ -300,6 +321,7 @@ __all__ = [
     "TraitCategoryFactory",
     "TraitFactory",
     "TraitSubcategoryFactory",
+    "UserDetailFactory",
     "UserFactory",
     "VampireClanFactory",
     "WerewolfAuspiceFactory",
