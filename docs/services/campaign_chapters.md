@@ -25,13 +25,34 @@ chapters = chapters_service(
 
 ### CRUD Operations
 
-| Method                                        | Returns           | Description                 |
-| --------------------------------------------- | ----------------- | --------------------------- |
-| `get(chapter_id)`                             | `CampaignChapter` | Get a chapter by ID         |
-| `create(ChapterCreate, **kwargs)`             | `CampaignChapter` | Create a new chapter        |
-| `update(chapter_id, ChapterUpdate, **kwargs)` | `CampaignChapter` | Update a chapter            |
-| `delete(chapter_id)`                          | `None`            | Delete a chapter            |
-| `renumber(chapter_id, number)`                | `CampaignChapter` | Change a chapter's position |
+| Method                                           | Returns                 | Description                                                             |
+| ------------------------------------------------ | ----------------------- | ----------------------------------------------------------------------- |
+| `get(chapter_id, *, include=None)`               | `CampaignChapterDetail` | Get a chapter by ID, optionally embedding `notes` or `assets`           |
+| `create(ChapterCreate, **kwargs)`                | `CampaignChapter`       | Create a new chapter                                                    |
+| `update(chapter_id, ChapterUpdate, **kwargs)`    | `CampaignChapter`       | Update a chapter                                                        |
+| `delete(chapter_id)`                             | `None`                  | Delete a chapter                                                        |
+| `renumber(chapter_id, number)`                   | `CampaignChapter`       | Change a chapter's position                                             |
+
+### Embedding Child Resources
+
+The `get()` method accepts an optional `include` parameter that embeds child resources directly in the response, eliminating the need for follow-up requests.
+
+**Valid values** (`ChapterInclude` type alias): `"notes"`, `"assets"`
+
+When a value is not included in the request, the corresponding field on `CampaignChapterDetail` is `None`. When requested, the field contains a list of fully populated objects — the same DTOs returned by the dedicated child endpoints.
+
+```python
+from vclient import chapters_service
+
+chapters = chapters_service(
+    user_id="...", campaign_id="...", book_id="...", company_id="..."
+)
+
+# Embed notes and assets in a single request
+chapter = await chapters.get("chapter_id", include=["notes", "assets"])
+assert chapter.notes is not None   # list[Note]
+assert chapter.assets is not None  # list[Asset]
+```
 
 ### Pagination
 
