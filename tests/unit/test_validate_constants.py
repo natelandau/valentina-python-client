@@ -127,6 +127,7 @@ class TestValidate:
                 "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
                 "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
                 "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+                "PermissionsRecoupXP": ["UNRESTRICTED", "DENIED", "WITHIN_SESSION"],
             },
             "gameplay": {
                 "DiceSize": [4, 6, 8, 10, 20, 100],
@@ -185,6 +186,7 @@ class TestValidate:
                 "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
                 "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
                 "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+                "PermissionsRecoupXP": ["UNRESTRICTED", "DENIED", "WITHIN_SESSION"],
             },
             "gameplay": {
                 "DiceSize": [4, 6, 8, 10, 20, 100],
@@ -243,6 +245,7 @@ class TestValidate:
                 "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
                 "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
                 "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+                "PermissionsRecoupXP": ["UNRESTRICTED", "DENIED", "WITHIN_SESSION"],
             },
             "gameplay": {
                 "DiceSize": [4, 6, 8, 10, 20, 100],
@@ -302,6 +305,7 @@ class TestValidate:
                 "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
                 "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
                 "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+                "PermissionsRecoupXP": ["UNRESTRICTED", "DENIED", "WITHIN_SESSION"],
             },
             "gameplay": {
                 "DiceSize": [4, 6, 8, 10, 20, 100],
@@ -358,6 +362,7 @@ class TestValidate:
                 "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
                 "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
                 "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+                "PermissionsRecoupXP": ["UNRESTRICTED", "DENIED", "WITHIN_SESSION"],
             },
             "gameplay": {
                 "DiceSize": [4, 6, 8, 10, 20, 100],
@@ -414,6 +419,7 @@ class TestValidate:
                 "PermissionManageCampaign": ["UNRESTRICTED", "STORYTELLER"],
                 "PermissionsGrantXP": ["UNRESTRICTED", "PLAYER", "STORYTELLER"],
                 "PermissionsFreeTraitChanges": ["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"],
+                "PermissionsRecoupXP": ["UNRESTRICTED", "DENIED", "WITHIN_SESSION"],
             },
             "gameplay": {
                 "DiceSize": [4, 6, 8, 10, 20, 100],
@@ -446,7 +452,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "21/21 constants in sync" in captured.out
+        assert "22/22 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""

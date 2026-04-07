@@ -59,6 +59,7 @@ HunterCreed = Literal["ENTREPRENEURIAL", "FAITHFUL", "INQUISITIVE", "MARTIAL", "
 HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
+RecoupXPPermission = Literal["UNRESTRICTED", "DENIED", "WITHIN_SESSION"]
 RollResultType = Literal["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"]
 AssetType = Literal["image", "text", "audio", "video", "document", "archive", "other"]
 SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
