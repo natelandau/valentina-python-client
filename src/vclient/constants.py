@@ -38,6 +38,9 @@ AbilityFocus = Literal["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"]
 AutoGenExperienceLevel = Literal["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"]
 CharacterClass = Literal["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"]
 CharacterInclude = Literal["traits", "inventory", "notes", "assets"]
+BookInclude = Literal["chapters", "notes", "assets"]
+ChapterInclude = Literal["notes", "assets"]
+UserInclude = Literal["quickrolls", "notes", "assets", "characters"]
 CharacterInventoryType = Literal[
     "BOOK",
     "CONSUMABLE",

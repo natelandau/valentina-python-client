@@ -66,7 +66,7 @@ class TestConstantMap:
         from vclient import constants
 
         # Client-only Literal types that don't correspond to an API /options value
-        client_only = {"CharacterInclude"}
+        client_only = {"CharacterInclude", "BookInclude", "ChapterInclude", "UserInclude"}
 
         literal_names = [
             name
