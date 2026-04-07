@@ -248,6 +248,57 @@ class TestUsersServiceGet:
         with pytest.raises(NotFoundError):
             await vclient.users(company_id).get(user_id)
 
+    @respx.mock
+    async def test_get_user_without_include_returns_detail_with_none_embeds(
+        self, vclient, base_url, user_response_data
+    ):
+        """Verify get() with no include param returns UserDetail with None embeds."""
+        from vclient.models import UserDetail
+
+        # Given: A mocked user endpoint returning plain user data
+        company_id = "company123"
+        user_id = user_response_data["id"]
+        route = respx.get(
+            f"{base_url}{Endpoints.USER.format(company_id=company_id, user_id=user_id)}"
+        ).respond(200, json=user_response_data)
+
+        # When: Getting the user without include
+        result = await vclient.users(company_id).get(user_id)
+
+        # Then: Returns UserDetail with None embed fields
+        assert route.called
+        assert isinstance(result, UserDetail)
+        assert result.quickrolls is None
+        assert result.notes is None
+        assert result.assets is None
+        assert result.characters is None
+
+    @respx.mock
+    async def test_get_user_with_include_sends_repeated_query_params(
+        self, vclient, base_url, user_response_data
+    ):
+        """Verify get() with include sends repeated query params and populates embeds."""
+        # Given: A mocked endpoint returning user with embedded resources
+        company_id = "company123"
+        user_id = user_response_data["id"]
+        payload = {**user_response_data, "quickrolls": [], "characters": []}
+        route = respx.get(
+            f"{base_url}{Endpoints.USER.format(company_id=company_id, user_id=user_id)}"
+        ).respond(200, json=payload)
+
+        # When: Getting user with include=["quickrolls", "characters"]
+        result = await vclient.users(company_id).get(user_id, include=["quickrolls", "characters"])
+
+        # Then: Request URL contains repeated include params and result has embedded data
+        assert route.called
+        sent_url = str(route.calls.last.request.url)
+        assert "include=quickrolls" in sent_url
+        assert "include=characters" in sent_url
+        assert result.quickrolls == []
+        assert result.characters == []
+        assert result.notes is None
+        assert result.assets is None
+
 
 class TestUsersServiceCreate:
     """Tests for UsersService.create method."""
