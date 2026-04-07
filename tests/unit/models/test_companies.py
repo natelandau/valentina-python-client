@@ -27,6 +27,7 @@ class TestCompanySettings:
         assert settings.permission_manage_campaign is None
         assert settings.permission_grant_xp is None
         assert settings.permission_free_trait_changes is None
+        assert settings.permission_recoup_xp is None
 
     def test_partial_settings(self):
         """Verify partial settings for updates."""
@@ -65,6 +66,17 @@ class TestCompanySettings:
         # When/Then: Creating settings with invalid permission raises error
         with pytest.raises(PydanticValidationError):
             CompanySettings(permission_manage_campaign="INVALID_VALUE")
+
+    @pytest.mark.parametrize("value", ["UNRESTRICTED", "DENIED", "WITHIN_SESSION"])
+    def test_recoup_xp_accepts_valid_values(self, value):
+        """Verify permission_recoup_xp accepts each valid enum value."""
+        settings = CompanySettings(permission_recoup_xp=value)
+        assert settings.permission_recoup_xp == value
+
+    def test_recoup_xp_rejects_invalid_value(self):
+        """Verify permission_recoup_xp rejects values outside the enum."""
+        with pytest.raises(PydanticValidationError):
+            CompanySettings(permission_recoup_xp="INVALID")
 
 
 class TestCompany:

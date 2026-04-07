@@ -10,6 +10,7 @@ from vclient.constants import (
     GrantXPPermission,
     ManageCampaignPermission,
     PermissionLevel,
+    RecoupXPPermission,
 )
 from vclient.models.users import User
 
@@ -26,6 +27,7 @@ class CompanySettings(BaseModel):
     permission_manage_campaign: ManageCampaignPermission | None = None
     permission_grant_xp: GrantXPPermission | None = None
     permission_free_trait_changes: FreeTraitChangesPermission | None = None
+    permission_recoup_xp: RecoupXPPermission | None = None
 
 
 class Company(BaseModel):
