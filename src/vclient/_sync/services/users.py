@@ -124,6 +124,10 @@ class SyncUsersService(SyncBaseService):
     def approve_user(self, user_id: str, role: UserRole, requesting_user_id: str) -> User:
         """Approve an unapproved user and assign them a role.
 
+        The assigned ``role`` is validated through the server-side role-assignment
+        hierarchy — for example, a STORYTELLER cannot approve a user directly to
+        ADMIN, and only ADMIN may approve a user to ADMIN or DEACTIVATED.
+
         Args:
             user_id: The ID of the unapproved user to approve.
             role: The role to assign to the approved user.
@@ -134,7 +138,8 @@ class SyncUsersService(SyncBaseService):
 
         Raises:
             NotFoundError: If the user does not exist.
-            AuthorizationError: If you don't have appropriate access.
+            AuthorizationError: If the requesting user lacks permission to assign
+                the requested role under the hierarchy.
         """
         body = UserApproveDTO(role=role, requesting_user_id=requesting_user_id)
         response = self._post(
@@ -296,6 +301,10 @@ class SyncUsersService(SyncBaseService):
         is optional and is not used for authentication but is included for Discord bot
         integration.
 
+        The initial ``role`` cannot be ``UNAPPROVED`` (use :meth:`register` for SSO
+        onboarding) or ``DEACTIVATED`` (not a creation path); either will surface as
+        ``ValidationError``.
+
         Args:
             request: A UserCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserCreate if request is not provided.
@@ -352,6 +361,14 @@ class SyncUsersService(SyncBaseService):
 
         Only include fields that need to be changed; omitted fields remain unchanged.
 
+        Setting ``role="DEACTIVATED"`` is the canonical way to deactivate a user:
+        the account can no longer log in or act, but their characters, assets, XP,
+        and notes remain intact and manageable by other users. Reactivate by calling
+        this same endpoint with any other valid role. Role changes are subject to a
+        server-side role-assignment hierarchy (e.g. only ADMIN may assign or remove
+        ADMIN/DEACTIVATED) and the server refuses to demote or deactivate the last
+        remaining active admin.
+
         Args:
             user_id: The ID of the user to update.
             request: A UserUpdate model, OR pass fields as keyword arguments.
@@ -365,7 +382,9 @@ class SyncUsersService(SyncBaseService):
 
         Raises:
             NotFoundError: If the user does not exist.
-            AuthorizationError: If you don't have appropriate access.
+            AuthorizationError: If the requesting user lacks permission to make
+                the change or to assign the requested role under the hierarchy.
+            ConflictError: If the change would remove the last active admin.
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
         """

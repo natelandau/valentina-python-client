@@ -438,6 +438,25 @@ class TestUserCreate:
             "requesting_user_id": "requester123",
         }
 
+    def test_deactivated_role_accepted(self):
+        """Verify DEACTIVATED is accepted on UserCreate and UserUpdate and round-trips."""
+        # When: Creating UserCreate and UserUpdate with role DEACTIVATED
+        created = UserCreate(
+            name_first="Test",
+            username="testuser",
+            email="test@example.com",
+            role="DEACTIVATED",
+            requesting_user_id="requester123",
+        )
+        updated = UserUpdate(role="DEACTIVATED", requesting_user_id="requester123")
+
+        # Then: Models accept and round-trip the value (server-side hierarchy rules
+        # are not enforced client-side — that's the server's job)
+        assert created.role == "DEACTIVATED"
+        assert updated.role == "DEACTIVATED"
+        assert created.model_dump(exclude_none=True, mode="json")["role"] == "DEACTIVATED"
+        assert updated.model_dump(exclude_none=True, mode="json")["role"] == "DEACTIVATED"
+
 
 class TestUserUpdate:
     """Tests for UserUpdate model."""
@@ -836,7 +855,7 @@ class TestUserApproveDTO:
     def test_all_roles_accepted(self):
         """Verify all UserRole values are accepted."""
         # When: Creating approve requests with each role
-        for role in ("ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED"):
+        for role in ("ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"):
             request = UserApproveDTO(role=role, requesting_user_id="requester123")
 
             # Then: Role is set correctly
