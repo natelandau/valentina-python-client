@@ -1,3 +1,10 @@
+## v1.20.1 (2026-04-08)
+
+### Fix
+
+- **users**: add DEACTIVATED user role
+- **users**: require requesting_user_id on unapproved list methods
+
 ## v1.20.0 (2026-04-07)
 
 ### Feat
