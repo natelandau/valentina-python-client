@@ -152,12 +152,8 @@ class Character(BaseModel):
     """
 
     id: str = Field(..., description="MongoDB document ObjectID.")
-    date_created: datetime | None = Field(
-        default=None, description="Timestamp when the character was created."
-    )
-    date_modified: datetime | None = Field(
-        default=None, description="Timestamp when the character was last modified."
-    )
+    date_created: datetime
+    date_modified: datetime
     date_killed: datetime | None = Field(
         default=None, description="Timestamp when the character was killed."
     )

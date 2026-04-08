@@ -43,7 +43,7 @@ class Company(BaseModel):
     description: str | None
     email: str
     resources_modified_at: datetime
-    settings: CompanySettings | None
+    settings: CompanySettings
 
 
 class CompanyPermissions(BaseModel):

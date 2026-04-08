@@ -65,13 +65,14 @@ class SyncUsersService(SyncBaseService):
         return endpoint.format(company_id=self._company_id, **kwargs)
 
     def get_unapproved_page(
-        self, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+        self, requesting_user_id: str, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
     ) -> PaginatedResponse[User]:
         """Retrieve a paginated page of unapproved users within a company.
 
         Unapproved users have registered but have not yet been approved by an admin.
 
         Args:
+            requesting_user_id: ID of the user making the request (for permissions).
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
 
@@ -79,34 +80,44 @@ class SyncUsersService(SyncBaseService):
             A PaginatedResponse containing User objects and pagination metadata.
         """
         return self._get_paginated_as(
-            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST), User, limit=limit, offset=offset
+            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST),
+            User,
+            limit=limit,
+            offset=offset,
+            params=self._build_params(requesting_user_id=requesting_user_id),
         )
 
-    def list_all_unapproved(self) -> list[User]:
+    def list_all_unapproved(self, requesting_user_id: str) -> list[User]:
         """Retrieve all unapproved users within a company.
 
         Automatically paginates through all results. Use `get_unapproved_page()` for
         paginated access or `iter_all_unapproved()` for memory-efficient streaming.
 
+        Args:
+            requesting_user_id: ID of the user making the request (for permissions).
+
         Returns:
             A list of all unapproved User objects.
         """
-        return [user for user in self.iter_all_unapproved()]
+        return [user for user in self.iter_all_unapproved(requesting_user_id)]
 
-    def iter_all_unapproved(self, *, limit: int = 100) -> Iterator[User]:
+    def iter_all_unapproved(self, requesting_user_id: str, *, limit: int = 100) -> Iterator[User]:
         """Iterate through all unapproved users within a company.
 
         Yields individual unapproved users, automatically fetching subsequent pages
         until all items have been retrieved.
 
         Args:
+            requesting_user_id: ID of the user making the request (for permissions).
             limit: Items per page (default 100 for efficiency).
 
         Yields:
             Individual User objects.
         """
         for item in self._iter_all_pages(
-            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST), limit=limit
+            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST),
+            limit=limit,
+            params=self._build_params(requesting_user_id=requesting_user_id),
         ):
             yield User.model_validate(item)
 

@@ -183,6 +183,8 @@ class TestSyncClientFullSheet:
         response_data = {
             "character": {
                 "id": "char123",
+                "date_created": "2024-01-15T10:30:00Z",
+                "date_modified": "2024-01-15T10:30:00Z",
                 "character_class": "VAMPIRE",
                 "game_version": "V5",
                 "name_first": "Marcus",

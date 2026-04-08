@@ -93,7 +93,7 @@ class TestCompany:
             resources_modified_at="2024-01-15T10:30:00Z",
             description=None,
             email="test@example.com",
-            settings=None,
+            settings=CompanySettings(permission_recoup_xp="UNRESTRICTED"),
         )
 
         # Then: Company is created correctly
@@ -103,7 +103,7 @@ class TestCompany:
         assert company.name == "Test"
         assert company.email == "test@example.com"
         assert company.description is None
-        assert company.settings is None
+        assert company.settings is not None
 
     def test_full_company(self):
         """Verify creating company with all fields populated."""

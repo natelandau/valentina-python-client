@@ -641,11 +641,11 @@ class TestUsersServiceGetUnapprovedPage:
         company_id = "company123"
         route = respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "10", "offset": "0"},
+            params={"limit": "10", "offset": "0", "requesting_user_id": "admin1"},
         ).respond(200, json=paginated_users_response)
 
         # When: Getting a page of unapproved users
-        result = await vclient.users(company_id).get_unapproved_page()
+        result = await vclient.users(company_id).get_unapproved_page("admin1")
 
         # Then: Returns PaginatedResponse with User objects
         assert route.called
@@ -660,7 +660,7 @@ class TestUsersServiceGetUnapprovedPage:
         company_id = "company123"
         route = respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "25", "offset": "50"},
+            params={"limit": "25", "offset": "50", "requesting_user_id": "admin1"},
         ).respond(
             200,
             json={
@@ -672,7 +672,7 @@ class TestUsersServiceGetUnapprovedPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.users(company_id).get_unapproved_page(limit=25, offset=50)
+        result = await vclient.users(company_id).get_unapproved_page("admin1", limit=25, offset=50)
 
         # Then: Request was made with correct params
         assert route.called
@@ -690,7 +690,7 @@ class TestUsersServiceListAllUnapproved:
         company_id = "company123"
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "100", "offset": "0"},
+            params={"limit": "100", "offset": "0", "requesting_user_id": "admin1"},
         ).respond(
             200,
             json={
@@ -702,7 +702,7 @@ class TestUsersServiceListAllUnapproved:
         )
 
         # When: Calling list_all_unapproved
-        result = await vclient.users(company_id).list_all_unapproved()
+        result = await vclient.users(company_id).list_all_unapproved("admin1")
 
         # Then: Returns list of User objects
         assert isinstance(result, list)
@@ -721,7 +721,7 @@ class TestUsersServiceIterAllUnapproved:
         user2 = {**user_response_data, "id": "507f1f77bcf86cd799439012", "name_first": "User 2"}
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "1", "offset": "0"},
+            params={"limit": "1", "offset": "0", "requesting_user_id": "admin1"},
         ).respond(
             200,
             json={
@@ -733,7 +733,7 @@ class TestUsersServiceIterAllUnapproved:
         )
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "1", "offset": "1"},
+            params={"limit": "1", "offset": "1", "requesting_user_id": "admin1"},
         ).respond(
             200,
             json={
@@ -745,7 +745,9 @@ class TestUsersServiceIterAllUnapproved:
         )
 
         # When: Iterating through all unapproved users
-        users = [user async for user in vclient.users(company_id).iter_all_unapproved(limit=1)]
+        users = [
+            user async for user in vclient.users(company_id).iter_all_unapproved("admin1", limit=1)
+        ]
 
         # Then: All users are yielded as User objects
         assert len(users) == 2

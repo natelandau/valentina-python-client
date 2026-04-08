@@ -28,6 +28,8 @@ class TestCharacter:
         # When: Creating a character with required fields only
         character = Character(
             id="char123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -504,6 +506,8 @@ class TestCharacterDetail:
         # Given: Standard character data with no embedded resources
         detail = CharacterDetail(
             id="char123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -530,6 +534,8 @@ class TestCharacterDetail:
         # Given: Character data with all embedded resources
         detail = CharacterDetail(
             id="char123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -611,6 +617,8 @@ class TestCharacterDetail:
         # Given: JSON response with no embedded resource keys
         data = {
             "id": "char123",
+            "date_created": "2024-01-15T10:30:00Z",
+            "date_modified": "2024-01-15T10:30:00Z",
             "character_class": "VAMPIRE",
             "game_version": "V5",
             "name_first": "John",

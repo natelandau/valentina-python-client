@@ -8,16 +8,16 @@ Models for managing companies, their settings, and developer access permissions.
 
 ## Company
 
-| Field                   | Type                      | Description                                 |
-| ----------------------- | ------------------------- | ------------------------------------------- |
-| `id`                    | `str`                     | Unique identifier                           |
-| `date_created`          | `datetime`                | Creation timestamp                          |
-| `date_modified`         | `datetime`                | Last modified timestamp                     |
-| `name`                  | `str`                     | Company name                                |
-| `description`           | `str \| None`             | Company description                         |
-| `email`                 | `str`                     | Contact email                               |
-| `resources_modified_at` | `datetime`                | Last modified timestamp for child resources |
-| `settings`              | `CompanySettings \| None` | Company configuration                       |
+| Field                   | Type              | Description                                 |
+| ----------------------- | ----------------- | ------------------------------------------- |
+| `id`                    | `str`             | Unique identifier                           |
+| `date_created`          | `datetime`        | Creation timestamp                          |
+| `date_modified`         | `datetime`        | Last modified timestamp                     |
+| `name`                  | `str`             | Company name                                |
+| `description`           | `str \| None`     | Company description                         |
+| `email`                 | `str`             | Contact email                               |
+| `resources_modified_at` | `datetime`        | Last modified timestamp for child resources |
+| `settings`              | `CompanySettings` | Company configuration                       |
 
 ## NewCompanyResponse
 
