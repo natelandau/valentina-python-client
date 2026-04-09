@@ -67,6 +67,7 @@ from vclient.registry import (  # noqa: E402
     global_admin_service,
     options_service,
     system_service,
+    user_lookup_service,
     users_service,
 )
 
@@ -102,6 +103,7 @@ __all__ = (
     "sync_system_service",
     "sync_users_service",
     "system_service",
+    "user_lookup_service",
     "users_service",
 )
 

@@ -38,6 +38,7 @@ if TYPE_CHECKING:
         SyncGlobalAdminService,
         SyncOptionsService,
         SyncSystemService,
+        SyncUserLookupService,
         SyncUsersService,
     )
 _default_client: "SyncVClient | None" = None
@@ -187,6 +188,29 @@ def sync_system_service() -> "SyncSystemService":
     from vclient._sync.services.system import SyncSystemService
 
     return SyncSystemService(sync_default_client())
+
+
+def user_lookup_service() -> "SyncUserLookupService":
+    """Create a SyncUserLookupService using the default client.
+
+    Discover which companies a person has a user record in by searching
+    via email, Discord ID, Google ID, or GitHub ID.
+
+    Returns:
+        SyncUserLookupService: A service instance for cross-company user lookup.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        lookup = user_lookup_service()
+        results = await lookup.by_email("alice@example.com")
+        ```
+    """
+    from vclient._sync.services.user_lookup import SyncUserLookupService
+
+    return SyncUserLookupService(sync_default_client())
 
 
 def sync_users_service(company_id: str | None = None) -> "SyncUsersService":

@@ -37,6 +37,7 @@ if TYPE_CHECKING:
         GlobalAdminService,
         OptionsService,
         SystemService,
+        UserLookupService,
         UsersService,
     )
 
@@ -187,6 +188,29 @@ def system_service() -> "SystemService":
     from vclient.services.system import SystemService
 
     return SystemService(default_client())
+
+
+def user_lookup_service() -> "UserLookupService":
+    """Create a UserLookupService using the default client.
+
+    Discover which companies a person has a user record in by searching
+    via email, Discord ID, Google ID, or GitHub ID.
+
+    Returns:
+        UserLookupService: A service instance for cross-company user lookup.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+
+    Example:
+        ```python
+        lookup = user_lookup_service()
+        results = await lookup.by_email("alice@example.com")
+        ```
+    """
+    from vclient.services.user_lookup import UserLookupService
+
+    return UserLookupService(default_client())
 
 
 def users_service(company_id: str | None = None) -> "UsersService":
