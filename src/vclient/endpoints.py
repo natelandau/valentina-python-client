@@ -19,6 +19,9 @@ class Endpoints:
     # System endpoints
     HEALTH = f"{_BASE}/health"
 
+    # User lookup (cross-company, not scoped)
+    USERS_LOOKUP = f"{_BASE}/users/lookup"
+
     # Global Admin endpoints
     ADMIN_DEVELOPERS = f"{_BASE}/admin/developers"
     ADMIN_DEVELOPER = f"{_BASE}/admin/developers/{{developer_id}}"
