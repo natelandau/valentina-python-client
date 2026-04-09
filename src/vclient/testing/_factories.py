@@ -43,6 +43,7 @@ from vclient.models import (
     TraitSubcategory,
     User,
     UserDetail,
+    UserLookupResult,
     VampireClan,
     WerewolfAuspice,
     WerewolfTribe,
@@ -259,6 +260,12 @@ class UserFactory(ModelFactory[User]):
     role = "PLAYER"
 
 
+class UserLookupResultFactory(ModelFactory[UserLookupResult]):
+    __model__ = UserLookupResult
+    __use_defaults__ = True
+    role = "PLAYER"
+
+
 class UserDetailFactory(ModelFactory[UserDetail]):
     __model__ = UserDetail
     __use_defaults__ = True
@@ -323,6 +330,7 @@ __all__ = [
     "TraitSubcategoryFactory",
     "UserDetailFactory",
     "UserFactory",
+    "UserLookupResultFactory",
     "VampireClanFactory",
     "WerewolfAuspiceFactory",
     "WerewolfTribeFactory",

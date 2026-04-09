@@ -15,6 +15,7 @@ from .dictionary import DictionaryService
 from .global_admin import GlobalAdminService
 from .options import OptionsService
 from .system import SystemService
+from .user_lookup import UserLookupService
 from .users import UsersService
 
 __all__ = [
@@ -33,5 +34,6 @@ __all__ = [
     "GlobalAdminService",
     "OptionsService",
     "SystemService",
+    "UserLookupService",
     "UsersService",
 ]

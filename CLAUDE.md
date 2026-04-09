@@ -199,3 +199,4 @@ The `vclient.testing` module provides a fake client for downstream applications 
 - Zensical is configured in `zensical.toml`.
 - The documentation is hosted on [GitHub Pages](https://pages.github.com/).
 - `docs/plans` is gitignored, it is used for Claude's planning and research and not published.
+- **When adding or modifying any service, endpoint, or model**, always include updates to the user-facing documentation in `docs/services/` and `docs/models/` as part of the implementation. Documentation is not a follow-up task — it ships with the code.

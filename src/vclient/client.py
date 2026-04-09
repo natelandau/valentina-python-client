@@ -36,6 +36,7 @@ if TYPE_CHECKING:
         GlobalAdminService,
         OptionsService,
         SystemService,
+        UserLookupService,
         UsersService,
     )
 
@@ -150,6 +151,7 @@ class VClient:
         self._developer: DeveloperService | None = None
         self._global_admin: GlobalAdminService | None = None
         self._system: SystemService | None = None
+        self._user_lookup: UserLookupService | None = None
 
         if set_as_default:
             from vclient.registry import configure_default_client
@@ -289,6 +291,19 @@ class VClient:
 
             self._system = SystemService(self)
         return self._system
+
+    @property
+    def user_lookup(self) -> "UserLookupService":
+        """Access the User Lookup service for cross-company user discovery.
+
+        Returns:
+            The UserLookupService instance for user lookup operations.
+        """
+        if self._user_lookup is None:
+            from vclient.services.user_lookup import UserLookupService
+
+            self._user_lookup = UserLookupService(self)
+        return self._user_lookup
 
     def users(self, company_id: str | None = None) -> "UsersService":
         """Get a UsersService scoped to a specific company.

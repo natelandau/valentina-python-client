@@ -115,6 +115,9 @@ from .shared import (
     Trait,
 )
 from .system import SystemHealth
+from .user_lookup import (
+    UserLookupResult,
+)
 from .users import (
     CampaignExperience,
     DiscordProfile,
@@ -221,6 +224,7 @@ __all__ = [
     "UserCreate",
     "UserDenyDTO",
     "UserDetail",
+    "UserLookupResult",
     "UserMergeDTO",
     "UserRegisterDTO",
     "UserUpdate",

@@ -19,6 +19,7 @@ from vclient._sync.registry import (
     sync_global_admin_service,
     sync_options_service,
     sync_system_service,
+    sync_user_lookup_service,
     sync_users_service,
 )
 
@@ -41,5 +42,6 @@ __all__ = [
     "sync_global_admin_service",
     "sync_options_service",
     "sync_system_service",
+    "sync_user_lookup_service",
     "sync_users_service",
 ]

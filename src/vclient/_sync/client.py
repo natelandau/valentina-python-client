@@ -37,6 +37,7 @@ if TYPE_CHECKING:
         SyncGlobalAdminService,
         SyncOptionsService,
         SyncSystemService,
+        SyncUserLookupService,
         SyncUsersService,
     )
 
@@ -147,6 +148,7 @@ class SyncVClient:
         self._developer: SyncDeveloperService | None = None
         self._global_admin: SyncGlobalAdminService | None = None
         self._system: SyncSystemService | None = None
+        self._user_lookup: SyncUserLookupService | None = None
         if set_as_default:
             from vclient._sync.registry import sync_configure_default_client
 
@@ -277,6 +279,19 @@ class SyncVClient:
 
             self._system = SyncSystemService(self)
         return self._system
+
+    @property
+    def user_lookup(self) -> "SyncUserLookupService":
+        """Access the User Lookup service for cross-company user discovery.
+
+        Returns:
+            The SyncUserLookupService instance for user lookup operations.
+        """
+        if self._user_lookup is None:
+            from vclient._sync.services.user_lookup import SyncUserLookupService
+
+            self._user_lookup = SyncUserLookupService(self)
+        return self._user_lookup
 
     def users(self, company_id: str | None = None) -> "SyncUsersService":
         """Get a SyncUsersService scoped to a specific company.
