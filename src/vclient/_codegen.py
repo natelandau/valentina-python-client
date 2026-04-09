@@ -28,6 +28,7 @@ RENAME_CLASSES: dict[str, str] = {
     "GlobalAdminService": "SyncGlobalAdminService",
     "OptionsService": "SyncOptionsService",
     "SystemService": "SyncSystemService",
+    "UserLookupService": "SyncUserLookupService",
     "UsersService": "SyncUsersService",
     "VClient": "SyncVClient",
     "FakeVClient": "SyncFakeVClient",
@@ -73,6 +74,7 @@ IMPORT_REWRITES: dict[str, str] = {
     "vclient.services.dicerolls": "vclient._sync.services.dicerolls",
     "vclient.services.options": "vclient._sync.services.options",
     "vclient.services.character_autogen": "vclient._sync.services.character_autogen",
+    "vclient.services.user_lookup": "vclient._sync.services.user_lookup",
     "vclient.registry": "vclient._sync.registry",
     "vclient.testing._client": "vclient._sync.testing._client",
 }
