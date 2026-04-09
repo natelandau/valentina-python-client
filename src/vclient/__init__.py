@@ -49,6 +49,7 @@ from vclient._sync import (  # noqa: E402
     sync_global_admin_service,
     sync_options_service,
     sync_system_service,
+    sync_user_lookup_service,
     sync_users_service,
 )
 from vclient.client import VClient  # noqa: E402
@@ -101,6 +102,7 @@ __all__ = (
     "sync_global_admin_service",
     "sync_options_service",
     "sync_system_service",
+    "sync_user_lookup_service",
     "sync_users_service",
     "system_service",
     "user_lookup_service",

@@ -190,7 +190,7 @@ def sync_system_service() -> "SyncSystemService":
     return SyncSystemService(sync_default_client())
 
 
-def user_lookup_service() -> "SyncUserLookupService":
+def sync_user_lookup_service() -> "SyncUserLookupService":
     """Create a SyncUserLookupService using the default client.
 
     Discover which companies a person has a user record in by searching
@@ -204,7 +204,7 @@ def user_lookup_service() -> "SyncUserLookupService":
 
     Example:
         ```python
-        lookup = user_lookup_service()
+        lookup = sync_user_lookup_service()
         results = await lookup.by_email("alice@example.com")
         ```
     """
