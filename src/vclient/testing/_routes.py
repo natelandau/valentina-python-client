@@ -40,6 +40,7 @@ from vclient.models import (
     TraitSubcategory,
     User,
     UserDetail,
+    UserLookupResult,
     VampireClan,
     WerewolfAuspice,
     WerewolfTribe,
@@ -131,6 +132,8 @@ class Routes:
     USERS_REGISTER = RouteSpec("POST", Endpoints.USER_REGISTER, SINGLE, User)
     USERS_MERGE = RouteSpec("POST", Endpoints.USER_MERGE, SINGLE, User)
     USERS_STATISTICS = RouteSpec("GET", Endpoints.USER_STATISTICS, SINGLE, RollStatistics)
+    # User lookup (cross-company)
+    USERS_LOOKUP = RouteSpec("GET", Endpoints.USERS_LOOKUP, LIST, UserLookupResult)
 
     # User assets
     USERS_ASSETS_LIST = RouteSpec("GET", Endpoints.USER_ASSETS, PAGINATED, Asset)
