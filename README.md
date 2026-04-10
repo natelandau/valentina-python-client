@@ -18,6 +18,18 @@ This client is a supported and up-to-date reference implementation for the [Vale
 
 The full documentation is available at https://natelandau.github.io/valentina-python-client/.
 
+## Claude Code Skill
+
+This repo includes a [Claude Code skill](https://docs.anthropic.com/en/docs/claude-code/skills) that gives Claude deep knowledge of vclient's services, models, constants, and testing utilities. Install it so Claude can help you build applications against the Valentina API.
+
+### Install
+
+```bash
+claude install-skill /path/to/valentina-python-client/vclient-guide-skill
+```
+
+Once installed, Claude will automatically activate the skill when you're working with vclient imports, Valentina API endpoints, or FakeVClient testing.
+
 ## Development Tools
 
 ### Validate Constants

@@ -200,3 +200,8 @@ The `vclient.testing` module provides a fake client for downstream applications 
 - The documentation is hosted on [GitHub Pages](https://pages.github.com/).
 - `docs/plans` is gitignored, it is used for Claude's planning and research and not published.
 - **When adding or modifying any service, endpoint, or model**, always include updates to the user-facing documentation in `docs/services/` and `docs/models/` as part of the implementation. Documentation is not a follow-up task — it ships with the code.
+- **When adding or modifying any service, endpoint, model, constant, or exception**, always review and update the Claude Code skill in `vclient-guide-skill/` as part of the implementation. The skill has three reference files that must stay in sync with the code:
+  - `vclient-guide-skill/references/services.md` — service methods, parameters, and return types
+  - `vclient-guide-skill/references/models.md` — model fields, types, and validation constraints
+  - `vclient-guide-skill/references/constants.md` — Literal types and configuration constants
+  - `vclient-guide-skill/SKILL.md` — overview, patterns, and examples (update if architecture or usage patterns change)
