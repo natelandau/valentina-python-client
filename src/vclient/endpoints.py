@@ -26,6 +26,7 @@ class Endpoints:
     ADMIN_DEVELOPERS = f"{_BASE}/admin/developers"
     ADMIN_DEVELOPER = f"{_BASE}/admin/developers/{{developer_id}}"
     ADMIN_DEVELOPER_NEW_KEY = f"{_BASE}/admin/developers/{{developer_id}}/new-key"
+    ADMIN_DEVELOPER_AUDIT_LOGS = f"{ADMIN_DEVELOPER}/audit-logs"
 
     # Developer endpoints (self-service)
     DEVELOPER_ME = f"{_BASE}/developers/me"
@@ -36,6 +37,7 @@ class Endpoints:
     COMPANY = f"{COMPANIES}/{{company_id}}"
     COMPANY_ACCESS = f"{COMPANY}/access"
     COMPANY_STATISTICS = f"{COMPANY}/statistics"
+    COMPANY_AUDIT_LOGS = f"{COMPANY}/audit-logs"
 
     # User endpoints
     USERS = f"{COMPANY}/users"

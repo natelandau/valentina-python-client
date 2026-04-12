@@ -62,6 +62,8 @@ class ValidationResult:
 
 CONSTANT_MAP: dict[str, ConstantMapping] = {
     "AbilityFocus": ConstantMapping("characters", "AbilityFocus"),
+    "AuditEntityType": ConstantMapping("audit_logs", "AuditEntityType"),
+    "AuditOperation": ConstantMapping("audit_logs", "AuditOperation"),
     "AutoGenExperienceLevel": ConstantMapping("characters", "AutoGenExperienceLevel"),
     "BlueprintTraitOrderBy": ConstantMapping("characters", "BlueprintTraitOrderBy"),
     "CharacterClass": ConstantMapping("characters", "CharacterClass"),
