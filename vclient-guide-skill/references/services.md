@@ -42,6 +42,9 @@ Complete method signatures for every service class.
 | `delete(company_id)` | `company_id: str` | `None` |
 | `grant_access(company_id, developer_id, permission)` | `company_id: str, developer_id: str, permission: PermissionLevel` | `CompanyPermissions` |
 | `get_statistics(company_id)` | `company_id: str, *, num_top_traits: int = 5` | `RollStatistics` |
+| `get_audit_log_page(company_id)` | `company_id: str, *, limit, offset, acting_user_id=, user_id=, campaign_id=, book_id=, chapter_id=, character_id=, entity_type=, operation=, date_from=, date_to=, include=` | `PaginatedResponse[AuditLog \| AuditLogDetail]` |
+| `list_all_audit_logs(company_id)` | `company_id: str, *, (same filters)` | `list[AuditLog \| AuditLogDetail]` |
+| `iter_all_audit_logs(company_id)` | `company_id: str, *, limit, (same filters)` | `AsyncIterator[AuditLog \| AuditLogDetail]` |
 
 ---
 
@@ -422,6 +425,9 @@ Plus standard notes and assets sub-resource methods.
 | `update(developer_id)` | `developer_id: str, request: DeveloperUpdate \| None, **kwargs` | `Developer` |
 | `delete(developer_id)` | `developer_id: str` | `None` |
 | `create_api_key(developer_id)` | `developer_id: str` | `DeveloperWithApiKey` |
+| `get_audit_log_page(developer_id)` | `developer_id: str, *, limit, offset, company_id=, acting_user_id=, user_id=, campaign_id=, book_id=, chapter_id=, character_id=, entity_type=, operation=, date_from=, date_to=, include=` | `PaginatedResponse[AuditLog \| AuditLogDetail]` |
+| `list_all_audit_logs(developer_id)` | `developer_id: str, *, company_id=, (same filters)` | `list[AuditLog \| AuditLogDetail]` |
+| `iter_all_audit_logs(developer_id)` | `developer_id: str, *, limit, company_id=, (same filters)` | `AsyncIterator[AuditLog \| AuditLogDetail]` |
 
 ---
 

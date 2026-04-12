@@ -87,6 +87,19 @@ ChapterInclude = Literal["notes", "assets"]
 UserInclude = Literal["quickrolls", "notes", "assets", "characters"]
 ```
 
+### Audit Logs
+
+```python
+AuditEntityType = Literal[
+    "ASSET", "BOOK", "CAMPAIGN", "CHAPTER", "CHARACTER",
+    "CHARACTER_INVENTORY", "CHARACTER_TRAIT", "CHARGEN_SESSION",
+    "COMPANY", "DEVELOPER", "DICTIONARY_TERM", "EXPERIENCE",
+    "NOTE", "QUICKROLL", "USER",
+]
+AuditOperation = Literal["CREATE", "UPDATE", "DELETE"]
+AuditLogInclude = Literal["request_details"]
+```
+
 ## Configuration Constants
 
 ```python
