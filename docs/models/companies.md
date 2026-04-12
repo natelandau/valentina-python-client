@@ -17,6 +17,11 @@ Models for managing companies, their settings, and developer access permissions.
 | `description`           | `str \| None`     | Company description                         |
 | `email`                 | `str`             | Contact email                               |
 | `resources_modified_at` | `datetime`        | Last modified timestamp for child resources |
+| `num_campaigns`         | `int`             | Number of active campaigns (excludes archived) |
+| `num_player_characters` | `int`             | Number of active player characters (excludes archived) |
+| `num_storyteller_characters` | `int`        | Number of active storyteller characters (excludes archived) |
+| `num_npc_characters`    | `int`             | Number of active NPC characters (excludes archived) |
+| `num_users`             | `int`             | Number of active users (excludes archived)  |
 | `settings`              | `CompanySettings` | Company configuration                       |
 
 ## NewCompanyResponse

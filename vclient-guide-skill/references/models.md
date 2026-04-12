@@ -153,6 +153,11 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 | description | str \| None | no |
 | email | str | yes |
 | resources_modified_at | datetime | yes |
+| num_campaigns | int | no (default=0) |
+| num_player_characters | int | no (default=0) |
+| num_storyteller_characters | int | no (default=0) |
+| num_npc_characters | int | no (default=0) |
+| num_users | int | no (default=0) |
 | settings | CompanySettings | yes |
 
 ### CompanySettings
