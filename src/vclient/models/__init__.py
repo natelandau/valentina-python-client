@@ -1,6 +1,10 @@
 """Data models for API responses."""
 
 # All imports at top
+from .audit_logs import (
+    AuditLog,
+    AuditLogDetail,
+)
 from .books import (
     BookCreate,
     BookUpdate,
@@ -140,6 +144,8 @@ from .users import (
 
 __all__ = [
     "Asset",
+    "AuditLog",
+    "AuditLogDetail",
     "BookCreate",
     "BookUpdate",
     "BulkAssignTraitFailure",
