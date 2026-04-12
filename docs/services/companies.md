@@ -104,4 +104,59 @@ print(f"Critical rate: {stats.criticals_percentage:.1f}%")
 print(f"Botch rate: {stats.botch_percentage:.1f}%")
 ```
 
-See [Response Models](../models/companies.md) for `Company`, `CompanySettings`, and related types.
+## Audit Logs
+
+View audit trail entries for a company. All filter parameters are optional.
+
+```python
+# Get a page of audit logs
+page = await companies.get_audit_log_page(
+    company.id,
+    entity_type="CHARACTER",
+    operation="UPDATE",
+)
+
+for entry in page.items:
+    print(f"{entry.date_created}: {entry.description}")
+
+# Get all audit logs
+all_logs = await companies.list_all_audit_logs(company.id)
+
+# Iterate through audit logs
+async for log in companies.iter_all_audit_logs(company.id, operation="DELETE"):
+    print(f"Deleted: {log.target_entity_id}")
+
+# Include request forensic details
+page = await companies.get_audit_log_page(
+    company.id,
+    include=["request_details"],
+)
+for entry in page.items:
+    print(f"{entry.method} {entry.url}")
+```
+
+### Audit Log Methods
+
+| Method                                    | Returns                                                    | Description                             |
+| ----------------------------------------- | ---------------------------------------------------------- | --------------------------------------- |
+| `get_audit_log_page(company_id, **filters)` | `PaginatedResponse[AuditLog \| AuditLogDetail]`         | Get a page of audit log entries         |
+| `list_all_audit_logs(company_id, **filters)` | `list[AuditLog \| AuditLogDetail]`                     | Get all audit log entries               |
+| `iter_all_audit_logs(company_id, **filters)` | `AsyncIterator[AuditLog \| AuditLogDetail]`            | Iterate through all audit log entries   |
+
+### Filter Parameters
+
+| Parameter        | Type                    | Description                         |
+| ---------------- | ----------------------- | ----------------------------------- |
+| `acting_user_id` | `str \| None`           | Who performed the action            |
+| `user_id`        | `str \| None`           | User being acted upon               |
+| `campaign_id`    | `str \| None`           | Campaign context                    |
+| `book_id`        | `str \| None`           | Book context                        |
+| `chapter_id`     | `str \| None`           | Chapter context                     |
+| `character_id`   | `str \| None`           | Character context                   |
+| `entity_type`    | `AuditEntityType`       | Filter by entity type               |
+| `operation`      | `AuditOperation`        | CREATE, UPDATE, or DELETE           |
+| `date_from`      | `datetime \| None`      | Entries on or after this timestamp  |
+| `date_to`        | `datetime \| None`      | Entries on or before this timestamp |
+| `include`        | `list[AuditLogInclude]` | Pass `["request_details"]` for forensics |
+
+See [Response Models](../models/companies.md) for `Company`, `CompanySettings`, and related types. See [Audit Log Models](../models/audit_logs.md) for `AuditLog` and `AuditLogDetail` field details.

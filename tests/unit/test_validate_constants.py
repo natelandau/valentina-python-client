@@ -66,7 +66,13 @@ class TestConstantMap:
         from vclient import constants
 
         # Client-only Literal types that don't correspond to an API /options value
-        client_only = {"CharacterInclude", "BookInclude", "ChapterInclude", "UserInclude"}
+        client_only = {
+            "AuditLogInclude",
+            "BookInclude",
+            "ChapterInclude",
+            "CharacterInclude",
+            "UserInclude",
+        }
 
         literal_names = [
             name
@@ -94,6 +100,26 @@ class TestValidate:
         """Verify validate returns is_valid=True when all constants match API."""
         # Given: API options that exactly match local constants
         api_options = {
+            "audit_logs": {
+                "AuditEntityType": [
+                    "ASSET",
+                    "BOOK",
+                    "CAMPAIGN",
+                    "CHAPTER",
+                    "CHARACTER",
+                    "CHARACTER_INVENTORY",
+                    "CHARACTER_TRAIT",
+                    "CHARGEN_SESSION",
+                    "COMPANY",
+                    "DEVELOPER",
+                    "DICTIONARY_TERM",
+                    "EXPERIENCE",
+                    "NOTE",
+                    "QUICKROLL",
+                    "USER",
+                ],
+                "AuditOperation": ["CREATE", "UPDATE", "DELETE"],
+            },
             "characters": {
                 "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
@@ -153,6 +179,26 @@ class TestValidate:
         """Verify validate detects values in API but missing from client."""
         # Given: API has an extra value for CharacterStatus
         api_options = {
+            "audit_logs": {
+                "AuditEntityType": [
+                    "ASSET",
+                    "BOOK",
+                    "CAMPAIGN",
+                    "CHAPTER",
+                    "CHARACTER",
+                    "CHARACTER_INVENTORY",
+                    "CHARACTER_TRAIT",
+                    "CHARGEN_SESSION",
+                    "COMPANY",
+                    "DEVELOPER",
+                    "DICTIONARY_TERM",
+                    "EXPERIENCE",
+                    "NOTE",
+                    "QUICKROLL",
+                    "USER",
+                ],
+                "AuditOperation": ["CREATE", "UPDATE", "DELETE"],
+            },
             "characters": {
                 "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
@@ -212,6 +258,26 @@ class TestValidate:
         """Verify validate detects values in client but missing from API."""
         # Given: API is missing "MORTAL" from CharacterClass
         api_options = {
+            "audit_logs": {
+                "AuditEntityType": [
+                    "ASSET",
+                    "BOOK",
+                    "CAMPAIGN",
+                    "CHAPTER",
+                    "CHARACTER",
+                    "CHARACTER_INVENTORY",
+                    "CHARACTER_TRAIT",
+                    "CHARGEN_SESSION",
+                    "COMPANY",
+                    "DEVELOPER",
+                    "DICTIONARY_TERM",
+                    "EXPERIENCE",
+                    "NOTE",
+                    "QUICKROLL",
+                    "USER",
+                ],
+                "AuditOperation": ["CREATE", "UPDATE", "DELETE"],
+            },
             "characters": {
                 "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
@@ -271,6 +337,26 @@ class TestValidate:
         """Verify validate detects API options with no local constant."""
         # Given: API has an extra option not in CONSTANT_MAP
         api_options = {
+            "audit_logs": {
+                "AuditEntityType": [
+                    "ASSET",
+                    "BOOK",
+                    "CAMPAIGN",
+                    "CHAPTER",
+                    "CHARACTER",
+                    "CHARACTER_INVENTORY",
+                    "CHARACTER_TRAIT",
+                    "CHARGEN_SESSION",
+                    "COMPANY",
+                    "DEVELOPER",
+                    "DICTIONARY_TERM",
+                    "EXPERIENCE",
+                    "NOTE",
+                    "QUICKROLL",
+                    "USER",
+                ],
+                "AuditOperation": ["CREATE", "UPDATE", "DELETE"],
+            },
             "characters": {
                 "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
@@ -328,6 +414,26 @@ class TestValidate:
         """Verify validate ignores _related keys in the API response."""
         # Given: API response includes _related metadata
         api_options = {
+            "audit_logs": {
+                "AuditEntityType": [
+                    "ASSET",
+                    "BOOK",
+                    "CAMPAIGN",
+                    "CHAPTER",
+                    "CHARACTER",
+                    "CHARACTER_INVENTORY",
+                    "CHARACTER_TRAIT",
+                    "CHARGEN_SESSION",
+                    "COMPANY",
+                    "DEVELOPER",
+                    "DICTIONARY_TERM",
+                    "EXPERIENCE",
+                    "NOTE",
+                    "QUICKROLL",
+                    "USER",
+                ],
+                "AuditOperation": ["CREATE", "UPDATE", "DELETE"],
+            },
             "characters": {
                 "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
@@ -385,6 +491,26 @@ class TestValidate:
         """Verify validate ignores non-list values (dicts, strings) in API categories."""
         # Given: API has a dict value that should be skipped
         api_options = {
+            "audit_logs": {
+                "AuditEntityType": [
+                    "ASSET",
+                    "BOOK",
+                    "CAMPAIGN",
+                    "CHAPTER",
+                    "CHARACTER",
+                    "CHARACTER_INVENTORY",
+                    "CHARACTER_TRAIT",
+                    "CHARGEN_SESSION",
+                    "COMPANY",
+                    "DEVELOPER",
+                    "DICTIONARY_TERM",
+                    "EXPERIENCE",
+                    "NOTE",
+                    "QUICKROLL",
+                    "USER",
+                ],
+                "AuditOperation": ["CREATE", "UPDATE", "DELETE"],
+            },
             "characters": {
                 "AbilityFocus": ["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"],
                 "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
@@ -452,7 +578,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "22/22 constants in sync" in captured.out
+        assert "24/24 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""

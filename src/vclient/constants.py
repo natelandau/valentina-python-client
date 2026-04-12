@@ -35,6 +35,25 @@ RATE_LIMIT_POLICY_HEADER = "RateLimit-Policy"
 
 # Valentina API Constants
 AbilityFocus = Literal["JACK_OF_ALL_TRADES", "BALANCED", "SPECIALIST"]
+AuditEntityType = Literal[
+    "ASSET",
+    "BOOK",
+    "CAMPAIGN",
+    "CHAPTER",
+    "CHARACTER",
+    "CHARACTER_INVENTORY",
+    "CHARACTER_TRAIT",
+    "CHARGEN_SESSION",
+    "COMPANY",
+    "DEVELOPER",
+    "DICTIONARY_TERM",
+    "EXPERIENCE",
+    "NOTE",
+    "QUICKROLL",
+    "USER",
+]
+AuditLogInclude = Literal["request_details"]
+AuditOperation = Literal["CREATE", "UPDATE", "DELETE"]
 AutoGenExperienceLevel = Literal["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"]
 CharacterClass = Literal["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"]
 CharacterInclude = Literal["traits", "inventory", "notes", "assets"]

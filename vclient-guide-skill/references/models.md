@@ -21,6 +21,7 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 - [Pagination](#pagination)
 - [System](#system)
 - [User Lookup](#user-lookup)
+- [Audit Logs](#audit-logs)
 
 ---
 
@@ -980,3 +981,44 @@ All optional: `username`, `email`, `is_global_admin`.
 | company_name | str | yes |
 | user_id | str | yes |
 | role | UserRole | yes |
+
+---
+
+## Audit Logs
+
+### AuditLog
+
+| Field | Type | Required |
+|-------|------|----------|
+| id | str | yes |
+| date_created | datetime | yes |
+| entity_type | AuditEntityType | yes |
+| operation | AuditOperation | yes |
+| target_entity_id | str | yes |
+| description | str | yes |
+| changes | dict[str, Any] \| None | no |
+| company_id | str | yes |
+| acting_user_id | str \| None | no |
+| user_id | str \| None | no |
+| campaign_id | str \| None | no |
+| book_id | str \| None | no |
+| chapter_id | str \| None | no |
+| character_id | str \| None | no |
+| request_id | str \| None | no |
+
+### AuditLogDetail
+
+Inherits all `AuditLog` fields plus:
+
+| Field | Type | Required |
+|-------|------|----------|
+| method | str \| None | no |
+| url | str \| None | no |
+| request_json | dict[str, Any] \| None | no |
+| request_body | str \| None | no |
+| path_params | dict[str, str] \| None | no |
+| query_params | dict[str, str] \| None | no |
+| operation_id | str \| None | no |
+| handler_name | str \| None | no |
+| name | str \| None | no |
+| summary | str \| None | no |

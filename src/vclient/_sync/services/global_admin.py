@@ -1,18 +1,22 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Global Admin API."""
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
+from datetime import datetime
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import DEFAULT_PAGE_LIMIT, AuditEntityType, AuditLogInclude, AuditOperation
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    AuditLog,
+    AuditLogDetail,
     Developer,
     DeveloperCreate,
     DeveloperUpdate,
     DeveloperWithApiKey,
     PaginatedResponse,
 )
+from vclient.services._audit_params import _build_audit_params
 
 
 class SyncGlobalAdminService(SyncBaseService):
@@ -197,3 +201,206 @@ class SyncGlobalAdminService(SyncBaseService):
         """
         response = self._post(Endpoints.ADMIN_DEVELOPER_NEW_KEY.format(developer_id=developer_id))
         return DeveloperWithApiKey.model_validate(response.json())
+
+    def get_audit_log_page(
+        self,
+        developer_id: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        company_id: str | None = None,
+        acting_user_id: str | None = None,
+        user_id: str | None = None,
+        campaign_id: str | None = None,
+        book_id: str | None = None,
+        chapter_id: str | None = None,
+        character_id: str | None = None,
+        entity_type: AuditEntityType | None = None,
+        operation: AuditOperation | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
+    ) -> PaginatedResponse[AuditLog] | PaginatedResponse[AuditLogDetail]:
+        """Retrieve a paginated page of audit log entries for a developer.
+
+        Use filter parameters to narrow results by entity, operation, user, or time range.
+        Pass ``include=["request_details"]`` to receive full HTTP request forensics in each
+        entry (returns AuditLogDetail instead of AuditLog).
+
+        Args:
+            developer_id: The ID of the developer whose audit logs to retrieve.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+            company_id: Filter by company ID.
+            acting_user_id: Filter by the user who performed the action.
+            user_id: Filter by the user affected by the action.
+            campaign_id: Filter by campaign ID.
+            book_id: Filter by book ID.
+            chapter_id: Filter by chapter ID.
+            character_id: Filter by character ID.
+            entity_type: Filter by entity type (e.g., "CAMPAIGN", "CHARACTER").
+            operation: Filter by operation type (CREATE, UPDATE, DELETE).
+            date_from: Return logs on or after this datetime.
+            date_to: Return logs on or before this datetime.
+            include: Additional data to include. Pass ["request_details"] for HTTP forensics.
+
+        Returns:
+            A PaginatedResponse containing AuditLog (or AuditLogDetail) objects.
+
+        Raises:
+            NotFoundError: If the developer does not exist.
+            AuthorizationError: If you don't have global admin privileges.
+        """
+        model = AuditLogDetail if include and "request_details" in include else AuditLog
+        params = _build_audit_params(
+            company_id=company_id,
+            acting_user_id=acting_user_id,
+            user_id=user_id,
+            campaign_id=campaign_id,
+            book_id=book_id,
+            chapter_id=chapter_id,
+            character_id=character_id,
+            entity_type=entity_type,
+            operation=operation,
+            date_from=date_from,
+            date_to=date_to,
+            include=include,
+        )
+        return self._get_paginated_as(
+            Endpoints.ADMIN_DEVELOPER_AUDIT_LOGS.format(developer_id=developer_id),
+            model,
+            limit=limit,
+            offset=offset,
+            params=params,
+        )
+
+    def list_all_audit_logs(
+        self,
+        developer_id: str,
+        *,
+        company_id: str | None = None,
+        acting_user_id: str | None = None,
+        user_id: str | None = None,
+        campaign_id: str | None = None,
+        book_id: str | None = None,
+        chapter_id: str | None = None,
+        character_id: str | None = None,
+        entity_type: AuditEntityType | None = None,
+        operation: AuditOperation | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
+    ) -> list[AuditLog] | list[AuditLogDetail]:
+        """Retrieve all audit log entries for a developer.
+
+        Automatically paginates through all results. Use ``get_audit_log_page()`` for
+        paginated access or ``iter_all_audit_logs()`` for memory-efficient streaming.
+
+        Args:
+            developer_id: The ID of the developer whose audit logs to retrieve.
+            company_id: Filter by company ID.
+            acting_user_id: Filter by the user who performed the action.
+            user_id: Filter by the user affected by the action.
+            campaign_id: Filter by campaign ID.
+            book_id: Filter by book ID.
+            chapter_id: Filter by chapter ID.
+            character_id: Filter by character ID.
+            entity_type: Filter by entity type (e.g., "CAMPAIGN", "CHARACTER").
+            operation: Filter by operation type (CREATE, UPDATE, DELETE).
+            date_from: Return logs on or after this datetime.
+            date_to: Return logs on or before this datetime.
+            include: Additional data to include. Pass ["request_details"] for HTTP forensics.
+
+        Returns:
+            A list of all AuditLog (or AuditLogDetail) objects.
+
+        Raises:
+            NotFoundError: If the developer does not exist.
+            AuthorizationError: If you don't have global admin privileges.
+        """
+        return [
+            log
+            for log in self.iter_all_audit_logs(
+                developer_id,
+                company_id=company_id,
+                acting_user_id=acting_user_id,
+                user_id=user_id,
+                campaign_id=campaign_id,
+                book_id=book_id,
+                chapter_id=chapter_id,
+                character_id=character_id,
+                entity_type=entity_type,
+                operation=operation,
+                date_from=date_from,
+                date_to=date_to,
+                include=include,
+            )
+        ]
+
+    def iter_all_audit_logs(
+        self,
+        developer_id: str,
+        *,
+        limit: int = 100,
+        company_id: str | None = None,
+        acting_user_id: str | None = None,
+        user_id: str | None = None,
+        campaign_id: str | None = None,
+        book_id: str | None = None,
+        chapter_id: str | None = None,
+        character_id: str | None = None,
+        entity_type: AuditEntityType | None = None,
+        operation: AuditOperation | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
+    ) -> Iterator[AuditLog] | Iterator[AuditLogDetail]:
+        """Iterate through all audit log entries for a developer.
+
+        Yields individual audit log entries, automatically fetching subsequent pages
+        until all matching entries have been retrieved.
+
+        Args:
+            developer_id: The ID of the developer whose audit logs to retrieve.
+            limit: Items per page (default 100 for efficiency).
+            company_id: Filter by company ID.
+            acting_user_id: Filter by the user who performed the action.
+            user_id: Filter by the user affected by the action.
+            campaign_id: Filter by campaign ID.
+            book_id: Filter by book ID.
+            chapter_id: Filter by chapter ID.
+            character_id: Filter by character ID.
+            entity_type: Filter by entity type (e.g., "CAMPAIGN", "CHARACTER").
+            operation: Filter by operation type (CREATE, UPDATE, DELETE).
+            date_from: Return logs on or after this datetime.
+            date_to: Return logs on or before this datetime.
+            include: Additional data to include. Pass ["request_details"] for HTTP forensics.
+
+        Yields:
+            Individual AuditLog (or AuditLogDetail) objects.
+
+        Raises:
+            NotFoundError: If the developer does not exist.
+            AuthorizationError: If you don't have global admin privileges.
+        """
+        model = AuditLogDetail if include and "request_details" in include else AuditLog
+        params = _build_audit_params(
+            company_id=company_id,
+            acting_user_id=acting_user_id,
+            user_id=user_id,
+            campaign_id=campaign_id,
+            book_id=book_id,
+            chapter_id=chapter_id,
+            character_id=character_id,
+            entity_type=entity_type,
+            operation=operation,
+            date_from=date_from,
+            date_to=date_to,
+            include=include,
+        )
+        for item in self._iter_all_pages(
+            Endpoints.ADMIN_DEVELOPER_AUDIT_LOGS.format(developer_id=developer_id),
+            limit=limit,
+            params=params,
+        ):
+            yield model.model_validate(item)
