@@ -43,6 +43,11 @@ class Company(BaseModel):
     description: str | None
     email: str
     resources_modified_at: datetime
+    num_campaigns: int = 0
+    num_player_characters: int = 0
+    num_storyteller_characters: int = 0
+    num_npc_characters: int = 0
+    num_users: int = 0
     settings: CompanySettings
 
 
