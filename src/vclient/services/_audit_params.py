@@ -41,7 +41,6 @@ def _build_audit_params(
     Returns:
         A dict of query parameters with only non-None values included.
     """
-    # Build string params first (simple pass-through values)
     string_params: dict[str, str | None] = {
         "acting_user_id": acting_user_id,
         "user_id": user_id,
