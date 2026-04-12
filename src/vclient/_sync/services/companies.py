@@ -2,11 +2,20 @@
 """Service for interacting with the Companies API."""
 
 from collections.abc import Iterator
+from datetime import datetime
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT, PermissionLevel
+from vclient.constants import (
+    DEFAULT_PAGE_LIMIT,
+    AuditEntityType,
+    AuditLogInclude,
+    AuditOperation,
+    PermissionLevel,
+)
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    AuditLog,
+    AuditLogDetail,
     Company,
     CompanyCreate,
     CompanyPermissions,
@@ -16,6 +25,7 @@ from vclient.models import (
     RollStatistics,
     _GrantAccess,
 )
+from vclient.services._audit_params import _build_audit_params
 
 
 class SyncCompaniesService(SyncBaseService):
@@ -216,3 +226,195 @@ class SyncCompaniesService(SyncBaseService):
             params={"num_top_traits": num_top_traits},
         )
         return RollStatistics.model_validate(response.json())
+
+    def get_audit_log_page(
+        self,
+        company_id: str,
+        *,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+        acting_user_id: str | None = None,
+        user_id: str | None = None,
+        campaign_id: str | None = None,
+        book_id: str | None = None,
+        chapter_id: str | None = None,
+        character_id: str | None = None,
+        entity_type: AuditEntityType | None = None,
+        operation: AuditOperation | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+        include: list[AuditLogInclude] | None = None,
+    ) -> PaginatedResponse[AuditLog] | PaginatedResponse[AuditLogDetail]:
+        """Retrieve a paginated page of audit log entries for a company.
+
+        Use filter parameters to narrow results by entity, operation, user, or time range.
+        Pass ``include=["request_details"]`` to receive full HTTP request forensics in each
+        entry (returns AuditLogDetail instead of AuditLog).
+
+        Args:
+            company_id: The ID of the company whose audit logs to retrieve.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+            acting_user_id: Filter by the user who performed the action.
+            user_id: Filter by the user affected by the action.
+            campaign_id: Filter by campaign ID.
+            book_id: Filter by book ID.
+            chapter_id: Filter by chapter ID.
+            character_id: Filter by character ID.
+            entity_type: Filter by entity type (e.g., "CAMPAIGN", "CHARACTER").
+            operation: Filter by operation type (CREATE, UPDATE, DELETE).
+            date_from: Return logs on or after this datetime.
+            date_to: Return logs on or before this datetime.
+            include: Additional data to include. Pass ["request_details"] for HTTP forensics.
+
+        Returns:
+            A PaginatedResponse containing AuditLog (or AuditLogDetail) objects.
+
+        Raises:
+            NotFoundError: If the company does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        model = AuditLogDetail if include and "request_details" in include else AuditLog
+        params = _build_audit_params(
+            acting_user_id=acting_user_id,
+            user_id=user_id,
+            campaign_id=campaign_id,
+            book_id=book_id,
+            chapter_id=chapter_id,
+            character_id=character_id,
+            entity_type=entity_type,
+            operation=operation,
+            date_from=date_from,
+            date_to=date_to,
+            include=include,
+        )
+        return self._get_paginated_as(
+            Endpoints.COMPANY_AUDIT_LOGS.format(company_id=company_id),
+            model,
+            limit=limit,
+            offset=offset,
+            params=params,
+        )
+
+    def list_all_audit_logs(
+        self,
+        company_id: str,
+        *,
+        acting_user_id: str | None = None,
+        user_id: str | None = None,
+        campaign_id: str | None = None,
+        book_id: str | None = None,
+        chapter_id: str | None = None,
+        character_id: str | None = None,
+        entity_type: AuditEntityType | None = None,
+        operation: AuditOperation | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+        include: list[AuditLogInclude] | None = None,
+    ) -> list[AuditLog] | list[AuditLogDetail]:
+        """Retrieve all audit log entries for a company.
+
+        Automatically paginates through all results. Use ``get_audit_log_page()`` for
+        paginated access or ``iter_all_audit_logs()`` for memory-efficient streaming.
+
+        Args:
+            company_id: The ID of the company whose audit logs to retrieve.
+            acting_user_id: Filter by the user who performed the action.
+            user_id: Filter by the user affected by the action.
+            campaign_id: Filter by campaign ID.
+            book_id: Filter by book ID.
+            chapter_id: Filter by chapter ID.
+            character_id: Filter by character ID.
+            entity_type: Filter by entity type (e.g., "CAMPAIGN", "CHARACTER").
+            operation: Filter by operation type (CREATE, UPDATE, DELETE).
+            date_from: Return logs on or after this datetime.
+            date_to: Return logs on or before this datetime.
+            include: Additional data to include. Pass ["request_details"] for HTTP forensics.
+
+        Returns:
+            A list of all AuditLog (or AuditLogDetail) objects.
+
+        Raises:
+            NotFoundError: If the company does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        return [
+            log
+            for log in self.iter_all_audit_logs(
+                company_id,
+                acting_user_id=acting_user_id,
+                user_id=user_id,
+                campaign_id=campaign_id,
+                book_id=book_id,
+                chapter_id=chapter_id,
+                character_id=character_id,
+                entity_type=entity_type,
+                operation=operation,
+                date_from=date_from,
+                date_to=date_to,
+                include=include,
+            )
+        ]
+
+    def iter_all_audit_logs(
+        self,
+        company_id: str,
+        *,
+        limit: int = 100,
+        acting_user_id: str | None = None,
+        user_id: str | None = None,
+        campaign_id: str | None = None,
+        book_id: str | None = None,
+        chapter_id: str | None = None,
+        character_id: str | None = None,
+        entity_type: AuditEntityType | None = None,
+        operation: AuditOperation | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+        include: list[AuditLogInclude] | None = None,
+    ) -> Iterator[AuditLog] | Iterator[AuditLogDetail]:
+        """Iterate through all audit log entries for a company.
+
+        Yields individual audit log entries, automatically fetching subsequent pages
+        until all matching entries have been retrieved.
+
+        Args:
+            company_id: The ID of the company whose audit logs to retrieve.
+            limit: Items per page (default 100 for efficiency).
+            acting_user_id: Filter by the user who performed the action.
+            user_id: Filter by the user affected by the action.
+            campaign_id: Filter by campaign ID.
+            book_id: Filter by book ID.
+            chapter_id: Filter by chapter ID.
+            character_id: Filter by character ID.
+            entity_type: Filter by entity type (e.g., "CAMPAIGN", "CHARACTER").
+            operation: Filter by operation type (CREATE, UPDATE, DELETE).
+            date_from: Return logs on or after this datetime.
+            date_to: Return logs on or before this datetime.
+            include: Additional data to include. Pass ["request_details"] for HTTP forensics.
+
+        Yields:
+            Individual AuditLog (or AuditLogDetail) objects.
+
+        Raises:
+            NotFoundError: If the company does not exist.
+            AuthorizationError: If you don't have access to the company.
+        """
+        model = AuditLogDetail if include and "request_details" in include else AuditLog
+        params = _build_audit_params(
+            acting_user_id=acting_user_id,
+            user_id=user_id,
+            campaign_id=campaign_id,
+            book_id=book_id,
+            chapter_id=chapter_id,
+            character_id=character_id,
+            entity_type=entity_type,
+            operation=operation,
+            date_from=date_from,
+            date_to=date_to,
+            include=include,
+        )
+        for item in self._iter_all_pages(
+            Endpoints.COMPANY_AUDIT_LOGS.format(company_id=company_id), limit=limit, params=params
+        ):
+            yield model.model_validate(item)
