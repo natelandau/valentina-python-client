@@ -94,6 +94,36 @@ print(f"New API Key: {dev_with_key.api_key}")
 
     API keys are only displayed once during creation. Save the key from the response - it cannot be retrieved later.
 
+### Audit Logs
+
+View audit trail entries for a specific developer across all companies. Requires global admin privileges.
+
+```python
+# Get a page of audit logs for a developer
+page = await admins.get_audit_log_page(dev.id)
+
+# Filter to a specific company
+page = await admins.get_audit_log_page(
+    dev.id,
+    company_id="company123",
+    operation="CREATE",
+)
+
+# Include request forensic details
+page = await admins.get_audit_log_page(
+    dev.id,
+    include=["request_details"],
+)
+```
+
+| Method                                                  | Returns                                          | Description                             |
+| ------------------------------------------------------- | ------------------------------------------------ | --------------------------------------- |
+| `get_audit_log_page(developer_id, **filters)`           | `PaginatedResponse[AuditLog \| AuditLogDetail]`  | Get a page of audit log entries         |
+| `list_all_audit_logs(developer_id, **filters)`          | `list[AuditLog \| AuditLogDetail]`               | Get all audit log entries               |
+| `iter_all_audit_logs(developer_id, **filters)`          | `AsyncIterator[AuditLog \| AuditLogDetail]`      | Iterate through all audit log entries   |
+
+The admin endpoint accepts all the same filter parameters as the company audit log (see [Companies Service](companies.md#filter-parameters)), plus `company_id` to narrow results to a specific company.
+
 ### List Developers
 
 Retrieve all developer accounts with optional filtering.
