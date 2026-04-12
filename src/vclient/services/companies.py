@@ -1,6 +1,6 @@
 """Service for interacting with the Companies API."""
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from datetime import datetime
 
 from vclient.constants import (
@@ -269,7 +269,7 @@ class CompaniesService(BaseService):
         operation: AuditOperation | None = None,
         date_from: datetime | None = None,
         date_to: datetime | None = None,
-        include: list[AuditLogInclude] | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
     ) -> PaginatedResponse[AuditLog] | PaginatedResponse[AuditLogDetail]:
         """Retrieve a paginated page of audit log entries for a company.
 
@@ -336,7 +336,7 @@ class CompaniesService(BaseService):
         operation: AuditOperation | None = None,
         date_from: datetime | None = None,
         date_to: datetime | None = None,
-        include: list[AuditLogInclude] | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
     ) -> list[AuditLog] | list[AuditLogDetail]:
         """Retrieve all audit log entries for a company.
 
@@ -397,7 +397,7 @@ class CompaniesService(BaseService):
         operation: AuditOperation | None = None,
         date_from: datetime | None = None,
         date_to: datetime | None = None,
-        include: list[AuditLogInclude] | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
     ) -> AsyncIterator[AuditLog] | AsyncIterator[AuditLogDetail]:
         """Iterate through all audit log entries for a company.
 

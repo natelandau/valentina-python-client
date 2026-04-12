@@ -1,7 +1,7 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Companies API."""
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from datetime import datetime
 
 from vclient._sync.services.base import SyncBaseService
@@ -243,7 +243,7 @@ class SyncCompaniesService(SyncBaseService):
         operation: AuditOperation | None = None,
         date_from: datetime | None = None,
         date_to: datetime | None = None,
-        include: list[AuditLogInclude] | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
     ) -> PaginatedResponse[AuditLog] | PaginatedResponse[AuditLogDetail]:
         """Retrieve a paginated page of audit log entries for a company.
 
@@ -310,7 +310,7 @@ class SyncCompaniesService(SyncBaseService):
         operation: AuditOperation | None = None,
         date_from: datetime | None = None,
         date_to: datetime | None = None,
-        include: list[AuditLogInclude] | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
     ) -> list[AuditLog] | list[AuditLogDetail]:
         """Retrieve all audit log entries for a company.
 
@@ -371,7 +371,7 @@ class SyncCompaniesService(SyncBaseService):
         operation: AuditOperation | None = None,
         date_from: datetime | None = None,
         date_to: datetime | None = None,
-        include: list[AuditLogInclude] | None = None,
+        include: Sequence[AuditLogInclude] | None = None,
     ) -> Iterator[AuditLog] | Iterator[AuditLogDetail]:
         """Iterate through all audit log entries for a company.
 
