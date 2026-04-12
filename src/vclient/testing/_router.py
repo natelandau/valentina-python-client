@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 from vclient.constants import REQUEST_ID_HEADER
 from vclient.models import (
     Asset,
+    AuditLog,
+    AuditLogDetail,
     BulkAssignTraitResponse,
     Campaign,
     CampaignBook,
@@ -57,6 +59,8 @@ from vclient.models.character_autogen import ChargenSessionResponse
 from vclient.models.users import CampaignExperience
 from vclient.testing._factories import (
     AssetFactory,
+    AuditLogDetailFactory,
+    AuditLogFactory,
     BulkAssignTraitResponseFactory,
     CampaignBookDetailFactory,
     CampaignBookFactory,
@@ -100,6 +104,8 @@ from vclient.testing._factories import (
 from vclient.testing._routes import LIST, NO_CONTENT, PAGINATED, RAW_JSON, Routes, RouteSpec
 
 _FACTORY_MAP: dict[type, type[ModelFactory]] = {
+    AuditLog: AuditLogFactory,
+    AuditLogDetail: AuditLogDetailFactory,
     Asset: AssetFactory,
     BulkAssignTraitResponse: BulkAssignTraitResponseFactory,
     Campaign: CampaignFactory,

@@ -4,6 +4,8 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 
 from vclient.models import (
     Asset,
+    AuditLog,
+    AuditLogDetail,
     BulkAssignTraitFailure,
     BulkAssignTraitResponse,
     BulkAssignTraitSuccess,
@@ -50,6 +52,16 @@ from vclient.models import (
 )
 from vclient.models.character_autogen import ChargenSessionResponse
 from vclient.models.users import CampaignExperience
+
+
+class AuditLogFactory(ModelFactory[AuditLog]):
+    __model__ = AuditLog
+    __use_defaults__ = True
+
+
+class AuditLogDetailFactory(ModelFactory[AuditLogDetail]):
+    __model__ = AuditLogDetail
+    __use_defaults__ = True
 
 
 class AssetFactory(ModelFactory[Asset]):
@@ -289,6 +301,8 @@ class WerewolfTribeFactory(ModelFactory[WerewolfTribe]):
 
 __all__ = [
     "AssetFactory",
+    "AuditLogDetailFactory",
+    "AuditLogFactory",
     "BulkAssignTraitFailureFactory",
     "BulkAssignTraitResponseFactory",
     "BulkAssignTraitSuccessFactory",

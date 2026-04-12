@@ -7,6 +7,7 @@ from typing import NamedTuple
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Asset,
+    AuditLog,
     BulkAssignTraitResponse,
     Campaign,
     CampaignBook,
@@ -103,6 +104,9 @@ class Routes:
     ADMIN_DEVELOPERS_NEW_KEY = RouteSpec(
         "POST", Endpoints.ADMIN_DEVELOPER_NEW_KEY, SINGLE, DeveloperWithApiKey
     )
+    ADMIN_DEVELOPER_AUDIT_LOGS_LIST = RouteSpec(
+        "GET", Endpoints.ADMIN_DEVELOPER_AUDIT_LOGS, PAGINATED, AuditLog
+    )
 
     # Developer self-service
     DEVELOPERS_ME_GET = RouteSpec("GET", Endpoints.DEVELOPER_ME, SINGLE, MeDeveloper)
@@ -119,6 +123,7 @@ class Routes:
     COMPANIES_DELETE = RouteSpec("DELETE", Endpoints.COMPANY, NO_CONTENT, None)
     COMPANIES_ACCESS = RouteSpec("POST", Endpoints.COMPANY_ACCESS, SINGLE, CompanyPermissions)
     COMPANIES_STATISTICS = RouteSpec("GET", Endpoints.COMPANY_STATISTICS, SINGLE, RollStatistics)
+    COMPANIES_AUDIT_LOGS_LIST = RouteSpec("GET", Endpoints.COMPANY_AUDIT_LOGS, PAGINATED, AuditLog)
 
     # Users
     USERS_LIST = RouteSpec("GET", Endpoints.USERS, PAGINATED, User)

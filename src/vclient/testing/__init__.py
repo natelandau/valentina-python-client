@@ -16,6 +16,8 @@ from vclient._sync.testing import SyncFakeVClient
 from vclient.testing._client import FakeVClient
 from vclient.testing._factories import (
     AssetFactory,
+    AuditLogDetailFactory,
+    AuditLogFactory,
     BulkAssignTraitFailureFactory,
     BulkAssignTraitResponseFactory,
     BulkAssignTraitSuccessFactory,
@@ -66,6 +68,8 @@ from vclient.testing._routes import Routes, RouteSpec
 
 __all__ = [
     "AssetFactory",
+    "AuditLogDetailFactory",
+    "AuditLogFactory",
     "BulkAssignTraitFailureFactory",
     "BulkAssignTraitResponseFactory",
     "BulkAssignTraitSuccessFactory",
