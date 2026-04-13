@@ -1005,6 +1005,7 @@ All optional: `username`, `email`, `is_global_admin`.
 | chapter_id | str \| None | no |
 | character_id | str \| None | no |
 | request_id | str \| None | no |
+| summary | str \| None | no |
 
 ### AuditLogDetail
 
@@ -1020,5 +1021,3 @@ Inherits all `AuditLog` fields plus:
 | query_params | dict[str, str] \| None | no |
 | operation_id | str \| None | no |
 | handler_name | str \| None | no |
-| name | str \| None | no |
-| summary | str \| None | no |

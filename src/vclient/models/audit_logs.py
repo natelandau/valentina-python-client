@@ -29,6 +29,7 @@ class AuditLog(BaseModel):
     chapter_id: str | None = None
     character_id: str | None = None
     request_id: str | None = None
+    summary: str | None = None
 
 
 class AuditLogDetail(AuditLog):
@@ -46,7 +47,6 @@ class AuditLogDetail(AuditLog):
     query_params: dict[str, str] | None = None
     operation_id: str | None = None
     handler_name: str | None = None
-    summary: str | None = None
 
 
 __all__ = [
