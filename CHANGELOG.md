@@ -1,3 +1,15 @@
+## v1.22.0 (2026-04-12)
+
+### Feat
+
+- add audit log endpoints to CompaniesService and GlobalAdminService (#66)
+- **models**: add resource count fields to Company (#65)
+- add Claude Code skill for vclient developer guidance (#64)
+
+### Fix
+
+- **auditlog**: remove name attribute
+
 ## v1.21.0 (2026-04-09)
 
 ### Feat
