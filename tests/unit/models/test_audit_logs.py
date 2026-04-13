@@ -130,7 +130,6 @@ class TestAuditLogDetail:
         assert detail.query_params is None
         assert detail.operation_id is None
         assert detail.handler_name is None
-        assert detail.name is None
         assert detail.summary is None
 
     def test_detail_fields_populated(self):
@@ -152,7 +151,6 @@ class TestAuditLogDetail:
             query_params={"include": "traits"},
             operation_id="create_character",
             handler_name="CharactersHandler.create",
-            name="Create Character",
             summary="Create a new character in a campaign",
         )
         assert detail.method == "POST"
@@ -162,5 +160,4 @@ class TestAuditLogDetail:
         assert detail.query_params == {"include": "traits"}
         assert detail.operation_id == "create_character"
         assert detail.handler_name == "CharactersHandler.create"
-        assert detail.name == "Create Character"
         assert detail.summary == "Create a new character in a campaign"

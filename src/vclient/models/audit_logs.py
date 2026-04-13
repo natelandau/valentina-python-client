@@ -46,7 +46,6 @@ class AuditLogDetail(AuditLog):
     query_params: dict[str, str] | None = None
     operation_id: str | None = None
     handler_name: str | None = None
-    name: str | None = None
     summary: str | None = None
 
 
