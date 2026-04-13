@@ -1,3 +1,9 @@
+## v1.22.1 (2026-04-12)
+
+### Fix
+
+- **auditlog**: move summary to base AuditLog model (#67)
+
 ## v1.22.0 (2026-04-12)
 
 ### Feat
