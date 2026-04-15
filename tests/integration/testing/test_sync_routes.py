@@ -24,7 +24,7 @@ class TestSyncSetResponsePaginated:
             client.set_response(Routes.USERS_LIST, items=[])
 
             # When listing all users
-            result = sync_users_service().list_all()
+            result = sync_users_service("on-behalf-of-user").list_all()
 
             # Then an empty list is returned
             assert result == []
@@ -38,7 +38,7 @@ class TestSyncSetResponsePaginated:
             client.set_response(Routes.USERS_LIST, items=[user_a, user_b])
 
             # When listing all users
-            result = sync_users_service().list_all()
+            result = sync_users_service("on-behalf-of-user").list_all()
 
             # Then both users are returned with matching IDs
             assert len(result) == 2
@@ -57,7 +57,7 @@ class TestSyncSetResponseSingle:
             client.set_response(Routes.CAMPAIGNS_GET, model=campaign)
 
             # When fetching the campaign
-            result = sync_campaigns_service().get(campaign.id)
+            result = sync_campaigns_service("on-behalf-of-user").get(campaign.id)
 
             # Then the correct campaign is returned
             assert result.id == campaign.id
@@ -70,7 +70,7 @@ class TestSyncSetResponseSingle:
             client.set_response(Routes.BOOKS_RENUMBER, model=book)
 
             # When renumbering the book
-            result = sync_books_service("campaign123").renumber(book.id, 5)
+            result = sync_books_service("campaign123", "on-behalf-of-user").renumber(book.id, 5)
 
             # Then the book is returned
             assert isinstance(result, CampaignBook)
@@ -89,4 +89,4 @@ class TestSyncSetError:
             # When fetching a campaign
             # Then a NotFoundError is raised
             with pytest.raises(NotFoundError):
-                sync_campaigns_service().get("nonexistent")
+                sync_campaigns_service("on-behalf-of-user").get("nonexistent")

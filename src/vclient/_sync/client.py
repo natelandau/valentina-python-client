@@ -293,13 +293,14 @@ class SyncVClient:
             self._user_lookup = SyncUserLookupService(self)
         return self._user_lookup
 
-    def users(self, company_id: str | None = None) -> "SyncUsersService":
+    def users(self, on_behalf_of: str, company_id: str | None = None) -> "SyncUsersService":
         """Get a SyncUsersService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete users,
         as well as access user statistics and assets.
 
         Args:
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
 
@@ -310,16 +311,16 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> users = client.users("company_id")
+            >>> users = client.users("user_id", "company_id")
             >>> all_users = await users.list_all()
             >>> user = await users.get("user_id")
         """
         from vclient._sync.services.users import SyncUsersService
 
-        return SyncUsersService(self, self._resolve_company_id(company_id))
+        return SyncUsersService(self, self._resolve_company_id(company_id), on_behalf_of)
 
     def campaigns(
-        self, *, company_id: str | None = None, on_behalf_of: str | None = None
+        self, on_behalf_of: str, *, company_id: str | None = None
     ) -> "SyncCampaignsService":
         """Get a SyncCampaignsService scoped to a specific company.
 
@@ -327,9 +328,9 @@ class SyncVClient:
         as well as access campaign statistics, assets, and notes.
 
         Args:
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A SyncCampaignsService instance scoped to the specified company.
@@ -338,7 +339,7 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> campaigns = client.campaigns()
+            >>> campaigns = client.campaigns("user_id")
             >>> all_campaigns = await campaigns.list_all()
             >>> campaign = await campaigns.get("campaign_id")
         """
@@ -347,7 +348,7 @@ class SyncVClient:
         return SyncCampaignsService(self, self._resolve_company_id(company_id), on_behalf_of)
 
     def books(
-        self, campaign_id: str, *, company_id: str | None = None, on_behalf_of: str | None = None
+        self, campaign_id: str, on_behalf_of: str, *, company_id: str | None = None
     ) -> "SyncBooksService":
         """Get a SyncBooksService scoped to a specific company and campaign.
 
@@ -356,9 +357,9 @@ class SyncVClient:
 
         Args:
             campaign_id: The ID of the campaign to operate within.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A SyncBooksService instance scoped to the specified context.
@@ -367,7 +368,7 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> books = client.books("campaign_id")
+            >>> books = client.books("campaign_id", "user_id")
             >>> all_books = await books.list_all()
             >>> book = await books.get("book_id")
         """
@@ -378,12 +379,7 @@ class SyncVClient:
         )
 
     def chapters(
-        self,
-        campaign_id: str,
-        book_id: str,
-        *,
-        company_id: str | None = None,
-        on_behalf_of: str | None = None,
+        self, campaign_id: str, book_id: str, on_behalf_of: str, *, company_id: str | None = None
     ) -> "SyncChaptersService":
         """Get a SyncChaptersService scoped to a specific company, campaign, and book.
 
@@ -393,9 +389,9 @@ class SyncVClient:
         Args:
             campaign_id: The ID of the campaign to operate within.
             book_id: The ID of the book to operate within.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A SyncChaptersService instance scoped to the specified context.
@@ -404,7 +400,7 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> chapters = client.chapters("campaign_id", "book_id")
+            >>> chapters = client.chapters("campaign_id", "book_id", "user_id")
             >>> all_chapters = await chapters.list_all()
             >>> chapter = await chapters.get("chapter_id")
         """
@@ -415,7 +411,7 @@ class SyncVClient:
         )
 
     def characters(
-        self, *, company_id: str | None = None, on_behalf_of: str | None = None
+        self, on_behalf_of: str, *, company_id: str | None = None
     ) -> "SyncCharactersService":
         """Get a SyncCharactersService scoped to a specific company.
 
@@ -423,9 +419,9 @@ class SyncVClient:
         Use the optional ``campaign_id`` filter on list methods to scope to a campaign.
 
         Args:
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A SyncCharactersService instance scoped to the specified context.
@@ -434,7 +430,7 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> characters = client.characters()
+            >>> characters = client.characters("user_id")
             >>> all_characters = await characters.list_all()
             >>> character = await characters.get("character_id")
         """
@@ -443,7 +439,7 @@ class SyncVClient:
         return SyncCharactersService(self, self._resolve_company_id(company_id), on_behalf_of)
 
     def character_traits(
-        self, character_id: str, *, company_id: str | None = None, on_behalf_of: str | None = None
+        self, character_id: str, on_behalf_of: str, *, company_id: str | None = None
     ) -> "SyncCharacterTraitsService":
         """Get a SyncCharacterTraitsService scoped to a specific company and character.
 
@@ -452,9 +448,9 @@ class SyncVClient:
 
         Args:
             character_id: The ID of the character to operate within.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A SyncCharacterTraitsService instance scoped to the specified context.
@@ -463,7 +459,7 @@ class SyncVClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> character_traits = client.character_traits("character_id")
+            >>> character_traits = client.character_traits("character_id", "user_id")
             >>> all_character_traits = await character_traits.list_all()
             >>> character_trait = await character_traits.get("character_trait_id")
         """
@@ -473,13 +469,16 @@ class SyncVClient:
             self, self._resolve_company_id(company_id), character_id, on_behalf_of
         )
 
-    def character_blueprint(self, company_id: str | None = None) -> "SyncCharacterBlueprintService":
+    def character_blueprint(
+        self, on_behalf_of: str, *, company_id: str | None = None
+    ) -> "SyncCharacterBlueprintService":
         """Get a SyncCharacterBlueprintService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete character blueprint sections,
         categories, and traits.
 
         Args:
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
 
@@ -488,14 +487,19 @@ class SyncVClient:
         """
         from vclient._sync.services.character_blueprint import SyncCharacterBlueprintService
 
-        return SyncCharacterBlueprintService(self, self._resolve_company_id(company_id))
+        return SyncCharacterBlueprintService(
+            self, self._resolve_company_id(company_id), on_behalf_of
+        )
 
-    def dictionary(self, company_id: str | None = None) -> "SyncDictionaryService":
+    def dictionary(
+        self, on_behalf_of: str, *, company_id: str | None = None
+    ) -> "SyncDictionaryService":
         """Get a SyncDictionaryService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete dictionary terms.
 
         Args:
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
 
@@ -504,19 +508,19 @@ class SyncVClient:
         """
         from vclient._sync.services.dictionary import SyncDictionaryService
 
-        return SyncDictionaryService(self, self._resolve_company_id(company_id))
+        return SyncDictionaryService(self, self._resolve_company_id(company_id), on_behalf_of)
 
     def dicerolls(
-        self, *, company_id: str | None = None, on_behalf_of: str | None = None
+        self, on_behalf_of: str, *, company_id: str | None = None
     ) -> "SyncDicerollService":
         """Get a SyncDicerollService scoped to a specific company.
 
         Provides methods to create, retrieve, and list dice rolls.
 
         Args:
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Raises:
             ValueError: If no company_id provided and no default configured.
@@ -525,12 +529,13 @@ class SyncVClient:
 
         return SyncDicerollService(self, self._resolve_company_id(company_id), on_behalf_of)
 
-    def options(self, company_id: str | None = None) -> "SyncOptionsService":
+    def options(self, on_behalf_of: str, *, company_id: str | None = None) -> "SyncOptionsService":
         """Get a SyncOptionsService scoped to a specific company.
 
         Provides methods to retrieve all options and enumerations for the api.
 
         Args:
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
 
@@ -539,10 +544,10 @@ class SyncVClient:
         """
         from vclient._sync.services.options import SyncOptionsService
 
-        return SyncOptionsService(self, self._resolve_company_id(company_id))
+        return SyncOptionsService(self, self._resolve_company_id(company_id), on_behalf_of)
 
     def character_autogen(
-        self, *, company_id: str | None = None, on_behalf_of: str | None = None
+        self, on_behalf_of: str, *, company_id: str | None = None
     ) -> "SyncCharacterAutogenService":
         """Get a SyncCharacterAutogenService scoped to a specific company.
 
@@ -551,9 +556,9 @@ class SyncVClient:
         ``start_chargen_session()`` to scope each call to a specific campaign.
 
         Args:
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Raises:
             ValueError: If no company_id provided and no default configured.

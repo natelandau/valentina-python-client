@@ -203,7 +203,9 @@ class TestSyncClientFullSheet:
         ).respond(200, json=response_data)
 
         # When: Calling sync get_full_sheet
-        result = sync_client.characters(company_id=company_id).get_full_sheet(character_id)
+        result = sync_client.characters("on-behalf-of-user", company_id=company_id).get_full_sheet(
+            character_id
+        )
 
         # Then: Returns CharacterFullSheet
         assert route.called
@@ -235,9 +237,9 @@ class TestSyncClientFullSheet:
         ).respond(200, json=category_data)
 
         # When: Calling sync get_full_sheet_category
-        result = sync_client.characters(company_id=company_id).get_full_sheet_category(
-            character_id, category_id
-        )
+        result = sync_client.characters(
+            "on-behalf-of-user", company_id=company_id
+        ).get_full_sheet_category(character_id, category_id)
 
         # Then: Returns FullSheetTraitCategory
         assert route.called

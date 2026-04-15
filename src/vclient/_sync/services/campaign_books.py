@@ -42,11 +42,7 @@ class SyncBooksService(SyncBaseService):
     """
 
     def __init__(
-        self,
-        client: "SyncVClient",
-        company_id: str,
-        campaign_id: str,
-        on_behalf_of: str | None = None,
+        self, client: "SyncVClient", company_id: str, campaign_id: str, on_behalf_of: str
     ) -> None:
         """Initialize the service scoped to a specific company and campaign.
 
@@ -54,7 +50,7 @@ class SyncBooksService(SyncBaseService):
             client: The SyncVClient instance to use for requests.
             company_id: The ID of the company to operate within.
             campaign_id: The ID of the campaign to operate within.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id

@@ -25,11 +25,7 @@ class SyncCharacterTraitsService(SyncBaseService):
     """Service for interacting with the Character Traits API."""
 
     def __init__(
-        self,
-        client: "SyncVClient",
-        company_id: str,
-        character_id: str,
-        on_behalf_of: str | None = None,
+        self, client: "SyncVClient", company_id: str, character_id: str, on_behalf_of: str
     ) -> None:
         """Initialize the service.
 
@@ -37,7 +33,7 @@ class SyncCharacterTraitsService(SyncBaseService):
             client: The SyncVClient instance to use for requests.
             company_id: The ID of the company to operate within.
             character_id: The ID of the character to operate within.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id

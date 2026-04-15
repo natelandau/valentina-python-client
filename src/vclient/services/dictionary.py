@@ -20,13 +20,13 @@ if TYPE_CHECKING:
 class DictionaryService(BaseService):
     """Service for interacting with the Dictionary API."""
 
-    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str | None = None) -> None:
+    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str) -> None:
         """Initialize the service.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
-            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
