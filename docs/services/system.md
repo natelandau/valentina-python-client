@@ -34,8 +34,9 @@ Verify that the API server, database, and cache are operational.
 health = await system.health()
 
 print(f"API Version: {health.version}")
-print(f"Database Status: {health.database_status}")
-print(f"Cache Status: {health.cache_status}")
+print(f"Uptime: {health.uptime}")
+print(f"Database: {health.database_status} ({health.database_latency_ms}ms)")
+print(f"Cache: {health.cache_status} ({health.cache_latency_ms}ms)")
 
 # Check if all systems are operational
 if health.database_status == "online" and health.cache_status == "online":

@@ -966,6 +966,9 @@ All optional: `username`, `email`, `is_global_admin`.
 |-------|------|----------|
 | database_status | str | yes |
 | cache_status | str | yes |
+| database_latency_ms | float \| None | yes |
+| cache_latency_ms | float \| None | yes |
+| uptime | str | yes |
 | version | str | yes |
 
 ---

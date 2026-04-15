@@ -73,8 +73,11 @@ Aggregated dice roll statistics for a user. Track success rates, critical rolls,
 
 Represents the health status of the API and its dependencies. Returned by the [System Service](../services/system.md) health check endpoint.
 
-| Field             | Type  | Description                |
-| ----------------- | ----- | -------------------------- |
-| `database_status` | `str` | Database connection status |
-| `cache_status`    | `str` | Cache connection status    |
-| `version`         | `str` | API version string         |
+| Field                 | Type            | Description                     |
+| --------------------- | --------------- | ------------------------------- |
+| `database_status`     | `str`           | Database connection status      |
+| `cache_status`        | `str`           | Cache connection status         |
+| `database_latency_ms` | `float \| None` | Database response latency in ms |
+| `cache_latency_ms`    | `float \| None` | Cache response latency in ms    |
+| `uptime`              | `str`           | Server uptime duration          |
+| `version`             | `str`           | API version string              |

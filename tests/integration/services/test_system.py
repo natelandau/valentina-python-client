@@ -16,6 +16,9 @@ def health_response_data() -> dict:
     return {
         "database_status": "online",
         "cache_status": "online",
+        "database_latency_ms": 1.2,
+        "cache_latency_ms": 0.5,
+        "uptime": "3d 12h 45m",
         "version": "0.7.0",
     }
 
@@ -37,6 +40,9 @@ class TestSystemServiceHealth:
         assert isinstance(result, SystemHealth)
         assert result.database_status == "online"
         assert result.cache_status == "online"
+        assert result.database_latency_ms == 1.2
+        assert result.cache_latency_ms == 0.5
+        assert result.uptime == "3d 12h 45m"
         assert result.version == "0.7.0"
 
     @respx.mock
@@ -46,6 +52,9 @@ class TestSystemServiceHealth:
         response_data = {
             "database_status": "offline",
             "cache_status": "online",
+            "database_latency_ms": None,
+            "cache_latency_ms": 0.5,
+            "uptime": "1d 0h 0m",
             "version": "0.7.0",
         }
         route = respx.get(f"{base_url}{Endpoints.HEALTH}").respond(200, json=response_data)
@@ -57,6 +66,7 @@ class TestSystemServiceHealth:
         assert route.called
         assert result.database_status == "offline"
         assert result.cache_status == "online"
+        assert result.database_latency_ms is None
 
     @respx.mock
     async def test_health_with_offline_cache(self, vclient, base_url):
@@ -65,6 +75,9 @@ class TestSystemServiceHealth:
         response_data = {
             "database_status": "online",
             "cache_status": "offline",
+            "database_latency_ms": 1.0,
+            "cache_latency_ms": None,
+            "uptime": "1d 0h 0m",
             "version": "0.7.0",
         }
         route = respx.get(f"{base_url}{Endpoints.HEALTH}").respond(200, json=response_data)
@@ -76,6 +89,7 @@ class TestSystemServiceHealth:
         assert route.called
         assert result.database_status == "online"
         assert result.cache_status == "offline"
+        assert result.cache_latency_ms is None
 
     @respx.mock
     async def test_health_with_all_services_offline(self, vclient, base_url):
@@ -84,6 +98,9 @@ class TestSystemServiceHealth:
         response_data = {
             "database_status": "offline",
             "cache_status": "offline",
+            "database_latency_ms": None,
+            "cache_latency_ms": None,
+            "uptime": "0d 0h 1m",
             "version": "0.7.0",
         }
         route = respx.get(f"{base_url}{Endpoints.HEALTH}").respond(200, json=response_data)

@@ -24,6 +24,9 @@ def health_response_data() -> dict:
     return {
         "database_status": "online",
         "cache_status": "online",
+        "database_latency_ms": 1.2,
+        "cache_latency_ms": 0.5,
+        "uptime": "3d 12h 45m",
         "version": "0.7.0",
     }
 
