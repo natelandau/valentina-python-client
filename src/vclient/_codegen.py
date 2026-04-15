@@ -29,6 +29,7 @@ RENAME_CLASSES: dict[str, str] = {
     "OptionsService": "SyncOptionsService",
     "SystemService": "SyncSystemService",
     "UserLookupService": "SyncUserLookupService",
+    "UserSelfRegistrationService": "SyncUserSelfRegistrationService",
     "UsersService": "SyncUsersService",
     "VClient": "SyncVClient",
     "FakeVClient": "SyncFakeVClient",
@@ -51,6 +52,7 @@ FACTORY_RENAMES: dict[str, str] = {
     "options_service": "sync_options_service",
     "character_autogen_service": "sync_character_autogen_service",
     "user_lookup_service": "sync_user_lookup_service",
+    "user_self_registration_service": "sync_user_self_registration_service",
     "configure_default_client": "sync_configure_default_client",
     "clear_default_client": "sync_clear_default_client",
     "default_client": "sync_default_client",
@@ -76,6 +78,7 @@ IMPORT_REWRITES: dict[str, str] = {
     "vclient.services.options": "vclient._sync.services.options",
     "vclient.services.character_autogen": "vclient._sync.services.character_autogen",
     "vclient.services.user_lookup": "vclient._sync.services.user_lookup",
+    "vclient.services.user_self_registration": "vclient._sync.services.user_self_registration",
     "vclient.registry": "vclient._sync.registry",
     "vclient.testing._client": "vclient._sync.testing._client",
 }

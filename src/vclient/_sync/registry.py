@@ -39,6 +39,7 @@ if TYPE_CHECKING:
         SyncOptionsService,
         SyncSystemService,
         SyncUserLookupService,
+        SyncUserSelfRegistrationService,
         SyncUsersService,
     )
 _default_client: "SyncVClient | None" = None
@@ -239,6 +240,34 @@ def sync_users_service(on_behalf_of: str, *, company_id: str | None = None) -> "
         ```
     """
     return sync_default_client().users(on_behalf_of, company_id=company_id)
+
+
+def sync_user_self_registration_service(
+    *, company_id: str | None = None
+) -> "SyncUserSelfRegistrationService":
+    """Create a SyncUserSelfRegistrationService using the default client.
+
+    Handles user self-registration via SSO onboarding. Does not require
+    an acting user — only developer API key authentication.
+
+    Args:
+        company_id: The ID of the company to register users in. If not
+            provided, uses the default_company_id from the client config.
+
+    Returns:
+        SyncUserSelfRegistrationService: A service instance for user self-registration.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+        ValueError: If no company_id provided and no default configured.
+
+    Example:
+        ```python
+        registration = sync_user_self_registration_service()
+        user = await registration.register(username="alice", email="a@b.com")
+        ```
+    """
+    return sync_default_client().user_self_registration(company_id=company_id)
 
 
 def sync_campaigns_service(

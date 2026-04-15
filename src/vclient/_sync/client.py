@@ -38,6 +38,7 @@ if TYPE_CHECKING:
         SyncOptionsService,
         SyncSystemService,
         SyncUserLookupService,
+        SyncUserSelfRegistrationService,
         SyncUsersService,
     )
 
@@ -320,6 +321,32 @@ class SyncVClient:
         return SyncUsersService(
             self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
         )
+
+    def user_self_registration(
+        self, *, company_id: str | None = None
+    ) -> "SyncUserSelfRegistrationService":
+        """Get a SyncUserSelfRegistrationService scoped to a specific company.
+
+        Handles user self-registration via SSO onboarding. Does not require
+        an acting user — only developer API key authentication.
+
+        Args:
+            company_id: The ID of the company to register users in. If not
+                provided, uses the default_company_id from config.
+
+        Returns:
+            A SyncUserSelfRegistrationService instance.
+
+        Raises:
+            ValueError: If no company_id provided and no default configured.
+
+        Example:
+            >>> registration = client.user_self_registration()
+            >>> user = await registration.register(username="alice", email="a@b.com")
+        """
+        from vclient._sync.services.user_self_registration import SyncUserSelfRegistrationService
+
+        return SyncUserSelfRegistrationService(self, self._resolve_company_id(company_id))
 
     def campaigns(
         self, on_behalf_of: str, *, company_id: str | None = None

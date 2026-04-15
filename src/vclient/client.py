@@ -37,6 +37,7 @@ if TYPE_CHECKING:
         OptionsService,
         SystemService,
         UserLookupService,
+        UserSelfRegistrationService,
         UsersService,
     )
 
@@ -332,6 +333,32 @@ class VClient:
         return UsersService(
             self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
         )
+
+    def user_self_registration(
+        self, *, company_id: str | None = None
+    ) -> "UserSelfRegistrationService":
+        """Get a UserSelfRegistrationService scoped to a specific company.
+
+        Handles user self-registration via SSO onboarding. Does not require
+        an acting user — only developer API key authentication.
+
+        Args:
+            company_id: The ID of the company to register users in. If not
+                provided, uses the default_company_id from config.
+
+        Returns:
+            A UserSelfRegistrationService instance.
+
+        Raises:
+            ValueError: If no company_id provided and no default configured.
+
+        Example:
+            >>> registration = client.user_self_registration()
+            >>> user = await registration.register(username="alice", email="a@b.com")
+        """
+        from vclient.services.user_self_registration import UserSelfRegistrationService
+
+        return UserSelfRegistrationService(self, self._resolve_company_id(company_id))
 
     def campaigns(
         self,

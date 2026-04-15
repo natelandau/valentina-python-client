@@ -17,6 +17,7 @@ from .global_admin import SyncGlobalAdminService
 from .options import SyncOptionsService
 from .system import SyncSystemService
 from .user_lookup import SyncUserLookupService
+from .user_self_registration import SyncUserSelfRegistrationService
 from .users import SyncUsersService
 
 __all__ = [
@@ -36,5 +37,6 @@ __all__ = [
     "SyncOptionsService",
     "SyncSystemService",
     "SyncUserLookupService",
+    "SyncUserSelfRegistrationService",
     "SyncUsersService",
 ]
