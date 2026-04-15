@@ -72,11 +72,15 @@ Services extend `BaseService` and provide standard methods:
 
 ```
 VClient
-├── companies()           # Top-level: no scoping
-├── users(company_id)     # Scoped to company
-├── campaigns(user_id, company_id)
-├── characters(user_id, campaign_id, company_id)
-├── character_traits(user_id, campaign_id, character_id, company_id)
+├── companies()                              # Top-level: no scoping
+├── users(on_behalf_of, company_id)          # Company-scoped
+├── campaigns(on_behalf_of, company_id)
+├── characters(on_behalf_of, company_id)
+├── character_traits(character_id, on_behalf_of, company_id)
+├── books(campaign_id, on_behalf_of, company_id)
+├── chapters(campaign_id, book_id, on_behalf_of, company_id)
+├── dicerolls(on_behalf_of, company_id)
+├── character_autogen(on_behalf_of, company_id)
 └── ... etc
 ```
 
@@ -87,14 +91,14 @@ VClient
 from vclient import VClient, campaigns_service
 
 async with VClient(base_url="https://api.valentina-noir.com", api_key="...") as client:
-    campaigns = client.campaigns(user_id="123")
+    campaigns = client.campaigns(on_behalf_of="user-123", company_id="company-456")
     all_campaigns = await campaigns.list_all()
 
 # Sync
 from vclient import SyncVClient, sync_campaigns_service
 
 with SyncVClient(base_url="https://api.valentina-noir.com", api_key="...") as client:
-    campaigns = client.campaigns(user_id="123")
+    campaigns = client.campaigns(on_behalf_of="user-123", company_id="company-456")
     all_campaigns = campaigns.list_all()
 ```
 
