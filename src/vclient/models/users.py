@@ -160,7 +160,6 @@ class UserMergeDTO(BaseModel):
 
     primary_user_id: str
     secondary_user_id: str
-    requesting_user_id: str
 
 
 class UserCreate(BaseModel):
@@ -177,7 +176,6 @@ class UserCreate(BaseModel):
     discord_profile: DiscordProfileUpdate | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
-    requesting_user_id: str
 
 
 class UserUpdate(BaseModel):
@@ -194,20 +192,12 @@ class UserUpdate(BaseModel):
     discord_profile: DiscordProfileUpdate | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
-    requesting_user_id: str
 
 
 class UserApproveDTO(BaseModel):
     """Approve an unapproved user and assign a role."""
 
     role: UserRole
-    requesting_user_id: str
-
-
-class UserDenyDTO(BaseModel):
-    """Deny an unapproved user."""
-
-    requesting_user_id: str
 
 
 # -----------------------------------------------------------------------------
@@ -269,7 +259,6 @@ class _ExperienceAddRemove(BaseModel):
 
     amount: int
     campaign_id: str
-    requesting_user_id: str
 
 
 __all__ = [
@@ -281,6 +270,7 @@ __all__ = [
     "QuickrollCreate",
     "QuickrollUpdate",
     "User",
+    "UserApproveDTO",
     "UserCreate",
     "UserDetail",
     "UserMergeDTO",

@@ -319,7 +319,6 @@ class TestUsersServiceCreate:
             username="testuser",
             email="test@example.com",
             role="PLAYER",
-            requesting_user_id="requester123",
         )
 
         # Then: Returns created User object
@@ -339,7 +338,6 @@ class TestUsersServiceCreate:
         assert body["username"] == "testuser"
         assert body["email"] == "test@example.com"
         assert body["role"] == "PLAYER"
-        assert body["requesting_user_id"] == "requester123"
 
     @respx.mock
     async def test_create_user_with_discord_profile(self, vclient, base_url, user_response_data):
@@ -358,7 +356,6 @@ class TestUsersServiceCreate:
             username="testuser",
             email="test@example.com",
             role="PLAYER",
-            requesting_user_id="requester123",
             discord_profile=discord,
         )
 
@@ -383,7 +380,6 @@ class TestUsersServiceCreate:
                 username="abcde",
                 email="test@example.com",
                 role="PLAYER",
-                requesting_user_id="requester123",
             )
 
         # Verify error details are accessible
@@ -483,7 +479,6 @@ class TestUsersServiceMerge:
         result = await vclient.users(company_id).merge(
             primary_user_id="primary123",
             secondary_user_id="secondary456",
-            requesting_user_id="requester123",
         )
 
         # Then: Returns the primary User object
@@ -497,7 +492,6 @@ class TestUsersServiceMerge:
         assert body == {
             "primary_user_id": "primary123",
             "secondary_user_id": "secondary456",
-            "requesting_user_id": "requester123",
         }
 
     @respx.mock
@@ -514,7 +508,6 @@ class TestUsersServiceMerge:
             await vclient.users(company_id).merge(
                 primary_user_id="primary123",
                 secondary_user_id="nonexistent",
-                requesting_user_id="requester123",
             )
 
 
@@ -535,7 +528,6 @@ class TestUsersServiceUpdate:
         # When: Updating the user name
         result = await vclient.users(company_id).update(
             user_id,
-            requesting_user_id="requester123",
             name_first="Updated",
         )
 
@@ -549,7 +541,7 @@ class TestUsersServiceUpdate:
         import json
 
         body = json.loads(request.content)
-        assert body == {"name_first": "Updated", "requesting_user_id": "requester123"}
+        assert body == {"name_first": "Updated"}
 
     @respx.mock
     async def test_update_user_not_found(self, vclient, base_url):
@@ -565,7 +557,6 @@ class TestUsersServiceUpdate:
         with pytest.raises(NotFoundError):
             await vclient.users(company_id).update(
                 user_id,
-                requesting_user_id="requester123",
                 name="New Name",
             )
 
@@ -769,9 +760,7 @@ class TestUsersServiceApproveUser:
         ).respond(200, json=approved_data)
 
         # When: Approving the user
-        result = await vclient.users(company_id).approve_user(
-            user_id, role="PLAYER", requesting_user_id="requester123"
-        )
+        result = await vclient.users(company_id).approve_user(user_id, role="PLAYER")
 
         # Then: Returns User object with assigned role
         assert route.called
@@ -782,7 +771,7 @@ class TestUsersServiceApproveUser:
         import json
 
         body = json.loads(route.calls.last.request.content)
-        assert body == {"role": "PLAYER", "requesting_user_id": "requester123"}
+        assert body == {"role": "PLAYER"}
 
     @respx.mock
     async def test_approve_user_not_found(self, vclient, base_url):
@@ -796,9 +785,7 @@ class TestUsersServiceApproveUser:
 
         # When/Then: Approving raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).approve_user(
-                user_id, role="PLAYER", requesting_user_id="requester123"
-            )
+            await vclient.users(company_id).approve_user(user_id, role="PLAYER")
 
 
 class TestUsersServiceDenyUser:
@@ -815,17 +802,11 @@ class TestUsersServiceDenyUser:
         ).respond(204)
 
         # When: Denying the user
-        result = await vclient.users(company_id).deny_user(user_id, "requester123")
+        result = await vclient.users(company_id).deny_user(user_id)
 
         # Then: Request was made and returns None
         assert route.called
         assert result is None
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls.last.request.content)
-        assert body == {"requesting_user_id": "requester123"}
 
     @respx.mock
     async def test_deny_user_not_found(self, vclient, base_url):
@@ -839,7 +820,7 @@ class TestUsersServiceDenyUser:
 
         # When/Then: Denying raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).deny_user(user_id, "requester123")
+            await vclient.users(company_id).deny_user(user_id)
 
 
 class TestUsersServiceAssets:

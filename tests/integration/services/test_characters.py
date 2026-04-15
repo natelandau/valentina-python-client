@@ -446,6 +446,7 @@ class TestCharactersServiceCreate:
 
         # When: Creating a character with required fields only
         result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -479,6 +480,7 @@ class TestCharactersServiceCreate:
 
         # When: Creating a character with all fields
         result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -529,6 +531,7 @@ class TestCharactersServiceCreate:
 
         # When: Creating a character with vampire attributes
         result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -571,6 +574,7 @@ class TestCharactersServiceCreate:
 
         # When: Creating a character with werewolf attributes
         result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="WEREWOLF",
             game_version="V5",
             name_first="Wolf",
@@ -611,6 +615,7 @@ class TestCharactersServiceCreate:
 
         # When: Creating a character with hunter attributes
         result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="HUNTER",
             game_version="V5",
             name_first="John",
@@ -655,6 +660,7 @@ class TestCharactersServiceCreate:
 
         # When: Creating a character with traits
         result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",

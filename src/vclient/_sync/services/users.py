@@ -22,7 +22,6 @@ from vclient.models import (
     User,
     UserApproveDTO,
     UserCreate,
-    UserDenyDTO,
     UserDetail,
     UserMergeDTO,
     UserRegisterDTO,
@@ -121,7 +120,7 @@ class SyncUsersService(SyncBaseService):
         ):
             yield User.model_validate(item)
 
-    def approve_user(self, user_id: str, role: UserRole, requesting_user_id: str) -> User:
+    def approve_user(self, user_id: str, role: UserRole) -> User:
         """Approve an unapproved user and assign them a role.
 
         The assigned ``role`` is validated through the server-side role-assignment
@@ -131,7 +130,6 @@ class SyncUsersService(SyncBaseService):
         Args:
             user_id: The ID of the unapproved user to approve.
             role: The role to assign to the approved user.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             The approved User object with the assigned role.
@@ -141,31 +139,26 @@ class SyncUsersService(SyncBaseService):
             AuthorizationError: If the requesting user lacks permission to assign
                 the requested role under the hierarchy.
         """
-        body = UserApproveDTO(role=role, requesting_user_id=requesting_user_id)
+        body = UserApproveDTO(role=role)
         response = self._post(
             self._format_endpoint(Endpoints.USER_APPROVE, user_id=user_id),
             json=body.model_dump(mode="json"),
         )
         return User.model_validate(response.json())
 
-    def deny_user(self, user_id: str, requesting_user_id: str) -> None:
+    def deny_user(self, user_id: str) -> None:
         """Deny an unapproved user.
 
         Args:
             user_id: The ID of the unapproved user to deny.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Raises:
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        body = UserDenyDTO(requesting_user_id=requesting_user_id)
-        self._post(
-            self._format_endpoint(Endpoints.USER_DENY, user_id=user_id),
-            json=body.model_dump(mode="json"),
-        )
+        self._post(self._format_endpoint(Endpoints.USER_DENY, user_id=user_id))
 
-    def merge(self, primary_user_id: str, secondary_user_id: str, requesting_user_id: str) -> User:
+    def merge(self, primary_user_id: str, secondary_user_id: str) -> User:
         """Merge an unapproved user into an existing primary user.
 
         The secondary (unapproved) user's data is merged into the primary user,
@@ -174,7 +167,6 @@ class SyncUsersService(SyncBaseService):
         Args:
             primary_user_id: The ID of the primary user to merge into.
             secondary_user_id: The ID of the unapproved user to merge from.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             The primary User object after the merge.
@@ -183,11 +175,7 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If either user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        body = UserMergeDTO(
-            primary_user_id=primary_user_id,
-            secondary_user_id=secondary_user_id,
-            requesting_user_id=requesting_user_id,
-        )
+        body = UserMergeDTO(primary_user_id=primary_user_id, secondary_user_id=secondary_user_id)
         response = self._post(
             self._format_endpoint(Endpoints.USER_MERGE),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),

@@ -207,6 +207,7 @@ class TestCharacterCreate:
         """Verify CharacterCreate with required fields only."""
         # When: Creating a request with required fields
         request = CharacterCreate(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -214,6 +215,7 @@ class TestCharacterCreate:
         )
 
         # Then: Request is created with correct values
+        assert request.campaign_id == "campaign123"
         assert request.character_class == "VAMPIRE"
         assert request.game_version == "V5"
         assert request.name_first == "John"
@@ -231,6 +233,7 @@ class TestCharacterCreate:
 
         # When: Creating a request with all fields
         request = CharacterCreate(
+            campaign_id="campaign123",
             character_class="WEREWOLF",
             game_version="V4",
             name_first="Jane",
@@ -260,6 +263,7 @@ class TestCharacterCreate:
         # When/Then: Short first name is rejected
         with pytest.raises(PydanticValidationError) as exc_info:
             CharacterCreate(
+                campaign_id="campaign123",
                 character_class="VAMPIRE",
                 game_version="V5",
                 name_first="Jo",  # Too short
@@ -273,6 +277,7 @@ class TestCharacterCreate:
         # When/Then: Short last name is rejected
         with pytest.raises(PydanticValidationError) as exc_info:
             CharacterCreate(
+                campaign_id="campaign123",
                 character_class="VAMPIRE",
                 game_version="V5",
                 name_first="John",
@@ -285,6 +290,7 @@ class TestCharacterCreate:
         """Verify model_dump with exclude_none excludes unset optional fields."""
         # Given: A request with only required fields
         request = CharacterCreate(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -296,6 +302,7 @@ class TestCharacterCreate:
 
         # Then: Only required fields are in the output
         assert data == {
+            "campaign_id": "campaign123",
             "character_class": "VAMPIRE",
             "game_version": "V5",
             "name_first": "John",
@@ -400,6 +407,7 @@ class TestCharacterCreateConstraints:
         """Verify explicitly passing None for optional constrained fields does not raise."""
         # When: Creating a request with None for optional constrained fields
         request = CharacterCreate(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",

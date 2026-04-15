@@ -270,9 +270,7 @@ class TestRequestIdHeader:
             client.set_error(Routes.CAMPAIGNS_GET, status_code=404)
 
             # When fetching a campaign
-            response = await client._http.get(
-                "/api/v1/companies/fake-company/users/user1/campaigns/camp1"
-            )
+            response = await client._http.get("/api/v1/companies/fake-company/campaigns/camp1")
 
             # Then X-Request-Id header is present
             assert REQUEST_ID_HEADER in response.headers
@@ -285,9 +283,7 @@ class TestRequestIdHeader:
             client.set_error(Routes.CAMPAIGNS_GET, status_code=404)
 
             # When fetching a campaign
-            response = await client._http.get(
-                "/api/v1/companies/fake-company/users/user1/campaigns/camp1"
-            )
+            response = await client._http.get("/api/v1/companies/fake-company/campaigns/camp1")
 
             # Then body request_id matches header
             body = response.json()

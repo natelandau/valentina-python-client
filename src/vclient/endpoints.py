@@ -61,7 +61,7 @@ class Endpoints:
     USER_QUICKROLL = f"{USER_QUICKROLLS}/{{quickroll_id}}"
 
     # Campaign endpoints
-    CAMPAIGNS = f"{USER}/campaigns"
+    CAMPAIGNS = f"{COMPANY}/campaigns"
     CAMPAIGN = f"{CAMPAIGNS}/{{campaign_id}}"
     CAMPAIGN_STATISTICS = f"{CAMPAIGN}/statistics"
     CAMPAIGN_ASSETS = f"{CAMPAIGN}/assets"
@@ -91,7 +91,7 @@ class Endpoints:
     BOOK_CHAPTER_ASSET = f"{BOOK_CHAPTER_ASSETS}/{{asset_id}}"
 
     # Character endpoints
-    CHARACTERS = f"{CAMPAIGN}/characters"
+    CHARACTERS = f"{COMPANY}/characters"
     CHARACTER = f"{CHARACTERS}/{{character_id}}"
     CHARACTER_STATISTICS = f"{CHARACTER}/statistics"
     CHARACTER_FULL_SHEET = f"{CHARACTER}/full-sheet"
@@ -142,7 +142,7 @@ class Endpoints:
     DICTIONARY_TERM = f"{DICTIONARY_TERMS}/{{term_id}}"
 
     # Dice Rolls
-    DICEROLLS = f"{USER}/dicerolls"
+    DICEROLLS = f"{COMPANY}/dicerolls"
     DICEROLL = f"{DICEROLLS}/{{diceroll_id}}"
     DICEROLL_QUICKROLL = f"{DICEROLLS}/quickroll"
 

@@ -20,7 +20,6 @@ from vclient.models import (
     User,
     UserApproveDTO,
     UserCreate,
-    UserDenyDTO,
     UserDetail,
     UserMergeDTO,
     UserRegisterDTO,
@@ -137,7 +136,6 @@ class UsersService(BaseService):
         self,
         user_id: str,
         role: UserRole,
-        requesting_user_id: str,
     ) -> User:
         """Approve an unapproved user and assign them a role.
 
@@ -148,7 +146,6 @@ class UsersService(BaseService):
         Args:
             user_id: The ID of the unapproved user to approve.
             role: The role to assign to the approved user.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             The approved User object with the assigned role.
@@ -158,7 +155,7 @@ class UsersService(BaseService):
             AuthorizationError: If the requesting user lacks permission to assign
                 the requested role under the hierarchy.
         """
-        body = UserApproveDTO(role=role, requesting_user_id=requesting_user_id)
+        body = UserApproveDTO(role=role)
         response = await self._post(
             self._format_endpoint(Endpoints.USER_APPROVE, user_id=user_id),
             json=body.model_dump(mode="json"),
@@ -168,29 +165,24 @@ class UsersService(BaseService):
     async def deny_user(
         self,
         user_id: str,
-        requesting_user_id: str,
     ) -> None:
         """Deny an unapproved user.
 
         Args:
             user_id: The ID of the unapproved user to deny.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Raises:
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        body = UserDenyDTO(requesting_user_id=requesting_user_id)
         await self._post(
             self._format_endpoint(Endpoints.USER_DENY, user_id=user_id),
-            json=body.model_dump(mode="json"),
         )
 
     async def merge(
         self,
         primary_user_id: str,
         secondary_user_id: str,
-        requesting_user_id: str,
     ) -> User:
         """Merge an unapproved user into an existing primary user.
 
@@ -200,7 +192,6 @@ class UsersService(BaseService):
         Args:
             primary_user_id: The ID of the primary user to merge into.
             secondary_user_id: The ID of the unapproved user to merge from.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             The primary User object after the merge.
@@ -212,7 +203,6 @@ class UsersService(BaseService):
         body = UserMergeDTO(
             primary_user_id=primary_user_id,
             secondary_user_id=secondary_user_id,
-            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_MERGE),
