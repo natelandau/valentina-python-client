@@ -51,6 +51,7 @@ VClient
 ├── .system                  # No scoping (property)
 ├── .user_lookup             # No scoping (property)
 ├── .users(on_behalf_of, company_id=)
+├── .user_self_registration(company_id=)   # no on_behalf_of — API key auth only
 ├── .campaigns(on_behalf_of, company_id=)
 ├── .books(on_behalf_of, campaign_id, company_id=)
 ├── .chapters(on_behalf_of, campaign_id, book_id, company_id=)
