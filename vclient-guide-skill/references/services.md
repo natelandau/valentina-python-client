@@ -83,11 +83,11 @@ Complete method signatures for every service class.
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `add_experience(user_id)` | `user_id: str, request: _ExperienceAddRemove \| None, **kwargs` | `CampaignExperience` |
-| `remove_experience(user_id)` | `user_id: str, request: _ExperienceAddRemove \| None, **kwargs` | `CampaignExperience` |
+| `add_xp(user_id, campaign_id, amount)` | `user_id: str, campaign_id: str, amount: int` | `CampaignExperience` |
+| `remove_xp(user_id, campaign_id, amount)` | `user_id: str, campaign_id: str, amount: int` | `CampaignExperience` |
+| `add_cool_points(user_id, campaign_id, amount)` | `user_id: str, campaign_id: str, amount: int` | `CampaignExperience` |
+| `get_experience(user_id, campaign_id)` | `user_id: str, campaign_id: str` | `CampaignExperience` |
 | `get_statistics(user_id)` | `user_id: str, *, num_top_traits: int = 5` | `RollStatistics` |
-
-**Experience kwargs:** `amount: int, campaign_id: str`
 
 ### Quickrolls
 
@@ -268,16 +268,16 @@ Each level (sections, categories, subcategories, traits) has the standard pagina
 
 ## CharacterAutogenService
 
-**Access:** `client.character_autogen(on_behalf_of, campaign_id, company_id=)`
-**Factory:** `character_autogen_service(on_behalf_of, campaign_id, company_id=)` / `sync_character_autogen_service(...)`
-**Scoping:** on_behalf_of, campaign_id, company_id
+**Access:** `client.character_autogen(on_behalf_of, company_id=)`
+**Factory:** `character_autogen_service(on_behalf_of, company_id=)` / `sync_character_autogen_service(...)`
+**Scoping:** on_behalf_of, company_id
 
 ### Methods
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `generate_character()` | `*, character_type: CharacterType, character_class: CharacterClass \| None, experience_level: AutoGenExperienceLevel \| None, skill_focus: AbilityFocus \| None, concept_id: str \| None, vampire_clan_id: str \| None, werewolf_tribe_id: str \| None, werewolf_auspice_id: str \| None` | `Character` |
-| `start_chargen_session()` | — | `ChargenSessionResponse` |
+| `generate_character()` | `*, campaign_id: str, character_type: CharacterType, character_class: CharacterClass \| None, experience_level: AutoGenExperienceLevel \| None, skill_focus: AbilityFocus \| None, concept_id: str \| None, vampire_clan_id: str \| None, werewolf_tribe_id: str \| None, werewolf_auspice_id: str \| None` | `Character` |
+| `start_chargen_session()` | `*, campaign_id: str` | `ChargenSessionResponse` |
 | `finalize_chargen_session(session_id, selected_character_id)` | both `str` | `Character` |
 | `list_all()` | — | `list[ChargenSessionResponse]` |
 | `get(session_id)` | `session_id: str` | `ChargenSessionResponse` |
@@ -286,9 +286,9 @@ Each level (sections, categories, subcategories, traits) has the standard pagina
 
 ## BooksService
 
-**Access:** `client.books(on_behalf_of, campaign_id, company_id=)`
-**Factory:** `books_service(on_behalf_of, campaign_id, company_id=)` / `sync_books_service(...)`
-**Scoping:** on_behalf_of, campaign_id, company_id
+**Access:** `client.books(campaign_id, on_behalf_of, company_id=)`
+**Factory:** `books_service(campaign_id, on_behalf_of, company_id=)` / `sync_books_service(...)`
+**Scoping:** campaign_id, on_behalf_of, company_id
 
 ### Methods
 
@@ -311,9 +311,9 @@ Plus standard notes and assets sub-resource methods (same pattern as CampaignsSe
 
 ## ChaptersService
 
-**Access:** `client.chapters(on_behalf_of, campaign_id, book_id, company_id=)`
-**Factory:** `chapters_service(on_behalf_of, campaign_id, book_id, company_id=)` / `sync_chapters_service(...)`
-**Scoping:** on_behalf_of, campaign_id, book_id, company_id
+**Access:** `client.chapters(campaign_id, book_id, on_behalf_of, company_id=)`
+**Factory:** `chapters_service(campaign_id, book_id, on_behalf_of, company_id=)` / `sync_chapters_service(...)`
+**Scoping:** campaign_id, book_id, on_behalf_of, company_id
 
 ### Methods
 
