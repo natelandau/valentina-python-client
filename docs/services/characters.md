@@ -12,8 +12,7 @@ Manage characters within a campaign, including their statistics, assets, notes, 
 from vclient import characters_service
 
 characters = characters_service(
-    user_id="USER_ID",
-    campaign_id="CAMPAIGN_ID",
+    on_behalf_of="USER_ID",
     company_id="COMPANY_ID"
 )
 ```
@@ -31,11 +30,11 @@ characters = characters_service(
 
 ### Pagination
 
-| Method                                                                                                  | Returns                        | Description                                    |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------------------------------------------- |
-| `get_page(limit?, offset?, user_player_id?, character_class?, character_type?, status?, is_temporary?)` | `PaginatedResponse[Character]` | Get a page of characters with optional filters |
-| `list_all(...)`                                                                                         | `list[Character]`              | Get all characters (supports same filters)     |
-| `iter_all(limit?, ...)`                                                                                 | `AsyncIterator[Character]`     | Iterate through all characters                 |
+| Method                                                                                                              | Returns                        | Description                                    |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------ | ---------------------------------------------- |
+| `get_page(limit?, offset?, campaign_id?, user_player_id?, character_class?, character_type?, status?, is_temporary?)` | `PaginatedResponse[Character]` | Get a page of characters with optional filters |
+| `list_all(...)`                                                                                                  | `list[Character]`              | Get all characters (supports same filters)     |
+| `iter_all(limit?, ...)`                                                                                          | `AsyncIterator[Character]`     | Iterate through all characters                 |
 
 ### Statistics
 
@@ -104,6 +103,7 @@ from vclient.models import CharacterCreate, CharacterUpdate, InventoryItemCreate
 
 # Create a vampire character (preferred method: use model object)
 request = CharacterCreate(
+    campaign_id="campaign_id",
     character_class="VAMPIRE",
     game_version="V5",
     name_first="Marcus",
@@ -114,6 +114,7 @@ character = await characters.create(request)
 
 # Alternative: pass fields as keyword arguments
 character = await characters.create(
+    campaign_id="campaign_id",
     character_class="VAMPIRE",
     game_version="V5",
     name_first="Marcus",

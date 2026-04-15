@@ -14,9 +14,9 @@ Campaign chapters organize content within books. Each chapter can contain notes 
 from vclient import chapters_service
 
 chapters = chapters_service(
-    user_id="USER_ID",
     campaign_id="CAMPAIGN_ID",
     book_id="BOOK_ID",
+    on_behalf_of="USER_ID",
     company_id="COMPANY_ID"
 )
 ```
@@ -45,7 +45,7 @@ When a value is not included in the request, the corresponding field on `Campaig
 from vclient import chapters_service
 
 chapters = chapters_service(
-    user_id="...", campaign_id="...", book_id="...", company_id="..."
+    campaign_id="...", book_id="...", on_behalf_of="...", company_id="..."
 )
 
 # Embed notes and assets in a single request

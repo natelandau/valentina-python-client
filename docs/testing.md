@@ -155,7 +155,7 @@ async with FakeVClient() as client:
     await svc.get("other-id")    # returns auto-generated data
 ```
 
-The parameter names in `params` correspond to the `{placeholders}` in the endpoint URL patterns. For example, `Routes.CAMPAIGNS_GET` matches the pattern `/api/v1/companies/{company_id}/users/{user_id}/campaigns/{campaign_id}`, so valid keys are `company_id`, `user_id`, and `campaign_id`.
+The parameter names in `params` correspond to the `{placeholders}` in the endpoint URL patterns. For example, `Routes.CAMPAIGNS_GET` matches the pattern `/api/v1/companies/{company_id}/campaigns/{campaign_id}`, so valid keys are `company_id` and `campaign_id`.
 
 ### Simulating Errors
 

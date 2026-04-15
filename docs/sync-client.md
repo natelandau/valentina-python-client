@@ -112,8 +112,8 @@ with SyncVClient(
     for company in companies.list_all():
         print(f"Company: {company.name} ({company.id})")
 
-    # Get campaigns for a user
-    campaigns = sync_campaigns_service(user_id="USER_ID")
+    # Get campaigns on behalf of a user
+    campaigns = sync_campaigns_service(on_behalf_of="USER_ID")
     for campaign in campaigns.list_all():
         print(f"Campaign: {campaign.name}")
 

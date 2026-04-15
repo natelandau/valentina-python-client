@@ -11,7 +11,7 @@ Access read-only character sheet blueprints, including sections, categories, tra
 ```python
 from vclient import character_blueprint_service
 
-blueprint = character_blueprint_service(company_id="COMPANY_ID")
+blueprint = character_blueprint_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 ## Methods

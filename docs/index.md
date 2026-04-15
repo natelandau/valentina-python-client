@@ -56,9 +56,9 @@ async def main():
         for company in await companies.list_all():
             print(f"Company: {company.name}")
 
-        # Fetch campaigns for a specific user
+        # Fetch campaigns on behalf of a user
         campaigns = campaigns_service(
-            user_id="USER_ID",
+            on_behalf_of="USER_ID",
             company_id="COMPANY_ID",
         )
         for campaign in await campaigns.list_all():
@@ -81,9 +81,9 @@ with SyncVClient(
     for company in companies.list_all():
         print(f"Company: {company.name}")
 
-    # Fetch campaigns for a specific user
+    # Fetch campaigns on behalf of a user
     campaigns = sync_campaigns_service(
-        user_id="USER_ID",
+        on_behalf_of="USER_ID",
         company_id="COMPANY_ID",
     )
     for campaign in campaigns.list_all():
@@ -100,7 +100,7 @@ When fetching a single character, you can embed related resources directly in th
 
 ```python
 async with VClient(base_url="...", api_key="...") as client:
-    svc = client.characters(user_id="USER_ID", campaign_id="CAMPAIGN_ID")
+    svc = client.characters(on_behalf_of="USER_ID")
 
     # Fetch character with embedded traits and inventory
     detail = await svc.get("CHARACTER_ID", include=["traits", "inventory"])
@@ -123,7 +123,7 @@ async with VClient(base_url="...", api_key="...") as client:
 
 ```python
 with SyncVClient(base_url="...", api_key="...") as client:
-    svc = client.characters(user_id="USER_ID", campaign_id="CAMPAIGN_ID")
+    svc = client.characters(on_behalf_of="USER_ID")
     detail = svc.get("CHARACTER_ID", include=["traits", "notes"])
 ```
 

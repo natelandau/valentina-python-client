@@ -13,7 +13,7 @@ The Dice Rolls service manages dice roll records in the Valentina API, allowing 
 ```python
 from vclient import dicerolls_service
 
-dicerolls = dicerolls_service(user_id="USER_ID", company_id="COMPANY_ID")
+dicerolls = dicerolls_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 ## Methods
