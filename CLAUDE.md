@@ -81,6 +81,7 @@ VClient
 ├── chapters(campaign_id, book_id, on_behalf_of, company_id)
 ├── dicerolls(on_behalf_of, company_id)
 ├── character_autogen(on_behalf_of, company_id)
+├── user_self_registration(company_id)         # No on_behalf_of — API key auth only (SSO onboarding)
 └── ... etc
 ```
 
@@ -112,9 +113,9 @@ with SyncVClient(base_url="https://api.valentina-noir.com", api_key="...") as cl
 
 Constants for these names are in `constants.py`: `ENV_BASE_URL`, `ENV_API_KEY`, `ENV_DEFAULT_COMPANY_ID`.
 
-Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `users_service`, etc.
+Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `user_self_registration_service`, `users_service`, etc.
 
-Sync factory functions in `_sync/registry.py`: `sync_books_service`, `sync_campaigns_service`, `sync_characters_service`, `sync_companies_service`, etc.
+Sync factory functions in `_sync/registry.py`: `sync_books_service`, `sync_campaigns_service`, `sync_characters_service`, `sync_companies_service`, `sync_user_self_registration_service`, etc.
 
 ## Sync Client (Code Generation)
 
