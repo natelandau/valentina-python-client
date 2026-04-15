@@ -26,7 +26,9 @@ if TYPE_CHECKING:
 class SyncCharacterBlueprintService(SyncBaseService):
     """Service for interacting with the Character Blueprint API."""
 
-    def __init__(self, client: "SyncVClient", company_id: str, on_behalf_of: str) -> None:
+    def __init__(
+        self, client: "SyncVClient", company_id: str, on_behalf_of: str | None = None
+    ) -> None:
         """Initialize the service.
 
         Args:

@@ -486,7 +486,7 @@ class SyncVClient:
         )
 
     def character_blueprint(
-        self, on_behalf_of: str, *, company_id: str | None = None
+        self, on_behalf_of: str | None = None, *, company_id: str | None = None
     ) -> "SyncCharacterBlueprintService":
         """Get a SyncCharacterBlueprintService scoped to a specific company.
 
@@ -508,7 +508,7 @@ class SyncVClient:
         )
 
     def dictionary(
-        self, on_behalf_of: str, *, company_id: str | None = None
+        self, on_behalf_of: str | None = None, *, company_id: str | None = None
     ) -> "SyncDictionaryService":
         """Get a SyncDictionaryService scoped to a specific company.
 
@@ -549,7 +549,9 @@ class SyncVClient:
             self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
         )
 
-    def options(self, on_behalf_of: str, *, company_id: str | None = None) -> "SyncOptionsService":
+    def options(
+        self, on_behalf_of: str | None = None, *, company_id: str | None = None
+    ) -> "SyncOptionsService":
         """Get a SyncOptionsService scoped to a specific company.
 
         Provides methods to retrieve all options and enumerations for the api.

@@ -386,7 +386,7 @@ def character_traits_service(
 
 
 def character_blueprint_service(
-    on_behalf_of: str,
+    on_behalf_of: str | None = None,
     *,
     company_id: str | None = None,
 ) -> "CharacterBlueprintService":
@@ -408,7 +408,7 @@ def character_blueprint_service(
 
 
 def dictionary_service(
-    on_behalf_of: str,
+    on_behalf_of: str | None = None,
     *,
     company_id: str | None = None,
 ) -> "DictionaryService":
@@ -452,7 +452,7 @@ def dicerolls_service(
 
 
 def options_service(
-    on_behalf_of: str,
+    on_behalf_of: str | None = None,
     *,
     company_id: str | None = None,
 ) -> "OptionsService":

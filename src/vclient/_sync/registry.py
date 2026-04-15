@@ -372,7 +372,7 @@ def sync_character_traits_service(
 
 
 def sync_character_blueprint_service(
-    on_behalf_of: str, *, company_id: str | None = None
+    on_behalf_of: str | None = None, *, company_id: str | None = None
 ) -> "SyncCharacterBlueprintService":
     """Create a SyncCharacterBlueprintService scoped to a specific company.
 
@@ -394,7 +394,7 @@ def sync_character_blueprint_service(
 
 
 def sync_dictionary_service(
-    on_behalf_of: str, *, company_id: str | None = None
+    on_behalf_of: str | None = None, *, company_id: str | None = None
 ) -> "SyncDictionaryService":
     """Create a SyncDictionaryService scoped to a specific company.
 
@@ -434,7 +434,7 @@ def sync_dicerolls_service(
 
 
 def sync_options_service(
-    on_behalf_of: str, *, company_id: str | None = None
+    on_behalf_of: str | None = None, *, company_id: str | None = None
 ) -> "SyncOptionsService":
     """Create a SyncOptionsService scoped to a specific company.
 

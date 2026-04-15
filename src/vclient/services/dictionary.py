@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class DictionaryService(BaseService):
     """Service for interacting with the Dictionary API."""
 
-    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str) -> None:
+    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str | None = None) -> None:
         """Initialize the service.
 
         Args:
