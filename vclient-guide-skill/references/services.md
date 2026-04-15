@@ -50,9 +50,9 @@ Complete method signatures for every service class.
 
 ## UsersService
 
-**Access:** `client.users(company_id=)`
-**Factory:** `users_service(company_id=)` / `sync_users_service(company_id=)`
-**Scoping:** company_id
+**Access:** `client.users(on_behalf_of, company_id=)`
+**Factory:** `users_service(on_behalf_of, company_id=)` / `sync_users_service(on_behalf_of, company_id=)`
+**Scoping:** on_behalf_of, company_id
 
 ### CRUD Methods
 
@@ -73,12 +73,11 @@ Complete method signatures for every service class.
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `get_unapproved_page(requesting_user_id)` | `requesting_user_id: str, *, limit, offset` | `PaginatedResponse[User]` |
-| `list_all_unapproved(requesting_user_id)` | `requesting_user_id: str` | `list[User]` |
-| `iter_all_unapproved(requesting_user_id)` | `requesting_user_id: str, *, limit` | `AsyncIterator[User]` |
-| `approve_user(user_id, role, requesting_user_id)` | `user_id: str, role: UserRole, requesting_user_id: str` | `User` |
-| `deny_user(user_id, requesting_user_id)` | `user_id: str, requesting_user_id: str` | `None` |
-| `merge(primary_user_id, secondary_user_id, requesting_user_id)` | all `str` | `User` |
+| `get_unapproved_page()` | `*, limit, offset` | `PaginatedResponse[User]` |
+| `list_all_unapproved()` | — | `list[User]` |
+| `iter_all_unapproved()` | `*, limit` | `AsyncIterator[User]` |
+| `approve_user(user_id, role)` | `user_id: str, role: UserRole` | `User` |
+| `merge(primary_user_id, secondary_user_id)` | both `str` | `User` |
 
 ### Experience
 
@@ -88,7 +87,7 @@ Complete method signatures for every service class.
 | `remove_experience(user_id)` | `user_id: str, request: _ExperienceAddRemove \| None, **kwargs` | `CampaignExperience` |
 | `get_statistics(user_id)` | `user_id: str, *, num_top_traits: int = 5` | `RollStatistics` |
 
-**Experience kwargs:** `amount: int, campaign_id: str, requesting_user_id: str`
+**Experience kwargs:** `amount: int, campaign_id: str`
 
 ### Quickrolls
 
@@ -110,9 +109,9 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 
 ## CampaignsService
 
-**Access:** `client.campaigns(user_id, company_id=)`
-**Factory:** `campaigns_service(user_id, company_id=)` / `sync_campaigns_service(...)`
-**Scoping:** company_id, user_id
+**Access:** `client.campaigns(on_behalf_of, company_id=)`
+**Factory:** `campaigns_service(on_behalf_of, company_id=)` / `sync_campaigns_service(...)`
+**Scoping:** on_behalf_of, company_id
 
 ### Methods
 
@@ -154,9 +153,9 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 
 ## CharactersService
 
-**Access:** `client.characters(user_id, campaign_id, company_id=)`
-**Factory:** `characters_service(user_id, campaign_id, company_id=)` / `sync_characters_service(...)`
-**Scoping:** company_id, user_id, campaign_id
+**Access:** `client.characters(on_behalf_of, company_id=)`
+**Factory:** `characters_service(on_behalf_of, company_id=)` / `sync_characters_service(...)`
+**Scoping:** on_behalf_of, company_id
 
 ### CRUD Methods
 
@@ -200,9 +199,9 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 
 ## CharacterTraitsService
 
-**Access:** `client.character_traits(user_id, campaign_id, character_id, company_id=)`
-**Factory:** `character_traits_service(user_id, campaign_id, character_id, company_id=)` / `sync_character_traits_service(...)`
-**Scoping:** company_id, user_id, campaign_id, character_id
+**Access:** `client.character_traits(on_behalf_of, character_id, company_id=)`
+**Factory:** `character_traits_service(on_behalf_of, character_id, company_id=)` / `sync_character_traits_service(...)`
+**Scoping:** on_behalf_of, character_id, company_id
 
 ### Methods
 
@@ -269,9 +268,9 @@ Each level (sections, categories, subcategories, traits) has the standard pagina
 
 ## CharacterAutogenService
 
-**Access:** `client.character_autogen(user_id, campaign_id, company_id=)`
-**Factory:** `character_autogen_service(user_id, campaign_id, company_id=)` / `sync_character_autogen_service(...)`
-**Scoping:** company_id, user_id, campaign_id
+**Access:** `client.character_autogen(on_behalf_of, campaign_id, company_id=)`
+**Factory:** `character_autogen_service(on_behalf_of, campaign_id, company_id=)` / `sync_character_autogen_service(...)`
+**Scoping:** on_behalf_of, campaign_id, company_id
 
 ### Methods
 
@@ -287,9 +286,9 @@ Each level (sections, categories, subcategories, traits) has the standard pagina
 
 ## BooksService
 
-**Access:** `client.books(user_id, campaign_id, company_id=)`
-**Factory:** `books_service(user_id, campaign_id, company_id=)` / `sync_books_service(...)`
-**Scoping:** company_id, user_id, campaign_id
+**Access:** `client.books(on_behalf_of, campaign_id, company_id=)`
+**Factory:** `books_service(on_behalf_of, campaign_id, company_id=)` / `sync_books_service(...)`
+**Scoping:** on_behalf_of, campaign_id, company_id
 
 ### Methods
 
@@ -312,9 +311,9 @@ Plus standard notes and assets sub-resource methods (same pattern as CampaignsSe
 
 ## ChaptersService
 
-**Access:** `client.chapters(user_id, campaign_id, book_id, company_id=)`
-**Factory:** `chapters_service(user_id, campaign_id, book_id, company_id=)` / `sync_chapters_service(...)`
-**Scoping:** company_id, user_id, campaign_id, book_id
+**Access:** `client.chapters(on_behalf_of, campaign_id, book_id, company_id=)`
+**Factory:** `chapters_service(on_behalf_of, campaign_id, book_id, company_id=)` / `sync_chapters_service(...)`
+**Scoping:** on_behalf_of, campaign_id, book_id, company_id
 
 ### Methods
 
@@ -337,9 +336,9 @@ Plus standard notes and assets sub-resource methods.
 
 ## DicerollService
 
-**Access:** `client.dicerolls(user_id, company_id=)`
-**Factory:** `dicerolls_service(user_id, company_id=)` / `sync_dicerolls_service(...)`
-**Scoping:** company_id, user_id
+**Access:** `client.dicerolls(on_behalf_of, company_id=)`
+**Factory:** `dicerolls_service(on_behalf_of, company_id=)` / `sync_dicerolls_service(...)`
+**Scoping:** on_behalf_of, company_id
 
 ### Methods
 
