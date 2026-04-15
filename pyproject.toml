@@ -9,7 +9,7 @@
         "httpx>=0.28.1",
         "loguru>=0.7.3",
         "polyfactory>=3.3.0",
-        "pydantic[email]>=2.12.5",
+        "pydantic[email]>=2.13.1",
     ]
     description = "Async Python client library for the Valentina Noir API"
     license = { file = "LICENSE" }
@@ -34,10 +34,10 @@
 
 [dependency-groups]
     dev = [
-        "commitizen>=4.13.9",
+        "commitizen>=4.13.10",
         "coverage>=7.13.5",
         "duty>=1.9.0",
-        "prek>=0.3.8",
+        "prek>=0.3.9",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.1.0",
@@ -46,16 +46,16 @@
         "pytest-repeat>=0.9.4",
         "pytest-sugar>=1.1.1",
         "pytest-xdist>=3.8.0",
-        "pytest>=9.0.2",
-        "respx>=0.22.0",
-        "ruff>=0.15.9",
+        "pytest>=9.0.3",
+        "respx>=0.23.1",
+        "ruff>=0.15.10",
         "shellcheck-py>=0.11.0.1",
-        "ty>=0.0.29",
-        "typos>=1.45.0",
+        "ty>=0.0.31",
+        "typos>=1.45.1",
         "vulture>=2.16",
         "yamllint>=1.38.0",
     ]
-    docs = ["zensical>=0.0.31"]
+    docs = ["zensical>=0.0.33"]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"

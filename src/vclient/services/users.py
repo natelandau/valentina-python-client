@@ -63,9 +63,7 @@ class UsersService(BaseService):
         """Format an endpoint with the scoped company_id plus any extra params."""
         return endpoint.format(company_id=self._company_id, **kwargs)
 
-    # -------------------------------------------------------------------------
     # Unapproved User Methods
-    # -------------------------------------------------------------------------
 
     async def get_unapproved_page(
         self,
@@ -202,9 +200,7 @@ class UsersService(BaseService):
         )
         return User.model_validate(response.json())
 
-    # -------------------------------------------------------------------------
     # User CRUD Methods
-    # -------------------------------------------------------------------------
 
     async def get_page(
         self,
@@ -445,9 +441,7 @@ class UsersService(BaseService):
         )
         return RollStatistics.model_validate(response.json())
 
-    # -------------------------------------------------------------------------
     # Asset Methods
-    # -------------------------------------------------------------------------
 
     async def get_assets_page(
         self,
@@ -604,9 +598,7 @@ class UsersService(BaseService):
         )
         return Asset.model_validate(response.json())
 
-    # -------------------------------------------------------------------------
     # Experience Methods
-    # -------------------------------------------------------------------------
 
     async def get_experience(
         self,
@@ -740,9 +732,7 @@ class UsersService(BaseService):
         )
         return CampaignExperience.model_validate(response.json())
 
-    # -------------------------------------------------------------------------
     # Notes Methods
-    # -------------------------------------------------------------------------
 
     async def get_notes_page(
         self,
@@ -931,9 +921,7 @@ class UsersService(BaseService):
             self._format_endpoint(Endpoints.USER_NOTE, user_id=user_id, note_id=note_id)
         )
 
-    # -------------------------------------------------------------------------
     # Quickroll Methods
-    # -------------------------------------------------------------------------
 
     async def get_quickrolls_page(
         self,
