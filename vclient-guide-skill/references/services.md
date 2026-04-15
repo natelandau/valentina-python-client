@@ -224,8 +224,8 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 
 ## CharacterBlueprintService
 
-**Access:** `client.character_blueprint(company_id=)`
-**Factory:** `character_blueprint_service(company_id=)` / `sync_character_blueprint_service(...)`
+**Access:** `client.character_blueprint(on_behalf_of=, company_id=)` — `on_behalf_of` is optional (not required by API)
+**Factory:** `character_blueprint_service(on_behalf_of=, company_id=)` / `sync_character_blueprint_service(...)`
 **Scoping:** company_id
 
 Provides read-only access to the character sheet template (sections, categories, subcategories, traits, concepts, clans, tribes, auspices).
@@ -355,8 +355,8 @@ Plus standard notes and assets sub-resource methods.
 
 ## DictionaryService
 
-**Access:** `client.dictionary(company_id=)`
-**Factory:** `dictionary_service(company_id=)` / `sync_dictionary_service(...)`
+**Access:** `client.dictionary(on_behalf_of=, company_id=)` — `on_behalf_of` is optional (not required by API)
+**Factory:** `dictionary_service(on_behalf_of=, company_id=)` / `sync_dictionary_service(...)`
 **Scoping:** company_id
 
 ### Methods
@@ -432,8 +432,8 @@ Plus standard notes and assets sub-resource methods.
 
 ## OptionsService
 
-**Access:** `client.options(company_id=)`
-**Factory:** `options_service(company_id=)` / `sync_options_service(...)`
+**Access:** `client.options(on_behalf_of=, company_id=)` — `on_behalf_of` is optional (not required by API)
+**Factory:** `options_service(on_behalf_of=, company_id=)` / `sync_options_service(...)`
 **Scoping:** company_id
 
 ### Methods
