@@ -1,3 +1,9 @@
+## v1.23.0 (2026-04-15)
+
+### Feat
+
+- migrate client to API v2 breaking changes (#68)
+
 ## v1.22.1 (2026-04-12)
 
 ### Fix
