@@ -6,6 +6,10 @@ icon: lucide/users
 
 Manage users within a company, including their experience points, assets, notes, and quickrolls. This service provides comprehensive user management for World of Darkness campaigns.
 
+!!! note "SSO registration"
+
+    For SSO user registration, see [UserSelfRegistrationService](user_self_registration.md).
+
 ## Usage
 
 ```python
@@ -22,7 +26,6 @@ users = users_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 | ----------------------------------------- | ------------ | ---------------------------------------------------------------------------------------- |
 | `get(user_id, *, include=None)`           | `UserDetail` | Retrieve a user by ID, optionally embedding `quickrolls`, `notes`, `assets`, `characters`|
 | `create(request=None, **kwargs)`          | `User`       | Create a new user                                                                        |
-| `register(request=None, **kwargs)`        | `User`       | Register via SSO                                                                         |
 | `update(user_id, request=None, **kwargs)` | `User`       | Update user properties                                                                   |
 | `delete(user_id)`                         | `None`       | Delete a user                                                                            |
 
@@ -298,31 +301,6 @@ print(f"Approved {approved.name_first} as {approved.role}")
 await users.deny_user(user_id=user.id)
 ```
 
-### Register a User via SSO
-
-Register a new user through an external auth provider flow.
-
-```python
-from vclient.models import UserRegisterDTO
-
-# Option 1: Use a model object
-request = UserRegisterDTO(
-    username="jane_doe",
-    email="jane@example.com",
-    name_first="Jane",
-    name_last="Doe",
-)
-user = await users.register(request=request)
-
-# Option 2: Pass fields as keyword arguments
-user = await users.register(
-    username="jane_doe",
-    email="jane@example.com",
-    name_first="Jane",
-    name_last="Doe",
-)
-```
-
 ### Merge Users
 
 Merge an unapproved user's data into an existing primary user.
@@ -338,4 +316,5 @@ print(f"Merged into: {merged_user.username}")
 
 ## Related Documentation
 
-- [Response Models](../models/users.md) - View `User`, `UserRegisterDTO`, `UserMergeDTO`, `UserApproveDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [Response Models](../models/users.md) - View `User`, `UserMergeDTO`, `UserApproveDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [UserSelfRegistrationService](user_self_registration.md) - SSO user registration
