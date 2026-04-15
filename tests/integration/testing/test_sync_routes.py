@@ -57,7 +57,7 @@ class TestSyncSetResponseSingle:
             client.set_response(Routes.CAMPAIGNS_GET, model=campaign)
 
             # When fetching the campaign
-            result = sync_campaigns_service("user123").get(campaign.id)
+            result = sync_campaigns_service().get(campaign.id)
 
             # Then the correct campaign is returned
             assert result.id == campaign.id
@@ -70,7 +70,7 @@ class TestSyncSetResponseSingle:
             client.set_response(Routes.BOOKS_RENUMBER, model=book)
 
             # When renumbering the book
-            result = sync_books_service("user123", "campaign123").renumber(book.id, 5)
+            result = sync_books_service("campaign123").renumber(book.id, 5)
 
             # Then the book is returned
             assert isinstance(result, CampaignBook)
@@ -89,4 +89,4 @@ class TestSyncSetError:
             # When fetching a campaign
             # Then a NotFoundError is raised
             with pytest.raises(NotFoundError):
-                sync_campaigns_service("user123").get("nonexistent")
+                sync_campaigns_service().get("nonexistent")

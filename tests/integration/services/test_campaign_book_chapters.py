@@ -63,9 +63,7 @@ class TestChaptersServiceGetPage:
         ).respond(200, json=paginated_chapters_response)
 
         # When: Getting a page of chapters
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).get_page()
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).get_page()
 
         # Then: Returns PaginatedResponse with CampaignChapter objects
         assert route.called
@@ -97,9 +95,9 @@ class TestChaptersServiceGetPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).get_page(limit=25, offset=50)
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).get_page(
+            limit=25, offset=50
+        )
 
         # Then: Request was made with correct params
         assert route.called
@@ -132,9 +130,7 @@ class TestChaptersServiceListAll:
         )
 
         # When: Calling list_all
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).list_all()
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).list_all()
 
         # Then: Returns list of CampaignChapter objects
         assert isinstance(result, list)
@@ -187,9 +183,9 @@ class TestChaptersServiceIterAll:
         # When: Iterating through all chapters
         chapters = [
             c
-            async for c in vclient.chapters(
-                user_id, campaign_id, book_id, company_id=company_id
-            ).iter_all(limit=1)
+            async for c in vclient.chapters(campaign_id, book_id, company_id=company_id).iter_all(
+                limit=1
+            )
         ]
 
         # Then: All chapters are yielded as CampaignChapter objects
@@ -219,9 +215,7 @@ class TestChaptersServiceGetWithInclude:
         ).respond(200, json=chapter_response_data)
 
         # When: Getting the chapter without include
-        result = await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).get(
-            chapter_id
-        )
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).get(chapter_id)
 
         # Then: Returns CampaignChapterDetail with embeds all None
         assert route.called
@@ -247,7 +241,7 @@ class TestChaptersServiceGetWithInclude:
         ).respond(200, json=payload)
 
         # When: Getting the chapter with include
-        result = await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).get(
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).get(
             chapter_id, include=["notes", "assets"]
         )
 
@@ -278,9 +272,7 @@ class TestChaptersServiceGet:
         ).respond(200, json=chapter_response_data)
 
         # When: Getting the chapter
-        result = await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).get(
-            chapter_id
-        )
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).get(chapter_id)
 
         # Then: Returns CampaignChapter object with correct data
         assert route.called
@@ -304,9 +296,7 @@ class TestChaptersServiceGet:
 
         # When/Then: Getting the chapter raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).get(
-                chapter_id
-            )
+            await vclient.chapters(campaign_id, book_id, company_id=company_id).get(chapter_id)
 
 
 class TestChaptersServiceCreate:
@@ -325,9 +315,9 @@ class TestChaptersServiceCreate:
         ).respond(201, json=chapter_response_data)
 
         # When: Creating a chapter with minimal data
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).create(name="Test Chapter")
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).create(
+            name="Test Chapter"
+        )
 
         # Then: Returns created CampaignChapter object
         assert route.called
@@ -354,9 +344,7 @@ class TestChaptersServiceCreate:
         ).respond(201, json=chapter_response_data)
 
         # When: Creating a chapter with all fields
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).create(
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).create(
             name="Test Chapter",
             description="A test chapter description",
         )
@@ -392,9 +380,9 @@ class TestChaptersServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating the chapter name
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).update(chapter_id, name="Updated Name")
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).update(
+            chapter_id, name="Updated Name"
+        )
 
         # Then: Returns updated CampaignChapter object
         assert route.called
@@ -423,7 +411,7 @@ class TestChaptersServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).update(
+            await vclient.chapters(campaign_id, book_id, company_id=company_id).update(
                 chapter_id, name="New Name"
             )
 
@@ -445,9 +433,7 @@ class TestChaptersServiceDelete:
         ).respond(204)
 
         # When: Deleting the chapter
-        await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).delete(
-            chapter_id
-        )
+        await vclient.chapters(campaign_id, book_id, company_id=company_id).delete(chapter_id)
 
         # Then: Request was made
         assert route.called
@@ -467,9 +453,7 @@ class TestChaptersServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).delete(
-                chapter_id
-            )
+            await vclient.chapters(campaign_id, book_id, company_id=company_id).delete(chapter_id)
 
 
 class TestChaptersServiceRenumber:
@@ -490,9 +474,9 @@ class TestChaptersServiceRenumber:
         ).respond(200, json=updated_data)
 
         # When: Renumbering the chapter
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).renumber(chapter_id, number=3)
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).renumber(
+            chapter_id, number=3
+        )
 
         # Then: Returns updated CampaignChapter object
         assert route.called
@@ -533,9 +517,9 @@ class TestChaptersServiceNotes:
         )
 
         # When: Getting a page of notes
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).get_notes_page(chapter_id)
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).get_notes_page(
+            chapter_id
+        )
 
         # Then: Returns paginated Note objects
         assert route.called
@@ -566,9 +550,9 @@ class TestChaptersServiceNotes:
         )
 
         # When: Calling list_all_notes
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).list_all_notes(chapter_id)
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).list_all_notes(
+            chapter_id
+        )
 
         # Then: Returns list of Note objects
         assert isinstance(result, list)
@@ -590,9 +574,9 @@ class TestChaptersServiceNotes:
         ).respond(200, json=note_response_data)
 
         # When: Getting the note
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).get_note(chapter_id, note_id)
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).get_note(
+            chapter_id, note_id
+        )
 
         # Then: Returns Note object
         assert route.called
@@ -614,9 +598,9 @@ class TestChaptersServiceNotes:
         ).respond(201, json=note_response_data)
 
         # When: Creating a note
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).create_note(chapter_id, title="Test Note", content="This is test content")
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).create_note(
+            chapter_id, title="Test Note", content="This is test content"
+        )
 
         # Then: Returns Note object
         assert route.called
@@ -639,9 +623,9 @@ class TestChaptersServiceNotes:
         ).respond(200, json=updated_data)
 
         # When: Updating the note
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).update_note(chapter_id, note_id, title="Updated Title")
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).update_note(
+            chapter_id, note_id, title="Updated Title"
+        )
 
         # Then: Returns updated Note object
         assert route.called
@@ -663,7 +647,7 @@ class TestChaptersServiceNotes:
         ).respond(204)
 
         # When: Deleting the note
-        await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).delete_note(
+        await vclient.chapters(campaign_id, book_id, company_id=company_id).delete_note(
             chapter_id, note_id
         )
 
@@ -698,7 +682,7 @@ class TestChaptersServiceAssets:
 
         # When: Getting a page of assets
         result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
+            campaign_id, book_id, company_id=company_id
         ).get_assets_page(chapter_id)
 
         # Then: Returns paginated Asset objects
@@ -731,7 +715,7 @@ class TestChaptersServiceAssets:
 
         # When: Calling list_all_assets
         result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
+            campaign_id, book_id, company_id=company_id
         ).list_all_assets(chapter_id)
 
         # Then: Returns list of Asset objects
@@ -754,9 +738,9 @@ class TestChaptersServiceAssets:
         ).respond(200, json=asset_response_data)
 
         # When: Getting the asset
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).get_asset(chapter_id, asset_id)
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).get_asset(
+            chapter_id, asset_id
+        )
 
         # Then: Returns Asset object
         assert route.called
@@ -778,7 +762,7 @@ class TestChaptersServiceAssets:
         ).respond(204)
 
         # When: Deleting the asset
-        await vclient.chapters(user_id, campaign_id, book_id, company_id=company_id).delete_asset(
+        await vclient.chapters(campaign_id, book_id, company_id=company_id).delete_asset(
             chapter_id, asset_id
         )
 
@@ -799,9 +783,7 @@ class TestChaptersServiceAssets:
         ).respond(201, json=asset_response_data)
 
         # When: Uploading an asset
-        result = await vclient.chapters(
-            user_id, campaign_id, book_id, company_id=company_id
-        ).upload_asset(
+        result = await vclient.chapters(campaign_id, book_id, company_id=company_id).upload_asset(
             chapter_id,
             filename="test.png",
             content=b"test content",

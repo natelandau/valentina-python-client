@@ -88,12 +88,7 @@ class TestCharacterTraitsServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_trait_response))
 
         # When: Requesting a page of character traits
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).get_page()
+        result = await vclient.character_traits("char123", company_id="company123").get_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -116,12 +111,9 @@ class TestCharacterTraitsServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_trait_response))
 
         # When: Requesting with pagination
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).get_page(limit=20, offset=10)
+        result = await vclient.character_traits("char123", company_id="company123").get_page(
+            limit=20, offset=10
+        )
 
         # Then: The route was called with correct params
         assert route.called
@@ -139,12 +131,9 @@ class TestCharacterTraitsServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_trait_response))
 
         # When: Requesting with filter
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).get_page(category_id="cat123")
+        result = await vclient.character_traits("char123", company_id="company123").get_page(
+            category_id="cat123"
+        )
 
         # Then: The route was called with correct params
         assert route.called
@@ -162,12 +151,9 @@ class TestCharacterTraitsServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_trait_response))
 
         # When: Requesting with is_rollable filter
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).get_page(is_rollable=True)
+        result = await vclient.character_traits("char123", company_id="company123").get_page(
+            is_rollable=True
+        )
 
         # Then: The route was called with correct params
         assert route.called
@@ -185,12 +171,9 @@ class TestCharacterTraitsServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_trait_response))
 
         # When: Requesting with is_rollable=False filter
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).get_page(is_rollable=False)
+        result = await vclient.character_traits("char123", company_id="company123").get_page(
+            is_rollable=False
+        )
 
         # Then: The route was called with correct params
         assert route.called
@@ -211,12 +194,7 @@ class TestCharacterTraitsServiceGet:
         ).mock(return_value=Response(200, json=character_trait_response_data))
 
         # When: Requesting a character trait
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).get("ct123")
+        result = await vclient.character_traits("char123", company_id="company123").get("ct123")
 
         # Then: The route was called and character trait is returned
         assert route.called
@@ -240,9 +218,7 @@ class TestCharacterTraitsServiceGet:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_traits(
-                "user123", "campaign123", "char123", company_id="company123"
-            ).get("nonexistent")
+            await vclient.character_traits("char123", company_id="company123").get("nonexistent")
 
         assert route.called
 
@@ -267,12 +243,7 @@ class TestCharacterTraitsServiceListAll:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all character traits
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).list_all()
+        result = await vclient.character_traits("char123", company_id="company123").list_all()
 
         # Then: All character traits are returned as a list
         assert route.called
@@ -298,12 +269,9 @@ class TestCharacterTraitsServiceListAll:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting with filter
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).list_all(category_id="cat123")
+        result = await vclient.character_traits("char123", company_id="company123").list_all(
+            category_id="cat123"
+        )
 
         # Then: Filtered results are returned
         assert route.called
@@ -327,12 +295,9 @@ class TestCharacterTraitsServiceListAll:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting with is_rollable filter
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).list_all(is_rollable=True)
+        result = await vclient.character_traits("char123", company_id="company123").list_all(
+            is_rollable=True
+        )
 
         # Then: Filtered results are returned
         assert route.called
@@ -362,10 +327,7 @@ class TestCharacterTraitsServiceIterAll:
         traits = [
             trait
             async for trait in vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
+                "char123", company_id="company123"
             ).iter_all()
         ]
 
@@ -395,10 +357,7 @@ class TestCharacterTraitsServiceIterAll:
         traits = [
             trait
             async for trait in vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
+                "char123", company_id="company123"
             ).iter_all(category_id="cat456")
         ]
 
@@ -427,10 +386,7 @@ class TestCharacterTraitsServiceIterAll:
         traits = [
             trait
             async for trait in vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
+                "char123", company_id="company123"
             ).iter_all(is_rollable=False)
         ]
 
@@ -451,12 +407,9 @@ class TestCharacterTraitsServiceAssign:
         ).mock(return_value=Response(201, json=character_trait_response_data))
 
         # When: Assigning a trait
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).assign(trait_id="trait123", value=3, currency="XP")
+        result = await vclient.character_traits("char123", company_id="company123").assign(
+            trait_id="trait123", value=3, currency="XP"
+        )
 
         # Then: The route was called and character trait is returned
         assert route.called
@@ -481,12 +434,9 @@ class TestCharacterTraitsServiceAssign:
         ).mock(return_value=Response(201, json=response_data))
 
         # When: Assigning a trait with value 0
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).assign(trait_id="trait123", value=0, currency="XP")
+        result = await vclient.character_traits("char123", company_id="company123").assign(
+            trait_id="trait123", value=0, currency="XP"
+        )
 
         # Then: The route was called and character trait is returned
         assert route.called
@@ -503,12 +453,9 @@ class TestCharacterTraitsServiceAssign:
 
         # When/Then: Assigning raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
-            ).assign(trait_id="nonexistent", value=1, currency="XP")
+            await vclient.character_traits("char123", company_id="company123").assign(
+                trait_id="nonexistent", value=1, currency="XP"
+            )
 
         assert route.called
 
@@ -535,12 +482,7 @@ class TestCharacterTraitsServiceCreate:
         ).mock(return_value=Response(201, json=response_data))
 
         # When: Creating a custom trait with required fields only
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).create(
+        result = await vclient.character_traits("char123", company_id="company123").create(
             name="Custom Skill",
             category_id="cat123",
         )
@@ -584,12 +526,7 @@ class TestCharacterTraitsServiceCreate:
         ).mock(return_value=Response(201, json=response_data))
 
         # When: Creating a custom trait with all fields
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).create(
+        result = await vclient.character_traits("char123", company_id="company123").create(
             name="Custom Background",
             category_id="backgrounds_cat",
             description="A custom background trait",
@@ -633,12 +570,7 @@ class TestCharacterTraitsServiceCreate:
         ).mock(return_value=Response(201, json=response_data))
 
         # When: Creating a custom trait with initial value
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).create(
+        result = await vclient.character_traits("char123", company_id="company123").create(
             name="Custom Trait",
             category_id="cat123",
             value=2,
@@ -662,12 +594,7 @@ class TestCharacterTraitsServiceCreate:
 
         # When/Then: Creating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
-            ).create(
+            await vclient.character_traits("char123", company_id="company123").create(
                 name="Custom Trait",
                 category_id="nonexistent_cat",
             )
@@ -687,12 +614,7 @@ class TestCharacterTraitsServiceDelete:
         ).mock(return_value=Response(204))
 
         # When: Deleting the trait
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).delete("ct123")
+        result = await vclient.character_traits("char123", company_id="company123").delete("ct123")
 
         # Then: The route was called and None is returned
         assert route.called
@@ -708,12 +630,9 @@ class TestCharacterTraitsServiceDelete:
         ).mock(return_value=Response(204))
 
         # When: Deleting the trait with currency
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).delete("ct123", currency="XP")
+        result = await vclient.character_traits("char123", company_id="company123").delete(
+            "ct123", currency="XP"
+        )
 
         # Then: The route was called with currency param and None is returned
         assert route.called
@@ -729,12 +648,7 @@ class TestCharacterTraitsServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
-            ).delete("nonexistent")
+            await vclient.character_traits("char123", company_id="company123").delete("nonexistent")
 
         assert route.called
 
@@ -786,10 +700,7 @@ class TestCharacterTraitsServiceMultiplePages:
         traits = [
             trait
             async for trait in vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
+                "char123", company_id="company123"
             ).iter_all(limit=1)
         ]
 
@@ -816,10 +727,7 @@ class TestCharacterTraitsServiceGetValueOptions:
 
         # When: Getting the value options for a character trait
         result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
+            "char123", company_id="company123"
         ).get_value_options("ct123")
 
         # Then: The route was called and the value options are returned
@@ -841,12 +749,9 @@ class TestCharacterTraitsServiceChangeValue:
         ).mock(return_value=Response(200, json=character_trait_response_data))
 
         # When: Changing the value of a character trait
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).change_value("ct123", new_value=4, currency="XP")
+        result = await vclient.character_traits("char123", company_id="company123").change_value(
+            "ct123", new_value=4, currency="XP"
+        )
 
         # Then: The route was called and character trait is returned
         assert route.called
@@ -900,12 +805,9 @@ class TestCharacterTraitsServiceBulkAssign:
             CharacterTraitAdd(trait_id="trait1", value=2, currency="NO_COST"),
             CharacterTraitAdd(trait_id="trait2", value=1, currency="XP"),
         ]
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).bulk_assign(items)
+        result = await vclient.character_traits("char123", company_id="company123").bulk_assign(
+            items
+        )
 
         # Then: The route was called and response is parsed correctly
         assert route.called
@@ -938,12 +840,9 @@ class TestCharacterTraitsServiceBulkAssign:
             CharacterTraitAdd(trait_id="trait1", value=2, currency="NO_COST"),
             CharacterTraitAdd(trait_id="trait2", value=1, currency="XP"),
         ]
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).bulk_assign(items)
+        result = await vclient.character_traits("char123", company_id="company123").bulk_assign(
+            items
+        )
 
         # Then: Both succeeded and failed lists are populated
         assert route.called
@@ -961,12 +860,7 @@ class TestCharacterTraitsServiceBulkAssign:
         ).mock(return_value=Response(200, json={"succeeded": [], "failed": []}))
 
         # When: Bulk assigning an empty list
-        result = await vclient.character_traits(
-            user_id="user123",
-            campaign_id="campaign123",
-            character_id="char123",
-            company_id="company123",
-        ).bulk_assign([])
+        result = await vclient.character_traits("char123", company_id="company123").bulk_assign([])
 
         # Then: Both lists are empty
         assert route.called
@@ -989,11 +883,6 @@ class TestCharacterTraitsServiceBulkAssign:
         # When/Then: Bulk assigning raises ValidationError
         items = [CharacterTraitAdd(trait_id="t1", value=1, currency="NO_COST")]
         with pytest.raises(ValidationError):
-            await vclient.character_traits(
-                user_id="user123",
-                campaign_id="campaign123",
-                character_id="char123",
-                company_id="company123",
-            ).bulk_assign(items)
+            await vclient.character_traits("char123", company_id="company123").bulk_assign(items)
 
         assert route.called

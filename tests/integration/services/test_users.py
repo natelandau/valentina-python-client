@@ -572,11 +572,10 @@ class TestUsersServiceDelete:
         user_id = "507f1f77bcf86cd799439011"
         route = respx.delete(
             f"{base_url}{Endpoints.USER.format(company_id=company_id, user_id=user_id)}",
-            params={"requesting_user_id": "requester123"},
         ).respond(204)
 
         # When: Deleting the user
-        result = await vclient.users(company_id).delete(user_id, "requester123")
+        result = await vclient.users(company_id).delete(user_id)
 
         # Then: Request was made and returns None
         assert route.called
@@ -590,12 +589,11 @@ class TestUsersServiceDelete:
         user_id = "nonexistent"
         respx.delete(
             f"{base_url}{Endpoints.USER.format(company_id=company_id, user_id=user_id)}",
-            params={"requesting_user_id": "requester123"},
         ).respond(404, json={"detail": "User not found"})
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).delete(user_id, "requester123")
+            await vclient.users(company_id).delete(user_id)
 
 
 class TestUsersServiceGetStatistics:
@@ -632,11 +630,11 @@ class TestUsersServiceGetUnapprovedPage:
         company_id = "company123"
         route = respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "10", "offset": "0", "requesting_user_id": "admin1"},
+            params={"limit": "10", "offset": "0"},
         ).respond(200, json=paginated_users_response)
 
         # When: Getting a page of unapproved users
-        result = await vclient.users(company_id).get_unapproved_page("admin1")
+        result = await vclient.users(company_id).get_unapproved_page()
 
         # Then: Returns PaginatedResponse with User objects
         assert route.called
@@ -651,7 +649,7 @@ class TestUsersServiceGetUnapprovedPage:
         company_id = "company123"
         route = respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "25", "offset": "50", "requesting_user_id": "admin1"},
+            params={"limit": "25", "offset": "50"},
         ).respond(
             200,
             json={
@@ -663,7 +661,7 @@ class TestUsersServiceGetUnapprovedPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.users(company_id).get_unapproved_page("admin1", limit=25, offset=50)
+        result = await vclient.users(company_id).get_unapproved_page(limit=25, offset=50)
 
         # Then: Request was made with correct params
         assert route.called
@@ -681,7 +679,7 @@ class TestUsersServiceListAllUnapproved:
         company_id = "company123"
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "100", "offset": "0", "requesting_user_id": "admin1"},
+            params={"limit": "100", "offset": "0"},
         ).respond(
             200,
             json={
@@ -693,7 +691,7 @@ class TestUsersServiceListAllUnapproved:
         )
 
         # When: Calling list_all_unapproved
-        result = await vclient.users(company_id).list_all_unapproved("admin1")
+        result = await vclient.users(company_id).list_all_unapproved()
 
         # Then: Returns list of User objects
         assert isinstance(result, list)
@@ -712,7 +710,7 @@ class TestUsersServiceIterAllUnapproved:
         user2 = {**user_response_data, "id": "507f1f77bcf86cd799439012", "name_first": "User 2"}
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "1", "offset": "0", "requesting_user_id": "admin1"},
+            params={"limit": "1", "offset": "0"},
         ).respond(
             200,
             json={
@@ -724,7 +722,7 @@ class TestUsersServiceIterAllUnapproved:
         )
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "1", "offset": "1", "requesting_user_id": "admin1"},
+            params={"limit": "1", "offset": "1"},
         ).respond(
             200,
             json={
@@ -736,9 +734,7 @@ class TestUsersServiceIterAllUnapproved:
         )
 
         # When: Iterating through all unapproved users
-        users = [
-            user async for user in vclient.users(company_id).iter_all_unapproved("admin1", limit=1)
-        ]
+        users = [user async for user in vclient.users(company_id).iter_all_unapproved(limit=1)]
 
         # Then: All users are yielded as User objects
         assert len(users) == 2
@@ -976,9 +972,7 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Adding XP
-        result = await vclient.users(company_id).add_xp(
-            user_id, campaign_id, amount=100, requesting_user_id="requester123"
-        )
+        result = await vclient.users(company_id).add_xp(user_id, campaign_id, amount=100)
 
         # Then: Returns updated CampaignExperience object
         assert route.called
@@ -998,9 +992,7 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Removing XP
-        result = await vclient.users(company_id).remove_xp(
-            user_id, campaign_id, amount=25, requesting_user_id="requester123"
-        )
+        result = await vclient.users(company_id).remove_xp(user_id, campaign_id, amount=25)
 
         # Then: Returns updated CampaignExperience object
         assert route.called
@@ -1020,9 +1012,7 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Adding cool points
-        result = await vclient.users(company_id).add_cool_points(
-            user_id, campaign_id, amount=5, requesting_user_id="requester123"
-        )
+        result = await vclient.users(company_id).add_cool_points(user_id, campaign_id, amount=5)
 
         # Then: Returns updated CampaignExperience object
         assert route.called

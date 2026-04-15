@@ -330,45 +330,54 @@ class VClient:
 
         return UsersService(self, self._resolve_company_id(company_id))
 
-    def campaigns(self, user_id: str, company_id: str | None = None) -> "CampaignsService":
-        """Get a CampaignsService scoped to a specific company and user.
+    def campaigns(
+        self,
+        *,
+        company_id: str | None = None,
+        on_behalf_of: str | None = None,
+    ) -> "CampaignsService":
+        """Get a CampaignsService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete campaigns,
         as well as access campaign statistics, assets, and notes.
 
         Args:
-            user_id: The ID of the user to operate as.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
-            A CampaignsService instance scoped to the specified company and user.
+            A CampaignsService instance scoped to the specified company.
 
         Raises:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> campaigns = client.campaigns("user_id")
+            >>> campaigns = client.campaigns()
             >>> all_campaigns = await campaigns.list_all()
             >>> campaign = await campaigns.get("campaign_id")
         """
         from vclient.services.campaigns import CampaignsService
 
-        return CampaignsService(self, self._resolve_company_id(company_id), user_id)
+        return CampaignsService(self, self._resolve_company_id(company_id), on_behalf_of)
 
     def books(
-        self, user_id: str, campaign_id: str, *, company_id: str | None = None
+        self,
+        campaign_id: str,
+        *,
+        company_id: str | None = None,
+        on_behalf_of: str | None = None,
     ) -> "BooksService":
-        """Get a BooksService scoped to a specific company, user, and campaign.
+        """Get a BooksService scoped to a specific company and campaign.
 
         Provides methods to create, retrieve, update, and delete campaign books,
         as well as access book notes and assets.
 
         Args:
-            user_id: The ID of the user to operate as.
             campaign_id: The ID of the campaign to operate within.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A BooksService instance scoped to the specified context.
@@ -377,28 +386,33 @@ class VClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> books = client.books("user_id", "campaign_id")
+            >>> books = client.books("campaign_id")
             >>> all_books = await books.list_all()
             >>> book = await books.get("book_id")
         """
         from vclient.services.campaign_books import BooksService
 
-        return BooksService(self, self._resolve_company_id(company_id), user_id, campaign_id)
+        return BooksService(self, self._resolve_company_id(company_id), campaign_id, on_behalf_of)
 
     def chapters(
-        self, user_id: str, campaign_id: str, book_id: str, *, company_id: str | None = None
+        self,
+        campaign_id: str,
+        book_id: str,
+        *,
+        company_id: str | None = None,
+        on_behalf_of: str | None = None,
     ) -> "ChaptersService":
-        """Get a ChaptersService scoped to a specific company, user, campaign, and book.
+        """Get a ChaptersService scoped to a specific company, campaign, and book.
 
         Provides methods to create, retrieve, update, and delete campaign book chapters,
         as well as access chapter notes and assets.
 
         Args:
-            user_id: The ID of the user to operate as.
             campaign_id: The ID of the campaign to operate within.
             book_id: The ID of the book to operate within.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A ChaptersService instance scoped to the specified context.
@@ -407,29 +421,31 @@ class VClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> chapters = client.chapters("user_id", "campaign_id", "book_id")
+            >>> chapters = client.chapters("campaign_id", "book_id")
             >>> all_chapters = await chapters.list_all()
             >>> chapter = await chapters.get("chapter_id")
         """
         from vclient.services.campaign_book_chapters import ChaptersService
 
         return ChaptersService(
-            self, self._resolve_company_id(company_id), user_id, campaign_id, book_id
+            self, self._resolve_company_id(company_id), campaign_id, book_id, on_behalf_of
         )
 
     def characters(
-        self, user_id: str, campaign_id: str, *, company_id: str | None = None
+        self,
+        *,
+        company_id: str | None = None,
+        on_behalf_of: str | None = None,
     ) -> "CharactersService":
-        """Get a CharactersService scoped to a specific company, user, and campaign.
+        """Get a CharactersService scoped to a specific company.
 
-        Provides methods to create, retrieve, update, and delete characters within
-        a campaign.
+        Provides methods to create, retrieve, update, and delete characters.
+        Use the optional ``campaign_id`` filter on list methods to scope to a campaign.
 
         Args:
-            user_id: The ID of the user to operate as.
-            campaign_id: The ID of the campaign to operate within.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A CharactersService instance scoped to the specified context.
@@ -438,33 +454,31 @@ class VClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> characters = client.characters("user_id", "campaign_id")
+            >>> characters = client.characters()
             >>> all_characters = await characters.list_all()
             >>> character = await characters.get("character_id")
         """
         from vclient.services.characters import CharactersService
 
-        return CharactersService(self, self._resolve_company_id(company_id), user_id, campaign_id)
+        return CharactersService(self, self._resolve_company_id(company_id), on_behalf_of)
 
     def character_traits(
         self,
-        user_id: str,
-        campaign_id: str,
         character_id: str,
         *,
         company_id: str | None = None,
+        on_behalf_of: str | None = None,
     ) -> "CharacterTraitsService":
-        """Get a CharacterTraitsService scoped to a specific company, user, campaign, and character.
+        """Get a CharacterTraitsService scoped to a specific company and character.
 
         Provides methods to create, retrieve, update, and delete character traits within
         a character.
 
         Args:
-            user_id: The ID of the user to operate as.
-            campaign_id: The ID of the campaign to operate within.
             character_id: The ID of the character to operate within.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Returns:
             A CharacterTraitsService instance scoped to the specified context.
@@ -473,14 +487,14 @@ class VClient:
             ValueError: If no company_id provided and no default configured.
 
         Example:
-            >>> character_traits = client.character_traits("user_id", "campaign_id", "character_id")
+            >>> character_traits = client.character_traits("character_id")
             >>> all_character_traits = await character_traits.list_all()
             >>> character_trait = await character_traits.get("character_trait_id")
         """
         from vclient.services.character_traits import CharacterTraitsService
 
         return CharacterTraitsService(
-            self, self._resolve_company_id(company_id), user_id, campaign_id, character_id
+            self, self._resolve_company_id(company_id), character_id, on_behalf_of
         )
 
     def character_blueprint(self, company_id: str | None = None) -> "CharacterBlueprintService":
@@ -516,22 +530,27 @@ class VClient:
 
         return DictionaryService(self, self._resolve_company_id(company_id))
 
-    def dicerolls(self, user_id: str, company_id: str | None = None) -> "DicerollService":
-        """Get a DicerollService scoped to a specific company and user.
+    def dicerolls(
+        self,
+        *,
+        company_id: str | None = None,
+        on_behalf_of: str | None = None,
+    ) -> "DicerollService":
+        """Get a DicerollService scoped to a specific company.
 
         Provides methods to create, retrieve, and list dice rolls.
 
         Args:
-            user_id: The ID of the user to operate as.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Raises:
             ValueError: If no company_id provided and no default configured.
         """
         from vclient.services.dicerolls import DicerollService
 
-        return DicerollService(self, self._resolve_company_id(company_id), user_id)
+        return DicerollService(self, self._resolve_company_id(company_id), on_behalf_of)
 
     def options(self, company_id: str | None = None) -> "OptionsService":
         """Get a OptionsService scoped to a specific company.
@@ -550,23 +569,25 @@ class VClient:
         return OptionsService(self, self._resolve_company_id(company_id))
 
     def character_autogen(
-        self, user_id: str, campaign_id: str, *, company_id: str | None = None
+        self,
+        *,
+        company_id: str | None = None,
+        on_behalf_of: str | None = None,
     ) -> "CharacterAutogenService":
-        """Get a CharacterAutogenService scoped to a specific company, user, and campaign.
+        """Get a CharacterAutogenService scoped to a specific company.
 
-        Provides methods to create, retrieve, update, and delete character autogen.
+        Provides methods to autogenerate characters and manage chargen sessions.
+        Pass ``campaign_id`` directly to ``generate_character()`` and
+        ``start_chargen_session()`` to scope each call to a specific campaign.
 
         Args:
-            user_id: The ID of the user to operate as.
-            campaign_id: The ID of the campaign to operate within.
             company_id: The ID of the company to operate within. If not provided,
                 uses the default_company_id from config.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
         Raises:
             ValueError: If no company_id provided and no default configured.
         """
         from vclient.services.character_autogen import CharacterAutogenService
 
-        return CharacterAutogenService(
-            self, self._resolve_company_id(company_id), user_id, campaign_id
-        )
+        return CharacterAutogenService(self, self._resolve_company_id(company_id), on_behalf_of)

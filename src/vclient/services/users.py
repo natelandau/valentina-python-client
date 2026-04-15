@@ -48,15 +48,17 @@ class UsersService(BaseService):
         ...     user = await users.get("user_id")
     """
 
-    def __init__(self, client: "VClient", company_id: str) -> None:
+    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str | None = None) -> None:
         """Initialize the service scoped to a specific company.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
         """Format an endpoint with the scoped company_id plus any extra params."""
@@ -68,7 +70,6 @@ class UsersService(BaseService):
 
     async def get_unapproved_page(
         self,
-        requesting_user_id: str,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
@@ -78,7 +79,6 @@ class UsersService(BaseService):
         Unapproved users have registered but have not yet been approved by an admin.
 
         Args:
-            requesting_user_id: ID of the user making the request (for permissions).
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
 
@@ -90,26 +90,21 @@ class UsersService(BaseService):
             User,
             limit=limit,
             offset=offset,
-            params=self._build_params(requesting_user_id=requesting_user_id),
         )
 
-    async def list_all_unapproved(self, requesting_user_id: str) -> list[User]:
+    async def list_all_unapproved(self) -> list[User]:
         """Retrieve all unapproved users within a company.
 
         Automatically paginates through all results. Use `get_unapproved_page()` for
         paginated access or `iter_all_unapproved()` for memory-efficient streaming.
 
-        Args:
-            requesting_user_id: ID of the user making the request (for permissions).
-
         Returns:
             A list of all unapproved User objects.
         """
-        return [user async for user in self.iter_all_unapproved(requesting_user_id)]
+        return [user async for user in self.iter_all_unapproved()]
 
     async def iter_all_unapproved(
         self,
-        requesting_user_id: str,
         *,
         limit: int = 100,
     ) -> AsyncIterator[User]:
@@ -119,7 +114,6 @@ class UsersService(BaseService):
         until all items have been retrieved.
 
         Args:
-            requesting_user_id: ID of the user making the request (for permissions).
             limit: Items per page (default 100 for efficiency).
 
         Yields:
@@ -128,7 +122,6 @@ class UsersService(BaseService):
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST),
             limit=limit,
-            params=self._build_params(requesting_user_id=requesting_user_id),
         ):
             yield User.model_validate(item)
 
@@ -443,7 +436,6 @@ class UsersService(BaseService):
     async def delete(
         self,
         user_id: str,
-        requesting_user_id: str,
     ) -> None:
         """Remove a user from the company.
 
@@ -451,7 +443,6 @@ class UsersService(BaseService):
 
         Args:
             user_id: The ID of the user to delete.
-            requesting_user_id: ID of the user making the request.
 
         Raises:
             NotFoundError: If the user does not exist.
@@ -459,7 +450,6 @@ class UsersService(BaseService):
         """
         await self._delete(
             self._format_endpoint(Endpoints.USER, user_id=user_id),
-            params={"requesting_user_id": requesting_user_id},
         )
 
     async def get_statistics(
@@ -684,7 +674,6 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
-        requesting_user_id: str,
     ) -> CampaignExperience:
         """Award experience points to a user for a specific campaign.
 
@@ -695,7 +684,6 @@ class UsersService(BaseService):
             user_id: The ID of the user to award XP to.
             campaign_id: The ID of the campaign to add XP for.
             amount: The amount of XP to add.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -709,7 +697,6 @@ class UsersService(BaseService):
             _ExperienceAddRemove,
             amount=amount,
             campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_ADD, user_id=user_id),
@@ -722,7 +709,6 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
-        requesting_user_id: str,
     ) -> CampaignExperience:
         """Deduct experience points from a user's current XP pool.
 
@@ -732,7 +718,6 @@ class UsersService(BaseService):
             user_id: The ID of the user to remove XP from.
             campaign_id: The ID of the campaign to remove XP for.
             amount: The amount of XP to remove.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -747,7 +732,6 @@ class UsersService(BaseService):
             _ExperienceAddRemove,
             amount=amount,
             campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_REMOVE, user_id=user_id),
@@ -760,7 +744,6 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
-        requesting_user_id: str,
     ) -> CampaignExperience:
         """Award cool points to a user for a specific campaign.
 
@@ -771,7 +754,6 @@ class UsersService(BaseService):
             user_id: The ID of the user to award cool points to.
             campaign_id: The ID of the campaign to add cool points for.
             amount: The amount of cool points to add.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -785,7 +767,6 @@ class UsersService(BaseService):
             _ExperienceAddRemove,
             amount=amount,
             campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_CP_ADD, user_id=user_id),

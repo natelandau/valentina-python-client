@@ -24,29 +24,29 @@ class CharacterTraitsService(BaseService):
     """Service for interacting with the Character Traits API."""
 
     def __init__(
-        self, client: "VClient", company_id: str, user_id: str, campaign_id: str, character_id: str
+        self,
+        client: "VClient",
+        company_id: str,
+        character_id: str,
+        on_behalf_of: str | None = None,
     ) -> None:
         """Initialize the service.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
-            user_id: The ID of the user to operate as.
-            campaign_id: The ID of the campaign to operate within.
             character_id: The ID of the character to operate within.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
-        self._user_id = user_id
-        self._campaign_id = campaign_id
         self._character_id = character_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
-        """Format an endpoint with the scoped company_id, user_id, campaign_id, and character_id plus any extra params."""
+        """Format an endpoint with the scoped company_id and character_id plus any extra params."""
         return endpoint.format(
             company_id=self._company_id,
-            user_id=self._user_id,
-            campaign_id=self._campaign_id,
             character_id=self._character_id,
             **kwargs,
         )

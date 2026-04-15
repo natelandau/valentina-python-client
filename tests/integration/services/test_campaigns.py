@@ -62,7 +62,7 @@ class TestCampaignsServiceGetPage:
         ).respond(200, json=paginated_campaigns_response)
 
         # When: Getting a page of campaigns
-        result = await vclient.campaigns(user_id, company_id).get_page()
+        result = await vclient.campaigns(company_id=company_id).get_page()
 
         # Then: Returns PaginatedResponse with Campaign objects
         assert route.called
@@ -92,7 +92,7 @@ class TestCampaignsServiceGetPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.campaigns(user_id, company_id).get_page(limit=25, offset=50)
+        result = await vclient.campaigns(company_id=company_id).get_page(limit=25, offset=50)
 
         # Then: Request was made with correct params
         assert route.called
@@ -123,7 +123,7 @@ class TestCampaignsServiceListAll:
         )
 
         # When: Calling list_all
-        result = await vclient.campaigns(user_id, company_id).list_all()
+        result = await vclient.campaigns(company_id=company_id).list_all()
 
         # Then: Returns list of Campaign objects
         assert isinstance(result, list)
@@ -171,7 +171,7 @@ class TestCampaignsServiceIterAll:
         )
 
         # When: Iterating through all campaigns
-        campaigns = [c async for c in vclient.campaigns(user_id, company_id).iter_all(limit=1)]
+        campaigns = [c async for c in vclient.campaigns(company_id=company_id).iter_all(limit=1)]
 
         # Then: All campaigns are yielded as Campaign objects
         assert len(campaigns) == 2
@@ -195,7 +195,7 @@ class TestCampaignsServiceGet:
         ).respond(200, json=campaign_response_data)
 
         # When: Getting the campaign
-        result = await vclient.campaigns(user_id, company_id).get(campaign_id)
+        result = await vclient.campaigns(company_id=company_id).get(campaign_id)
 
         # Then: Returns Campaign object with correct data
         assert route.called
@@ -218,7 +218,7 @@ class TestCampaignsServiceGet:
 
         # When/Then: Getting the campaign raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.campaigns(user_id, company_id).get(campaign_id)
+            await vclient.campaigns(company_id=company_id).get(campaign_id)
 
 
 class TestCampaignsServiceCreate:
@@ -235,7 +235,7 @@ class TestCampaignsServiceCreate:
         ).respond(201, json=campaign_response_data)
 
         # When: Creating a campaign with minimal data
-        result = await vclient.campaigns(user_id, company_id).create(name="Test Campaign")
+        result = await vclient.campaigns(company_id=company_id).create(name="Test Campaign")
 
         # Then: Returns created Campaign object
         assert route.called
@@ -260,7 +260,7 @@ class TestCampaignsServiceCreate:
         ).respond(201, json=campaign_response_data)
 
         # When: Creating a campaign with all fields
-        result = await vclient.campaigns(user_id, company_id).create(
+        result = await vclient.campaigns(company_id=company_id).create(
             name="Test Campaign",
             description="A test campaign description",
             desperation=2,
@@ -285,7 +285,7 @@ class TestCampaignsServiceCreate:
         """Verify validation error on invalid data raises RequestValidationError."""
         # When/Then: Creating with invalid data raises RequestValidationError
         with pytest.raises(RequestValidationError):
-            await vclient.campaigns("user123", "company123").create(name="AB")
+            await vclient.campaigns(company_id="company123").create(name="AB")
 
 
 class TestCampaignsServiceUpdate:
@@ -304,7 +304,7 @@ class TestCampaignsServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating the campaign name
-        result = await vclient.campaigns(user_id, company_id).update(
+        result = await vclient.campaigns(company_id=company_id).update(
             campaign_id, name="Updated Name"
         )
 
@@ -333,7 +333,7 @@ class TestCampaignsServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.campaigns(user_id, company_id).update(campaign_id, name="New Name")
+            await vclient.campaigns(company_id=company_id).update(campaign_id, name="New Name")
 
 
 class TestCampaignsServiceDelete:
@@ -351,7 +351,7 @@ class TestCampaignsServiceDelete:
         ).respond(204)
 
         # When: Deleting the campaign
-        await vclient.campaigns(user_id, company_id).delete(campaign_id)
+        await vclient.campaigns(company_id=company_id).delete(campaign_id)
 
         # Then: Request was made
         assert route.called
@@ -369,7 +369,7 @@ class TestCampaignsServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.campaigns(user_id, company_id).delete(campaign_id)
+            await vclient.campaigns(company_id=company_id).delete(campaign_id)
 
 
 class TestCampaignsServiceGetStatistics:
@@ -388,7 +388,7 @@ class TestCampaignsServiceGetStatistics:
         ).respond(200, json=statistics_response_data)
 
         # When: Getting statistics
-        result = await vclient.campaigns(user_id, company_id).get_statistics(campaign_id)
+        result = await vclient.campaigns(company_id=company_id).get_statistics(campaign_id)
 
         # Then: Returns RollStatistics object
         assert route.called
@@ -421,7 +421,7 @@ class TestCampaignsServiceAssets:
         )
 
         # When: Getting a page of assets
-        result = await vclient.campaigns(user_id, company_id).get_assets_page(campaign_id)
+        result = await vclient.campaigns(company_id=company_id).get_assets_page(campaign_id)
 
         # Then: Returns paginated Asset objects
         assert route.called
@@ -450,7 +450,7 @@ class TestCampaignsServiceAssets:
         )
 
         # When: Calling list_all_assets
-        result = await vclient.campaigns(user_id, company_id).list_all_assets(campaign_id)
+        result = await vclient.campaigns(company_id=company_id).list_all_assets(campaign_id)
 
         # Then: Returns list of Asset objects
         assert isinstance(result, list)
@@ -470,7 +470,7 @@ class TestCampaignsServiceAssets:
         ).respond(200, json=asset_response_data)
 
         # When: Getting the asset
-        result = await vclient.campaigns(user_id, company_id).get_asset(campaign_id, asset_id)
+        result = await vclient.campaigns(company_id=company_id).get_asset(campaign_id, asset_id)
 
         # Then: Returns Asset object
         assert route.called
@@ -490,7 +490,7 @@ class TestCampaignsServiceAssets:
         ).respond(204)
 
         # When: Deleting the asset
-        await vclient.campaigns(user_id, company_id).delete_asset(campaign_id, asset_id)
+        await vclient.campaigns(company_id=company_id).delete_asset(campaign_id, asset_id)
 
         # Then: Request was made
         assert route.called
@@ -507,7 +507,7 @@ class TestCampaignsServiceAssets:
         ).respond(201, json=asset_response_data)
 
         # When: Uploading an asset
-        result = await vclient.campaigns(user_id, company_id).upload_asset(
+        result = await vclient.campaigns(company_id=company_id).upload_asset(
             campaign_id,
             filename="test.png",
             content=b"test content",
@@ -544,7 +544,7 @@ class TestCampaignsServiceNotes:
         )
 
         # When: Getting a page of notes
-        result = await vclient.campaigns(user_id, company_id).get_notes_page(campaign_id)
+        result = await vclient.campaigns(company_id=company_id).get_notes_page(campaign_id)
 
         # Then: Returns paginated Note objects
         assert route.called
@@ -565,7 +565,7 @@ class TestCampaignsServiceNotes:
         ).respond(200, json=note_response_data)
 
         # When: Getting the note
-        result = await vclient.campaigns(user_id, company_id).get_note(campaign_id, note_id)
+        result = await vclient.campaigns(company_id=company_id).get_note(campaign_id, note_id)
 
         # Then: Returns Note object
         assert route.called
@@ -585,7 +585,7 @@ class TestCampaignsServiceNotes:
         ).respond(201, json=note_response_data)
 
         # When: Creating a note
-        result = await vclient.campaigns(user_id, company_id).create_note(
+        result = await vclient.campaigns(company_id=company_id).create_note(
             campaign_id, title="Test Note", content="This is test content"
         )
 
@@ -608,7 +608,7 @@ class TestCampaignsServiceNotes:
         ).respond(200, json=updated_data)
 
         # When: Updating the note
-        result = await vclient.campaigns(user_id, company_id).update_note(
+        result = await vclient.campaigns(company_id=company_id).update_note(
             campaign_id, note_id, title="Updated Title"
         )
 
@@ -630,7 +630,7 @@ class TestCampaignsServiceNotes:
         ).respond(204)
 
         # When: Deleting the note
-        await vclient.campaigns(user_id, company_id).delete_note(campaign_id, note_id)
+        await vclient.campaigns(company_id=company_id).delete_note(campaign_id, note_id)
 
         # Then: Request was made
         assert route.called

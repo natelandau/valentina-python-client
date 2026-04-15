@@ -240,19 +240,21 @@ def sync_users_service(company_id: str | None = None) -> "SyncUsersService":
     return sync_default_client().users(company_id)
 
 
-def sync_campaigns_service(user_id: str, company_id: str | None = None) -> "SyncCampaignsService":
-    """Create a SyncCampaignsService scoped to a specific company and user.
+def sync_campaigns_service(
+    *, company_id: str | None = None, on_behalf_of: str | None = None
+) -> "SyncCampaignsService":
+    """Create a SyncCampaignsService scoped to a specific company.
 
     Provides access to campaign management operations (list, get, create, update, delete)
-    within a specific company and user context without needing to pass a client instance.
+    within a specific company context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
+        on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
     Returns:
-        SyncCampaignsService: A service instance scoped to the specified company and user.
+        SyncCampaignsService: A service instance scoped to the specified company.
 
     Raises:
         RuntimeError: If no default client has been configured.
@@ -260,27 +262,27 @@ def sync_campaigns_service(user_id: str, company_id: str | None = None) -> "Sync
 
     Example:
         ```python
-        campaigns = sync_campaigns_service("user_id")
+        campaigns = sync_campaigns_service()
         all_campaigns = await campaigns.list_all()
         campaign = await campaigns.get("campaign_id")
         ```
     """
-    return sync_default_client().campaigns(user_id, company_id)
+    return sync_default_client().campaigns(company_id=company_id, on_behalf_of=on_behalf_of)
 
 
 def sync_books_service(
-    user_id: str, campaign_id: str, *, company_id: str | None = None
+    campaign_id: str, *, company_id: str | None = None, on_behalf_of: str | None = None
 ) -> "SyncBooksService":
-    """Create a SyncBooksService scoped to a specific company, user, and campaign.
+    """Create a SyncBooksService scoped to a specific company and campaign.
 
     Provides access to campaign book management operations (list, get, create, update, delete)
-    within a specific company, user, and campaign context without needing to pass a client instance.
+    within a specific company and campaign context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
         campaign_id: The ID of the campaign to operate within.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
+        on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
     Returns:
         SyncBooksService: A service instance scoped to the specified context.
@@ -291,78 +293,84 @@ def sync_books_service(
 
     Example:
         ```python
-        books = sync_books_service("user_id", "campaign_id")
+        books = sync_books_service("campaign_id")
         all_books = await books.list_all()
         book = await books.get("book_id")
         ```
     """
-    return sync_default_client().books(user_id, campaign_id, company_id=company_id)
+    return sync_default_client().books(
+        campaign_id, company_id=company_id, on_behalf_of=on_behalf_of
+    )
 
 
 def sync_chapters_service(
-    user_id: str, campaign_id: str, book_id: str, *, company_id: str | None = None
+    campaign_id: str,
+    book_id: str,
+    *,
+    company_id: str | None = None,
+    on_behalf_of: str | None = None,
 ) -> "SyncChaptersService":
-    """Create a SyncChaptersService scoped to a specific company, user, campaign, and book.
+    """Create a SyncChaptersService scoped to a specific company, campaign, and book.
 
     Provides access to campaign book chapter management operations (list, get, create, update, delete)
-    within a specific company, user, campaign, and book context without needing to pass a client instance.
+    within a specific company, campaign, and book context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
         campaign_id: The ID of the campaign to operate within.
         book_id: The ID of the book to operate within.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
+        on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
     Raises:
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().chapters(user_id, campaign_id, book_id, company_id=company_id)
+    return sync_default_client().chapters(
+        campaign_id, book_id, company_id=company_id, on_behalf_of=on_behalf_of
+    )
 
 
 def sync_characters_service(
-    user_id: str, campaign_id: str, *, company_id: str | None = None
+    *, company_id: str | None = None, on_behalf_of: str | None = None
 ) -> "SyncCharactersService":
-    """Create a SyncCharactersService scoped to a specific company, user, and campaign.
+    """Create a SyncCharactersService scoped to a specific company.
 
     Provides access to character management operations (list, get, create, update, delete)
-    within a specific company, user, and campaign context without needing to pass a client instance.
+    within a specific company context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
-        campaign_id: The ID of the campaign to operate within.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
+        on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
     Raises:
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().characters(user_id, campaign_id, company_id=company_id)
+    return sync_default_client().characters(company_id=company_id, on_behalf_of=on_behalf_of)
 
 
 def sync_character_traits_service(
-    user_id: str, campaign_id: str, character_id: str, *, company_id: str | None = None
+    character_id: str, *, company_id: str | None = None, on_behalf_of: str | None = None
 ) -> "SyncCharacterTraitsService":
-    """Create a SyncCharacterTraitsService scoped to a specific company, user, campaign, and character.
+    """Create a SyncCharacterTraitsService scoped to a specific company and character.
 
     Provides access to character trait management operations (list, get, create, update, delete)
-    within a specific company, user, campaign, and character context without needing to pass a client instance.
+    within a specific company and character context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
-        campaign_id: The ID of the campaign to operate within.
         character_id: The ID of the character to operate within.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
+        on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
     Raises:
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
     return sync_default_client().character_traits(
-        user_id, campaign_id, character_id, company_id=company_id
+        character_id, company_id=company_id, on_behalf_of=on_behalf_of
     )
 
 
@@ -402,22 +410,24 @@ def sync_dictionary_service(company_id: str | None = None) -> "SyncDictionarySer
     return sync_default_client().dictionary(company_id)
 
 
-def sync_dicerolls_service(user_id: str, company_id: str | None = None) -> "SyncDicerollService":
-    """Create a SyncDicerollService scoped to a specific company and user.
+def sync_dicerolls_service(
+    *, company_id: str | None = None, on_behalf_of: str | None = None
+) -> "SyncDicerollService":
+    """Create a SyncDicerollService scoped to a specific company.
 
     Provides access to dice roll management operations (list, get, create)
-    within a specific company and user context without needing to pass a client instance.
+    within a specific company context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
+        on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
     Raises:
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().dicerolls(user_id, company_id)
+    return sync_default_client().dicerolls(company_id=company_id, on_behalf_of=on_behalf_of)
 
 
 def sync_options_service(company_id: str | None = None) -> "SyncOptionsService":
@@ -438,21 +448,21 @@ def sync_options_service(company_id: str | None = None) -> "SyncOptionsService":
 
 
 def sync_character_autogen_service(
-    user_id: str, campaign_id: str, *, company_id: str | None = None
+    *, company_id: str | None = None, on_behalf_of: str | None = None
 ) -> "SyncCharacterAutogenService":
-    """Create a SyncCharacterAutogenService scoped to a specific company, user, and campaign.
+    """Create a SyncCharacterAutogenService scoped to a specific company.
 
-    Provides access to character autogen management operations (list, get, create, update, delete)
-    within a specific company, user, and campaign context without needing to pass a client instance.
+    Provides access to character autogeneration and chargen session operations
+    without needing to pass a client instance. Pass ``campaign_id`` directly to
+    ``generate_character()`` and ``start_chargen_session()`` to scope each call.
 
     Args:
-        user_id: The ID of the user to operate as.
-        campaign_id: The ID of the campaign to operate within.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
+        on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
 
     Raises:
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().character_autogen(user_id, campaign_id, company_id=company_id)
+    return sync_default_client().character_autogen(company_id=company_id, on_behalf_of=on_behalf_of)

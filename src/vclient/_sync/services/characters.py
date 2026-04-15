@@ -37,50 +37,44 @@ if TYPE_CHECKING:
 
 
 class SyncCharactersService(SyncBaseService):
-    """Service for managing characters within a campaign in the Valentina API.
+    """Service for managing characters within a company in the Valentina API.
 
-    This service is scoped to a specific company, user, and campaign at initialization time.
+    This service is scoped to a specific company at initialization time.
     All methods operate within that context.
 
     Provides methods to create, retrieve, update, and delete characters.
 
     Example:
         >>> async with SyncVClient() as client:
-        ...     characters = client.characters("company_id", "user_id", "campaign_id")
+        ...     characters = client.characters("company_id")
         ...     all_characters = await characters.list_all()
         ...     character = await characters.get("character_id")
     """
 
     def __init__(
-        self, client: "SyncVClient", company_id: str, user_id: str, campaign_id: str
+        self, client: "SyncVClient", company_id: str, on_behalf_of: str | None = None
     ) -> None:
-        """Initialize the service scoped to a specific company, user, and campaign.
+        """Initialize the service scoped to a specific company.
 
         Args:
             client: The SyncVClient instance to use for requests.
             company_id: The ID of the company to operate within.
-            user_id: The ID of the user to operate as.
-            campaign_id: The ID of the campaign to operate within.
+            on_behalf_of: Optional user ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
-        self._user_id = user_id
-        self._campaign_id = campaign_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
         """Format an endpoint with scoped IDs plus any extra params."""
-        return endpoint.format(
-            company_id=self._company_id,
-            user_id=self._user_id,
-            campaign_id=self._campaign_id,
-            **kwargs,
-        )
+        return endpoint.format(company_id=self._company_id, **kwargs)
 
     def get_page(
         self,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
+        campaign_id: str | None = None,
         user_player_id: str | None = None,
         user_creator_id: str | None = None,
         character_class: CharacterClass | None = None,
@@ -93,6 +87,7 @@ class SyncCharactersService(SyncBaseService):
         Args:
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
+            campaign_id: Filter by campaign ID.
             user_player_id: Filter by player user ID.
             user_creator_id: Filter by creator user ID.
             character_class: Filter by character class.
@@ -109,6 +104,7 @@ class SyncCharactersService(SyncBaseService):
             limit=limit,
             offset=offset,
             params=self._build_params(
+                campaign_id=campaign_id,
                 user_player_id=user_player_id,
                 user_creator_id=user_creator_id,
                 character_class=character_class,
@@ -121,6 +117,7 @@ class SyncCharactersService(SyncBaseService):
     def list_all(
         self,
         *,
+        campaign_id: str | None = None,
         user_player_id: str | None = None,
         user_creator_id: str | None = None,
         character_class: CharacterClass | None = None,
@@ -134,6 +131,7 @@ class SyncCharactersService(SyncBaseService):
         or `iter_all()` for memory-efficient streaming of large datasets.
 
         Args:
+            campaign_id: Filter by campaign ID.
             user_player_id: Filter by player user ID.
             user_creator_id: Filter by creator user ID.
             character_class: Filter by character class.
@@ -147,6 +145,7 @@ class SyncCharactersService(SyncBaseService):
         return [
             character
             for character in self.iter_all(
+                campaign_id=campaign_id,
                 user_player_id=user_player_id,
                 user_creator_id=user_creator_id,
                 character_class=character_class,
@@ -160,6 +159,7 @@ class SyncCharactersService(SyncBaseService):
         self,
         *,
         limit: int = 100,
+        campaign_id: str | None = None,
         user_player_id: str | None = None,
         user_creator_id: str | None = None,
         character_class: CharacterClass | None = None,
@@ -174,6 +174,7 @@ class SyncCharactersService(SyncBaseService):
 
         Args:
             limit: Items per page (default 100 for efficiency).
+            campaign_id: Filter by campaign ID.
             user_player_id: Filter by player user ID.
             user_creator_id: Filter by creator user ID.
             character_class: Filter by character class.
@@ -192,6 +193,7 @@ class SyncCharactersService(SyncBaseService):
             self._format_endpoint(Endpoints.CHARACTERS),
             limit=limit,
             params=self._build_params(
+                campaign_id=campaign_id,
                 user_player_id=user_player_id,
                 user_creator_id=user_creator_id,
                 character_class=character_class,

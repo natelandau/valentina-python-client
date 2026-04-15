@@ -48,7 +48,7 @@ class TestFakeVClientBasicUsage:
         """Verify scoped factory functions work with FakeVClient."""
         async with FakeVClient() as _client:
             # When using a scoped factory function
-            result = await campaigns_service("user123").list_all()
+            result = await campaigns_service().list_all()
 
             # Then the result contains Campaign instances
             assert isinstance(result, list)
@@ -77,7 +77,7 @@ class TestFakeVClientBasicUsage:
         """Verify delete operations complete without error."""
         async with FakeVClient() as _client:
             # When deleting a campaign
-            await campaigns_service("user123").delete("some-id")
+            await campaigns_service().delete("some-id")
 
     async def test_default_company_id(self):
         """Verify custom default_company_id is preserved."""

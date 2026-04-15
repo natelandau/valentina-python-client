@@ -43,7 +43,7 @@ class TestSyncFakeVClient:
         """Verify scoped factory functions work with SyncFakeVClient."""
         with SyncFakeVClient() as _client:
             # When using a scoped factory function
-            result = sync_campaigns_service("user123").list_all()
+            result = sync_campaigns_service().list_all()
 
             # Then the result contains Campaign instances
             assert isinstance(result, list)
