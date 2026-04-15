@@ -293,7 +293,7 @@ class SyncVClient:
             self._user_lookup = SyncUserLookupService(self)
         return self._user_lookup
 
-    def users(self, on_behalf_of: str, company_id: str | None = None) -> "SyncUsersService":
+    def users(self, on_behalf_of: str, *, company_id: str | None = None) -> "SyncUsersService":
         """Get a SyncUsersService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete users,
@@ -317,7 +317,9 @@ class SyncVClient:
         """
         from vclient._sync.services.users import SyncUsersService
 
-        return SyncUsersService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return SyncUsersService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def campaigns(
         self, on_behalf_of: str, *, company_id: str | None = None
@@ -345,7 +347,9 @@ class SyncVClient:
         """
         from vclient._sync.services.campaigns import SyncCampaignsService
 
-        return SyncCampaignsService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return SyncCampaignsService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def books(
         self, campaign_id: str, on_behalf_of: str, *, company_id: str | None = None
@@ -375,7 +379,10 @@ class SyncVClient:
         from vclient._sync.services.campaign_books import SyncBooksService
 
         return SyncBooksService(
-            self, self._resolve_company_id(company_id), campaign_id, on_behalf_of
+            self,
+            company_id=self._resolve_company_id(company_id),
+            campaign_id=campaign_id,
+            on_behalf_of=on_behalf_of,
         )
 
     def chapters(
@@ -407,7 +414,11 @@ class SyncVClient:
         from vclient._sync.services.campaign_book_chapters import SyncChaptersService
 
         return SyncChaptersService(
-            self, self._resolve_company_id(company_id), campaign_id, book_id, on_behalf_of
+            self,
+            company_id=self._resolve_company_id(company_id),
+            campaign_id=campaign_id,
+            book_id=book_id,
+            on_behalf_of=on_behalf_of,
         )
 
     def characters(
@@ -436,7 +447,9 @@ class SyncVClient:
         """
         from vclient._sync.services.characters import SyncCharactersService
 
-        return SyncCharactersService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return SyncCharactersService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def character_traits(
         self, character_id: str, on_behalf_of: str, *, company_id: str | None = None
@@ -466,7 +479,10 @@ class SyncVClient:
         from vclient._sync.services.character_traits import SyncCharacterTraitsService
 
         return SyncCharacterTraitsService(
-            self, self._resolve_company_id(company_id), character_id, on_behalf_of
+            self,
+            company_id=self._resolve_company_id(company_id),
+            character_id=character_id,
+            on_behalf_of=on_behalf_of,
         )
 
     def character_blueprint(
@@ -488,7 +504,7 @@ class SyncVClient:
         from vclient._sync.services.character_blueprint import SyncCharacterBlueprintService
 
         return SyncCharacterBlueprintService(
-            self, self._resolve_company_id(company_id), on_behalf_of
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
         )
 
     def dictionary(
@@ -508,7 +524,9 @@ class SyncVClient:
         """
         from vclient._sync.services.dictionary import SyncDictionaryService
 
-        return SyncDictionaryService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return SyncDictionaryService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def dicerolls(
         self, on_behalf_of: str, *, company_id: str | None = None
@@ -527,7 +545,9 @@ class SyncVClient:
         """
         from vclient._sync.services.dicerolls import SyncDicerollService
 
-        return SyncDicerollService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return SyncDicerollService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def options(self, on_behalf_of: str, *, company_id: str | None = None) -> "SyncOptionsService":
         """Get a SyncOptionsService scoped to a specific company.
@@ -544,7 +564,9 @@ class SyncVClient:
         """
         from vclient._sync.services.options import SyncOptionsService
 
-        return SyncOptionsService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return SyncOptionsService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def character_autogen(
         self, on_behalf_of: str, *, company_id: str | None = None
@@ -565,4 +587,6 @@ class SyncVClient:
         """
         from vclient._sync.services.character_autogen import SyncCharacterAutogenService
 
-        return SyncCharacterAutogenService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return SyncCharacterAutogenService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )

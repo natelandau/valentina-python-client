@@ -213,7 +213,7 @@ def sync_user_lookup_service() -> "SyncUserLookupService":
     return SyncUserLookupService(sync_default_client())
 
 
-def sync_users_service(on_behalf_of: str, company_id: str | None = None) -> "SyncUsersService":
+def sync_users_service(on_behalf_of: str, *, company_id: str | None = None) -> "SyncUsersService":
     """Create a SyncUsersService scoped to a specific company using the default client.
 
     Provides access to user management operations (list, get, create, update, delete)
@@ -238,7 +238,7 @@ def sync_users_service(on_behalf_of: str, company_id: str | None = None) -> "Syn
         user = await users.get("user_id")
         ```
     """
-    return sync_default_client().users(on_behalf_of, company_id)
+    return sync_default_client().users(on_behalf_of, company_id=company_id)
 
 
 def sync_campaigns_service(
@@ -299,7 +299,9 @@ def sync_books_service(
         book = await books.get("book_id")
         ```
     """
-    return sync_default_client().books(campaign_id, on_behalf_of, company_id=company_id)
+    return sync_default_client().books(
+        campaign_id=campaign_id, on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def sync_chapters_service(
@@ -321,7 +323,9 @@ def sync_chapters_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().chapters(campaign_id, book_id, on_behalf_of, company_id=company_id)
+    return sync_default_client().chapters(
+        campaign_id=campaign_id, book_id=book_id, on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def sync_characters_service(
@@ -341,7 +345,7 @@ def sync_characters_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().characters(on_behalf_of, company_id=company_id)
+    return sync_default_client().characters(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def sync_character_traits_service(
@@ -362,7 +366,9 @@ def sync_character_traits_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().character_traits(character_id, on_behalf_of, company_id=company_id)
+    return sync_default_client().character_traits(
+        character_id=character_id, on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def sync_character_blueprint_service(
@@ -382,7 +388,9 @@ def sync_character_blueprint_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().character_blueprint(on_behalf_of, company_id=company_id)
+    return sync_default_client().character_blueprint(
+        on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def sync_dictionary_service(
@@ -402,7 +410,7 @@ def sync_dictionary_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().dictionary(on_behalf_of, company_id=company_id)
+    return sync_default_client().dictionary(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def sync_dicerolls_service(
@@ -422,7 +430,7 @@ def sync_dicerolls_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().dicerolls(on_behalf_of, company_id=company_id)
+    return sync_default_client().dicerolls(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def sync_options_service(
@@ -442,7 +450,7 @@ def sync_options_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().options(on_behalf_of, company_id=company_id)
+    return sync_default_client().options(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def sync_character_autogen_service(
@@ -463,4 +471,4 @@ def sync_character_autogen_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return sync_default_client().character_autogen(on_behalf_of, company_id=company_id)
+    return sync_default_client().character_autogen(on_behalf_of=on_behalf_of, company_id=company_id)

@@ -249,8 +249,8 @@ class CharactersService(BaseService):
         Args:
             request: A CharacterCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for CharacterCreate if request is not provided.
-                Required: character_class (CharacterClass), game_version (GameVersion),
-                name_first (str), name_last (str).
+                Required: campaign_id (str), character_class (CharacterClass),
+                game_version (GameVersion), name_first (str), name_last (str).
                 Optional: type (CharacterType), name_nick (str), age (int),
                 biography (str), demeanor (str), nature (str), concept_id (str),
                 user_player_id (str), traits (list), vampire_attributes, etc.

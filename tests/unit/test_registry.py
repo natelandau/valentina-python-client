@@ -605,7 +605,7 @@ class TestDefaultCompanyId:
         configure_default_client(client)
 
         # When: Getting users service with explicit company_id
-        service = users_service("on-behalf-of-user", "explicit-company")
+        service = users_service("on-behalf-of-user", company_id="explicit-company")
 
         # Then: Service uses the explicit company_id
         assert service._company_id == "explicit-company"
@@ -672,7 +672,7 @@ class TestVClientDefaultCompanyId:
         )
 
         # When: Getting users service with explicit company_id
-        service = client.users("on-behalf-of-user", "explicit-company")
+        service = client.users("on-behalf-of-user", company_id="explicit-company")
 
         # Then: Service uses the explicit company_id
         assert service._company_id == "explicit-company"

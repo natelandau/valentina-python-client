@@ -305,7 +305,7 @@ class VClient:
             self._user_lookup = UserLookupService(self)
         return self._user_lookup
 
-    def users(self, on_behalf_of: str, company_id: str | None = None) -> "UsersService":
+    def users(self, on_behalf_of: str, *, company_id: str | None = None) -> "UsersService":
         """Get a UsersService scoped to a specific company.
 
         Provides methods to create, retrieve, update, and delete users,
@@ -329,7 +329,9 @@ class VClient:
         """
         from vclient.services.users import UsersService
 
-        return UsersService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return UsersService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def campaigns(
         self,
@@ -360,7 +362,9 @@ class VClient:
         """
         from vclient.services.campaigns import CampaignsService
 
-        return CampaignsService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return CampaignsService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def books(
         self,
@@ -393,7 +397,12 @@ class VClient:
         """
         from vclient.services.campaign_books import BooksService
 
-        return BooksService(self, self._resolve_company_id(company_id), campaign_id, on_behalf_of)
+        return BooksService(
+            self,
+            company_id=self._resolve_company_id(company_id),
+            campaign_id=campaign_id,
+            on_behalf_of=on_behalf_of,
+        )
 
     def chapters(
         self,
@@ -429,7 +438,11 @@ class VClient:
         from vclient.services.campaign_book_chapters import ChaptersService
 
         return ChaptersService(
-            self, self._resolve_company_id(company_id), campaign_id, book_id, on_behalf_of
+            self,
+            company_id=self._resolve_company_id(company_id),
+            campaign_id=campaign_id,
+            book_id=book_id,
+            on_behalf_of=on_behalf_of,
         )
 
     def characters(
@@ -461,7 +474,9 @@ class VClient:
         """
         from vclient.services.characters import CharactersService
 
-        return CharactersService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return CharactersService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def character_traits(
         self,
@@ -495,7 +510,10 @@ class VClient:
         from vclient.services.character_traits import CharacterTraitsService
 
         return CharacterTraitsService(
-            self, self._resolve_company_id(company_id), character_id, on_behalf_of
+            self,
+            company_id=self._resolve_company_id(company_id),
+            character_id=character_id,
+            on_behalf_of=on_behalf_of,
         )
 
     def character_blueprint(
@@ -516,7 +534,9 @@ class VClient:
         """
         from vclient.services.character_blueprint import CharacterBlueprintService
 
-        return CharacterBlueprintService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return CharacterBlueprintService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def dictionary(
         self, on_behalf_of: str, *, company_id: str | None = None
@@ -535,7 +555,9 @@ class VClient:
         """
         from vclient.services.dictionary import DictionaryService
 
-        return DictionaryService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return DictionaryService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def dicerolls(
         self,
@@ -557,7 +579,9 @@ class VClient:
         """
         from vclient.services.dicerolls import DicerollService
 
-        return DicerollService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return DicerollService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def options(self, on_behalf_of: str, *, company_id: str | None = None) -> "OptionsService":
         """Get a OptionsService scoped to a specific company.
@@ -574,7 +598,9 @@ class VClient:
         """
         from vclient.services.options import OptionsService
 
-        return OptionsService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return OptionsService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )
 
     def character_autogen(
         self,
@@ -598,4 +624,6 @@ class VClient:
         """
         from vclient.services.character_autogen import CharacterAutogenService
 
-        return CharacterAutogenService(self, self._resolve_company_id(company_id), on_behalf_of)
+        return CharacterAutogenService(
+            self, company_id=self._resolve_company_id(company_id), on_behalf_of=on_behalf_of
+        )

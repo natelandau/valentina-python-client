@@ -84,7 +84,7 @@ class SyncCharacterAutogenService(SyncBaseService):
         response = self._post(
             self._format_endpoint(Endpoints.AUTOGENERATE),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-            params=self._build_params(campaign_id=campaign_id),
+            params={"campaign_id": campaign_id},
         )
         return Character.model_validate(response.json())
 
@@ -98,8 +98,7 @@ class SyncCharacterAutogenService(SyncBaseService):
             The chargen session response.
         """
         response = self._post(
-            self._format_endpoint(Endpoints.CHARGEN_START),
-            params=self._build_params(campaign_id=campaign_id),
+            self._format_endpoint(Endpoints.CHARGEN_START), params={"campaign_id": campaign_id}
         )
         return ChargenSessionResponse.model_validate(response.json())
 

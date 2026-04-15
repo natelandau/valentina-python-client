@@ -337,8 +337,8 @@ class UsersService(BaseService):
         Args:
             request: A UserCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserCreate if request is not provided.
-                Accepts: name (str, required), email (str, required),
-                role (UserRole, required), requesting_user_id (str, required),
+                Accepts: username (str, required), email (str, required),
+                role (UserRole, required),
                 discord_profile (DiscordProfile | None).
 
         Returns:
@@ -363,8 +363,8 @@ class UsersService(BaseService):
     ) -> User:
         """Register a new user via SSO onboarding.
 
-        Unlike `create()`, this endpoint does not require a requesting_user_id
-        because it is used during external auth provider flows.
+        Unlike `create()`, this endpoint is used during external auth
+        provider flows and does not require admin privileges.
 
         Args:
             request: A UserRegisterDTO model, OR pass fields as keyword arguments.
@@ -411,8 +411,8 @@ class UsersService(BaseService):
             user_id: The ID of the user to update.
             request: A UserUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserUpdate if request is not provided.
-                Accepts: requesting_user_id (str, required), name (str | None),
-                email (str | None), role (UserRole | None),
+                Accepts: name (str | None), email (str | None),
+                role (UserRole | None),
                 discord_profile (DiscordProfile | None).
 
         Returns:

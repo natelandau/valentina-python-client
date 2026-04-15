@@ -213,7 +213,7 @@ def user_lookup_service() -> "UserLookupService":
     return UserLookupService(default_client())
 
 
-def users_service(on_behalf_of: str, company_id: str | None = None) -> "UsersService":
+def users_service(on_behalf_of: str, *, company_id: str | None = None) -> "UsersService":
     """Create a UsersService scoped to a specific company using the default client.
 
     Provides access to user management operations (list, get, create, update, delete)
@@ -238,7 +238,7 @@ def users_service(on_behalf_of: str, company_id: str | None = None) -> "UsersSer
         user = await users.get("user_id")
         ```
     """
-    return default_client().users(on_behalf_of, company_id)
+    return default_client().users(on_behalf_of, company_id=company_id)
 
 
 def campaigns_service(
@@ -304,7 +304,9 @@ def books_service(
         book = await books.get("book_id")
         ```
     """
-    return default_client().books(campaign_id, on_behalf_of, company_id=company_id)
+    return default_client().books(
+        campaign_id=campaign_id, on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def chapters_service(
@@ -330,7 +332,9 @@ def chapters_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().chapters(campaign_id, book_id, on_behalf_of, company_id=company_id)
+    return default_client().chapters(
+        campaign_id=campaign_id, book_id=book_id, on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def characters_service(
@@ -352,7 +356,7 @@ def characters_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().characters(on_behalf_of, company_id=company_id)
+    return default_client().characters(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def character_traits_service(
@@ -376,7 +380,9 @@ def character_traits_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().character_traits(character_id, on_behalf_of, company_id=company_id)
+    return default_client().character_traits(
+        character_id=character_id, on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def character_blueprint_service(
@@ -398,7 +404,7 @@ def character_blueprint_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().character_blueprint(on_behalf_of, company_id=company_id)
+    return default_client().character_blueprint(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def dictionary_service(
@@ -420,7 +426,7 @@ def dictionary_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().dictionary(on_behalf_of, company_id=company_id)
+    return default_client().dictionary(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def dicerolls_service(
@@ -442,7 +448,7 @@ def dicerolls_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().dicerolls(on_behalf_of, company_id=company_id)
+    return default_client().dicerolls(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def options_service(
@@ -464,7 +470,7 @@ def options_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().options(on_behalf_of, company_id=company_id)
+    return default_client().options(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def character_autogen_service(
@@ -487,4 +493,4 @@ def character_autogen_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().character_autogen(on_behalf_of, company_id=company_id)
+    return default_client().character_autogen(on_behalf_of=on_behalf_of, company_id=company_id)
