@@ -20,7 +20,6 @@ from vclient.models import (
     User,
     UserApproveDTO,
     UserCreate,
-    UserDenyDTO,
     UserUpdate,
 )
 
@@ -349,7 +348,6 @@ class TestUserCreate:
             username="testuser",
             email="test@example.com",
             role="PLAYER",
-            requesting_user_id="requester123",
         )
 
         # Then: Request is created correctly
@@ -358,7 +356,6 @@ class TestUserCreate:
         assert request.username == "testuser"
         assert request.email == "test@example.com"
         assert request.role == "PLAYER"
-        assert request.requesting_user_id == "requester123"
         assert request.discord_profile is None
         assert request.google_profile is None
         assert request.github_profile is None
@@ -377,7 +374,6 @@ class TestUserCreate:
             username="fulluser",
             email="full@example.com",
             role="ADMIN",
-            requesting_user_id="requester123",
             discord_profile=discord,
             google_profile=google,
             github_profile=github,
@@ -400,7 +396,6 @@ class TestUserCreate:
                 username="ab",
                 email="test@example.com",
                 role="PLAYER",
-                requesting_user_id="requester123",
             )
 
     def test_name_validation_max_length(self):
@@ -412,7 +407,6 @@ class TestUserCreate:
                 username="a" * 51,
                 email="test@example.com",
                 role="PLAYER",
-                requesting_user_id="requester123",
             )
 
     def test_model_dump_excludes_unset(self):
@@ -423,7 +417,6 @@ class TestUserCreate:
             username="testuser",
             email="test@example.com",
             role="PLAYER",
-            requesting_user_id="requester123",
         )
 
         # When: Dumping with exclude_none and exclude_unset
@@ -435,7 +428,6 @@ class TestUserCreate:
             "username": "testuser",
             "email": "test@example.com",
             "role": "PLAYER",
-            "requesting_user_id": "requester123",
         }
 
     def test_deactivated_role_accepted(self):
@@ -446,9 +438,8 @@ class TestUserCreate:
             username="testuser",
             email="test@example.com",
             role="DEACTIVATED",
-            requesting_user_id="requester123",
         )
-        updated = UserUpdate(role="DEACTIVATED", requesting_user_id="requester123")
+        updated = UserUpdate(role="DEACTIVATED")
 
         # Then: Models accept and round-trip the value (server-side hierarchy rules
         # are not enforced client-side — that's the server's job)
@@ -461,13 +452,12 @@ class TestUserCreate:
 class TestUserUpdate:
     """Tests for UserUpdate model."""
 
-    def test_only_requesting_user_id_required(self):
-        """Verify only requesting_user_id is required."""
-        # When: Creating request with only requesting_user_id
-        request = UserUpdate(requesting_user_id="requester123")
+    def test_empty_update_allowed(self):
+        """Verify creating an empty update request is allowed."""
+        # When: Creating an empty update request
+        request = UserUpdate()
 
-        # Then: All other fields are None
-        assert request.requesting_user_id == "requester123"
+        # Then: All fields are None
         assert request.name_first is None
         assert request.name_last is None
         assert request.email is None
@@ -483,7 +473,6 @@ class TestUserUpdate:
             name_first="Updated",
             name_last="Name",
             role="STORYTELLER",
-            requesting_user_id="requester123",
         )
 
         # Then: Only specified fields are set
@@ -498,7 +487,6 @@ class TestUserUpdate:
         request = UserUpdate(
             name_first="Updated",
             name_last="Name",
-            requesting_user_id="requester123",
         )
 
         # When: Dumping with exclude_none and exclude_unset
@@ -508,13 +496,12 @@ class TestUserUpdate:
         assert data == {
             "name_first": "Updated",
             "name_last": "Name",
-            "requesting_user_id": "requester123",
         }
 
     def test_update_explicit_none_for_constrained_fields(self):
         """Verify explicitly passing None for constrained optional fields does not raise."""
         # When: Creating an update request with None for constrained name field
-        request = UserUpdate(name_first=None, name_last=None, requesting_user_id="requester123")
+        request = UserUpdate(name_first=None, name_last=None)
 
         # Then: Name is None without validation errors
         assert request.name_first is None
@@ -523,7 +510,7 @@ class TestUserUpdate:
     def test_update_constrained_fields_still_validate_non_none(self):
         """Verify constraints still apply when a non-None value is provided."""
         with pytest.raises(PydanticValidationError):
-            UserUpdate(name_first="ab", name_last="ab", requesting_user_id="requester123")
+            UserUpdate(name_first="ab", name_last="ab")
 
 
 class TestRollStatistics:
@@ -846,17 +833,16 @@ class TestUserApproveDTO:
     def test_valid_request(self):
         """Verify creating approve request with valid fields."""
         # When: Creating an approve request
-        request = UserApproveDTO(role="PLAYER", requesting_user_id="requester123")
+        request = UserApproveDTO(role="PLAYER")
 
         # Then: Fields are set correctly
         assert request.role == "PLAYER"
-        assert request.requesting_user_id == "requester123"
 
     def test_all_roles_accepted(self):
         """Verify all UserRole values are accepted."""
         # When: Creating approve requests with each role
         for role in ("ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"):
-            request = UserApproveDTO(role=role, requesting_user_id="requester123")
+            request = UserApproveDTO(role=role)
 
             # Then: Role is set correctly
             assert request.role == role
@@ -865,41 +851,18 @@ class TestUserApproveDTO:
         """Verify invalid role values are rejected."""
         # When/Then: Creating request with invalid role raises error
         with pytest.raises(PydanticValidationError):
-            UserApproveDTO(role="INVALID", requesting_user_id="requester123")
+            UserApproveDTO(role="INVALID")
 
     def test_model_dump(self):
         """Verify model_dump produces correct output."""
         # Given: An approve request
-        request = UserApproveDTO(role="STORYTELLER", requesting_user_id="requester123")
+        request = UserApproveDTO(role="STORYTELLER")
 
         # When: Dumping the model
         data = request.model_dump(mode="json")
 
         # Then: All fields are present
-        assert data == {"role": "STORYTELLER", "requesting_user_id": "requester123"}
-
-
-class TestUserDenyDTO:
-    """Tests for UserDenyDTO model."""
-
-    def test_valid_request(self):
-        """Verify creating deny request with valid fields."""
-        # When: Creating a deny request
-        request = UserDenyDTO(requesting_user_id="requester123")
-
-        # Then: Field is set correctly
-        assert request.requesting_user_id == "requester123"
-
-    def test_model_dump(self):
-        """Verify model_dump produces correct output."""
-        # Given: A deny request
-        request = UserDenyDTO(requesting_user_id="requester123")
-
-        # When: Dumping the model
-        data = request.model_dump(mode="json")
-
-        # Then: All fields are present
-        assert data == {"requesting_user_id": "requester123"}
+        assert data == {"role": "STORYTELLER"}
 
 
 _VALID_USER_PAYLOAD = {

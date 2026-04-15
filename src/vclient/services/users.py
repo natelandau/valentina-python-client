@@ -20,10 +20,8 @@ from vclient.models import (
     User,
     UserApproveDTO,
     UserCreate,
-    UserDenyDTO,
     UserDetail,
     UserMergeDTO,
-    UserRegisterDTO,
     UserUpdate,
     _ExperienceAddRemove,
 )
@@ -49,15 +47,17 @@ class UsersService(BaseService):
         ...     user = await users.get("user_id")
     """
 
-    def __init__(self, client: "VClient", company_id: str) -> None:
+    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str) -> None:
         """Initialize the service scoped to a specific company.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
         """Format an endpoint with the scoped company_id plus any extra params."""
@@ -69,7 +69,6 @@ class UsersService(BaseService):
 
     async def get_unapproved_page(
         self,
-        requesting_user_id: str,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
@@ -79,7 +78,6 @@ class UsersService(BaseService):
         Unapproved users have registered but have not yet been approved by an admin.
 
         Args:
-            requesting_user_id: ID of the user making the request (for permissions).
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
 
@@ -91,26 +89,21 @@ class UsersService(BaseService):
             User,
             limit=limit,
             offset=offset,
-            params=self._build_params(requesting_user_id=requesting_user_id),
         )
 
-    async def list_all_unapproved(self, requesting_user_id: str) -> list[User]:
+    async def list_all_unapproved(self) -> list[User]:
         """Retrieve all unapproved users within a company.
 
         Automatically paginates through all results. Use `get_unapproved_page()` for
         paginated access or `iter_all_unapproved()` for memory-efficient streaming.
 
-        Args:
-            requesting_user_id: ID of the user making the request (for permissions).
-
         Returns:
             A list of all unapproved User objects.
         """
-        return [user async for user in self.iter_all_unapproved(requesting_user_id)]
+        return [user async for user in self.iter_all_unapproved()]
 
     async def iter_all_unapproved(
         self,
-        requesting_user_id: str,
         *,
         limit: int = 100,
     ) -> AsyncIterator[User]:
@@ -120,7 +113,6 @@ class UsersService(BaseService):
         until all items have been retrieved.
 
         Args:
-            requesting_user_id: ID of the user making the request (for permissions).
             limit: Items per page (default 100 for efficiency).
 
         Yields:
@@ -129,7 +121,6 @@ class UsersService(BaseService):
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST),
             limit=limit,
-            params=self._build_params(requesting_user_id=requesting_user_id),
         ):
             yield User.model_validate(item)
 
@@ -137,7 +128,6 @@ class UsersService(BaseService):
         self,
         user_id: str,
         role: UserRole,
-        requesting_user_id: str,
     ) -> User:
         """Approve an unapproved user and assign them a role.
 
@@ -148,7 +138,6 @@ class UsersService(BaseService):
         Args:
             user_id: The ID of the unapproved user to approve.
             role: The role to assign to the approved user.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             The approved User object with the assigned role.
@@ -158,7 +147,7 @@ class UsersService(BaseService):
             AuthorizationError: If the requesting user lacks permission to assign
                 the requested role under the hierarchy.
         """
-        body = UserApproveDTO(role=role, requesting_user_id=requesting_user_id)
+        body = UserApproveDTO(role=role)
         response = await self._post(
             self._format_endpoint(Endpoints.USER_APPROVE, user_id=user_id),
             json=body.model_dump(mode="json"),
@@ -168,29 +157,24 @@ class UsersService(BaseService):
     async def deny_user(
         self,
         user_id: str,
-        requesting_user_id: str,
     ) -> None:
         """Deny an unapproved user.
 
         Args:
             user_id: The ID of the unapproved user to deny.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Raises:
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        body = UserDenyDTO(requesting_user_id=requesting_user_id)
         await self._post(
             self._format_endpoint(Endpoints.USER_DENY, user_id=user_id),
-            json=body.model_dump(mode="json"),
         )
 
     async def merge(
         self,
         primary_user_id: str,
         secondary_user_id: str,
-        requesting_user_id: str,
     ) -> User:
         """Merge an unapproved user into an existing primary user.
 
@@ -200,7 +184,6 @@ class UsersService(BaseService):
         Args:
             primary_user_id: The ID of the primary user to merge into.
             secondary_user_id: The ID of the unapproved user to merge from.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             The primary User object after the merge.
@@ -212,7 +195,6 @@ class UsersService(BaseService):
         body = UserMergeDTO(
             primary_user_id=primary_user_id,
             secondary_user_id=secondary_user_id,
-            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_MERGE),
@@ -354,8 +336,8 @@ class UsersService(BaseService):
         Args:
             request: A UserCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserCreate if request is not provided.
-                Accepts: name (str, required), email (str, required),
-                role (UserRole, required), requesting_user_id (str, required),
+                Accepts: username (str, required), email (str, required),
+                role (UserRole, required),
                 discord_profile (DiscordProfile | None).
 
         Returns:
@@ -369,39 +351,6 @@ class UsersService(BaseService):
         body = request if request is not None else self._validate_request(UserCreate, **kwargs)
         response = await self._post(
             self._format_endpoint(Endpoints.USERS),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-        )
-        return User.model_validate(response.json())
-
-    async def register(
-        self,
-        request: UserRegisterDTO | None = None,
-        **kwargs,
-    ) -> User:
-        """Register a new user via SSO onboarding.
-
-        Unlike `create()`, this endpoint does not require a requesting_user_id
-        because it is used during external auth provider flows.
-
-        Args:
-            request: A UserRegisterDTO model, OR pass fields as keyword arguments.
-            **kwargs: Fields for UserRegisterDTO if request is not provided.
-                Accepts: username (str, required), email (str, required),
-                name_first (str | None), name_last (str | None),
-                discord_profile (DiscordProfile | None),
-                google_profile (GoogleProfile | None),
-                github_profile (GitHubProfile | None).
-
-        Returns:
-            The newly registered User object.
-
-        Raises:
-            RequestValidationError: If the input parameters fail client-side validation.
-            ValidationError: If the request data is invalid.
-        """
-        body = request if request is not None else self._validate_request(UserRegisterDTO, **kwargs)
-        response = await self._post(
-            self._format_endpoint(Endpoints.USER_REGISTER),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())
@@ -428,8 +377,8 @@ class UsersService(BaseService):
             user_id: The ID of the user to update.
             request: A UserUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserUpdate if request is not provided.
-                Accepts: requesting_user_id (str, required), name (str | None),
-                email (str | None), role (UserRole | None),
+                Accepts: name (str | None), email (str | None),
+                role (UserRole | None),
                 discord_profile (DiscordProfile | None).
 
         Returns:
@@ -453,7 +402,6 @@ class UsersService(BaseService):
     async def delete(
         self,
         user_id: str,
-        requesting_user_id: str,
     ) -> None:
         """Remove a user from the company.
 
@@ -461,7 +409,6 @@ class UsersService(BaseService):
 
         Args:
             user_id: The ID of the user to delete.
-            requesting_user_id: ID of the user making the request.
 
         Raises:
             NotFoundError: If the user does not exist.
@@ -469,7 +416,6 @@ class UsersService(BaseService):
         """
         await self._delete(
             self._format_endpoint(Endpoints.USER, user_id=user_id),
-            params={"requesting_user_id": requesting_user_id},
         )
 
     async def get_statistics(
@@ -694,7 +640,6 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
-        requesting_user_id: str,
     ) -> CampaignExperience:
         """Award experience points to a user for a specific campaign.
 
@@ -705,7 +650,6 @@ class UsersService(BaseService):
             user_id: The ID of the user to award XP to.
             campaign_id: The ID of the campaign to add XP for.
             amount: The amount of XP to add.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -719,7 +663,6 @@ class UsersService(BaseService):
             _ExperienceAddRemove,
             amount=amount,
             campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_ADD, user_id=user_id),
@@ -732,7 +675,6 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
-        requesting_user_id: str,
     ) -> CampaignExperience:
         """Deduct experience points from a user's current XP pool.
 
@@ -742,7 +684,6 @@ class UsersService(BaseService):
             user_id: The ID of the user to remove XP from.
             campaign_id: The ID of the campaign to remove XP for.
             amount: The amount of XP to remove.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -757,7 +698,6 @@ class UsersService(BaseService):
             _ExperienceAddRemove,
             amount=amount,
             campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_REMOVE, user_id=user_id),
@@ -770,7 +710,6 @@ class UsersService(BaseService):
         user_id: str,
         campaign_id: str,
         amount: int,
-        requesting_user_id: str,
     ) -> CampaignExperience:
         """Award cool points to a user for a specific campaign.
 
@@ -781,7 +720,6 @@ class UsersService(BaseService):
             user_id: The ID of the user to award cool points to.
             campaign_id: The ID of the campaign to add cool points for.
             amount: The amount of cool points to add.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -795,7 +733,6 @@ class UsersService(BaseService):
             _ExperienceAddRemove,
             amount=amount,
             campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_CP_ADD, user_id=user_id),

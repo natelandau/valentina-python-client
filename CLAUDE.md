@@ -72,11 +72,16 @@ Services extend `BaseService` and provide standard methods:
 
 ```
 VClient
-├── companies()           # Top-level: no scoping
-├── users(company_id)     # Scoped to company
-├── campaigns(user_id, company_id)
-├── characters(user_id, campaign_id, company_id)
-├── character_traits(user_id, campaign_id, character_id, company_id)
+├── companies()                              # Top-level: no scoping
+├── users(on_behalf_of, company_id)          # Company-scoped
+├── campaigns(on_behalf_of, company_id)
+├── characters(on_behalf_of, company_id)
+├── character_traits(character_id, on_behalf_of, company_id)
+├── books(campaign_id, on_behalf_of, company_id)
+├── chapters(campaign_id, book_id, on_behalf_of, company_id)
+├── dicerolls(on_behalf_of, company_id)
+├── character_autogen(on_behalf_of, company_id)
+├── user_self_registration(company_id)         # No on_behalf_of — API key auth only (SSO onboarding)
 └── ... etc
 ```
 
@@ -87,14 +92,14 @@ VClient
 from vclient import VClient, campaigns_service
 
 async with VClient(base_url="https://api.valentina-noir.com", api_key="...") as client:
-    campaigns = client.campaigns(user_id="123")
+    campaigns = client.campaigns(on_behalf_of="user-123", company_id="company-456")
     all_campaigns = await campaigns.list_all()
 
 # Sync
 from vclient import SyncVClient, sync_campaigns_service
 
 with SyncVClient(base_url="https://api.valentina-noir.com", api_key="...") as client:
-    campaigns = client.campaigns(user_id="123")
+    campaigns = client.campaigns(on_behalf_of="user-123", company_id="company-456")
     all_campaigns = campaigns.list_all()
 ```
 
@@ -108,9 +113,9 @@ with SyncVClient(base_url="https://api.valentina-noir.com", api_key="...") as cl
 
 Constants for these names are in `constants.py`: `ENV_BASE_URL`, `ENV_API_KEY`, `ENV_DEFAULT_COMPANY_ID`.
 
-Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `users_service`, etc.
+Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `user_self_registration_service`, `users_service`, etc.
 
-Sync factory functions in `_sync/registry.py`: `sync_books_service`, `sync_campaigns_service`, `sync_characters_service`, `sync_companies_service`, etc.
+Sync factory functions in `_sync/registry.py`: `sync_books_service`, `sync_campaigns_service`, `sync_characters_service`, `sync_companies_service`, `sync_user_self_registration_service`, etc.
 
 ## Sync Client (Code Generation)
 

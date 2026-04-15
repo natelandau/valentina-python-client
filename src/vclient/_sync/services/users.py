@@ -22,10 +22,8 @@ from vclient.models import (
     User,
     UserApproveDTO,
     UserCreate,
-    UserDenyDTO,
     UserDetail,
     UserMergeDTO,
-    UserRegisterDTO,
     UserUpdate,
     _ExperienceAddRemove,
 )
@@ -50,29 +48,30 @@ class SyncUsersService(SyncBaseService):
         ...     user = await users.get("user_id")
     """
 
-    def __init__(self, client: "SyncVClient", company_id: str) -> None:
+    def __init__(self, client: "SyncVClient", company_id: str, on_behalf_of: str) -> None:
         """Initialize the service scoped to a specific company.
 
         Args:
             client: The SyncVClient instance to use for requests.
             company_id: The ID of the company to operate within.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
         """Format an endpoint with the scoped company_id plus any extra params."""
         return endpoint.format(company_id=self._company_id, **kwargs)
 
     def get_unapproved_page(
-        self, requesting_user_id: str, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
+        self, *, limit: int = DEFAULT_PAGE_LIMIT, offset: int = 0
     ) -> PaginatedResponse[User]:
         """Retrieve a paginated page of unapproved users within a company.
 
         Unapproved users have registered but have not yet been approved by an admin.
 
         Args:
-            requesting_user_id: ID of the user making the request (for permissions).
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
 
@@ -80,48 +79,38 @@ class SyncUsersService(SyncBaseService):
             A PaginatedResponse containing User objects and pagination metadata.
         """
         return self._get_paginated_as(
-            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST),
-            User,
-            limit=limit,
-            offset=offset,
-            params=self._build_params(requesting_user_id=requesting_user_id),
+            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST), User, limit=limit, offset=offset
         )
 
-    def list_all_unapproved(self, requesting_user_id: str) -> list[User]:
+    def list_all_unapproved(self) -> list[User]:
         """Retrieve all unapproved users within a company.
 
         Automatically paginates through all results. Use `get_unapproved_page()` for
         paginated access or `iter_all_unapproved()` for memory-efficient streaming.
 
-        Args:
-            requesting_user_id: ID of the user making the request (for permissions).
-
         Returns:
             A list of all unapproved User objects.
         """
-        return [user for user in self.iter_all_unapproved(requesting_user_id)]
+        return [user for user in self.iter_all_unapproved()]
 
-    def iter_all_unapproved(self, requesting_user_id: str, *, limit: int = 100) -> Iterator[User]:
+    def iter_all_unapproved(self, *, limit: int = 100) -> Iterator[User]:
         """Iterate through all unapproved users within a company.
 
         Yields individual unapproved users, automatically fetching subsequent pages
         until all items have been retrieved.
 
         Args:
-            requesting_user_id: ID of the user making the request (for permissions).
             limit: Items per page (default 100 for efficiency).
 
         Yields:
             Individual User objects.
         """
         for item in self._iter_all_pages(
-            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST),
-            limit=limit,
-            params=self._build_params(requesting_user_id=requesting_user_id),
+            self._format_endpoint(Endpoints.USERS_UNAPPROVED_LIST), limit=limit
         ):
             yield User.model_validate(item)
 
-    def approve_user(self, user_id: str, role: UserRole, requesting_user_id: str) -> User:
+    def approve_user(self, user_id: str, role: UserRole) -> User:
         """Approve an unapproved user and assign them a role.
 
         The assigned ``role`` is validated through the server-side role-assignment
@@ -131,7 +120,6 @@ class SyncUsersService(SyncBaseService):
         Args:
             user_id: The ID of the unapproved user to approve.
             role: The role to assign to the approved user.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             The approved User object with the assigned role.
@@ -141,31 +129,26 @@ class SyncUsersService(SyncBaseService):
             AuthorizationError: If the requesting user lacks permission to assign
                 the requested role under the hierarchy.
         """
-        body = UserApproveDTO(role=role, requesting_user_id=requesting_user_id)
+        body = UserApproveDTO(role=role)
         response = self._post(
             self._format_endpoint(Endpoints.USER_APPROVE, user_id=user_id),
             json=body.model_dump(mode="json"),
         )
         return User.model_validate(response.json())
 
-    def deny_user(self, user_id: str, requesting_user_id: str) -> None:
+    def deny_user(self, user_id: str) -> None:
         """Deny an unapproved user.
 
         Args:
             user_id: The ID of the unapproved user to deny.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Raises:
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        body = UserDenyDTO(requesting_user_id=requesting_user_id)
-        self._post(
-            self._format_endpoint(Endpoints.USER_DENY, user_id=user_id),
-            json=body.model_dump(mode="json"),
-        )
+        self._post(self._format_endpoint(Endpoints.USER_DENY, user_id=user_id))
 
-    def merge(self, primary_user_id: str, secondary_user_id: str, requesting_user_id: str) -> User:
+    def merge(self, primary_user_id: str, secondary_user_id: str) -> User:
         """Merge an unapproved user into an existing primary user.
 
         The secondary (unapproved) user's data is merged into the primary user,
@@ -174,7 +157,6 @@ class SyncUsersService(SyncBaseService):
         Args:
             primary_user_id: The ID of the primary user to merge into.
             secondary_user_id: The ID of the unapproved user to merge from.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             The primary User object after the merge.
@@ -183,11 +165,7 @@ class SyncUsersService(SyncBaseService):
             NotFoundError: If either user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        body = UserMergeDTO(
-            primary_user_id=primary_user_id,
-            secondary_user_id=secondary_user_id,
-            requesting_user_id=requesting_user_id,
-        )
+        body = UserMergeDTO(primary_user_id=primary_user_id, secondary_user_id=secondary_user_id)
         response = self._post(
             self._format_endpoint(Endpoints.USER_MERGE),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
@@ -308,8 +286,8 @@ class SyncUsersService(SyncBaseService):
         Args:
             request: A UserCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserCreate if request is not provided.
-                Accepts: name (str, required), email (str, required),
-                role (UserRole, required), requesting_user_id (str, required),
+                Accepts: username (str, required), email (str, required),
+                role (UserRole, required),
                 discord_profile (DiscordProfile | None).
 
         Returns:
@@ -323,35 +301,6 @@ class SyncUsersService(SyncBaseService):
         body = request if request is not None else self._validate_request(UserCreate, **kwargs)
         response = self._post(
             self._format_endpoint(Endpoints.USERS),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
-        )
-        return User.model_validate(response.json())
-
-    def register(self, request: UserRegisterDTO | None = None, **kwargs) -> User:
-        """Register a new user via SSO onboarding.
-
-        Unlike `create()`, this endpoint does not require a requesting_user_id
-        because it is used during external auth provider flows.
-
-        Args:
-            request: A UserRegisterDTO model, OR pass fields as keyword arguments.
-            **kwargs: Fields for UserRegisterDTO if request is not provided.
-                Accepts: username (str, required), email (str, required),
-                name_first (str | None), name_last (str | None),
-                discord_profile (DiscordProfile | None),
-                google_profile (GoogleProfile | None),
-                github_profile (GitHubProfile | None).
-
-        Returns:
-            The newly registered User object.
-
-        Raises:
-            RequestValidationError: If the input parameters fail client-side validation.
-            ValidationError: If the request data is invalid.
-        """
-        body = request if request is not None else self._validate_request(UserRegisterDTO, **kwargs)
-        response = self._post(
-            self._format_endpoint(Endpoints.USER_REGISTER),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())
@@ -373,8 +322,8 @@ class SyncUsersService(SyncBaseService):
             user_id: The ID of the user to update.
             request: A UserUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserUpdate if request is not provided.
-                Accepts: requesting_user_id (str, required), name (str | None),
-                email (str | None), role (UserRole | None),
+                Accepts: name (str | None), email (str | None),
+                role (UserRole | None),
                 discord_profile (DiscordProfile | None).
 
         Returns:
@@ -395,23 +344,19 @@ class SyncUsersService(SyncBaseService):
         )
         return User.model_validate(response.json())
 
-    def delete(self, user_id: str, requesting_user_id: str) -> None:
+    def delete(self, user_id: str) -> None:
         """Remove a user from the company.
 
         The user is removed from the company's user list and their data is archived.
 
         Args:
             user_id: The ID of the user to delete.
-            requesting_user_id: ID of the user making the request.
 
         Raises:
             NotFoundError: If the user does not exist.
             AuthorizationError: If you don't have appropriate access.
         """
-        self._delete(
-            self._format_endpoint(Endpoints.USER, user_id=user_id),
-            params={"requesting_user_id": requesting_user_id},
-        )
+        self._delete(self._format_endpoint(Endpoints.USER, user_id=user_id))
 
     def get_statistics(self, user_id: str, *, num_top_traits: int = 5) -> RollStatistics:
         """Retrieve aggregated dice roll statistics for a specific user.
@@ -587,9 +532,7 @@ class SyncUsersService(SyncBaseService):
         )
         return CampaignExperience.model_validate(response.json())
 
-    def add_xp(
-        self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str
-    ) -> CampaignExperience:
+    def add_xp(self, user_id: str, campaign_id: str, amount: int) -> CampaignExperience:
         """Award experience points to a user for a specific campaign.
 
         The XP is added to both the current XP pool (available for spending) and
@@ -599,7 +542,6 @@ class SyncUsersService(SyncBaseService):
             user_id: The ID of the user to award XP to.
             campaign_id: The ID of the campaign to add XP for.
             amount: The amount of XP to add.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -609,21 +551,14 @@ class SyncUsersService(SyncBaseService):
             AuthorizationError: If you don't have appropriate access.
             RequestValidationError: If the input parameters fail client-side validation.
         """
-        body = self._validate_request(
-            _ExperienceAddRemove,
-            amount=amount,
-            campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
-        )
+        body = self._validate_request(_ExperienceAddRemove, amount=amount, campaign_id=campaign_id)
         response = self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_ADD, user_id=user_id),
             json=body.model_dump(mode="json"),
         )
         return CampaignExperience.model_validate(response.json())
 
-    def remove_xp(
-        self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str
-    ) -> CampaignExperience:
+    def remove_xp(self, user_id: str, campaign_id: str, amount: int) -> CampaignExperience:
         """Deduct experience points from a user's current XP pool.
 
         Returns an error if the user has insufficient XP to complete the deduction.
@@ -632,7 +567,6 @@ class SyncUsersService(SyncBaseService):
             user_id: The ID of the user to remove XP from.
             campaign_id: The ID of the campaign to remove XP for.
             amount: The amount of XP to remove.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -643,21 +577,14 @@ class SyncUsersService(SyncBaseService):
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the user has insufficient XP.
         """
-        body = self._validate_request(
-            _ExperienceAddRemove,
-            amount=amount,
-            campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
-        )
+        body = self._validate_request(_ExperienceAddRemove, amount=amount, campaign_id=campaign_id)
         response = self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_XP_REMOVE, user_id=user_id),
             json=body.model_dump(mode="json"),
         )
         return CampaignExperience.model_validate(response.json())
 
-    def add_cool_points(
-        self, user_id: str, campaign_id: str, amount: int, requesting_user_id: str
-    ) -> CampaignExperience:
+    def add_cool_points(self, user_id: str, campaign_id: str, amount: int) -> CampaignExperience:
         """Award cool points to a user for a specific campaign.
 
         Cool points are converted to XP automatically based on the company's
@@ -667,7 +594,6 @@ class SyncUsersService(SyncBaseService):
             user_id: The ID of the user to award cool points to.
             campaign_id: The ID of the campaign to add cool points for.
             amount: The amount of cool points to add.
-            requesting_user_id: ID of the user making the request (for permissions).
 
         Returns:
             Updated CampaignExperience object.
@@ -677,12 +603,7 @@ class SyncUsersService(SyncBaseService):
             AuthorizationError: If you don't have appropriate access.
             RequestValidationError: If the input parameters fail client-side validation.
         """
-        body = self._validate_request(
-            _ExperienceAddRemove,
-            amount=amount,
-            campaign_id=campaign_id,
-            requesting_user_id=requesting_user_id,
-        )
+        body = self._validate_request(_ExperienceAddRemove, amount=amount, campaign_id=campaign_id)
         response = self._post(
             self._format_endpoint(Endpoints.USER_EXPERIENCE_CP_ADD, user_id=user_id),
             json=body.model_dump(mode="json"),

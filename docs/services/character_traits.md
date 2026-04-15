@@ -12,9 +12,8 @@ Manage character traits including retrieval, assignment, and value modification.
 from vclient import character_traits_service
 
 traits = character_traits_service(
-    user_id="USER_ID",
-    campaign_id="CAMPAIGN_ID",
     character_id="CHARACTER_ID",
+    on_behalf_of="USER_ID",
     company_id="COMPANY_ID"
 )
 ```

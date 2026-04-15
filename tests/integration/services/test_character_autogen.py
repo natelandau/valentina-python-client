@@ -38,8 +38,8 @@ class TestCharacterAutogenService:
 
         # When: Starting a chargen session
         result = await vclient.character_autogen(
-            user_id="user123", campaign_id="campaign123", company_id="company123"
-        ).start_chargen_session()
+            "on-behalf-of-user", company_id="company123"
+        ).start_chargen_session(campaign_id="campaign123")
 
         # Then: The route was called with correct params
         assert route.called
@@ -62,7 +62,7 @@ class TestCharacterAutogenServiceFinalizeChargenSession:
 
         # When: Finalizing a chargen session
         result = await vclient.character_autogen(
-            user_id="user123", campaign_id="campaign123", company_id="company123"
+            "on-behalf-of-user", company_id="company123"
         ).finalize_chargen_session("session123", "char123")
 
         # Then: The route was called with correct params
@@ -90,8 +90,8 @@ class TestCharacterAutogenerateCharacter:
 
         # When: Generating a character
         result = await vclient.character_autogen(
-            user_id="user123", campaign_id="campaign123", company_id="company123"
-        ).generate_character(character_type="PLAYER")
+            "on-behalf-of-user", company_id="company123"
+        ).generate_character(campaign_id="campaign123", character_type="PLAYER")
 
         # Then: The route was called with correct params
         assert route.called
@@ -117,7 +117,7 @@ class TestCharacterAutogenServiceListSessions:
 
         # When: Listing all chargen sessions
         result = await vclient.character_autogen(
-            user_id="user123", campaign_id="campaign123", company_id="company123"
+            "on-behalf-of-user", company_id="company123"
         ).list_all()
 
         # Then: The route was called and returned a list
@@ -137,7 +137,7 @@ class TestCharacterAutogenServiceListSessions:
 
         # When: Listing all chargen sessions
         result = await vclient.character_autogen(
-            user_id="user123", campaign_id="campaign123", company_id="company123"
+            "on-behalf-of-user", company_id="company123"
         ).list_all()
 
         # Then: The route was called and returned an empty list
@@ -157,9 +157,9 @@ class TestCharacterAutogenServiceGetSession:
         ).mock(return_value=Response(200, json=character_autogen_response_data))
 
         # When: Getting a specific chargen session
-        result = await vclient.character_autogen(
-            user_id="user123", campaign_id="campaign123", company_id="company123"
-        ).get("session123")
+        result = await vclient.character_autogen("on-behalf-of-user", company_id="company123").get(
+            "session123"
+        )
 
         # Then: The route was called and returned the session
         assert route.called

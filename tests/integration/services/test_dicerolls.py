@@ -73,7 +73,7 @@ class TestDicerollServiceGetPage:
         ).respond(200, json=paginated_dicerolls_response)
 
         # When: Getting a page of dicerolls
-        result = await vclient.dicerolls(user_id="user123", company_id="company123").get_page()
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").get_page()
 
         # Then: Returns paginated Diceroll objects
         assert route.called
@@ -109,7 +109,7 @@ class TestDicerollServiceGetPage:
         ).respond(200, json=paginated_dicerolls_response)
 
         # When: Getting a page of dicerolls with filters
-        result = await vclient.dicerolls(user_id="user123", company_id="company123").get_page(
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").get_page(
             userid="user123", characterid="character123", campaignid="campaign123"
         )
 
@@ -135,7 +135,7 @@ class TestDicerollServiceGetPage:
         ).respond(200, json=paginated_dicerolls_response)
 
         # When: Getting a page of dicerolls with pagination
-        result = await vclient.dicerolls(user_id="user123", company_id="company123").get_page(
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").get_page(
             limit=25, offset=50
         )
 
@@ -164,7 +164,7 @@ class TestDicerollServiceListAll:
         ).respond(200, json=paginated_dicerolls_response)
 
         # When: Getting all dicerolls
-        result = await vclient.dicerolls(user_id="user123", company_id="company123").list_all()
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").list_all()
 
         # Then: Returns list of Diceroll objects
         assert route.called
@@ -189,7 +189,7 @@ class TestDicerollServiceListAll:
         ).respond(200, json=paginated_dicerolls_response)
 
         # When: Getting all dicerolls with filters
-        result = await vclient.dicerolls(user_id="user123", company_id="company123").list_all(
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").list_all(
             userid="user123", characterid="character123", campaignid="campaign123"
         )
 
@@ -218,7 +218,7 @@ class TestDicerollServiceIterAll:
         result = [
             diceroll
             async for diceroll in vclient.dicerolls(
-                company_id="company123", user_id="user123"
+                "on-behalf-of-user", company_id="company123"
             ).iter_all()
         ]
 
@@ -244,7 +244,7 @@ class TestDicerollServiceGet:
         ).respond(200, json=diceroll_response_data)
 
         # When: Getting a diceroll
-        result = await vclient.dicerolls(user_id="user123", company_id="company123").get(
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").get(
             "diceroll123"
         )
 
@@ -270,7 +270,7 @@ class TestDicerollServiceGet:
 
         # When/Then: Getting the diceroll raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.dicerolls(user_id="user123", company_id="company123").get("nonexistent")
+            await vclient.dicerolls("on-behalf-of-user", company_id="company123").get("nonexistent")
 
         assert route.called
 
@@ -287,7 +287,7 @@ class TestDicerollServiceCreate:
         ).respond(200, json=diceroll_response_data)
 
         # When: Creating a diceroll
-        result = await vclient.dicerolls(user_id="user123", company_id="company123").create(
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").create(
             dice_size=10,
             difficulty=6,
             num_dice=1,
@@ -335,7 +335,7 @@ class TestDicerollServiceCreateQuickroll:
 
         # When: Creating a diceroll quickroll
         result = await vclient.dicerolls(
-            company_id="company123", user_id="user123"
+            "on-behalf-of-user", company_id="company123"
         ).create_from_quickroll(
             quickroll_id="quickroll123",
             character_id="character123",

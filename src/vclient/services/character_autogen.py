@@ -19,26 +19,22 @@ if TYPE_CHECKING:
 class CharacterAutogenService(BaseService):
     """Service for interacting with the Character Autogeneration API."""
 
-    def __init__(self, client: "VClient", company_id: str, user_id: str, campaign_id: str) -> None:
+    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str) -> None:
         """Initialize the service.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
-            user_id: The ID of the user to operate as.
-            campaign_id: The ID of the campaign to operate within.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
-        self._user_id = user_id
-        self._campaign_id = campaign_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
-        """Format an endpoint with the scoped company_id, user_id, and campaign_id plus any extra params."""
+        """Format an endpoint with the scoped company_id plus any extra params."""
         return endpoint.format(
             company_id=self._company_id,
-            user_id=self._user_id,
-            campaign_id=self._campaign_id,
             **kwargs,
         )
 
@@ -49,6 +45,7 @@ class CharacterAutogenService(BaseService):
     async def generate_character(
         self,
         *,
+        campaign_id: str,
         character_type: CharacterType,
         character_class: CharacterClass | None = None,
         experience_level: AutoGenExperienceLevel | None = None,
@@ -61,6 +58,7 @@ class CharacterAutogenService(BaseService):
         """Generate a character.
 
         Args:
+            campaign_id: The ID of the campaign to generate the character for.
             character_type: The type of character to generate.
             character_class: The class of character to generate.
             experience_level: The experience level of character to generate.
@@ -92,12 +90,23 @@ class CharacterAutogenService(BaseService):
         response = await self._post(
             self._format_endpoint(Endpoints.AUTOGENERATE),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+            params={"campaign_id": campaign_id},
         )
         return Character.model_validate(response.json())
 
-    async def start_chargen_session(self) -> ChargenSessionResponse:
-        """Start a chargen session."""
-        response = await self._post(self._format_endpoint(Endpoints.CHARGEN_START))
+    async def start_chargen_session(self, *, campaign_id: str) -> ChargenSessionResponse:
+        """Start a chargen session.
+
+        Args:
+            campaign_id: The ID of the campaign to start the chargen session for.
+
+        Returns:
+            The chargen session response.
+        """
+        response = await self._post(
+            self._format_endpoint(Endpoints.CHARGEN_START),
+            params={"campaign_id": campaign_id},
+        )
         return ChargenSessionResponse.model_validate(response.json())
 
     async def finalize_chargen_session(

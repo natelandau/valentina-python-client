@@ -77,7 +77,7 @@ class TestOptionsServiceGetOptions:
         )
 
         # When: Calling get_options
-        result = await vclient.options(company_id).get_options()
+        result = await vclient.options("on-behalf-of-user", company_id=company_id).get_options()
 
         # Then: Returns the correct options
         assert route.called

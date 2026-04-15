@@ -11,7 +11,7 @@ The Options service retrieves all available enumerations and configuration value
 ```python
 from vclient import options_service
 
-options = options_service(company_id="COMPANY_ID")
+options = options_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 ## Methods

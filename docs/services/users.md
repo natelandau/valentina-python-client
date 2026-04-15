@@ -6,12 +6,16 @@ icon: lucide/users
 
 Manage users within a company, including their experience points, assets, notes, and quickrolls. This service provides comprehensive user management for World of Darkness campaigns.
 
+!!! note "SSO registration"
+
+    For SSO user registration, see [UserSelfRegistrationService](user_self_registration.md).
+
 ## Usage
 
 ```python
 from vclient import users_service
 
-users = users_service(company_id="COMPANY_ID")
+users = users_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 ## Methods
@@ -22,9 +26,8 @@ users = users_service(company_id="COMPANY_ID")
 | ----------------------------------------- | ------------ | ---------------------------------------------------------------------------------------- |
 | `get(user_id, *, include=None)`           | `UserDetail` | Retrieve a user by ID, optionally embedding `quickrolls`, `notes`, `assets`, `characters`|
 | `create(request=None, **kwargs)`          | `User`       | Create a new user                                                                        |
-| `register(request=None, **kwargs)`        | `User`       | Register via SSO                                                                         |
 | `update(user_id, request=None, **kwargs)` | `User`       | Update user properties                                                                   |
-| `delete(user_id, requesting_user_id)`     | `None`       | Delete a user                                                                            |
+| `delete(user_id)`                         | `None`       | Delete a user                                                                            |
 
 ### Embedding Child Resources
 
@@ -42,7 +45,7 @@ When a value is not included in the request, the corresponding field on `UserDet
 ```python
 from vclient import users_service
 
-users = users_service(company_id="...")
+users = users_service(on_behalf_of="...", company_id="...")
 
 # Embed quickrolls and characters in a single request
 user = await users.get("user_id", include=["quickrolls", "characters"])
@@ -67,9 +70,9 @@ assert user.assets is None          # not requested
 | `get_unapproved_page(limit=10, offset=0)`               | `PaginatedResponse[User]` | List unapproved users (paginated)   |
 | `list_all_unapproved()`                                 | `list[User]`              | List all unapproved users           |
 | `iter_all_unapproved(limit=100)`                        | `AsyncIterator[User]`     | Iterate through unapproved users    |
-| `approve_user(user_id, role, requesting_user_id)`        | `User`                    | Approve a user and assign a role    |
-| `deny_user(user_id, requesting_user_id)`                 | `None`                    | Deny an unapproved user             |
-| `merge(primary_user_id, secondary_user_id, requesting_user_id)` | `User`                    | Merge unapproved user into primary  |
+| `approve_user(user_id, role)`                           | `User`                    | Approve a user and assign a role    |
+| `deny_user(user_id)`                                    | `None`                    | Deny an unapproved user             |
+| `merge(primary_user_id, secondary_user_id)`             | `User`                    | Merge unapproved user into primary  |
 
 ### Statistics
 
@@ -82,9 +85,9 @@ assert user.assets is None          # not requested
 | Method                                                              | Returns              | Description                 |
 | ------------------------------------------------------------------- | -------------------- | --------------------------- |
 | `get_experience(user_id, campaign_id)`                              | `CampaignExperience` | Retrieve XP and cool points |
-| `add_xp(user_id, campaign_id, amount, requesting_user_id)`          | `CampaignExperience` | Award experience points     |
-| `remove_xp(user_id, campaign_id, amount, requesting_user_id)`       | `CampaignExperience` | Deduct experience points    |
-| `add_cool_points(user_id, campaign_id, amount, requesting_user_id)` | `CampaignExperience` | Award cool points           |
+| `add_xp(user_id, campaign_id, amount)`          | `CampaignExperience` | Award experience points     |
+| `remove_xp(user_id, campaign_id, amount)`       | `CampaignExperience` | Deduct experience points    |
+| `add_cool_points(user_id, campaign_id, amount)` | `CampaignExperience` | Award cool points           |
 
 ### Asset Management
 
@@ -146,7 +149,6 @@ request = UserCreate(
     username="john_doe",
     email="john@example.com",
     role="PLAYER",
-    requesting_user_id="admin_user_id"
 )
 user = await users.create(request=request)
 
@@ -157,7 +159,6 @@ user = await users.create(
     username="john_doe",
     email="john@example.com",
     role="PLAYER",
-    requesting_user_id="admin_user_id"
 )
 ```
 
@@ -171,21 +172,15 @@ experience = await users.get_experience(user.id, campaign_id)
 print(f"Current XP: {experience.xp_current}")
 print(f"Total earned: {experience.xp_total}")
 
-# Award XP (requesting_user_id for permission checking)
-updated = await users.add_xp(
-    user.id, campaign_id, amount=50, requesting_user_id=admin.id
-)
+# Award XP
+updated = await users.add_xp(user.id, campaign_id, amount=50)
 print(f"New XP: {updated.xp_current}")
 
 # Award cool points (converted to XP automatically)
-updated = await users.add_cool_points(
-    user.id, campaign_id, amount=3, requesting_user_id=admin.id
-)
+updated = await users.add_cool_points(user.id, campaign_id, amount=3)
 
 # Deduct XP for character upgrades
-updated = await users.remove_xp(
-    user.id, campaign_id, amount=20, requesting_user_id=admin.id
-)
+updated = await users.remove_xp(user.id, campaign_id, amount=20)
 ```
 
 ### Create and Manage Notes
@@ -299,43 +294,11 @@ for user in unapproved:
     print(f"Pending: {user.name_first} {user.name_last} ({user.email})")
 
 # Approve a user as a player
-approved = await users.approve_user(
-    user_id=user.id,
-    role="PLAYER",
-    requesting_user_id=admin_user_id,
-)
+approved = await users.approve_user(user_id=user.id, role="PLAYER")
 print(f"Approved {approved.name_first} as {approved.role}")
 
 # Deny a user
-await users.deny_user(
-    user_id=user.id,
-    requesting_user_id=admin_user_id,
-)
-```
-
-### Register a User via SSO
-
-Register a new user through an external auth provider flow (no requesting_user_id needed).
-
-```python
-from vclient.models import UserRegisterDTO
-
-# Option 1: Use a model object
-request = UserRegisterDTO(
-    username="jane_doe",
-    email="jane@example.com",
-    name_first="Jane",
-    name_last="Doe",
-)
-user = await users.register(request=request)
-
-# Option 2: Pass fields as keyword arguments
-user = await users.register(
-    username="jane_doe",
-    email="jane@example.com",
-    name_first="Jane",
-    name_last="Doe",
-)
+await users.deny_user(user_id=user.id)
 ```
 
 ### Merge Users
@@ -347,11 +310,11 @@ Merge an unapproved user's data into an existing primary user.
 merged_user = await users.merge(
     primary_user_id="primary_user_id",
     secondary_user_id="unapproved_user_id",
-    requesting_user_id=admin_user_id,
 )
 print(f"Merged into: {merged_user.username}")
 ```
 
 ## Related Documentation
 
-- [Response Models](../models/users.md) - View `User`, `UserRegisterDTO`, `UserMergeDTO`, `UserApproveDTO`, `UserDenyDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [Response Models](../models/users.md) - View `User`, `UserMergeDTO`, `UserApproveDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [UserSelfRegistrationService](user_self_registration.md) - SSO user registration

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 class BooksService(BaseService):
     """Service for managing campaign books within a campaign in the Valentina API.
 
-    This service is scoped to a specific company, user, and campaign at initialization time.
+    This service is scoped to a specific company and campaign at initialization time.
     All methods operate within that context.
 
     Provides methods to create, retrieve, update, and delete campaign books,
@@ -35,30 +35,35 @@ class BooksService(BaseService):
 
     Example:
         >>> async with VClient() as client:
-        ...     books = client.books("company_id", "user_id", "campaign_id")
+        ...     books = client.books("company_id", "campaign_id")
         ...     all_books = await books.list_all()
         ...     book = await books.get("book_id")
     """
 
-    def __init__(self, client: "VClient", company_id: str, user_id: str, campaign_id: str) -> None:
-        """Initialize the service scoped to a specific company, user, and campaign.
+    def __init__(
+        self,
+        client: "VClient",
+        company_id: str,
+        campaign_id: str,
+        on_behalf_of: str,
+    ) -> None:
+        """Initialize the service scoped to a specific company and campaign.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
-            user_id: The ID of the user to operate as.
             campaign_id: The ID of the campaign to operate within.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
-        self._user_id = user_id
         self._campaign_id = campaign_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
-        """Format an endpoint with the scoped company_id, user_id, campaign_id plus any extra params."""
+        """Format an endpoint with the scoped company_id and campaign_id plus any extra params."""
         return endpoint.format(
             company_id=self._company_id,
-            user_id=self._user_id,
             campaign_id=self._campaign_id,
             **kwargs,
         )

@@ -277,9 +277,7 @@ class TestCharactersServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_response))
 
         # When: Requesting a page of characters
-        result = await vclient.characters(
-            "user123", "campaign123", company_id="company123"
-        ).get_page()
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").get_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -306,9 +304,9 @@ class TestCharactersServiceGetPage:
         ).mock(return_value=Response(200, json=paginated_character_response))
 
         # When: Requesting with filters
-        result = await vclient.characters(
-            "user123", "campaign123", company_id="company123"
-        ).get_page(character_class="VAMPIRE", status="ALIVE", is_temporary=True)
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").get_page(
+            character_class="VAMPIRE", status="ALIVE", is_temporary=True
+        )
 
         # Then: The route was called with correct params
         assert route.called
@@ -327,7 +325,7 @@ class TestCharactersServiceGet:
         ).mock(return_value=Response(200, json=character_response_data))
 
         # When: Requesting a character
-        result = await vclient.characters("user123", "campaign123", company_id="company123").get(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").get(
             "char123"
         )
 
@@ -353,7 +351,7 @@ class TestCharactersServiceGet:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.characters("user123", "campaign123", company_id="company123").get(
+            await vclient.characters("on-behalf-of-user", company_id="company123").get(
                 "nonexistent"
             )
 
@@ -393,7 +391,7 @@ class TestCharactersServiceGetWithInclude:
         ).mock(return_value=Response(200, json=character_detail_response_data))
 
         # When: Requesting a character with include
-        result = await vclient.characters("user123", "campaign123", company_id="company123").get(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").get(
             "char123", include=["traits", "notes"]
         )
 
@@ -418,7 +416,7 @@ class TestCharactersServiceGetWithInclude:
         ).mock(return_value=Response(200, json=character_response_data))
 
         # When: Requesting a character without include
-        result = await vclient.characters("user123", "campaign123", company_id="company123").get(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").get(
             "char123"
         )
 
@@ -445,7 +443,8 @@ class TestCharactersServiceCreate:
         ).mock(return_value=Response(201, json=character_response_data))
 
         # When: Creating a character with required fields only
-        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -478,7 +477,8 @@ class TestCharactersServiceCreate:
         ).mock(return_value=Response(201, json=character_response_data))
 
         # When: Creating a character with all fields
-        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -528,7 +528,8 @@ class TestCharactersServiceCreate:
         )
 
         # When: Creating a character with vampire attributes
-        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -570,7 +571,8 @@ class TestCharactersServiceCreate:
         )
 
         # When: Creating a character with werewolf attributes
-        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="WEREWOLF",
             game_version="V5",
             name_first="Wolf",
@@ -610,7 +612,8 @@ class TestCharactersServiceCreate:
         )
 
         # When: Creating a character with hunter attributes
-        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="HUNTER",
             game_version="V5",
             name_first="John",
@@ -654,7 +657,8 @@ class TestCharactersServiceCreate:
         ]
 
         # When: Creating a character with traits
-        result = await vclient.characters("user123", "campaign123", company_id="company123").create(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").create(
+            campaign_id="campaign123",
             character_class="VAMPIRE",
             game_version="V5",
             name_first="John",
@@ -692,7 +696,7 @@ class TestCharactersServiceUpdate:
         ).mock(return_value=Response(200, json=updated_data))
 
         # When: Updating the character's name
-        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").update(
             "char123", name_first="Jane"
         )
 
@@ -723,7 +727,7 @@ class TestCharactersServiceUpdate:
         ).mock(return_value=Response(200, json=updated_data))
 
         # When: Updating the character's status
-        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").update(
             "char123", status="DEAD"
         )
 
@@ -743,7 +747,7 @@ class TestCharactersServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.characters("user123", "campaign123", company_id="company123").update(
+            await vclient.characters("on-behalf-of-user", company_id="company123").update(
                 "nonexistent", name_first="Jane"
             )
 
@@ -782,7 +786,7 @@ class TestCharactersServiceUpdate:
         )
 
         # When: Updating the character's vampire attributes
-        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").update(
             "char123", vampire_attributes=vampire_attrs
         )
 
@@ -832,7 +836,7 @@ class TestCharactersServiceUpdate:
         )
 
         # When: Updating the character's werewolf attributes
-        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").update(
             "char456", werewolf_attributes=werewolf_attrs
         )
 
@@ -875,7 +879,7 @@ class TestCharactersServiceUpdate:
         )
 
         # When: Updating the character's hunter attributes
-        result = await vclient.characters("user123", "campaign123", company_id="company123").update(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").update(
             "char789", hunter_attributes=hunter_attrs
         )
 
@@ -905,7 +909,7 @@ class TestCharactersServiceDelete:
         ).mock(return_value=Response(204))
 
         # When: Deleting the character
-        result = await vclient.characters("user123", "campaign123", company_id="company123").delete(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").delete(
             "char123"
         )
 
@@ -925,7 +929,7 @@ class TestCharactersServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.characters("user123", "campaign123", company_id="company123").delete(
+            await vclient.characters("on-behalf-of-user", company_id="company123").delete(
                 "nonexistent"
             )
 
@@ -950,9 +954,7 @@ class TestCharactersServiceListAll:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all characters
-        result = await vclient.characters(
-            "user123", "campaign123", company_id="company123"
-        ).list_all()
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").list_all()
 
         # Then: All characters are returned as a list
         assert route.called
@@ -982,7 +984,7 @@ class TestCharactersServiceIterAll:
         characters = [
             character
             async for character in vclient.characters(
-                "user123", "campaign123", company_id="company123"
+                "on-behalf-of-user", company_id="company123"
             ).iter_all()
         ]
 
@@ -1006,7 +1008,7 @@ class TestCharactersServiceVampireAttributes:
         ).mock(return_value=Response(200, json=character_response_data))
 
         # When: Requesting the character
-        result = await vclient.characters("user123", "campaign123", company_id="company123").get(
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").get(
             "char123"
         )
 
@@ -1043,7 +1045,7 @@ class TestCharactersServiceAssets:
 
         # When: Getting a page of assets
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_assets_page("char123")
 
         # Then: Returns paginated Asset objects
@@ -1075,7 +1077,7 @@ class TestCharactersServiceAssets:
 
         # When: Calling list_all_assets
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).list_all_assets(character_id)
 
         # Then: Returns list of Asset objects
@@ -1096,7 +1098,7 @@ class TestCharactersServiceAssets:
         ).respond(200, json=asset_response_data)
 
         # When: Getting the asset
-        result = await vclient.characters(user_id, campaign_id, company_id=company_id).get_asset(
+        result = await vclient.characters("on-behalf-of-user", company_id=company_id).get_asset(
             "char123", asset_id
         )
 
@@ -1118,7 +1120,7 @@ class TestCharactersServiceAssets:
         ).respond(204)
 
         # When: Deleting the asset
-        await vclient.characters(user_id, campaign_id, company_id=company_id).delete_asset(
+        await vclient.characters("on-behalf-of-user", company_id=company_id).delete_asset(
             "char123", asset_id
         )
 
@@ -1137,7 +1139,7 @@ class TestCharactersServiceAssets:
         ).respond(201, json=asset_response_data)
 
         # When: Uploading an asset
-        result = await vclient.characters(user_id, campaign_id, company_id=company_id).upload_asset(
+        result = await vclient.characters("on-behalf-of-user", company_id=company_id).upload_asset(
             "char123",
             filename="test.png",
             content=b"test content",
@@ -1175,7 +1177,7 @@ class TestCharactersServiceNotes:
 
         # When: Getting a page of notes
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_notes_page("char123")
 
         # Then: Returns paginated Note objects
@@ -1197,7 +1199,7 @@ class TestCharactersServiceNotes:
         ).respond(200, json=note_response_data)
 
         # When: Getting the note
-        result = await vclient.characters(user_id, campaign_id, company_id=company_id).get_note(
+        result = await vclient.characters("on-behalf-of-user", company_id=company_id).get_note(
             "char123", note_id
         )
 
@@ -1220,7 +1222,7 @@ class TestCharactersServiceNotes:
         ).respond(201, json=note_response_data)
 
         # When: Creating a note
-        result = await vclient.characters(user_id, campaign_id, company_id=company_id).create_note(
+        result = await vclient.characters("on-behalf-of-user", company_id=company_id).create_note(
             character_id, title="Test Note", content="This is test content"
         )
 
@@ -1244,7 +1246,7 @@ class TestCharactersServiceNotes:
         ).respond(200, json=updated_data)
 
         # When: Updating the note
-        result = await vclient.characters(user_id, campaign_id, company_id=company_id).update_note(
+        result = await vclient.characters("on-behalf-of-user", company_id=company_id).update_note(
             character_id, note_id, title="Updated Title"
         )
 
@@ -1266,7 +1268,7 @@ class TestCharactersServiceNotes:
         ).respond(204)
 
         # When: Deleting the note
-        await vclient.characters(user_id, campaign_id, company_id=company_id).delete_note(
+        await vclient.characters("on-behalf-of-user", company_id=company_id).delete_note(
             "char123", note_id
         )
 
@@ -1292,7 +1294,7 @@ class TestCharactersServiceGetStatistics:
 
         # When: Getting statistics
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_statistics(character_id)
 
         # Then: Returns RollStatistics object
@@ -1319,7 +1321,7 @@ class TestCharactersServiceGetFullSheet:
 
         # When: Getting the full sheet
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_full_sheet(character_id)
 
         # Then: Returns CharacterFullSheet with correct hierarchy
@@ -1347,7 +1349,7 @@ class TestCharactersServiceGetFullSheet:
 
         # When: Getting the full sheet with include_available_traits=True
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_full_sheet(character_id, include_available_traits=True)
 
         # Then: Returns CharacterFullSheet with available_traits populated
@@ -1377,7 +1379,7 @@ class TestCharactersServiceGetFullSheetCategory:
 
         # When: Getting a single category
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_full_sheet_category(character_id, category_id)
 
         # Then: Returns FullSheetTraitCategory with correct data
@@ -1406,7 +1408,7 @@ class TestCharactersServiceGetFullSheetCategory:
 
         # When: Getting a category with available traits
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_full_sheet_category(character_id, category_id, include_available_traits=True)
 
         # Then: Returns category with available_traits populated
@@ -1442,7 +1444,7 @@ class TestCharactersServiceInventory:
 
         # When: Getting a page of inventory items
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_inventory_page(character_id)
 
         # Then: Returns paginated InventoryItem objects
@@ -1474,7 +1476,7 @@ class TestCharactersServiceInventory:
 
         # When: Listing all inventory items
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).list_all_inventory(character_id)
 
         # Then: Returns list of InventoryItem objects
@@ -1502,7 +1504,7 @@ class TestCharactersServiceInventory:
         result = [
             item
             async for item in vclient.characters(
-                user_id=user_id, campaign_id=campaign_id, company_id=company_id
+                "on-behalf-of-user", company_id=company_id
             ).iter_all_inventory(character_id)
         ]
 
@@ -1527,7 +1529,7 @@ class TestCharactersServiceInventory:
         ).respond(200, json=inventory_item_response_data)
         # When: Getting the inventory item
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_inventory_item(character_id, item_id)
 
         # Then: Returns InventoryItem object
@@ -1551,7 +1553,7 @@ class TestCharactersServiceInventory:
         ).respond(201, json=inventory_item_response_data)
         # When: Creating the inventory item
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).create_inventory_item(
             character_id, name="Test Item", type="BOOK", description="This is test content"
         )
@@ -1580,7 +1582,7 @@ class TestCharactersServiceInventory:
 
         # When: Updating the inventory item
         result = await vclient.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).update_inventory_item(character_id, item_id, name="Updated Item")
 
         # Then: Returns InventoryItem object
@@ -1605,7 +1607,7 @@ class TestCharactersServiceInventory:
         ).respond(204)
 
         # When: Deleting the inventory item
-        await vclient.characters(user_id, campaign_id, company_id=company_id).delete_inventory_item(
+        await vclient.characters("on-behalf-of-user", company_id=company_id).delete_inventory_item(
             character_id, item_id
         )
 

@@ -17,6 +17,7 @@ from vclient.constants import (
     IDEMPOTENCY_KEY_HEADER,
     IDEMPOTENT_HTTP_METHODS,
     MAX_PAGE_LIMIT,
+    ON_BEHALF_OF_HEADER,
     RATE_LIMIT_HEADER,
     REQUEST_ID_HEADER,
 )
@@ -52,6 +53,7 @@ class BaseService:
             client: The VClient instance to use for requests.
         """
         self._client = client
+        self._on_behalf_of: str | None = None
 
     @property
     def _http(self) -> httpx.AsyncClient:
@@ -169,6 +171,8 @@ class BaseService:
             httpx.TimeoutException: When request times out and max retries are exhausted.
             APIError: For other API error responses.
         """
+        headers = self._merge_on_behalf_of_header(headers)
+
         config = self._client._config  # noqa: SLF001
         max_attempts = config.max_retries + 1 if config.auto_retry_rate_limit else 1
         retry_statuses = config.retry_statuses
@@ -437,6 +441,26 @@ class BaseService:
             The HTTP response.
         """
         return await self._request("GET", path, params=params)
+
+    def _merge_on_behalf_of_header(
+        self,
+        headers: dict[str, str] | None,
+    ) -> dict[str, str] | None:
+        """Merge the On-Behalf-Of header into headers when _on_behalf_of is set.
+
+        Prepends the On-Behalf-Of header so caller-supplied headers always win
+        on any key collision (though in practice the keys are distinct).
+
+        Args:
+            headers: Existing request headers, or None.
+
+        Returns:
+            A new headers dict with the On-Behalf-Of header included, or the
+            original value unchanged if _on_behalf_of is not set.
+        """
+        if self._on_behalf_of is None:
+            return headers
+        return {ON_BEHALF_OF_HEADER: self._on_behalf_of, **(headers or {})}
 
     def _build_idempotency_headers(
         self,

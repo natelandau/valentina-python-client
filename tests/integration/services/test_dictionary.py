@@ -51,7 +51,7 @@ class TestDictionaryServiceGetPage:
         ).respond(200, json=paginated_dictionary_terms_response)
 
         # When: Getting a page of dictionary terms
-        result = await vclient.dictionary(company_id).get_page()
+        result = await vclient.dictionary("on-behalf-of-user", company_id=company_id).get_page()
 
         # Then: Returns paginated DictionaryTerm objects
         assert route.called
@@ -73,7 +73,9 @@ class TestDictionaryServiceGetPage:
         ).respond(200, json=paginated_dictionary_terms_response)
 
         # When: Getting a page of dictionary terms with filters
-        result = await vclient.dictionary("company123").get_page(term="Test Term")
+        result = await vclient.dictionary("on-behalf-of-user", company_id="company123").get_page(
+            term="Test Term"
+        )
 
         # Then: Request was made with correct params
         assert route.called
@@ -96,7 +98,9 @@ class TestDictionaryServiceGetPage:
         ).respond(200, json=paginated_dictionary_terms_response)
 
         # When: Getting a page of dictionary terms with pagination
-        result = await vclient.dictionary("company123").get_page(limit=25, offset=50)
+        result = await vclient.dictionary("on-behalf-of-user", company_id="company123").get_page(
+            limit=25, offset=50
+        )
 
         # Then: Request was made with correct params
         assert route.called
@@ -121,7 +125,7 @@ class TestDictionaryServiceListAll:
         ).respond(200, json=paginated_dictionary_terms_response)
 
         # When: Listing all dictionary terms
-        result = await vclient.dictionary("company123").list_all()
+        result = await vclient.dictionary("on-behalf-of-user", company_id="company123").list_all()
 
         # Then: Returns list of DictionaryTerm objects
         assert route.called
@@ -142,7 +146,9 @@ class TestDictionaryServiceListAll:
         ).respond(200, json=paginated_dictionary_terms_response)
 
         # When: Listing all dictionary terms with filters
-        result = await vclient.dictionary("company123").list_all(term="Test")
+        result = await vclient.dictionary("on-behalf-of-user", company_id="company123").list_all(
+            term="Test"
+        )
 
         # Then: Request was made with correct params
         assert route.called
@@ -164,7 +170,12 @@ class TestDictionaryServiceIterAll:
         ).respond(200, json=paginated_dictionary_terms_response)
 
         # When: Iterating through dictionary terms
-        terms = [term async for term in vclient.dictionary("company123").iter_all()]
+        terms = [
+            term
+            async for term in vclient.dictionary(
+                "on-behalf-of-user", company_id="company123"
+            ).iter_all()
+        ]
 
         # Then: Returns list of DictionaryTerm objects
         assert route.called
@@ -189,7 +200,7 @@ class TestDictionaryServiceGet:
         ).respond(200, json=dictionary_term_response_data)
 
         # When: Getting a dictionary term
-        result = await vclient.dictionary("company123").get(term_id)
+        result = await vclient.dictionary("on-behalf-of-user", company_id="company123").get(term_id)
 
         # Then: Returns DictionaryTerm object
         assert route.called
@@ -208,7 +219,7 @@ class TestDictionaryServiceGet:
 
         # When/Then: Getting the dictionary term raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.dictionary("company123").get(term_id)
+            await vclient.dictionary("on-behalf-of-user", company_id="company123").get(term_id)
 
         assert route.called
 
@@ -226,7 +237,7 @@ class TestDictionaryServiceCreate:
         ).respond(200, json=dictionary_term_response_data)
 
         # When: Creating a dictionary term
-        result = await vclient.dictionary("company123").create(
+        result = await vclient.dictionary("on-behalf-of-user", company_id="company123").create(
             term="Test Term",
             definition="A test definition",
             link="https://example.com",
@@ -263,7 +274,7 @@ class TestDictionaryServiceUpdate:
         ).respond(200, json=dictionary_term_response_data)
 
         # When: Updating a dictionary term
-        result = await vclient.dictionary("company123").update(
+        result = await vclient.dictionary("on-behalf-of-user", company_id="company123").update(
             term_id,  # positional argument
             term="Updated Term",
             definition="An updated definition",
@@ -304,7 +315,9 @@ class TestDictionaryServiceDelete:
         ).respond(200, json=dictionary_term_response_data)
 
         # When: Deleting a dictionary term
-        result = await vclient.dictionary("company123").delete(term_id)
+        result = await vclient.dictionary("on-behalf-of-user", company_id="company123").delete(
+            term_id
+        )
 
         # Then: Request was made and returns None
         assert route.called

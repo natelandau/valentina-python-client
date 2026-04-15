@@ -89,7 +89,7 @@ Use the `UserInclude` type alias from `vclient.constants` to get editor autocomp
 
 ## UserRegisterDTO
 
-Request body for registering a user via SSO onboarding. Unlike `UserCreate`, no `requesting_user_id` is required.
+Request body for registering a user via SSO onboarding.
 
 | Field             | Type                     | Description              |
 | ----------------- | ------------------------ | ------------------------ |
@@ -105,11 +105,10 @@ Request body for registering a user via SSO onboarding. Unlike `UserCreate`, no 
 
 Request body for merging an unapproved user into an existing primary user.
 
-| Field                | Type  | Description                          |
-| -------------------- | ----- | ------------------------------------ |
-| `primary_user_id`    | `str` | ID of the primary user to merge into |
-| `secondary_user_id`  | `str` | ID of the unapproved user to merge   |
-| `requesting_user_id` | `str` | ID of the user making the request    |
+| Field               | Type  | Description                          |
+| ------------------- | ----- | ------------------------------------ |
+| `primary_user_id`   | `str` | ID of the primary user to merge into |
+| `secondary_user_id` | `str` | ID of the unapproved user to merge   |
 
 ## Quickroll
 
@@ -149,15 +148,6 @@ Request body for updating a quickroll. Only include fields that need to change.
 
 Request body for approving an unapproved user.
 
-| Field                | Type       | Description                         |
-| -------------------- | ---------- | ----------------------------------- |
-| `role`               | `UserRole` | Role to assign to the approved user |
-| `requesting_user_id` | `str`      | ID of the user making the request   |
-
-## UserDenyDTO
-
-Request body for denying an unapproved user.
-
-| Field                | Type  | Description                       |
-| -------------------- | ----- | --------------------------------- |
-| `requesting_user_id` | `str` | ID of the user making the request |
+| Field  | Type       | Description                         |
+| ------ | ---------- | ----------------------------------- |
+| `role` | `UserRole` | Role to assign to the approved user |

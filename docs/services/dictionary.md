@@ -11,7 +11,7 @@ Manage dictionary terms within a company for in-game terminology and definitions
 ```python
 from vclient import dictionary_service
 
-dictionary = dictionary_service(company_id="COMPANY_ID")
+dictionary = dictionary_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 ## Methods

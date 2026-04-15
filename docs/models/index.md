@@ -34,11 +34,10 @@ async with VClient() as client:
         name="Alice Johnson",
         email="alice@example.com",
         role="PLAYER",
-        requesting_user_id="admin_id",
     )
 
     # Send the request and receive a typed response model
-    users = client.users(company_id="company_123")
+    users = client.users(on_behalf_of="admin_id", company_id="company_123")
     user: User = await users.create(request)
 
     # Access fields with full type hints

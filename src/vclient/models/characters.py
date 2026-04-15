@@ -252,6 +252,7 @@ class CharacterCreate(BaseModel):
     Used to construct the JSON payload for character creation.
     """
 
+    campaign_id: str = Field(..., description="ID of the campaign this character belongs to.")
     character_class: CharacterClass = Field(..., description="Character class.")
     game_version: GameVersion = Field(..., description="Game version for character sheet.")
     name_first: str = Field(..., min_length=3, description="Character's first name.")

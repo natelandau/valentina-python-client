@@ -36,40 +36,36 @@ if TYPE_CHECKING:
 
 
 class CharactersService(BaseService):
-    """Service for managing characters within a campaign in the Valentina API.
+    """Service for managing characters within a company in the Valentina API.
 
-    This service is scoped to a specific company, user, and campaign at initialization time.
+    This service is scoped to a specific company at initialization time.
     All methods operate within that context.
 
     Provides methods to create, retrieve, update, and delete characters.
 
     Example:
         >>> async with VClient() as client:
-        ...     characters = client.characters("company_id", "user_id", "campaign_id")
+        ...     characters = client.characters("company_id")
         ...     all_characters = await characters.list_all()
         ...     character = await characters.get("character_id")
     """
 
-    def __init__(self, client: "VClient", company_id: str, user_id: str, campaign_id: str) -> None:
-        """Initialize the service scoped to a specific company, user, and campaign.
+    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str) -> None:
+        """Initialize the service scoped to a specific company.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
-            user_id: The ID of the user to operate as.
-            campaign_id: The ID of the campaign to operate within.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
-        self._user_id = user_id
-        self._campaign_id = campaign_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
         """Format an endpoint with scoped IDs plus any extra params."""
         return endpoint.format(
             company_id=self._company_id,
-            user_id=self._user_id,
-            campaign_id=self._campaign_id,
             **kwargs,
         )
 
@@ -80,6 +76,7 @@ class CharactersService(BaseService):
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
+        campaign_id: str | None = None,
         user_player_id: str | None = None,
         user_creator_id: str | None = None,
         character_class: CharacterClass | None = None,
@@ -92,6 +89,7 @@ class CharactersService(BaseService):
         Args:
             limit: Maximum number of items to return (0-100, default 10).
             offset: Number of items to skip from the beginning (default 0).
+            campaign_id: Filter by campaign ID.
             user_player_id: Filter by player user ID.
             user_creator_id: Filter by creator user ID.
             character_class: Filter by character class.
@@ -108,6 +106,7 @@ class CharactersService(BaseService):
             limit=limit,
             offset=offset,
             params=self._build_params(
+                campaign_id=campaign_id,
                 user_player_id=user_player_id,
                 user_creator_id=user_creator_id,
                 character_class=character_class,
@@ -120,6 +119,7 @@ class CharactersService(BaseService):
     async def list_all(
         self,
         *,
+        campaign_id: str | None = None,
         user_player_id: str | None = None,
         user_creator_id: str | None = None,
         character_class: CharacterClass | None = None,
@@ -133,6 +133,7 @@ class CharactersService(BaseService):
         or `iter_all()` for memory-efficient streaming of large datasets.
 
         Args:
+            campaign_id: Filter by campaign ID.
             user_player_id: Filter by player user ID.
             user_creator_id: Filter by creator user ID.
             character_class: Filter by character class.
@@ -146,6 +147,7 @@ class CharactersService(BaseService):
         return [
             character
             async for character in self.iter_all(
+                campaign_id=campaign_id,
                 user_player_id=user_player_id,
                 user_creator_id=user_creator_id,
                 character_class=character_class,
@@ -159,6 +161,7 @@ class CharactersService(BaseService):
         self,
         *,
         limit: int = 100,
+        campaign_id: str | None = None,
         user_player_id: str | None = None,
         user_creator_id: str | None = None,
         character_class: CharacterClass | None = None,
@@ -173,6 +176,7 @@ class CharactersService(BaseService):
 
         Args:
             limit: Items per page (default 100 for efficiency).
+            campaign_id: Filter by campaign ID.
             user_player_id: Filter by player user ID.
             user_creator_id: Filter by creator user ID.
             character_class: Filter by character class.
@@ -191,6 +195,7 @@ class CharactersService(BaseService):
             self._format_endpoint(Endpoints.CHARACTERS),
             limit=limit,
             params=self._build_params(
+                campaign_id=campaign_id,
                 user_player_id=user_player_id,
                 user_creator_id=user_creator_id,
                 character_class=character_class,
@@ -244,8 +249,8 @@ class CharactersService(BaseService):
         Args:
             request: A CharacterCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for CharacterCreate if request is not provided.
-                Required: character_class (CharacterClass), game_version (GameVersion),
-                name_first (str), name_last (str).
+                Required: campaign_id (str), character_class (CharacterClass),
+                game_version (GameVersion), name_first (str), name_last (str).
                 Optional: type (CharacterType), name_nick (str), age (int),
                 biography (str), demeanor (str), nature (str), concept_id (str),
                 user_player_id (str), traits (list), vampire_attributes, etc.

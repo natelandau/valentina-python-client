@@ -12,8 +12,7 @@ Generate characters for a campaign using AI-assisted character creation.
 from vclient import character_autogen_service
 
 autogen = character_autogen_service(
-    user_id="USER_ID",
-    campaign_id="CAMPAIGN_ID",
+    on_behalf_of="USER_ID",
     company_id="COMPANY_ID"
 )
 ```
@@ -24,14 +23,15 @@ autogen = character_autogen_service(
 | ------------------------------------------------------------- | ------------------------------ | -------------------------------- |
 | `list_all()`                                                  | `list[ChargenSessionResponse]` | List all sessions for a campaign |
 | `get(session_id)`                                             | `ChargenSessionResponse`       | Retrieve a single session        |
-| `generate_character(*, character_type, ...)`                  | `Character`                    | Generate a single character      |
-| `start_chargen_session()`                                     | `ChargenSessionResponse`       | Start an interactive session     |
+| `generate_character(*, campaign_id, character_type, ...)`     | `Character`                    | Generate a single character      |
+| `start_chargen_session(*, campaign_id)`                       | `ChargenSessionResponse`       | Start an interactive session     |
 | `finalize_chargen_session(session_id, selected_character_id)` | `Character`                    | Finalize and select a character  |
 
 ## Generate Character Parameters
 
 | Parameter             | Type                     | Required | Description                               |
 | --------------------- | ------------------------ | -------- | ----------------------------------------- |
+| `campaign_id`         | `str`                    | Yes      | Campaign to generate the character for    |
 | `character_type`      | `CharacterType`          | Yes      | Type of character (PLAYER, NPC)           |
 | `character_class`     | `CharacterClass`         | No       | Class (VAMPIRE, WEREWOLF, HUNTER, MORTAL) |
 | `experience_level`    | `AutoGenExperienceLevel` | No       | Experience level                          |
@@ -62,13 +62,14 @@ print(f"Characters available: {len(session.characters)}")
 ```python
 # Generate a single character
 character = await autogen.generate_character(
+    campaign_id="campaign_id",
     character_type="PLAYER",
     character_class="VAMPIRE",
     experience_level="NEONATE"
 )
 
 # Use an interactive session for multiple character options
-session = await autogen.start_chargen_session()
+session = await autogen.start_chargen_session(campaign_id="campaign_id")
 print(f"Session expires: {session.expires_at}")
 print(f"Characters available: {len(session.characters)}")
 

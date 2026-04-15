@@ -251,11 +251,10 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 | discord_profile | DiscordProfileUpdate \| None | — |
 | google_profile | GoogleProfile \| None | — |
 | github_profile | GitHubProfile \| None | — |
-| requesting_user_id | str | required |
 
 ### UserUpdate
 
-All fields optional except `requesting_user_id` (required). Same fields as UserCreate.
+All fields optional. Same fields as UserCreate (without role).
 
 ### UserRegisterDTO
 
@@ -275,7 +274,6 @@ All fields optional except `requesting_user_id` (required). Same fields as UserC
 |-------|------|----------|
 | primary_user_id | str | yes |
 | secondary_user_id | str | yes |
-| requesting_user_id | str | yes |
 
 ### CampaignExperience
 
@@ -397,6 +395,7 @@ All fields optional. Same constraints as CampaignCreate.
 |-------|------|------------|
 | character_class | CharacterClass | required |
 | game_version | GameVersion | required |
+| campaign_id | str | required |
 | name_first | str | min 3, required |
 | name_last | str | min 3, required |
 | type | CharacterType \| None | optional |

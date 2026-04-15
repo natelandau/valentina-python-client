@@ -5,7 +5,7 @@ import pytest
 import respx
 
 from vclient import VClient
-from vclient.constants import API_KEY_HEADER, IDEMPOTENCY_KEY_HEADER
+from vclient.constants import API_KEY_HEADER, IDEMPOTENCY_KEY_HEADER, ON_BEHALF_OF_HEADER
 from vclient.exceptions import (
     APIError,
     AuthenticationError,
@@ -1254,3 +1254,61 @@ class TestBaseServiceNetworkErrorRetry:
         assert delays[0] >= 1.0  # 1 * 2^0 = 1
         assert delays[1] >= 2.0  # 1 * 2^1 = 2
         assert delays[2] >= 4.0  # 1 * 2^2 = 4
+
+
+class ConcreteServiceWithOnBehalfOf(BaseService):
+    """Concrete implementation with on_behalf_of for testing."""
+
+    def __init__(self, client: VClient, on_behalf_of: str | None = None) -> None:
+        super().__init__(client)
+        self._on_behalf_of = on_behalf_of
+
+
+class TestOnBehalfOfHeader:
+    """Tests for On-Behalf-Of header injection."""
+
+    @respx.mock
+    async def test_on_behalf_of_header_sent(self, vclient, base_url):
+        """Verify On-Behalf-Of header is sent when set."""
+        # Given: A service with on_behalf_of set
+        service = ConcreteServiceWithOnBehalfOf(vclient, on_behalf_of="user-uuid-123")
+        route = respx.get(f"{base_url}/test").respond(200, json={})
+
+        # When: Making a GET request
+        await service._get("/test")
+
+        # Then: The On-Behalf-Of header is present in the request
+        assert route.called
+        request = route.calls[0].request
+        assert request.headers[ON_BEHALF_OF_HEADER] == "user-uuid-123"
+
+    @respx.mock
+    async def test_on_behalf_of_header_not_sent_when_none(self, vclient, base_url):
+        """Verify On-Behalf-Of header is not sent when not set."""
+        # Given: A service with on_behalf_of unset
+        service = ConcreteServiceWithOnBehalfOf(vclient, on_behalf_of=None)
+        route = respx.get(f"{base_url}/test").respond(200, json={})
+
+        # When: Making a GET request
+        await service._get("/test")
+
+        # Then: The On-Behalf-Of header is absent from the request
+        assert route.called
+        request = route.calls[0].request
+        assert ON_BEHALF_OF_HEADER not in request.headers
+
+    @respx.mock
+    async def test_on_behalf_of_coexists_with_idempotency_key(self, vclient, base_url):
+        """Verify On-Behalf-Of header coexists with idempotency key header."""
+        # Given: A service with on_behalf_of set and an explicit idempotency key
+        service = ConcreteServiceWithOnBehalfOf(vclient, on_behalf_of="user-uuid-123")
+        route = respx.post(f"{base_url}/test").respond(200, json={})
+
+        # When: Making a POST request with an explicit idempotency key
+        await service._post("/test", json={}, idempotency_key="idem-key-456")
+
+        # Then: Both headers are present in the request
+        assert route.called
+        request = route.calls[0].request
+        assert request.headers[ON_BEHALF_OF_HEADER] == "user-uuid-123"
+        assert request.headers["Idempotency-Key"] == "idem-key-456"

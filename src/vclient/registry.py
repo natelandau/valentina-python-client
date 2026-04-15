@@ -38,6 +38,7 @@ if TYPE_CHECKING:
         OptionsService,
         SystemService,
         UserLookupService,
+        UserSelfRegistrationService,
         UsersService,
     )
 
@@ -213,13 +214,14 @@ def user_lookup_service() -> "UserLookupService":
     return UserLookupService(default_client())
 
 
-def users_service(company_id: str | None = None) -> "UsersService":
+def users_service(on_behalf_of: str, *, company_id: str | None = None) -> "UsersService":
     """Create a UsersService scoped to a specific company using the default client.
 
     Provides access to user management operations (list, get, create, update, delete)
     within a specific company without needing to pass a client instance.
 
     Args:
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -232,27 +234,59 @@ def users_service(company_id: str | None = None) -> "UsersService":
 
     Example:
         ```python
-        users = users_service("company_id")
+        users = users_service("user_id", "company_id")
         all_users = await users.list_all()
         user = await users.get("user_id")
         ```
     """
-    return default_client().users(company_id)
+    return default_client().users(on_behalf_of, company_id=company_id)
 
 
-def campaigns_service(user_id: str, company_id: str | None = None) -> "CampaignsService":
-    """Create a CampaignsService scoped to a specific company and user.
+def user_self_registration_service(
+    *, company_id: str | None = None
+) -> "UserSelfRegistrationService":
+    """Create a UserSelfRegistrationService using the default client.
 
-    Provides access to campaign management operations (list, get, create, update, delete)
-    within a specific company and user context without needing to pass a client instance.
+    Handles user self-registration via SSO onboarding. Does not require
+    an acting user — only developer API key authentication.
 
     Args:
-        user_id: The ID of the user to operate as.
+        company_id: The ID of the company to register users in. If not
+            provided, uses the default_company_id from the client config.
+
+    Returns:
+        UserSelfRegistrationService: A service instance for user self-registration.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+        ValueError: If no company_id provided and no default configured.
+
+    Example:
+        ```python
+        registration = user_self_registration_service()
+        user = await registration.register(username="alice", email="a@b.com")
+        ```
+    """
+    return default_client().user_self_registration(company_id=company_id)
+
+
+def campaigns_service(
+    on_behalf_of: str,
+    *,
+    company_id: str | None = None,
+) -> "CampaignsService":
+    """Create a CampaignsService scoped to a specific company.
+
+    Provides access to campaign management operations (list, get, create, update, delete)
+    within a specific company context without needing to pass a client instance.
+
+    Args:
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
     Returns:
-        CampaignsService: A service instance scoped to the specified company and user.
+        CampaignsService: A service instance scoped to the specified company.
 
     Raises:
         RuntimeError: If no default client has been configured.
@@ -265,20 +299,23 @@ def campaigns_service(user_id: str, company_id: str | None = None) -> "Campaigns
         campaign = await campaigns.get("campaign_id")
         ```
     """
-    return default_client().campaigns(user_id, company_id)
+    return default_client().campaigns(on_behalf_of, company_id=company_id)
 
 
 def books_service(
-    user_id: str, campaign_id: str, *, company_id: str | None = None
+    campaign_id: str,
+    on_behalf_of: str,
+    *,
+    company_id: str | None = None,
 ) -> "BooksService":
-    """Create a BooksService scoped to a specific company, user, and campaign.
+    """Create a BooksService scoped to a specific company and campaign.
 
     Provides access to campaign book management operations (list, get, create, update, delete)
-    within a specific company, user, and campaign context without needing to pass a client instance.
+    within a specific company and campaign context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
         campaign_id: The ID of the campaign to operate within.
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -291,26 +328,32 @@ def books_service(
 
     Example:
         ```python
-        books = books_service("user_id", "campaign_id")
+        books = books_service("campaign_id", "user_id")
         all_books = await books.list_all()
         book = await books.get("book_id")
         ```
     """
-    return default_client().books(user_id, campaign_id, company_id=company_id)
+    return default_client().books(
+        campaign_id=campaign_id, on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def chapters_service(
-    user_id: str, campaign_id: str, book_id: str, *, company_id: str | None = None
+    campaign_id: str,
+    book_id: str,
+    on_behalf_of: str,
+    *,
+    company_id: str | None = None,
 ) -> "ChaptersService":
-    """Create a ChaptersService scoped to a specific company, user, campaign, and book.
+    """Create a ChaptersService scoped to a specific company, campaign, and book.
 
     Provides access to campaign book chapter management operations (list, get, create, update, delete)
-    within a specific company, user, campaign, and book context without needing to pass a client instance.
+    within a specific company, campaign, and book context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
         campaign_id: The ID of the campaign to operate within.
         book_id: The ID of the book to operate within.
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -318,20 +361,23 @@ def chapters_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().chapters(user_id, campaign_id, book_id, company_id=company_id)
+    return default_client().chapters(
+        campaign_id=campaign_id, book_id=book_id, on_behalf_of=on_behalf_of, company_id=company_id
+    )
 
 
 def characters_service(
-    user_id: str, campaign_id: str, *, company_id: str | None = None
+    on_behalf_of: str,
+    *,
+    company_id: str | None = None,
 ) -> "CharactersService":
-    """Create a CharactersService scoped to a specific company, user, and campaign.
+    """Create a CharactersService scoped to a specific company.
 
     Provides access to character management operations (list, get, create, update, delete)
-    within a specific company, user, and campaign context without needing to pass a client instance.
+    within a specific company context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
-        campaign_id: The ID of the campaign to operate within.
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -339,21 +385,23 @@ def characters_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().characters(user_id, campaign_id, company_id=company_id)
+    return default_client().characters(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def character_traits_service(
-    user_id: str, campaign_id: str, character_id: str, *, company_id: str | None = None
+    character_id: str,
+    on_behalf_of: str,
+    *,
+    company_id: str | None = None,
 ) -> "CharacterTraitsService":
-    """Create a CharacterTraitsService scoped to a specific company, user, campaign, and character.
+    """Create a CharacterTraitsService scoped to a specific company and character.
 
     Provides access to character trait management operations (list, get, create, update, delete)
-    within a specific company, user, campaign, and character context without needing to pass a client instance.
+    within a specific company and character context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
-        campaign_id: The ID of the campaign to operate within.
         character_id: The ID of the character to operate within.
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -362,17 +410,22 @@ def character_traits_service(
         ValueError: If no company_id provided and no default configured.
     """
     return default_client().character_traits(
-        user_id, campaign_id, character_id, company_id=company_id
+        character_id=character_id, on_behalf_of=on_behalf_of, company_id=company_id
     )
 
 
-def character_blueprint_service(company_id: str | None = None) -> "CharacterBlueprintService":
+def character_blueprint_service(
+    on_behalf_of: str | None = None,
+    *,
+    company_id: str | None = None,
+) -> "CharacterBlueprintService":
     """Create a CharacterBlueprintService scoped to a specific company.
 
     Provides access to character blueprint management operations (list, get, create, update, delete)
     within a specific company context without needing to pass a client instance.
 
     Args:
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -380,16 +433,21 @@ def character_blueprint_service(company_id: str | None = None) -> "CharacterBlue
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().character_blueprint(company_id)
+    return default_client().character_blueprint(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
-def dictionary_service(company_id: str | None = None) -> "DictionaryService":
+def dictionary_service(
+    on_behalf_of: str | None = None,
+    *,
+    company_id: str | None = None,
+) -> "DictionaryService":
     """Create a DictionaryService scoped to a specific company.
 
     Provides access to dictionary term management operations (list, get, create, update, delete)
     within a specific company context without needing to pass a client instance.
 
     Args:
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -397,17 +455,21 @@ def dictionary_service(company_id: str | None = None) -> "DictionaryService":
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().dictionary(company_id)
+    return default_client().dictionary(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
-def dicerolls_service(user_id: str, company_id: str | None = None) -> "DicerollService":
-    """Create a DicerollService scoped to a specific company and user.
+def dicerolls_service(
+    on_behalf_of: str,
+    *,
+    company_id: str | None = None,
+) -> "DicerollService":
+    """Create a DicerollService scoped to a specific company.
 
     Provides access to dice roll management operations (list, get, create)
-    within a specific company and user context without needing to pass a client instance.
+    within a specific company context without needing to pass a client instance.
 
     Args:
-        user_id: The ID of the user to operate as.
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -415,16 +477,21 @@ def dicerolls_service(user_id: str, company_id: str | None = None) -> "DicerollS
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().dicerolls(user_id, company_id)
+    return default_client().dicerolls(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
-def options_service(company_id: str | None = None) -> "OptionsService":
+def options_service(
+    on_behalf_of: str | None = None,
+    *,
+    company_id: str | None = None,
+) -> "OptionsService":
     """Create a OptionsService scoped to a specific company.
 
     Provides access to options and enumerations management operations (list, get, create, update, delete)
     within a specific company context without needing to pass a client instance.
 
     Args:
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -432,20 +499,22 @@ def options_service(company_id: str | None = None) -> "OptionsService":
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().options(company_id)
+    return default_client().options(on_behalf_of=on_behalf_of, company_id=company_id)
 
 
 def character_autogen_service(
-    user_id: str, campaign_id: str, *, company_id: str | None = None
+    on_behalf_of: str,
+    *,
+    company_id: str | None = None,
 ) -> "CharacterAutogenService":
-    """Create a CharacterAutogenService scoped to a specific company, user, and campaign.
+    """Create a CharacterAutogenService scoped to a specific company.
 
-    Provides access to character autogen management operations (list, get, create, update, delete)
-    within a specific company, user, and campaign context without needing to pass a client instance.
+    Provides access to character autogeneration and chargen session operations
+    without needing to pass a client instance. Pass ``campaign_id`` directly to
+    ``generate_character()`` and ``start_chargen_session()`` to scope each call.
 
     Args:
-        user_id: The ID of the user to operate as.
-        campaign_id: The ID of the campaign to operate within.
+        on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         company_id: The ID of the company to operate within. If not provided,
             uses the default_company_id from the client config.
 
@@ -453,4 +522,4 @@ def character_autogen_service(
         RuntimeError: If no default client has been configured.
         ValueError: If no company_id provided and no default configured.
     """
-    return default_client().character_autogen(user_id, campaign_id, company_id=company_id)
+    return default_client().character_autogen(on_behalf_of=on_behalf_of, company_id=company_id)

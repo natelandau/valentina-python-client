@@ -20,21 +20,21 @@ if TYPE_CHECKING:
 class DicerollService(BaseService):
     """Service for interacting with the Dice Rolls API."""
 
-    def __init__(self, client: "VClient", company_id: str, user_id: str) -> None:
+    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str) -> None:
         """Initialize the service.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
-            user_id: The ID of the user to operate as.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
-        self._user_id = user_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
-        """Format an endpoint with the scoped company_id and user_id plus any extra params."""
-        return endpoint.format(company_id=self._company_id, user_id=self._user_id, **kwargs)
+        """Format an endpoint with the scoped company_id plus any extra params."""
+        return endpoint.format(company_id=self._company_id, **kwargs)
 
     # -------------------------------------------------------------------------
     # Diceroll CRUD Methods

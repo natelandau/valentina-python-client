@@ -288,7 +288,9 @@ class TestCharacterBlueprintServiceSections:
         ).mock(return_value=Response(200, json=paginated_section_response))
 
         # When: Requesting a page of sections
-        result = await vclient.character_blueprint(company_id).get_sections_page()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_sections_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -311,7 +313,9 @@ class TestCharacterBlueprintServiceSections:
         ).mock(return_value=Response(200, json=paginated_section_response))
 
         # When: Requesting with game_version filter
-        result = await vclient.character_blueprint(company_id).get_sections_page(game_version="V5")
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_sections_page(game_version="V5")
 
         # Then: The route was called with correct params
         assert route.called
@@ -330,9 +334,9 @@ class TestCharacterBlueprintServiceSections:
         ).mock(return_value=Response(200, json=paginated_section_response))
 
         # When: Requesting with character_class filter
-        result = await vclient.character_blueprint(company_id).get_sections_page(
-            character_class="VAMPIRE"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_sections_page(character_class="VAMPIRE")
 
         # Then: The route was called with correct params
         assert route.called
@@ -354,7 +358,9 @@ class TestCharacterBlueprintServiceSections:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all sections
-        result = await vclient.character_blueprint(company_id).list_all_sections()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_sections()
 
         # Then: All sections are returned as a list
         assert route.called
@@ -379,7 +385,10 @@ class TestCharacterBlueprintServiceSections:
 
         # When: Iterating through all sections
         sections = [
-            section async for section in vclient.character_blueprint(company_id).iter_all_sections()
+            section
+            async for section in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_sections()
         ]
 
         # Then: All sections are yielded
@@ -398,7 +407,9 @@ class TestCharacterBlueprintServiceSections:
         ).mock(return_value=Response(200, json=section_response_data))
 
         # When: Requesting a section
-        result = await vclient.character_blueprint(company_id).get_section(section_id=section_id)
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_section(section_id=section_id)
 
         # Then: The route was called and section is returned
         assert route.called
@@ -420,7 +431,9 @@ class TestCharacterBlueprintServiceSections:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_blueprint(company_id).get_section(section_id=section_id)
+            await vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).get_section(section_id=section_id)
 
         assert route.called
 
@@ -441,7 +454,9 @@ class TestCharacterBlueprintServiceCategories:
         ).mock(return_value=Response(200, json=paginated_category_response))
 
         # When: Requesting a page of categories
-        result = await vclient.character_blueprint(company_id).get_categories_page()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_categories_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -464,9 +479,9 @@ class TestCharacterBlueprintServiceCategories:
         ).mock(return_value=Response(200, json=paginated_category_response))
 
         # When: Requesting with section_id filter
-        result = await vclient.character_blueprint(company_id).get_categories_page(
-            section_id="section123"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_categories_page(section_id="section123")
 
         # Then: The route was called with correct params
         assert route.called
@@ -485,9 +500,9 @@ class TestCharacterBlueprintServiceCategories:
         ).mock(return_value=Response(200, json=paginated_category_response))
 
         # When: Requesting with character_class filter
-        result = await vclient.character_blueprint(company_id).get_categories_page(
-            character_class="VAMPIRE"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_categories_page(character_class="VAMPIRE")
 
         # Then: The route was called with correct params
         assert route.called
@@ -509,7 +524,9 @@ class TestCharacterBlueprintServiceCategories:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all categories
-        result = await vclient.character_blueprint(company_id).list_all_categories()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_categories()
 
         # Then: All categories are returned as a list
         assert route.called
@@ -535,7 +552,9 @@ class TestCharacterBlueprintServiceCategories:
         # When: Iterating through all categories
         categories = [
             category
-            async for category in vclient.character_blueprint(company_id).iter_all_categories()
+            async for category in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_categories()
         ]
 
         # Then: All categories are yielded
@@ -554,7 +573,9 @@ class TestCharacterBlueprintServiceCategories:
         ).mock(return_value=Response(200, json=category_response_data))
 
         # When: Requesting a category
-        result = await vclient.character_blueprint(company_id).get_category(category_id=category_id)
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_category(category_id=category_id)
 
         # Then: The route was called and category is returned
         assert route.called
@@ -579,7 +600,9 @@ class TestCharacterBlueprintServiceCategories:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_blueprint(company_id).get_category(category_id=category_id)
+            await vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).get_category(category_id=category_id)
 
         assert route.called
 
@@ -600,7 +623,9 @@ class TestCharacterBlueprintServiceSubcategories:
         ).mock(return_value=Response(200, json=paginated_subcategory_response))
 
         # When: Requesting a page of subcategories
-        result = await vclient.character_blueprint(company_id).get_subcategories_page()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_subcategories_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -623,9 +648,9 @@ class TestCharacterBlueprintServiceSubcategories:
         ).mock(return_value=Response(200, json=paginated_subcategory_response))
 
         # When: Requesting with category_id filter
-        result = await vclient.character_blueprint(company_id).get_subcategories_page(
-            category_id="category123"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_subcategories_page(category_id="category123")
 
         # Then: The route was called with correct params
         assert route.called
@@ -644,7 +669,9 @@ class TestCharacterBlueprintServiceSubcategories:
         ).mock(return_value=Response(200, json=paginated_subcategory_response))
 
         # When: Requesting with character_class filter
-        result = await vclient.character_blueprint(company_id).get_subcategories_page(
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_subcategories_page(
             character_class="VAMPIRE",
         )
 
@@ -670,7 +697,9 @@ class TestCharacterBlueprintServiceSubcategories:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all subcategories
-        result = await vclient.character_blueprint(company_id).list_all_subcategories()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_subcategories()
 
         # Then: All subcategories are returned as a list
         assert route.called
@@ -699,7 +728,7 @@ class TestCharacterBlueprintServiceSubcategories:
         subcategories = [
             subcategory
             async for subcategory in vclient.character_blueprint(
-                company_id
+                "on-behalf-of-user", company_id=company_id
             ).iter_all_subcategories()
         ]
 
@@ -719,7 +748,9 @@ class TestCharacterBlueprintServiceSubcategories:
         ).mock(return_value=Response(200, json=subcategory_response_data))
 
         # When: Requesting a single subcategory
-        result = await vclient.character_blueprint(company_id).get_subcategory(
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_subcategory(
             subcategory_id=subcategory_id,
         )
 
@@ -746,7 +777,9 @@ class TestCharacterBlueprintServiceSubcategories:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_blueprint(company_id).get_subcategory(
+            await vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).get_subcategory(
                 subcategory_id=subcategory_id,
             )
 
@@ -768,7 +801,9 @@ class TestCharacterBlueprintServiceTraits:
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
         # When: Requesting a page of traits
-        result = await vclient.character_blueprint(company_id).get_traits_page()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_traits_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -796,7 +831,9 @@ class TestCharacterBlueprintServiceTraits:
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
         # When: Requesting with filters
-        result = await vclient.character_blueprint(company_id).get_traits_page(
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_traits_page(
             character_class="VAMPIRE",
             category_id="category123",
             order_by=None,
@@ -819,7 +856,9 @@ class TestCharacterBlueprintServiceTraits:
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
         # When: Requesting with is_rollable filter
-        result = await vclient.character_blueprint(company_id).get_traits_page(
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_traits_page(
             is_rollable=True,
         )
 
@@ -840,7 +879,9 @@ class TestCharacterBlueprintServiceTraits:
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
         # When: Requesting with subcategory_id filter
-        result = await vclient.character_blueprint(company_id).get_traits_page(
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_traits_page(
             subcategory_id="subcat123",
         )
 
@@ -861,7 +902,9 @@ class TestCharacterBlueprintServiceTraits:
         ).mock(return_value=Response(200, json=paginated_trait_response))
 
         # When: Requesting with exclude_subcategory_traits=True
-        result = await vclient.character_blueprint(company_id).get_traits_page(
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_traits_page(
             exclude_subcategory_traits=True,
         )
 
@@ -885,7 +928,9 @@ class TestCharacterBlueprintServiceTraits:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all traits
-        result = await vclient.character_blueprint(company_id).list_all_traits()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_traits()
 
         # Then: All traits are returned as a list
         assert route.called
@@ -911,7 +956,10 @@ class TestCharacterBlueprintServiceTraits:
 
         # When: Iterating through all traits
         traits = [
-            trait async for trait in vclient.character_blueprint(company_id).iter_all_traits()
+            trait
+            async for trait in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_traits()
         ]
 
         # Then: All traits are yielded
@@ -930,7 +978,9 @@ class TestCharacterBlueprintServiceTraits:
         ).mock(return_value=Response(200, json=trait_response_data))
 
         # When: Requesting a trait
-        result = await vclient.character_blueprint(company_id).get_trait(
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_trait(
             trait_id=trait_id,
         )
 
@@ -954,7 +1004,9 @@ class TestCharacterBlueprintServiceTraits:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_blueprint(company_id).get_trait(trait_id=trait_id)
+            await vclient.character_blueprint("on-behalf-of-user", company_id=company_id).get_trait(
+                trait_id=trait_id
+            )
 
         assert route.called
 
@@ -985,9 +1037,9 @@ class TestCharacterBlueprintServicePagination:
         )
 
         # When: Requesting with custom pagination
-        result = await vclient.character_blueprint(company_id).get_sections_page(
-            limit=50, offset=100
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_sections_page(limit=50, offset=100)
 
         # Then: The route was called with correct params
         assert route.called
@@ -1025,7 +1077,10 @@ class TestCharacterBlueprintServicePagination:
 
         # When: Iterating through all sections
         sections = [
-            section async for section in vclient.character_blueprint(company_id).iter_all_sections()
+            section
+            async for section in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_sections()
         ]
 
         # Then: All sections from both pages are yielded
@@ -1051,7 +1106,9 @@ class TestCharacterBlueprintServiceConcepts:
         ).mock(return_value=Response(200, json=paginated_character_concept_response))
 
         # When: Requesting a page of concepts
-        result = await vclient.character_blueprint(company_id).get_concepts_page()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_concepts_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -1079,7 +1136,9 @@ class TestCharacterBlueprintServiceConcepts:
         )
 
         # When: Requesting all concepts
-        result = await vclient.character_blueprint(company_id).list_all_concepts()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_concepts()
 
         # Then: All concepts are returned as a list
         assert route.called
@@ -1106,7 +1165,10 @@ class TestCharacterBlueprintServiceConcepts:
 
         # When: Iterating through all concepts
         concepts = [
-            concept async for concept in vclient.character_blueprint(company_id).iter_all_concepts()
+            concept
+            async for concept in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_concepts()
         ]
 
         # Then: All concepts are yielded
@@ -1126,7 +1188,9 @@ class TestCharacterBlueprintServiceConcepts:
         ).mock(return_value=Response(200, json=character_concept_response_data))
 
         # When: Requesting a concept
-        result = await vclient.character_blueprint(company_id).get_concept(concept_id=concept_id)
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_concept(concept_id=concept_id)
 
         # Then: The route was called and concept is returned
         assert route.called
@@ -1150,7 +1214,9 @@ class TestCharacterBlueprintServiceConcepts:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_blueprint(company_id).get_concept(concept_id=concept_id)
+            await vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).get_concept(concept_id=concept_id)
 
         assert route.called
 
@@ -1171,7 +1237,9 @@ class TestCharacterBlueprintServiceVampireClans:
         ).mock(return_value=Response(200, json=paginated_vampire_clan_response))
 
         # When: Requesting a page of vampire clans
-        result = await vclient.character_blueprint(company_id).get_vampire_clans_page()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_vampire_clans_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -1194,9 +1262,9 @@ class TestCharacterBlueprintServiceVampireClans:
         ).mock(return_value=Response(200, json=paginated_vampire_clan_response))
 
         # When: Requesting with game_version filter
-        result = await vclient.character_blueprint(company_id).get_vampire_clans_page(
-            game_version="V5"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_vampire_clans_page(game_version="V5")
 
         # Then: The route was called with correct params
         assert route.called
@@ -1221,7 +1289,9 @@ class TestCharacterBlueprintServiceVampireClans:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all vampire clans
-        result = await vclient.character_blueprint(company_id).list_all_vampire_clans()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_vampire_clans()
 
         # Then: All vampire clans are returned as a list
         assert route.called
@@ -1249,9 +1319,9 @@ class TestCharacterBlueprintServiceVampireClans:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all vampire clans with game_version filter
-        result = await vclient.character_blueprint(company_id).list_all_vampire_clans(
-            game_version="V5"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_vampire_clans(game_version="V5")
 
         # Then: The route was called with correct params
         assert route.called
@@ -1278,7 +1348,10 @@ class TestCharacterBlueprintServiceVampireClans:
 
         # When: Iterating through all vampire clans
         clans = [
-            clan async for clan in vclient.character_blueprint(company_id).iter_all_vampire_clans()
+            clan
+            async for clan in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_vampire_clans()
         ]
 
         # Then: All vampire clans are yielded
@@ -1308,9 +1381,9 @@ class TestCharacterBlueprintServiceVampireClans:
         # When: Iterating with game_version filter
         clans = [
             clan
-            async for clan in vclient.character_blueprint(company_id).iter_all_vampire_clans(
-                game_version="V5"
-            )
+            async for clan in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_vampire_clans(game_version="V5")
         ]
 
         # Then: The route was called with correct params
@@ -1329,9 +1402,9 @@ class TestCharacterBlueprintServiceVampireClans:
         ).mock(return_value=Response(200, json=vampire_clan_response_data))
 
         # When: Requesting a vampire clan
-        result = await vclient.character_blueprint(company_id).get_vampire_clan(
-            vampire_clan_id=vampire_clan_id
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_vampire_clan(vampire_clan_id=vampire_clan_id)
 
         # Then: The route was called and vampire clan is returned
         assert route.called
@@ -1356,9 +1429,9 @@ class TestCharacterBlueprintServiceVampireClans:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_blueprint(company_id).get_vampire_clan(
-                vampire_clan_id=vampire_clan_id
-            )
+            await vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).get_vampire_clan(vampire_clan_id=vampire_clan_id)
 
         assert route.called
 
@@ -1379,7 +1452,9 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         ).mock(return_value=Response(200, json=paginated_werewolf_auspice_response))
 
         # When: Requesting a page of werewolf auspices
-        result = await vclient.character_blueprint(company_id).get_werewolf_auspices_page()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_werewolf_auspices_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -1401,9 +1476,9 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         ).mock(return_value=Response(200, json=paginated_werewolf_auspice_response))
 
         # When: Requesting with game_version filter
-        result = await vclient.character_blueprint(company_id).get_werewolf_auspices_page(
-            game_version="V5"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_werewolf_auspices_page(game_version="V5")
 
         # Then: The route was called with correct params
         assert route.called
@@ -1428,7 +1503,9 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all werewolf auspices
-        result = await vclient.character_blueprint(company_id).list_all_werewolf_auspices()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_werewolf_auspices()
 
         # Then: All werewolf auspices are returned as a list
         assert route.called
@@ -1456,7 +1533,7 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         auspices = [
             auspice
             async for auspice in vclient.character_blueprint(
-                company_id
+                "on-behalf-of-user", company_id=company_id
             ).iter_all_werewolf_auspices()
         ]
 
@@ -1485,9 +1562,9 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all werewolf auspices with game_version filter
-        result = await vclient.character_blueprint(company_id).list_all_werewolf_auspices(
-            game_version="V5"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_werewolf_auspices(game_version="V5")
 
         # Then: The route was called with correct params
         assert route.called
@@ -1516,9 +1593,9 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         # When: Iterating with game_version filter
         auspices = [
             auspice
-            async for auspice in vclient.character_blueprint(company_id).iter_all_werewolf_auspices(
-                game_version="V5"
-            )
+            async for auspice in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_werewolf_auspices(game_version="V5")
         ]
 
         # Then: The route was called with correct params
@@ -1539,9 +1616,9 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
         ).mock(return_value=Response(200, json=werewolf_auspice_response_data))
 
         # When: Requesting a werewolf auspice
-        result = await vclient.character_blueprint(company_id).get_werewolf_auspice(
-            werewolf_auspice_id=werewolf_auspice_id
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_werewolf_auspice(werewolf_auspice_id=werewolf_auspice_id)
 
         # Then: The route was called and werewolf auspice is returned
         assert route.called
@@ -1563,9 +1640,9 @@ class TestCharacterBlueprintServiceWerewolfAuspices:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_blueprint(company_id).get_werewolf_auspice(
-                werewolf_auspice_id=werewolf_auspice_id
-            )
+            await vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).get_werewolf_auspice(werewolf_auspice_id=werewolf_auspice_id)
 
         assert route.called
 
@@ -1586,7 +1663,9 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         ).mock(return_value=Response(200, json=paginated_werewolf_tribe_response))
 
         # When: Requesting a page of werewolf tribes
-        result = await vclient.character_blueprint(company_id).get_werewolf_tribes_page()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_werewolf_tribes_page()
 
         # Then: The route was called and response is paginated
         assert route.called
@@ -1607,9 +1686,9 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         ).mock(return_value=Response(200, json=paginated_werewolf_tribe_response))
 
         # When: Requesting with game_version filter
-        result = await vclient.character_blueprint(company_id).get_werewolf_tribes_page(
-            game_version="V5"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_werewolf_tribes_page(game_version="V5")
 
         # Then: The route was called with correct params
         assert route.called
@@ -1634,7 +1713,9 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all werewolf tribes
-        result = await vclient.character_blueprint(company_id).list_all_werewolf_tribes()
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_werewolf_tribes()
 
         # Then: All werewolf tribes are returned as a list
         assert route.called
@@ -1662,9 +1743,9 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         ).mock(return_value=Response(200, json=paginated_response))
 
         # When: Requesting all werewolf tribes with game_version filter
-        result = await vclient.character_blueprint(company_id).list_all_werewolf_tribes(
-            game_version="V5"
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_werewolf_tribes(game_version="V5")
 
         # Then: The route was called with correct params
         assert route.called
@@ -1692,7 +1773,9 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         # When: Iterating through all werewolf tribes
         tribes = [
             tribe
-            async for tribe in vclient.character_blueprint(company_id).iter_all_werewolf_tribes()
+            async for tribe in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_werewolf_tribes()
         ]
 
         # Then: All werewolf tribes are yielded
@@ -1722,9 +1805,9 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         # When: Iterating with game_version filter
         tribes = [
             tribe
-            async for tribe in vclient.character_blueprint(company_id).iter_all_werewolf_tribes(
-                game_version="V5"
-            )
+            async for tribe in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_werewolf_tribes(game_version="V5")
         ]
 
         # Then: The route was called with correct params
@@ -1745,9 +1828,9 @@ class TestCharacterBlueprintServiceWerewolfTribes:
         ).mock(return_value=Response(200, json=werewolf_tribe_response_data))
 
         # When: Requesting a werewolf tribe
-        result = await vclient.character_blueprint(company_id).get_werewolf_tribe(
-            werewolf_tribe_id=werewolf_tribe_id
-        )
+        result = await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_werewolf_tribe(werewolf_tribe_id=werewolf_tribe_id)
 
         # Then: The route was called and werewolf tribe is returned
         assert route.called
@@ -1772,8 +1855,8 @@ class TestCharacterBlueprintServiceWerewolfTribes:
 
         # When/Then: Requesting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.character_blueprint(company_id).get_werewolf_tribe(
-                werewolf_tribe_id=werewolf_tribe_id
-            )
+            await vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).get_werewolf_tribe(werewolf_tribe_id=werewolf_tribe_id)
 
         assert route.called

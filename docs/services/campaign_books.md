@@ -13,7 +13,7 @@ Campaign books organize your campaign content into chapters. Each book can conta
 ```python
 from vclient import books_service
 
-books = books_service(user_id="USER_ID", campaign_id="CAMPAIGN_ID", company_id="COMPANY_ID")
+books = books_service(campaign_id="CAMPAIGN_ID", on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 ## Methods
@@ -39,7 +39,7 @@ When a value is not included in the request, the corresponding field on `Campaig
 ```python
 from vclient import books_service
 
-books = books_service(user_id="...", campaign_id="...", company_id="...")
+books = books_service(campaign_id="...", on_behalf_of="...", company_id="...")
 
 # Embed chapters and notes in a single request
 book = await books.get("book_id", include=["chapters", "notes"])

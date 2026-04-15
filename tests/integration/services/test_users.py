@@ -14,7 +14,6 @@ from vclient.models import (
     Quickroll,
     RollStatistics,
     User,
-    UserRegisterDTO,
 )
 
 pytestmark = pytest.mark.anyio
@@ -80,7 +79,7 @@ class TestUsersServiceGetPage:
         ).respond(200, json=paginated_users_response)
 
         # When: Getting a page of users
-        result = await vclient.users(company_id).get_page()
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_page()
 
         # Then: Returns PaginatedResponse with User objects
         assert route.called
@@ -102,7 +101,9 @@ class TestUsersServiceGetPage:
         ).respond(200, json=paginated_users_response)
 
         # When: Getting a page with role filter
-        result = await vclient.users(company_id).get_page(user_role="STORYTELLER")
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_page(
+            user_role="STORYTELLER"
+        )
 
         # Then: Request was made with correct params
         assert route.called
@@ -127,7 +128,9 @@ class TestUsersServiceGetPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.users(company_id).get_page(limit=25, offset=50)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_page(
+            limit=25, offset=50
+        )
 
         # Then: Request was made with correct params
         assert route.called
@@ -157,7 +160,7 @@ class TestUsersServiceListAll:
         )
 
         # When: Calling list_all
-        result = await vclient.users(company_id).list_all()
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).list_all()
 
         # Then: Returns list of User objects
         assert isinstance(result, list)
@@ -200,7 +203,12 @@ class TestUsersServiceIterAll:
         )
 
         # When: Iterating through all users
-        users = [user async for user in vclient.users(company_id).iter_all(limit=1)]
+        users = [
+            user
+            async for user in vclient.users("on-behalf-of-user", company_id=company_id).iter_all(
+                limit=1
+            )
+        ]
 
         # Then: All users are yielded as User objects
         assert len(users) == 2
@@ -223,7 +231,7 @@ class TestUsersServiceGet:
         ).respond(200, json=user_response_data)
 
         # When: Getting the user
-        result = await vclient.users(company_id).get(user_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get(user_id)
 
         # Then: Returns User object with correct data
         assert route.called
@@ -246,7 +254,7 @@ class TestUsersServiceGet:
 
         # When/Then: Getting the user raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).get(user_id)
+            await vclient.users("on-behalf-of-user", company_id=company_id).get(user_id)
 
     @respx.mock
     async def test_get_user_without_include_returns_detail_with_none_embeds(
@@ -263,7 +271,7 @@ class TestUsersServiceGet:
         ).respond(200, json=user_response_data)
 
         # When: Getting the user without include
-        result = await vclient.users(company_id).get(user_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get(user_id)
 
         # Then: Returns UserDetail with None embed fields
         assert route.called
@@ -287,7 +295,9 @@ class TestUsersServiceGet:
         ).respond(200, json=payload)
 
         # When: Getting user with include=["quickrolls", "characters"]
-        result = await vclient.users(company_id).get(user_id, include=["quickrolls", "characters"])
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get(
+            user_id, include=["quickrolls", "characters"]
+        )
 
         # Then: Request URL contains repeated include params and result has embedded data
         assert route.called
@@ -313,13 +323,12 @@ class TestUsersServiceCreate:
         )
 
         # When: Creating a user with minimal data
-        result = await vclient.users(company_id).create(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).create(
             name_first="Test",
             name_last="User",
             username="testuser",
             email="test@example.com",
             role="PLAYER",
-            requesting_user_id="requester123",
         )
 
         # Then: Returns created User object
@@ -339,7 +348,6 @@ class TestUsersServiceCreate:
         assert body["username"] == "testuser"
         assert body["email"] == "test@example.com"
         assert body["role"] == "PLAYER"
-        assert body["requesting_user_id"] == "requester123"
 
     @respx.mock
     async def test_create_user_with_discord_profile(self, vclient, base_url, user_response_data):
@@ -352,13 +360,12 @@ class TestUsersServiceCreate:
 
         # When: Creating a user with Discord profile
         discord = DiscordProfileUpdate(id="discord123", username="testuser")
-        result = await vclient.users(company_id).create(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).create(
             name_first="Test",
             name_last="User",
             username="testuser",
             email="test@example.com",
             role="PLAYER",
-            requesting_user_id="requester123",
             discord_profile=discord,
         )
 
@@ -378,93 +385,16 @@ class TestUsersServiceCreate:
         """Verify validation error on invalid data raises RequestValidationError."""
         # When/Then: Creating with invalid data raises RequestValidationError
         with pytest.raises(RequestValidationError) as exc_info:
-            await vclient.users("company123").create(
+            await vclient.users("on-behalf-of-user", company_id="company123").create(
                 name_first="AB",
                 username="abcde",
                 email="test@example.com",
                 role="PLAYER",
-                requesting_user_id="requester123",
             )
 
         # Verify error details are accessible
         assert len(exc_info.value.errors) == 1
         assert exc_info.value.errors[0]["loc"] == ("name_first",)
-
-
-class TestUsersServiceRegister:
-    """Tests for UsersService.register method."""
-
-    @respx.mock
-    async def test_register_user_with_kwargs(self, vclient, base_url, user_response_data):
-        """Verify registering a user via kwargs."""
-        # Given: A mocked register endpoint
-        company_id = "company123"
-        route = respx.post(
-            f"{base_url}{Endpoints.USER_REGISTER.format(company_id=company_id)}"
-        ).respond(201, json=user_response_data)
-
-        # When: Registering a user with kwargs
-        result = await vclient.users(company_id).register(
-            username="testuser",
-            email="test@example.com",
-            name_first="Test",
-            name_last="User",
-        )
-
-        # Then: Returns created User object
-        assert route.called
-        assert isinstance(result, User)
-        assert result.username == "testuser"
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls.last.request.content)
-        assert body["username"] == "testuser"
-        assert body["email"] == "test@example.com"
-        assert body["name_first"] == "Test"
-        assert body["name_last"] == "User"
-
-    @respx.mock
-    async def test_register_user_with_model(self, vclient, base_url, user_response_data):
-        """Verify registering a user via UserRegisterDTO model."""
-        # Given: A mocked register endpoint
-        company_id = "company123"
-        route = respx.post(
-            f"{base_url}{Endpoints.USER_REGISTER.format(company_id=company_id)}"
-        ).respond(201, json=user_response_data)
-
-        # When: Registering with a model object
-        request = UserRegisterDTO(
-            username="testuser",
-            email="test@example.com",
-            name_first="Test",
-            name_last="User",
-        )
-        result = await vclient.users(company_id).register(request=request)
-
-        # Then: Returns created User object
-        assert route.called
-        assert isinstance(result, User)
-
-        # Verify request body excludes unset optional fields
-        import json
-
-        body = json.loads(route.calls.last.request.content)
-        assert body["username"] == "testuser"
-        assert body["email"] == "test@example.com"
-        assert "discord_profile" not in body
-        assert "google_profile" not in body
-        assert "github_profile" not in body
-
-    @respx.mock
-    async def test_register_user_validation_error(self, vclient):
-        """Verify validation error on missing required fields raises RequestValidationError."""
-        # When/Then: Registering without required email raises RequestValidationError
-        with pytest.raises(RequestValidationError):
-            await vclient.users("company123").register(
-                username="testuser",
-            )
 
 
 class TestUsersServiceMerge:
@@ -480,10 +410,9 @@ class TestUsersServiceMerge:
         ).respond(200, json=user_response_data)
 
         # When: Merging two users
-        result = await vclient.users(company_id).merge(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).merge(
             primary_user_id="primary123",
             secondary_user_id="secondary456",
-            requesting_user_id="requester123",
         )
 
         # Then: Returns the primary User object
@@ -497,7 +426,6 @@ class TestUsersServiceMerge:
         assert body == {
             "primary_user_id": "primary123",
             "secondary_user_id": "secondary456",
-            "requesting_user_id": "requester123",
         }
 
     @respx.mock
@@ -511,10 +439,9 @@ class TestUsersServiceMerge:
 
         # When/Then: Merging raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).merge(
+            await vclient.users("on-behalf-of-user", company_id=company_id).merge(
                 primary_user_id="primary123",
                 secondary_user_id="nonexistent",
-                requesting_user_id="requester123",
             )
 
 
@@ -533,9 +460,8 @@ class TestUsersServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating the user name
-        result = await vclient.users(company_id).update(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).update(
             user_id,
-            requesting_user_id="requester123",
             name_first="Updated",
         )
 
@@ -549,7 +475,7 @@ class TestUsersServiceUpdate:
         import json
 
         body = json.loads(request.content)
-        assert body == {"name_first": "Updated", "requesting_user_id": "requester123"}
+        assert body == {"name_first": "Updated"}
 
     @respx.mock
     async def test_update_user_not_found(self, vclient, base_url):
@@ -563,9 +489,8 @@ class TestUsersServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).update(
+            await vclient.users("on-behalf-of-user", company_id=company_id).update(
                 user_id,
-                requesting_user_id="requester123",
                 name="New Name",
             )
 
@@ -581,11 +506,10 @@ class TestUsersServiceDelete:
         user_id = "507f1f77bcf86cd799439011"
         route = respx.delete(
             f"{base_url}{Endpoints.USER.format(company_id=company_id, user_id=user_id)}",
-            params={"requesting_user_id": "requester123"},
         ).respond(204)
 
         # When: Deleting the user
-        result = await vclient.users(company_id).delete(user_id, "requester123")
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).delete(user_id)
 
         # Then: Request was made and returns None
         assert route.called
@@ -599,12 +523,11 @@ class TestUsersServiceDelete:
         user_id = "nonexistent"
         respx.delete(
             f"{base_url}{Endpoints.USER.format(company_id=company_id, user_id=user_id)}",
-            params={"requesting_user_id": "requester123"},
         ).respond(404, json={"detail": "User not found"})
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).delete(user_id, "requester123")
+            await vclient.users("on-behalf-of-user", company_id=company_id).delete(user_id)
 
 
 class TestUsersServiceGetStatistics:
@@ -622,7 +545,9 @@ class TestUsersServiceGetStatistics:
         ).respond(200, json=statistics_response_data)
 
         # When: Getting statistics
-        result = await vclient.users(company_id).get_statistics(user_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_statistics(
+            user_id
+        )
 
         # Then: Returns RollStatistics object
         assert route.called
@@ -641,11 +566,13 @@ class TestUsersServiceGetUnapprovedPage:
         company_id = "company123"
         route = respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "10", "offset": "0", "requesting_user_id": "admin1"},
+            params={"limit": "10", "offset": "0"},
         ).respond(200, json=paginated_users_response)
 
         # When: Getting a page of unapproved users
-        result = await vclient.users(company_id).get_unapproved_page("admin1")
+        result = await vclient.users(
+            "on-behalf-of-user", company_id=company_id
+        ).get_unapproved_page()
 
         # Then: Returns PaginatedResponse with User objects
         assert route.called
@@ -660,7 +587,7 @@ class TestUsersServiceGetUnapprovedPage:
         company_id = "company123"
         route = respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "25", "offset": "50", "requesting_user_id": "admin1"},
+            params={"limit": "25", "offset": "50"},
         ).respond(
             200,
             json={
@@ -672,7 +599,9 @@ class TestUsersServiceGetUnapprovedPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.users(company_id).get_unapproved_page("admin1", limit=25, offset=50)
+        result = await vclient.users(
+            "on-behalf-of-user", company_id=company_id
+        ).get_unapproved_page(limit=25, offset=50)
 
         # Then: Request was made with correct params
         assert route.called
@@ -690,7 +619,7 @@ class TestUsersServiceListAllUnapproved:
         company_id = "company123"
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "100", "offset": "0", "requesting_user_id": "admin1"},
+            params={"limit": "100", "offset": "0"},
         ).respond(
             200,
             json={
@@ -702,7 +631,9 @@ class TestUsersServiceListAllUnapproved:
         )
 
         # When: Calling list_all_unapproved
-        result = await vclient.users(company_id).list_all_unapproved("admin1")
+        result = await vclient.users(
+            "on-behalf-of-user", company_id=company_id
+        ).list_all_unapproved()
 
         # Then: Returns list of User objects
         assert isinstance(result, list)
@@ -721,7 +652,7 @@ class TestUsersServiceIterAllUnapproved:
         user2 = {**user_response_data, "id": "507f1f77bcf86cd799439012", "name_first": "User 2"}
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "1", "offset": "0", "requesting_user_id": "admin1"},
+            params={"limit": "1", "offset": "0"},
         ).respond(
             200,
             json={
@@ -733,7 +664,7 @@ class TestUsersServiceIterAllUnapproved:
         )
         respx.get(
             f"{base_url}{Endpoints.USERS_UNAPPROVED_LIST.format(company_id=company_id)}",
-            params={"limit": "1", "offset": "1", "requesting_user_id": "admin1"},
+            params={"limit": "1", "offset": "1"},
         ).respond(
             200,
             json={
@@ -746,7 +677,10 @@ class TestUsersServiceIterAllUnapproved:
 
         # When: Iterating through all unapproved users
         users = [
-            user async for user in vclient.users(company_id).iter_all_unapproved("admin1", limit=1)
+            user
+            async for user in vclient.users(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_unapproved(limit=1)
         ]
 
         # Then: All users are yielded as User objects
@@ -769,8 +703,8 @@ class TestUsersServiceApproveUser:
         ).respond(200, json=approved_data)
 
         # When: Approving the user
-        result = await vclient.users(company_id).approve_user(
-            user_id, role="PLAYER", requesting_user_id="requester123"
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).approve_user(
+            user_id, role="PLAYER"
         )
 
         # Then: Returns User object with assigned role
@@ -782,7 +716,7 @@ class TestUsersServiceApproveUser:
         import json
 
         body = json.loads(route.calls.last.request.content)
-        assert body == {"role": "PLAYER", "requesting_user_id": "requester123"}
+        assert body == {"role": "PLAYER"}
 
     @respx.mock
     async def test_approve_user_not_found(self, vclient, base_url):
@@ -796,8 +730,8 @@ class TestUsersServiceApproveUser:
 
         # When/Then: Approving raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).approve_user(
-                user_id, role="PLAYER", requesting_user_id="requester123"
+            await vclient.users("on-behalf-of-user", company_id=company_id).approve_user(
+                user_id, role="PLAYER"
             )
 
 
@@ -815,17 +749,11 @@ class TestUsersServiceDenyUser:
         ).respond(204)
 
         # When: Denying the user
-        result = await vclient.users(company_id).deny_user(user_id, "requester123")
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).deny_user(user_id)
 
         # Then: Request was made and returns None
         assert route.called
         assert result is None
-
-        # Verify request body
-        import json
-
-        body = json.loads(route.calls.last.request.content)
-        assert body == {"requesting_user_id": "requester123"}
 
     @respx.mock
     async def test_deny_user_not_found(self, vclient, base_url):
@@ -839,7 +767,7 @@ class TestUsersServiceDenyUser:
 
         # When/Then: Denying raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.users(company_id).deny_user(user_id, "requester123")
+            await vclient.users("on-behalf-of-user", company_id=company_id).deny_user(user_id)
 
 
 class TestUsersServiceAssets:
@@ -865,7 +793,9 @@ class TestUsersServiceAssets:
         )
 
         # When: Getting a page of assets
-        result = await vclient.users(company_id).get_assets_page(user_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_assets_page(
+            user_id
+        )
 
         # Then: Returns PaginatedResponse with Asset objects
         assert route.called
@@ -893,7 +823,9 @@ class TestUsersServiceAssets:
         )
 
         # When: Calling list_all_assets
-        result = await vclient.users(company_id).list_all_assets(user_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).list_all_assets(
+            user_id
+        )
 
         # Then: Returns list of Asset objects
         assert isinstance(result, list)
@@ -912,7 +844,9 @@ class TestUsersServiceAssets:
         ).respond(200, json=asset_response_data)
 
         # When: Getting the asset
-        result = await vclient.users(company_id).get_asset(user_id, asset_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_asset(
+            user_id, asset_id
+        )
 
         # Then: Returns Asset object
         assert route.called
@@ -931,7 +865,9 @@ class TestUsersServiceAssets:
         ).respond(204)
 
         # When: Deleting the asset
-        await vclient.users(company_id).delete_asset(user_id, asset_id)
+        await vclient.users("on-behalf-of-user", company_id=company_id).delete_asset(
+            user_id, asset_id
+        )
 
         # Then: Request was made
         assert route.called
@@ -947,7 +883,7 @@ class TestUsersServiceAssets:
         ).respond(201, json=asset_response_data)
 
         # When: Uploading an asset
-        result = await vclient.users(company_id).upload_asset(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).upload_asset(
             user_id,
             filename="test.png",
             content=b"fake image content",
@@ -975,7 +911,9 @@ class TestUsersServiceExperience:
         ).respond(200, json=experience_response_data)
 
         # When: Getting experience
-        result = await vclient.users(company_id).get_experience(user_id, campaign_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_experience(
+            user_id, campaign_id
+        )
 
         # Then: Returns CampaignExperience object
         assert route.called
@@ -995,8 +933,8 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Adding XP
-        result = await vclient.users(company_id).add_xp(
-            user_id, campaign_id, amount=100, requesting_user_id="requester123"
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).add_xp(
+            user_id, campaign_id, amount=100
         )
 
         # Then: Returns updated CampaignExperience object
@@ -1017,8 +955,8 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Removing XP
-        result = await vclient.users(company_id).remove_xp(
-            user_id, campaign_id, amount=25, requesting_user_id="requester123"
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).remove_xp(
+            user_id, campaign_id, amount=25
         )
 
         # Then: Returns updated CampaignExperience object
@@ -1039,8 +977,8 @@ class TestUsersServiceExperience:
         ).respond(201, json=updated_data)
 
         # When: Adding cool points
-        result = await vclient.users(company_id).add_cool_points(
-            user_id, campaign_id, amount=5, requesting_user_id="requester123"
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).add_cool_points(
+            user_id, campaign_id, amount=5
         )
 
         # Then: Returns updated CampaignExperience object
@@ -1072,7 +1010,9 @@ class TestUsersServiceNotes:
         )
 
         # When: Getting a page of notes
-        result = await vclient.users(company_id).get_notes_page(user_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_notes_page(
+            user_id
+        )
 
         # Then: Returns PaginatedResponse with Note objects
         assert route.called
@@ -1092,7 +1032,9 @@ class TestUsersServiceNotes:
         ).respond(200, json=note_response_data)
 
         # When: Getting the note
-        result = await vclient.users(company_id).get_note(user_id, note_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_note(
+            user_id, note_id
+        )
 
         # Then: Returns Note object
         assert route.called
@@ -1110,7 +1052,7 @@ class TestUsersServiceNotes:
         ).respond(201, json=note_response_data)
 
         # When: Creating a note
-        result = await vclient.users(company_id).create_note(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).create_note(
             user_id,
             title="Test Note",
             content="This is test content",
@@ -1134,7 +1076,7 @@ class TestUsersServiceNotes:
         ).respond(200, json=updated_data)
 
         # When: Updating the note
-        result = await vclient.users(company_id).update_note(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).update_note(
             user_id,
             note_id,
             title="Updated Title",
@@ -1157,7 +1099,9 @@ class TestUsersServiceNotes:
         ).respond(204)
 
         # When: Deleting the note
-        await vclient.users(company_id).delete_note(user_id, note_id)
+        await vclient.users("on-behalf-of-user", company_id=company_id).delete_note(
+            user_id, note_id
+        )
 
         # Then: Request was made
         assert route.called
@@ -1186,7 +1130,9 @@ class TestUsersServiceQuickrolls:
         )
 
         # When: Getting a page of quickrolls
-        result = await vclient.users(company_id).get_quickrolls_page(user_id)
+        result = await vclient.users(
+            "on-behalf-of-user", company_id=company_id
+        ).get_quickrolls_page(user_id)
 
         # Then: Returns PaginatedResponse with Quickroll objects
         assert route.called
@@ -1206,7 +1152,9 @@ class TestUsersServiceQuickrolls:
         ).respond(200, json=quickroll_response_data)
 
         # When: Getting the quickroll
-        result = await vclient.users(company_id).get_quickroll(user_id, quickroll_id)
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).get_quickroll(
+            user_id, quickroll_id
+        )
 
         # Then: Returns Quickroll object
         assert route.called
@@ -1224,7 +1172,7 @@ class TestUsersServiceQuickrolls:
         ).respond(201, json=quickroll_response_data)
 
         # When: Creating a quickroll
-        result = await vclient.users(company_id).create_quickroll(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).create_quickroll(
             user_id,
             name="Test Quickroll",
             description="A test quickroll",
@@ -1249,7 +1197,7 @@ class TestUsersServiceQuickrolls:
         ).respond(200, json=updated_data)
 
         # When: Updating the quickroll
-        result = await vclient.users(company_id).update_quickroll(
+        result = await vclient.users("on-behalf-of-user", company_id=company_id).update_quickroll(
             user_id,
             quickroll_id,
             name="Updated Name",
@@ -1272,7 +1220,9 @@ class TestUsersServiceQuickrolls:
         ).respond(204)
 
         # When: Deleting the quickroll
-        await vclient.users(company_id).delete_quickroll(user_id, quickroll_id)
+        await vclient.users("on-behalf-of-user", company_id=company_id).delete_quickroll(
+            user_id, quickroll_id
+        )
 
         # Then: Request was made
         assert route.called
@@ -1284,7 +1234,7 @@ class TestUsersServiceFactoryMethod:
     async def test_users_method_returns_service(self, vclient):
         """Verify users method returns UsersService instance."""
         # When: Calling the users method
-        service = vclient.users("company123")
+        service = vclient.users("on-behalf-of-user", company_id="company123")
 
         # Then: Returns a UsersService instance
         from vclient.services.users import UsersService
@@ -1294,8 +1244,8 @@ class TestUsersServiceFactoryMethod:
     async def test_users_method_creates_new_instance(self, vclient):
         """Verify users method creates new instance each call."""
         # When: Calling the users method multiple times
-        service1 = vclient.users("company123")
-        service2 = vclient.users("company123")
+        service1 = vclient.users("on-behalf-of-user", company_id="company123")
+        service2 = vclient.users("on-behalf-of-user", company_id="company123")
 
         # Then: Returns different instances (not cached)
         assert service1 is not service2
@@ -1303,7 +1253,7 @@ class TestUsersServiceFactoryMethod:
     async def test_users_method_stores_company_id(self, vclient):
         """Verify users method stores company_id on the service."""
         # When: Calling the users method with a company_id
-        service = vclient.users("company123")
+        service = vclient.users("on-behalf-of-user", company_id="company123")
 
         # Then: The service has the company_id stored
         assert service._company_id == "company123"

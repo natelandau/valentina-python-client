@@ -203,7 +203,7 @@ class TestSyncClientFullSheet:
         ).respond(200, json=response_data)
 
         # When: Calling sync get_full_sheet
-        result = sync_client.characters(user_id, campaign_id, company_id=company_id).get_full_sheet(
+        result = sync_client.characters("on-behalf-of-user", company_id=company_id).get_full_sheet(
             character_id
         )
 
@@ -238,7 +238,7 @@ class TestSyncClientFullSheet:
 
         # When: Calling sync get_full_sheet_category
         result = sync_client.characters(
-            user_id, campaign_id, company_id=company_id
+            "on-behalf-of-user", company_id=company_id
         ).get_full_sheet_category(character_id, category_id)
 
         # Then: Returns FullSheetTraitCategory

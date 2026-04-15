@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 class CampaignsService(BaseService):
     """Service for managing campaigns within a company in the Valentina API.
 
-    This service is scoped to a specific company and user at initialization time.
+    This service is scoped to a specific company at initialization time.
     All methods operate within that context.
 
     Provides methods to create, retrieve, update, and delete campaigns,
@@ -34,28 +34,27 @@ class CampaignsService(BaseService):
 
     Example:
         >>> async with VClient() as client:
-        ...     campaigns = client.campaigns("company_id", "user_id")
+        ...     campaigns = client.campaigns("company_id")
         ...     all_campaigns = await campaigns.list_all()
         ...     campaign = await campaigns.get("campaign_id")
     """
 
-    def __init__(self, client: "VClient", company_id: str, user_id: str) -> None:
-        """Initialize the service scoped to a specific company and user.
+    def __init__(self, client: "VClient", company_id: str, on_behalf_of: str) -> None:
+        """Initialize the service scoped to a specific company.
 
         Args:
             client: The VClient instance to use for requests.
             company_id: The ID of the company to operate within.
-            user_id: The ID of the user to operate as.
+            on_behalf_of: User ID to impersonate via On-Behalf-Of header.
         """
         super().__init__(client)
         self._company_id = company_id
-        self._user_id = user_id
+        self._on_behalf_of = on_behalf_of
 
     def _format_endpoint(self, endpoint: str, **kwargs: str) -> str:
-        """Format an endpoint with the scoped company_id and user_id plus any extra params."""
+        """Format an endpoint with the scoped company_id plus any extra params."""
         return endpoint.format(
             company_id=self._company_id,
-            user_id=self._user_id,
             **kwargs,
         )
 

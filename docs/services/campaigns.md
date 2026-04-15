@@ -13,7 +13,7 @@ The Campaigns service provides full CRUD operations for campaigns, plus speciali
 ```python
 from vclient import campaigns_service
 
-campaigns = campaigns_service(user_id="USER_ID", company_id="COMPANY_ID")
+campaigns = campaigns_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 ## Methods

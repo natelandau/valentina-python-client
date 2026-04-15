@@ -22,7 +22,7 @@ from vclient import VClient
 
 async with VClient(base_url="https://api.example.com", api_key="key") as client:
     companies = await client.companies.list_all()
-    users_svc = client.users(company_id="comp-123")
+    users_svc = client.users(on_behalf_of="user-123", company_id="comp-123")
     all_users = await users_svc.list_all()
 
 # Sync
@@ -50,16 +50,17 @@ VClient
 ├── .global_admin            # No scoping (property)
 ├── .system                  # No scoping (property)
 ├── .user_lookup             # No scoping (property)
-├── .users(company_id)
-├── .campaigns(user_id, company_id)
-├── .books(user_id, campaign_id, company_id=)
-├── .chapters(user_id, campaign_id, book_id, company_id=)
-├── .characters(user_id, campaign_id, company_id=)
-├── .character_traits(user_id, campaign_id, character_id, company_id=)
+├── .users(on_behalf_of, company_id=)
+├── .user_self_registration(company_id=)   # no on_behalf_of — API key auth only
+├── .campaigns(on_behalf_of, company_id=)
+├── .books(on_behalf_of, campaign_id, company_id=)
+├── .chapters(on_behalf_of, campaign_id, book_id, company_id=)
+├── .characters(on_behalf_of, company_id=)
+├── .character_traits(on_behalf_of, character_id, company_id=)
 ├── .character_blueprint(company_id=)
-├── .character_autogen(user_id, campaign_id, company_id=)
+├── .character_autogen(on_behalf_of, campaign_id, company_id=)
 ├── .dictionary(company_id=)
-├── .dicerolls(user_id, company_id=)
+├── .dicerolls(on_behalf_of, company_id=)
 └── .options(company_id=)
 ```
 
@@ -74,8 +75,8 @@ from vclient import VClient, campaigns_service
 
 async with VClient(base_url="...", api_key="...", default_company_id="comp-1") as client:
     # These are equivalent:
-    svc = client.campaigns(user_id="u1")
-    svc = campaigns_service(user_id="u1")
+    svc = client.campaigns(on_behalf_of="u1")
+    svc = campaigns_service(on_behalf_of="u1")
 ```
 
 Sync equivalents use the `sync_` prefix: `sync_campaigns_service(...)`.
@@ -165,7 +166,7 @@ from vclient.testing import FakeVClient, Routes
 
 async with FakeVClient() as client:
     # All service methods work out of the box with generated fake data
-    users = await client.users(company_id="fake-company").list_all()
+    users = await client.users(on_behalf_of="user-123", company_id="fake-company").list_all()
 
     # Override specific routes
     client.set_response(Routes.USERS_LIST, items=[

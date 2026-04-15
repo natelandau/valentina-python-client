@@ -21,7 +21,7 @@ class TestFakeRouterPatternMatching:
         router = _FakeRouter()
         request = httpx.Request(
             "GET",
-            "https://fake.test/api/v1/companies/abc123/users/user456/campaigns",
+            "https://fake.test/api/v1/companies/abc123/campaigns",
         )
         response = router.handle(request)
         assert response.status_code == 200
@@ -33,7 +33,7 @@ class TestFakeRouterPatternMatching:
         router = _FakeRouter()
         request = httpx.Request(
             "GET",
-            "https://fake.test/api/v1/companies/abc/users/u1/campaigns/c1",
+            "https://fake.test/api/v1/companies/abc/campaigns/c1",
         )
         response = router.handle(request)
         assert response.status_code == 200
@@ -45,7 +45,7 @@ class TestFakeRouterPatternMatching:
         router = _FakeRouter()
         request = httpx.Request(
             "DELETE",
-            "https://fake.test/api/v1/companies/abc/users/u1/campaigns/c1",
+            "https://fake.test/api/v1/companies/abc/campaigns/c1",
         )
         response = router.handle(request)
         assert response.status_code == 204
@@ -66,7 +66,7 @@ class TestFakeRouterOverrides:
         router.add_route("GET", Endpoints.CAMPAIGNS, json=custom_json)
         request = httpx.Request(
             "GET",
-            "https://fake.test/api/v1/companies/abc/users/u1/campaigns",
+            "https://fake.test/api/v1/companies/abc/campaigns",
         )
         response = router.handle(request)
         body = json.loads(response.content)
@@ -77,7 +77,7 @@ class TestFakeRouterOverrides:
         router.add_route("GET", Endpoints.CAMPAIGN, json={"error": "not found"}, status_code=404)
         request = httpx.Request(
             "GET",
-            "https://fake.test/api/v1/companies/abc/users/u1/campaigns/c1",
+            "https://fake.test/api/v1/companies/abc/campaigns/c1",
         )
         response = router.handle(request)
         assert response.status_code == 404
@@ -95,7 +95,7 @@ class TestFakeRouterOverrides:
         # When requesting the matching campaign_id
         matched = httpx.Request(
             "GET",
-            "https://fake.test/api/v1/companies/co1/users/u1/campaigns/aaa",
+            "https://fake.test/api/v1/companies/co1/campaigns/aaa",
         )
         response = router.handle(matched)
         body = json.loads(response.content)
@@ -104,7 +104,7 @@ class TestFakeRouterOverrides:
         # When requesting a different campaign_id, the default factory response is used
         other = httpx.Request(
             "GET",
-            "https://fake.test/api/v1/companies/co1/users/u1/campaigns/bbb",
+            "https://fake.test/api/v1/companies/co1/campaigns/bbb",
         )
         response = router.handle(other)
         body = json.loads(response.content)
@@ -128,13 +128,13 @@ class TestFakeRouterOverrides:
 
         # When requesting campaign aaa
         resp_a = router.handle(
-            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/users/u1/campaigns/aaa")
+            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/campaigns/aaa")
         )
         assert json.loads(resp_a.content)["id"] == "aaa"
 
         # When requesting campaign bbb
         resp_b = router.handle(
-            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/users/u1/campaigns/bbb")
+            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/campaigns/bbb")
         )
         assert json.loads(resp_b.content)["id"] == "bbb"
 
@@ -158,14 +158,14 @@ class TestFakeRouterOverrides:
 
         # When requesting the targeted campaign_id
         response = router.handle(
-            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/users/u1/campaigns/target")
+            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/campaigns/target")
         )
         body = json.loads(response.content)
         assert body["id"] == "specific"
 
         # When requesting a different campaign_id, the generic override is used
         response = router.handle(
-            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/users/u1/campaigns/other")
+            httpx.Request("GET", "https://fake.test/api/v1/companies/co1/campaigns/other")
         )
         body = json.loads(response.content)
         assert body["id"] == "generic"

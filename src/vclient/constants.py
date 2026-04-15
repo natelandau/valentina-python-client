@@ -28,6 +28,7 @@ HTTP_600_UPPER_BOUND = 600
 # Idempotency
 IDEMPOTENCY_KEY_HEADER = "Idempotency-Key"
 REQUEST_ID_HEADER = "X-Request-Id"
+ON_BEHALF_OF_HEADER = "On-Behalf-Of"
 
 # Rate Limiting Headers
 RATE_LIMIT_HEADER = "RateLimit"

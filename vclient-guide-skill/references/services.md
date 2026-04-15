@@ -6,6 +6,7 @@ Complete method signatures for every service class.
 
 - [CompaniesService](#companiesservice)
 - [UsersService](#usersservice)
+- [UserSelfRegistrationService](#userselfregistrationservice)
 - [CampaignsService](#campaignsservice)
 - [CharactersService](#charactersservice)
 - [CharacterTraitsService](#charactertraitsservice)
@@ -50,9 +51,9 @@ Complete method signatures for every service class.
 
 ## UsersService
 
-**Access:** `client.users(company_id=)`
-**Factory:** `users_service(company_id=)` / `sync_users_service(company_id=)`
-**Scoping:** company_id
+**Access:** `client.users(on_behalf_of, company_id=)`
+**Factory:** `users_service(on_behalf_of, company_id=)` / `sync_users_service(on_behalf_of, company_id=)`
+**Scoping:** on_behalf_of, company_id
 
 ### CRUD Methods
 
@@ -63,7 +64,6 @@ Complete method signatures for every service class.
 | `iter_all()` | `*, user_role=, email=, limit` | `AsyncIterator[User]` |
 | `get(user_id)` | `user_id: str, *, include: Sequence[UserInclude] \| None` | `UserDetail` |
 | `create()` | `request: UserCreate \| None, **kwargs` | `User` |
-| `register()` | `request: UserRegisterDTO \| None, **kwargs` | `User` |
 | `update(user_id)` | `user_id: str, request: UserUpdate \| None, **kwargs` | `User` |
 | `delete(user_id)` | `user_id: str` | `None` |
 
@@ -73,22 +73,21 @@ Complete method signatures for every service class.
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `get_unapproved_page(requesting_user_id)` | `requesting_user_id: str, *, limit, offset` | `PaginatedResponse[User]` |
-| `list_all_unapproved(requesting_user_id)` | `requesting_user_id: str` | `list[User]` |
-| `iter_all_unapproved(requesting_user_id)` | `requesting_user_id: str, *, limit` | `AsyncIterator[User]` |
-| `approve_user(user_id, role, requesting_user_id)` | `user_id: str, role: UserRole, requesting_user_id: str` | `User` |
-| `deny_user(user_id, requesting_user_id)` | `user_id: str, requesting_user_id: str` | `None` |
-| `merge(primary_user_id, secondary_user_id, requesting_user_id)` | all `str` | `User` |
+| `get_unapproved_page()` | `*, limit, offset` | `PaginatedResponse[User]` |
+| `list_all_unapproved()` | — | `list[User]` |
+| `iter_all_unapproved()` | `*, limit` | `AsyncIterator[User]` |
+| `approve_user(user_id, role)` | `user_id: str, role: UserRole` | `User` |
+| `merge(primary_user_id, secondary_user_id)` | both `str` | `User` |
 
 ### Experience
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `add_experience(user_id)` | `user_id: str, request: _ExperienceAddRemove \| None, **kwargs` | `CampaignExperience` |
-| `remove_experience(user_id)` | `user_id: str, request: _ExperienceAddRemove \| None, **kwargs` | `CampaignExperience` |
+| `add_xp(user_id, campaign_id, amount)` | `user_id: str, campaign_id: str, amount: int` | `CampaignExperience` |
+| `remove_xp(user_id, campaign_id, amount)` | `user_id: str, campaign_id: str, amount: int` | `CampaignExperience` |
+| `add_cool_points(user_id, campaign_id, amount)` | `user_id: str, campaign_id: str, amount: int` | `CampaignExperience` |
+| `get_experience(user_id, campaign_id)` | `user_id: str, campaign_id: str` | `CampaignExperience` |
 | `get_statistics(user_id)` | `user_id: str, *, num_top_traits: int = 5` | `RollStatistics` |
-
-**Experience kwargs:** `amount: int, campaign_id: str, requesting_user_id: str`
 
 ### Quickrolls
 
@@ -108,11 +107,27 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 
 ---
 
+## UserSelfRegistrationService
+
+**Access:** `client.user_self_registration(company_id=)`
+**Factory:** `user_self_registration_service(company_id=)` / `sync_user_self_registration_service(...)`
+**Scoping:** company_id (no on_behalf_of — API key auth only)
+
+### Methods
+
+| Method | Parameters | Returns |
+|--------|-----------|---------|
+| `register(request=None, **kwargs)` | `request: UserRegisterDTO \| None, **kwargs` | `User` |
+
+**Register kwargs:** `username: str, email: str, name_first: str | None, name_last: str | None, discord_profile: DiscordProfileUpdate | None, google_profile: GoogleProfile | None, github_profile: GitHubProfile | None`
+
+---
+
 ## CampaignsService
 
-**Access:** `client.campaigns(user_id, company_id=)`
-**Factory:** `campaigns_service(user_id, company_id=)` / `sync_campaigns_service(...)`
-**Scoping:** company_id, user_id
+**Access:** `client.campaigns(on_behalf_of, company_id=)`
+**Factory:** `campaigns_service(on_behalf_of, company_id=)` / `sync_campaigns_service(...)`
+**Scoping:** on_behalf_of, company_id
 
 ### Methods
 
@@ -154,9 +169,9 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 
 ## CharactersService
 
-**Access:** `client.characters(user_id, campaign_id, company_id=)`
-**Factory:** `characters_service(user_id, campaign_id, company_id=)` / `sync_characters_service(...)`
-**Scoping:** company_id, user_id, campaign_id
+**Access:** `client.characters(on_behalf_of, company_id=)`
+**Factory:** `characters_service(on_behalf_of, company_id=)` / `sync_characters_service(...)`
+**Scoping:** on_behalf_of, company_id
 
 ### CRUD Methods
 
@@ -200,9 +215,9 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 
 ## CharacterTraitsService
 
-**Access:** `client.character_traits(user_id, campaign_id, character_id, company_id=)`
-**Factory:** `character_traits_service(user_id, campaign_id, character_id, company_id=)` / `sync_character_traits_service(...)`
-**Scoping:** company_id, user_id, campaign_id, character_id
+**Access:** `client.character_traits(on_behalf_of, character_id, company_id=)`
+**Factory:** `character_traits_service(on_behalf_of, character_id, company_id=)` / `sync_character_traits_service(...)`
+**Scoping:** on_behalf_of, character_id, company_id
 
 ### Methods
 
@@ -225,8 +240,8 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 
 ## CharacterBlueprintService
 
-**Access:** `client.character_blueprint(company_id=)`
-**Factory:** `character_blueprint_service(company_id=)` / `sync_character_blueprint_service(...)`
+**Access:** `client.character_blueprint(on_behalf_of=, company_id=)` — `on_behalf_of` is optional (not required by API)
+**Factory:** `character_blueprint_service(on_behalf_of=, company_id=)` / `sync_character_blueprint_service(...)`
 **Scoping:** company_id
 
 Provides read-only access to the character sheet template (sections, categories, subcategories, traits, concepts, clans, tribes, auspices).
@@ -269,16 +284,16 @@ Each level (sections, categories, subcategories, traits) has the standard pagina
 
 ## CharacterAutogenService
 
-**Access:** `client.character_autogen(user_id, campaign_id, company_id=)`
-**Factory:** `character_autogen_service(user_id, campaign_id, company_id=)` / `sync_character_autogen_service(...)`
-**Scoping:** company_id, user_id, campaign_id
+**Access:** `client.character_autogen(on_behalf_of, company_id=)`
+**Factory:** `character_autogen_service(on_behalf_of, company_id=)` / `sync_character_autogen_service(...)`
+**Scoping:** on_behalf_of, company_id
 
 ### Methods
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `generate_character()` | `*, character_type: CharacterType, character_class: CharacterClass \| None, experience_level: AutoGenExperienceLevel \| None, skill_focus: AbilityFocus \| None, concept_id: str \| None, vampire_clan_id: str \| None, werewolf_tribe_id: str \| None, werewolf_auspice_id: str \| None` | `Character` |
-| `start_chargen_session()` | — | `ChargenSessionResponse` |
+| `generate_character()` | `*, campaign_id: str, character_type: CharacterType, character_class: CharacterClass \| None, experience_level: AutoGenExperienceLevel \| None, skill_focus: AbilityFocus \| None, concept_id: str \| None, vampire_clan_id: str \| None, werewolf_tribe_id: str \| None, werewolf_auspice_id: str \| None` | `Character` |
+| `start_chargen_session()` | `*, campaign_id: str` | `ChargenSessionResponse` |
 | `finalize_chargen_session(session_id, selected_character_id)` | both `str` | `Character` |
 | `list_all()` | — | `list[ChargenSessionResponse]` |
 | `get(session_id)` | `session_id: str` | `ChargenSessionResponse` |
@@ -287,9 +302,9 @@ Each level (sections, categories, subcategories, traits) has the standard pagina
 
 ## BooksService
 
-**Access:** `client.books(user_id, campaign_id, company_id=)`
-**Factory:** `books_service(user_id, campaign_id, company_id=)` / `sync_books_service(...)`
-**Scoping:** company_id, user_id, campaign_id
+**Access:** `client.books(campaign_id, on_behalf_of, company_id=)`
+**Factory:** `books_service(campaign_id, on_behalf_of, company_id=)` / `sync_books_service(...)`
+**Scoping:** campaign_id, on_behalf_of, company_id
 
 ### Methods
 
@@ -312,9 +327,9 @@ Plus standard notes and assets sub-resource methods (same pattern as CampaignsSe
 
 ## ChaptersService
 
-**Access:** `client.chapters(user_id, campaign_id, book_id, company_id=)`
-**Factory:** `chapters_service(user_id, campaign_id, book_id, company_id=)` / `sync_chapters_service(...)`
-**Scoping:** company_id, user_id, campaign_id, book_id
+**Access:** `client.chapters(campaign_id, book_id, on_behalf_of, company_id=)`
+**Factory:** `chapters_service(campaign_id, book_id, on_behalf_of, company_id=)` / `sync_chapters_service(...)`
+**Scoping:** campaign_id, book_id, on_behalf_of, company_id
 
 ### Methods
 
@@ -337,9 +352,9 @@ Plus standard notes and assets sub-resource methods.
 
 ## DicerollService
 
-**Access:** `client.dicerolls(user_id, company_id=)`
-**Factory:** `dicerolls_service(user_id, company_id=)` / `sync_dicerolls_service(...)`
-**Scoping:** company_id, user_id
+**Access:** `client.dicerolls(on_behalf_of, company_id=)`
+**Factory:** `dicerolls_service(on_behalf_of, company_id=)` / `sync_dicerolls_service(...)`
+**Scoping:** on_behalf_of, company_id
 
 ### Methods
 
@@ -356,8 +371,8 @@ Plus standard notes and assets sub-resource methods.
 
 ## DictionaryService
 
-**Access:** `client.dictionary(company_id=)`
-**Factory:** `dictionary_service(company_id=)` / `sync_dictionary_service(...)`
+**Access:** `client.dictionary(on_behalf_of=, company_id=)` — `on_behalf_of` is optional (not required by API)
+**Factory:** `dictionary_service(on_behalf_of=, company_id=)` / `sync_dictionary_service(...)`
 **Scoping:** company_id
 
 ### Methods
@@ -433,8 +448,8 @@ Plus standard notes and assets sub-resource methods.
 
 ## OptionsService
 
-**Access:** `client.options(company_id=)`
-**Factory:** `options_service(company_id=)` / `sync_options_service(...)`
+**Access:** `client.options(on_behalf_of=, company_id=)` — `on_behalf_of` is optional (not required by API)
+**Factory:** `options_service(on_behalf_of=, company_id=)` / `sync_options_service(...)`
 **Scoping:** company_id
 
 ### Methods

@@ -22,7 +22,7 @@ class TestSetResponsePaginated:
             client.set_response(Routes.USERS_LIST, items=[])
 
             # When listing all users
-            result = await users_service().list_all()
+            result = await users_service("on-behalf-of-user").list_all()
 
             # Then an empty list is returned
             assert result == []
@@ -36,7 +36,7 @@ class TestSetResponsePaginated:
             client.set_response(Routes.USERS_LIST, items=[user_a, user_b])
 
             # When listing all users
-            result = await users_service().list_all()
+            result = await users_service("on-behalf-of-user").list_all()
 
             # Then both users are returned with matching IDs
             assert len(result) == 2
@@ -52,7 +52,7 @@ class TestSetResponsePaginated:
             client.set_response(Routes.USERS_LIST, items=[user_dict])
 
             # When listing all users
-            result = await users_service().list_all()
+            result = await users_service("on-behalf-of-user").list_all()
 
             # Then the user is returned correctly
             assert len(result) == 1
@@ -66,7 +66,7 @@ class TestSetResponsePaginated:
             client.set_response(Routes.USERS_LIST, items=users)
 
             # When getting a page of users
-            result = await users_service().get_page()
+            result = await users_service("on-behalf-of-user").get_page()
 
             # Then the response is a PaginatedResponse with the correct total
             assert isinstance(result, PaginatedResponse)
@@ -86,7 +86,7 @@ class TestSetResponseSingle:
             client.set_response(Routes.CAMPAIGNS_GET, model=campaign)
 
             # When fetching the campaign
-            result = await campaigns_service("user123").get(campaign.id)
+            result = await campaigns_service("on-behalf-of-user").get(campaign.id)
 
             # Then the correct campaign is returned
             assert result.id == campaign.id
@@ -100,7 +100,7 @@ class TestSetResponseSingle:
             client.set_response(Routes.CAMPAIGNS_GET, model=campaign_dict)
 
             # When fetching the campaign
-            result = await campaigns_service("user123").get(campaign.id)
+            result = await campaigns_service("on-behalf-of-user").get(campaign.id)
 
             # Then the correct campaign is returned
             assert result.id == campaign.id
@@ -113,7 +113,7 @@ class TestSetResponseSingle:
             client.set_response(Routes.BOOKS_RENUMBER, model=book)
 
             # When renumbering the book
-            result = await books_service("user123", "campaign123").renumber(book.id, 5)
+            result = await books_service("campaign123", "on-behalf-of-user").renumber(book.id, 5)
 
             # Then the book is returned
             assert isinstance(result, CampaignBook)
@@ -132,7 +132,7 @@ class TestSetError:
             # When fetching a campaign
             # Then a NotFoundError is raised
             with pytest.raises(NotFoundError):
-                await campaigns_service("user123").get("nonexistent")
+                await campaigns_service("on-behalf-of-user").get("nonexistent")
 
     async def test_error_with_detail(self):
         """Verify set_error includes the custom detail message."""
@@ -147,7 +147,7 @@ class TestSetError:
             # When fetching a campaign
             # Then the error contains the custom detail
             with pytest.raises(NotFoundError, match="Campaign not found"):
-                await campaigns_service("user123").get("nonexistent")
+                await campaigns_service("on-behalf-of-user").get("nonexistent")
 
 
 class TestSetResponseWithParams:
@@ -170,7 +170,7 @@ class TestSetResponseWithParams:
                 params={"campaign_id": campaign_b.id},
             )
 
-            svc = campaigns_service("user123")
+            svc = campaigns_service("on-behalf-of-user")
 
             # When fetching each campaign by its ID
             result_a = await svc.get(campaign_a.id)
@@ -193,7 +193,7 @@ class TestSetResponseWithParams:
                 params={"campaign_id": "target-id"},
             )
 
-            svc = campaigns_service("user123")
+            svc = campaigns_service("on-behalf-of-user")
 
             # When fetching the targeted campaign
             result = await svc.get("target-id")
@@ -217,7 +217,7 @@ class TestSetResponseWithParams:
                 params={"campaign_id": "missing"},
             )
 
-            svc = campaigns_service("user123")
+            svc = campaigns_service("on-behalf-of-user")
 
             # When fetching the missing campaign
             with pytest.raises(NotFoundError):
@@ -270,9 +270,7 @@ class TestRequestIdHeader:
             client.set_error(Routes.CAMPAIGNS_GET, status_code=404)
 
             # When fetching a campaign
-            response = await client._http.get(
-                "/api/v1/companies/fake-company/users/user1/campaigns/camp1"
-            )
+            response = await client._http.get("/api/v1/companies/fake-company/campaigns/camp1")
 
             # Then X-Request-Id header is present
             assert REQUEST_ID_HEADER in response.headers
@@ -285,9 +283,7 @@ class TestRequestIdHeader:
             client.set_error(Routes.CAMPAIGNS_GET, status_code=404)
 
             # When fetching a campaign
-            response = await client._http.get(
-                "/api/v1/companies/fake-company/users/user1/campaigns/camp1"
-            )
+            response = await client._http.get("/api/v1/companies/fake-company/campaigns/camp1")
 
             # Then body request_id matches header
             body = response.json()
