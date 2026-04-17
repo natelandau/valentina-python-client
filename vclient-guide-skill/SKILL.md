@@ -114,7 +114,7 @@ await svc.create(name="My Campaign")
 
 ### Error Handling
 
-All exceptions inherit from `APIError` and follow RFC 9457 Problem Details:
+All exceptions inherit from `APIError` and follow RFC 9457 Problem Details. Import from `vclient.exceptions`:
 
 | Exception | HTTP | When |
 |-----------|------|------|
@@ -127,18 +127,71 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details:
 | `RateLimitError` | 429 | Rate limited (check `.retry_after`, `.remaining`) |
 | `ServerError` | 5xx | Server error |
 
-All have `.status_code`, `.title`, `.detail`, `.instance`, `.request_id` properties.
+#### Common properties (all exceptions)
+
+| Property | Type | Purpose |
+|----------|------|---------|
+| `.status_code` | `int \| None` | HTTP status (None for client-side errors) |
+| `.title` | `str \| None` | RFC 9457 short summary |
+| `.detail` | `str \| None` | RFC 9457 human-readable explanation |
+| `.instance` | `str \| None` | RFC 9457 URI reference to this occurrence |
+| `.request_id` | `str \| None` | Server-generated ID — include this when reporting bugs |
+| `.response_data` | `dict` | Raw RFC 9457 payload from the server |
+
+`str(exc)` produces a formatted message with status, title, detail, instance, and request_id — safe to log directly.
+
+#### Client-side vs server-side validation
+
+`RequestValidationError` is raised **before** any HTTP call when a Pydantic model (request body or query params) fails validation locally. It wraps a `pydantic.ValidationError` and exposes `.errors` (list of Pydantic error dicts with `type`, `loc`, `msg`, `input`). Use this to fail fast on bad input without hitting the network.
+
+`ValidationError` is raised for **server-side** validation failures (HTTP 400). It adds `.invalid_parameters`, a list of `{"field": ..., "message": ...}` dicts describing exactly which fields the server rejected — useful for surfacing per-field errors in a UI.
+
+#### Rate limit handling
+
+When `auto_retry_rate_limit=True` (the default), the client transparently waits and retries on 429 up to `max_retries` times. `RateLimitError` is only raised when retries are exhausted or auto-retry is disabled. Read `.retry_after` (seconds) and `.remaining` (tokens left in the bucket) to implement backoff when you handle 429s yourself.
+
+#### Automatic retries
+
+Transient errors in `retry_statuses` (default `{429, 500, 502, 503, 504}`) are retried up to `max_retries` times with exponential backoff starting at `retry_delay`. The exception you catch is the final failure after retries are exhausted, not the first transient error.
+
+#### Typical patterns
 
 ```python
-from vclient.exceptions import NotFoundError, RateLimitError
+from vclient.exceptions import (
+    APIError,
+    NotFoundError,
+    RateLimitError,
+    RequestValidationError,
+    ValidationError,
+)
 
+# Narrow handling — recover from specific failure modes
 try:
     user = await users_svc.get("nonexistent")
-except NotFoundError as e:
-    print(f"{e.title}: {e.detail}")
+except NotFoundError:
+    user = None  # treat as absent
 except RateLimitError as e:
-    print(f"Retry after {e.retry_after}s")
+    await asyncio.sleep(e.retry_after or 1)
+
+# Surface field-level errors to the caller
+try:
+    await campaigns_svc.create(name="")
+except ValidationError as e:
+    for p in e.invalid_parameters:
+        print(f"{p['field']}: {p['message']}")
+except RequestValidationError as e:
+    for err in e.errors:
+        print(f"{'.'.join(map(str, err['loc']))}: {err['msg']}")
+
+# Catch-all for logging / error reporting — always capture request_id
+try:
+    await svc.do_something()
+except APIError as e:
+    logger.exception("API call failed", extra={"request_id": e.request_id})
+    raise
 ```
+
+See `references/error-handling.md` for deeper patterns (correlation IDs, retry-aware wrappers, mapping to HTTP responses in web frameworks).
 
 ### Client Configuration
 
@@ -191,3 +244,5 @@ For detailed information, read the appropriate reference file:
 - **`references/models.md`** — Every Pydantic model with all fields, types, and validation constraints. Read this when you need to know the shape of request/response objects.
 
 - **`references/constants.md`** — All Literal types (enums), configuration constants, and endpoint paths. Read this when you need valid values for fields like `character_class`, `game_version`, `user_role`, etc.
+
+- **`references/error-handling.md`** — Full exception hierarchy, property details, client vs server validation differences, retry behavior, and recipes for logging, web framework integration, and testing error paths. Read this when designing error handling strategy or debugging a specific exception.
