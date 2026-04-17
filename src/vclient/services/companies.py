@@ -126,7 +126,7 @@ class CompaniesService(BaseService):
             request: A CompanyCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for CompanyCreate if request is not provided.
                 Accepts: name (str, required), email (str, required),
-                description (str | None), settings (CompanySettings | None).
+                description (str | None), settings (CompanySettingsCreate | None).
 
         Returns:
             The newly created NewCompanyResponse object containing the company and admin user.
@@ -157,7 +157,7 @@ class CompaniesService(BaseService):
             request: A CompanyUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for CompanyUpdate if request is not provided.
                 Accepts: name (str | None), email (str | None),
-                description (str | None), settings (CompanySettings | None).
+                description (str | None), settings (CompanySettingsUpdate | None).
 
         Returns:
             The updated Company object.

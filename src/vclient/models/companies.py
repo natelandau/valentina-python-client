@@ -16,14 +16,46 @@ from vclient.models.users import User
 
 
 class CompanySettings(BaseModel):
-    """Settings configuration for a company.
+    """Company configuration settings as returned by the API.
 
-    Controls various permissions and configuration options for the company.
-    Used in both response and request contexts; defaults support partial updates.
+    Strict response model — every field is always populated by the server.
+    For partial create/update payloads, use CompanySettingsCreate or
+    CompanySettingsUpdate instead.
+    """
+
+    character_autogen_xp_cost: int
+    character_autogen_num_choices: int
+    character_autogen_starting_points: int
+    permission_manage_campaign: ManageCampaignPermission
+    permission_grant_xp: GrantXPPermission
+    permission_free_trait_changes: FreeTraitChangesPermission
+    permission_recoup_xp: RecoupXPPermission
+
+
+class CompanySettingsCreate(BaseModel):
+    """Partial CompanySettings payload for POST /companies.
+
+    All fields optional — the server applies defaults for anything omitted.
     """
 
     character_autogen_xp_cost: int | None = None
     character_autogen_num_choices: int | None = None
+    character_autogen_starting_points: int | None = None
+    permission_manage_campaign: ManageCampaignPermission | None = None
+    permission_grant_xp: GrantXPPermission | None = None
+    permission_free_trait_changes: FreeTraitChangesPermission | None = None
+    permission_recoup_xp: RecoupXPPermission | None = None
+
+
+class CompanySettingsUpdate(BaseModel):
+    """Partial CompanySettings payload for PATCH /companies/{id}.
+
+    All fields optional — omitted fields remain unchanged on the server.
+    """
+
+    character_autogen_xp_cost: int | None = None
+    character_autogen_num_choices: int | None = None
+    character_autogen_starting_points: int | None = None
     permission_manage_campaign: ManageCampaignPermission | None = None
     permission_grant_xp: GrantXPPermission | None = None
     permission_free_trait_changes: FreeTraitChangesPermission | None = None
@@ -86,7 +118,7 @@ class CompanyCreate(BaseModel):
     name: str = Field(min_length=3, max_length=50)
     email: str
     description: Annotated[str, Field(min_length=3)] | None = None
-    settings: CompanySettings | None = None
+    settings: CompanySettingsCreate | None = None
 
 
 class CompanyUpdate(BaseModel):
@@ -98,7 +130,7 @@ class CompanyUpdate(BaseModel):
     name: Annotated[str, Field(min_length=3, max_length=50)] | None = None
     email: str | None = None
     description: Annotated[str, Field(min_length=3)] | None = None
-    settings: CompanySettings | None = None
+    settings: CompanySettingsUpdate | None = None
 
 
 class _GrantAccess(BaseModel):
@@ -113,6 +145,8 @@ __all__ = [
     "CompanyCreate",
     "CompanyPermissions",
     "CompanySettings",
+    "CompanySettingsCreate",
+    "CompanySettingsUpdate",
     "CompanyUpdate",
     "NewCompanyResponse",
     "_GrantAccess",

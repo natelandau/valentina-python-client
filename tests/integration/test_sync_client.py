@@ -18,51 +18,6 @@ def sync_client(base_url, api_key):
     client.close()
 
 
-@pytest.fixture
-def health_response_data() -> dict:
-    """Return sample health response data."""
-    return {
-        "database_status": "online",
-        "cache_status": "online",
-        "database_latency_ms": 1.2,
-        "cache_latency_ms": 0.5,
-        "uptime": "3d 12h 45m",
-        "version": "0.7.0",
-    }
-
-
-@pytest.fixture
-def company_response_data() -> dict:
-    """Return sample company response data."""
-    return {
-        "id": "507f1f77bcf86cd799439011",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "name": "Test Company",
-        "description": "A test company",
-        "email": "test@example.com",
-        "resources_modified_at": "2024-01-15T10:30:00Z",
-        "settings": {
-            "character_autogen_xp_cost": 10,
-            "character_autogen_num_choices": 3,
-            "permission_manage_campaign": "UNRESTRICTED",
-            "permission_grant_xp": "UNRESTRICTED",
-            "permission_free_trait_changes": "UNRESTRICTED",
-        },
-    }
-
-
-@pytest.fixture
-def paginated_companies_response(company_response_data) -> dict:
-    """Return sample paginated companies response."""
-    return {
-        "items": [company_response_data],
-        "limit": 10,
-        "offset": 0,
-        "total": 1,
-    }
-
-
 class TestSyncClientContextManager:
     """Tests for SyncVClient context manager behavior."""
 

@@ -10,19 +10,6 @@ from vclient.services import SystemService
 pytestmark = pytest.mark.anyio
 
 
-@pytest.fixture
-def health_response_data() -> dict:
-    """Return sample health response data."""
-    return {
-        "database_status": "online",
-        "cache_status": "online",
-        "database_latency_ms": 1.2,
-        "cache_latency_ms": 0.5,
-        "uptime": "3d 12h 45m",
-        "version": "0.7.0",
-    }
-
-
 class TestSystemServiceHealth:
     """Tests for SystemService.health method."""
 

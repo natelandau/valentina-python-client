@@ -159,4 +159,4 @@ for entry in page.items:
 | `date_to`        | `datetime \| None`      | Entries on or before this timestamp |
 | `include`        | `list[AuditLogInclude]` | Pass `["request_details"]` for forensics |
 
-See [Response Models](../models/companies.md) for `Company`, `CompanySettings`, and related types. See [Audit Log Models](../models/audit_logs.md) for `AuditLog` and `AuditLogDetail` field details.
+See [Response Models](../models/companies.md) for `Company`, `CompanySettings`, `CompanySettingsCreate`, `CompanySettingsUpdate`, and related types. See [Audit Log Models](../models/audit_logs.md) for `AuditLog` and `AuditLogDetail` field details.

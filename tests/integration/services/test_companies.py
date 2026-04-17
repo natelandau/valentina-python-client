@@ -8,45 +8,14 @@ from vclient.exceptions import AuthorizationError, NotFoundError, RequestValidat
 from vclient.models import (
     Company,
     CompanyPermissions,
-    CompanySettings,
+    CompanySettingsCreate,
+    CompanySettingsUpdate,
     NewCompanyResponse,
     PaginatedResponse,
     RollStatistics,
 )
 
 pytestmark = pytest.mark.anyio
-
-
-@pytest.fixture
-def company_response_data() -> dict:
-    """Return sample company response data."""
-    return {
-        "id": "507f1f77bcf86cd799439011",
-        "date_created": "2024-01-15T10:30:00Z",
-        "date_modified": "2024-01-15T10:30:00Z",
-        "name": "Test Company",
-        "description": "A test company",
-        "email": "test@example.com",
-        "resources_modified_at": "2024-01-15T10:30:00Z",
-        "settings": {
-            "character_autogen_xp_cost": 10,
-            "character_autogen_num_choices": 3,
-            "permission_manage_campaign": "UNRESTRICTED",
-            "permission_grant_xp": "UNRESTRICTED",
-            "permission_free_trait_changes": "UNRESTRICTED",
-        },
-    }
-
-
-@pytest.fixture
-def paginated_companies_response(company_response_data) -> dict:
-    """Return sample paginated companies response."""
-    return {
-        "items": [company_response_data],
-        "limit": 10,
-        "offset": 0,
-        "total": 1,
-    }
 
 
 @pytest.fixture
@@ -259,7 +228,7 @@ class TestCompaniesServiceCreate:
         )
 
         # When: Creating a company with all options using string values
-        settings = CompanySettings(
+        settings = CompanySettingsCreate(
             character_autogen_xp_cost=15,
             character_autogen_num_choices=5,
             permission_manage_campaign="STORYTELLER",
@@ -343,7 +312,7 @@ class TestCompaniesServiceUpdate:
         )
 
         # When: Updating with settings object using string values
-        settings = CompanySettings(
+        settings = CompanySettingsUpdate(
             character_autogen_xp_cost=20,
             permission_manage_campaign="STORYTELLER",
         )

@@ -1,82 +1,199 @@
 """Tests for vclient.api.models.companies."""
 
+import typing
+
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
+from vclient.constants import RecoupXPPermission
 from vclient.models.companies import (
     Company,
     CompanyCreate,
     CompanyPermissions,
     CompanySettings,
+    CompanySettingsCreate,
+    CompanySettingsUpdate,
     CompanyUpdate,
     _GrantAccess,
 )
 
 
 class TestCompanySettings:
-    """Tests for CompanySettings model."""
+    """Tests for CompanySettings response model (strict — all fields required)."""
+
+    def _full_settings_kwargs(self) -> dict[str, int | str]:
+        """Return a complete set of valid kwargs for CompanySettings."""
+        return {
+            "character_autogen_xp_cost": 10,
+            "character_autogen_num_choices": 3,
+            "character_autogen_starting_points": 15,
+            "permission_manage_campaign": "UNRESTRICTED",
+            "permission_grant_xp": "UNRESTRICTED",
+            "permission_free_trait_changes": "UNRESTRICTED",
+            "permission_recoup_xp": "DENIED",
+        }
+
+    def test_all_fields_required(self):
+        """Verify full construction with all fields succeeds."""
+        # When: Constructing with all required fields
+        settings = CompanySettings(**self._full_settings_kwargs())
+
+        # Then: All values are set
+        assert settings.character_autogen_xp_cost == 10
+        assert settings.character_autogen_num_choices == 3
+        assert settings.character_autogen_starting_points == 15
+        assert settings.permission_manage_campaign == "UNRESTRICTED"
+        assert settings.permission_grant_xp == "UNRESTRICTED"
+        assert settings.permission_free_trait_changes == "UNRESTRICTED"
+        assert settings.permission_recoup_xp == "DENIED"
+
+    @pytest.mark.parametrize(
+        "missing_field",
+        [
+            "character_autogen_xp_cost",
+            "character_autogen_num_choices",
+            "character_autogen_starting_points",
+            "permission_manage_campaign",
+            "permission_grant_xp",
+            "permission_free_trait_changes",
+            "permission_recoup_xp",
+        ],
+    )
+    def test_missing_required_field_raises(self, missing_field):
+        """Verify missing any field raises ValidationError."""
+        # Given: A full kwargs dict with one field removed
+        kwargs = self._full_settings_kwargs()
+        del kwargs[missing_field]
+
+        # When/Then: Construction raises
+        with pytest.raises(PydanticValidationError):
+            CompanySettings(**kwargs)
+
+    def test_invalid_permission_rejected(self):
+        """Verify invalid permission enum values are rejected."""
+        # Given: Full kwargs with one invalid enum
+        kwargs = self._full_settings_kwargs()
+        kwargs["permission_manage_campaign"] = "INVALID"
+
+        # When/Then: Construction raises
+        with pytest.raises(PydanticValidationError):
+            CompanySettings(**kwargs)
+
+    @pytest.mark.parametrize("value", typing.get_args(RecoupXPPermission))
+    def test_recoup_xp_valid_values(self, value):
+        """Verify permission_recoup_xp accepts each valid enum value."""
+        # Given: Full kwargs with the parametrized recoup_xp value
+        kwargs = self._full_settings_kwargs()
+        kwargs["permission_recoup_xp"] = value
+
+        # When: Constructing
+        settings = CompanySettings(**kwargs)
+
+        # Then: Value round-trips
+        assert settings.permission_recoup_xp == value
+
+
+class TestCompanySettingsCreate:
+    """Tests for CompanySettingsCreate request model (all-optional)."""
 
     def test_all_fields_default_to_none(self):
-        """Verify all fields default to None for partial updates."""
-        # When: Creating settings with no arguments
-        settings = CompanySettings()
+        """Verify all fields default to None for partial create."""
+        # When: Constructing with no args
+        settings = CompanySettingsCreate()
 
-        # Then: All values are None
+        # Then: All fields are None
         assert settings.character_autogen_xp_cost is None
         assert settings.character_autogen_num_choices is None
+        assert settings.character_autogen_starting_points is None
         assert settings.permission_manage_campaign is None
         assert settings.permission_grant_xp is None
         assert settings.permission_free_trait_changes is None
         assert settings.permission_recoup_xp is None
 
-    def test_partial_settings(self):
-        """Verify partial settings for updates."""
-        # When: Creating settings with only some values
-        settings = CompanySettings(
+    def test_partial_construction(self):
+        """Verify construction with only some fields set."""
+        # When: Constructing with two fields
+        settings = CompanySettingsCreate(
             character_autogen_xp_cost=20,
-            permission_manage_campaign="STORYTELLER",
+            character_autogen_starting_points=8,
         )
 
-        # Then: Specified values are set, others are None
+        # Then: Set fields have values; others are None
         assert settings.character_autogen_xp_cost == 20
+        assert settings.character_autogen_starting_points == 8
         assert settings.character_autogen_num_choices is None
-        assert settings.permission_manage_campaign == "STORYTELLER"
-        assert settings.permission_grant_xp is None
-        assert settings.permission_free_trait_changes is None
+        assert settings.permission_manage_campaign is None
 
-    def test_model_dump_excludes_none(self):
-        """Verify model_dump with exclude_none works correctly."""
-        # Given: Settings with some values set
-        settings = CompanySettings(
+    def test_model_dump_exclude_unset(self):
+        """Verify model_dump with exclude_unset yields only set fields."""
+        # Given: Settings with two fields set
+        settings = CompanySettingsCreate(
             character_autogen_xp_cost=15,
             permission_manage_campaign="STORYTELLER",
         )
 
-        # When: Dumping with exclude_none
-        data = settings.model_dump(exclude_none=True)
+        # When: Dumping with exclude_unset and exclude_none
+        data = settings.model_dump(exclude_unset=True, exclude_none=True, mode="json")
 
-        # Then: Only non-None values are included
+        # Then: Only set fields appear
         assert data == {
             "character_autogen_xp_cost": 15,
             "permission_manage_campaign": "STORYTELLER",
         }
 
-    def test_invalid_permission_value_rejected(self):
-        """Verify invalid permission values are rejected by Pydantic."""
-        # When/Then: Creating settings with invalid permission raises error
+    def test_invalid_permission_rejected(self):
+        """Verify invalid enum values are rejected."""
+        # When/Then: Invalid permission value raises
         with pytest.raises(PydanticValidationError):
-            CompanySettings(permission_manage_campaign="INVALID_VALUE")
+            CompanySettingsCreate(permission_manage_campaign="INVALID")
 
-    @pytest.mark.parametrize("value", ["UNRESTRICTED", "DENIED", "WITHIN_SESSION"])
-    def test_recoup_xp_accepts_valid_values(self, value):
-        """Verify permission_recoup_xp accepts each valid enum value."""
-        settings = CompanySettings(permission_recoup_xp=value)
-        assert settings.permission_recoup_xp == value
 
-    def test_recoup_xp_rejects_invalid_value(self):
-        """Verify permission_recoup_xp rejects values outside the enum."""
+class TestCompanySettingsUpdate:
+    """Tests for CompanySettingsUpdate request model (all-optional)."""
+
+    def test_all_fields_default_to_none(self):
+        """Verify all fields default to None for partial update."""
+        # When: Constructing with no args
+        settings = CompanySettingsUpdate()
+
+        # Then: All fields are None
+        assert settings.character_autogen_xp_cost is None
+        assert settings.character_autogen_num_choices is None
+        assert settings.character_autogen_starting_points is None
+        assert settings.permission_manage_campaign is None
+        assert settings.permission_grant_xp is None
+        assert settings.permission_free_trait_changes is None
+        assert settings.permission_recoup_xp is None
+
+    def test_partial_construction(self):
+        """Verify construction with only some fields set."""
+        # When: Constructing with two fields
+        settings = CompanySettingsUpdate(
+            character_autogen_starting_points=12,
+            permission_recoup_xp="WITHIN_SESSION",
+        )
+
+        # Then: Set fields have values; others are None
+        assert settings.character_autogen_starting_points == 12
+        assert settings.permission_recoup_xp == "WITHIN_SESSION"
+        assert settings.character_autogen_xp_cost is None
+
+    def test_model_dump_exclude_unset(self):
+        """Verify model_dump with exclude_unset yields only set fields."""
+        # Given: Settings with one field set
+        settings = CompanySettingsUpdate(character_autogen_starting_points=25)
+
+        # When: Dumping with exclude_unset and exclude_none
+        data = settings.model_dump(exclude_unset=True, exclude_none=True, mode="json")
+
+        # Then: Only the set field appears
+        assert data == {"character_autogen_starting_points": 25}
+
+    def test_invalid_permission_rejected(self):
+        """Verify invalid enum values are rejected."""
+        # When/Then: Invalid permission value raises
         with pytest.raises(PydanticValidationError):
-            CompanySettings(permission_recoup_xp="INVALID")
+            CompanySettingsUpdate(permission_recoup_xp="INVALID")
 
 
 class TestCompany:
@@ -93,7 +210,15 @@ class TestCompany:
             resources_modified_at="2024-01-15T10:30:00Z",
             description=None,
             email="test@example.com",
-            settings=CompanySettings(permission_recoup_xp="UNRESTRICTED"),
+            settings=CompanySettings(
+                character_autogen_xp_cost=10,
+                character_autogen_num_choices=3,
+                character_autogen_starting_points=5,
+                permission_manage_campaign="UNRESTRICTED",
+                permission_grant_xp="UNRESTRICTED",
+                permission_free_trait_changes="UNRESTRICTED",
+                permission_recoup_xp="UNRESTRICTED",
+            ),
         )
 
         # Then: Company is created correctly
@@ -108,7 +233,15 @@ class TestCompany:
     def test_full_company(self):
         """Verify creating company with all fields populated."""
         # Given: Settings with some values
-        settings = CompanySettings(character_autogen_xp_cost=15)
+        settings = CompanySettings(
+            character_autogen_xp_cost=15,
+            character_autogen_num_choices=3,
+            character_autogen_starting_points=10,
+            permission_manage_campaign="UNRESTRICTED",
+            permission_grant_xp="UNRESTRICTED",
+            permission_free_trait_changes="UNRESTRICTED",
+            permission_recoup_xp="DENIED",
+        )
 
         # When: Creating company with all fields
         company = Company(
@@ -146,9 +279,11 @@ class TestCompany:
             "settings": {
                 "character_autogen_xp_cost": 10,
                 "character_autogen_num_choices": 3,
+                "character_autogen_starting_points": 5,
                 "permission_manage_campaign": "UNRESTRICTED",
                 "permission_grant_xp": "PLAYER",
                 "permission_free_trait_changes": "WITHIN_24_HOURS",
+                "permission_recoup_xp": "UNRESTRICTED",
             },
         }
 
@@ -248,7 +383,7 @@ class TestCompanyCreate:
     def test_full_request(self):
         """Verify creating request with all fields."""
         # Given: Settings with some values
-        settings = CompanySettings(character_autogen_xp_cost=20)
+        settings = CompanySettingsCreate(character_autogen_xp_cost=20)
 
         # When: Creating request with all fields
         request = CompanyCreate(
@@ -279,7 +414,7 @@ class TestCompanyCreate:
     def test_model_dump_with_settings(self):
         """Verify model_dump includes settings correctly."""
         # Given: Request with partial settings
-        settings = CompanySettings(
+        settings = CompanySettingsCreate(
             character_autogen_xp_cost=15,
             permission_manage_campaign="STORYTELLER",
         )
@@ -353,6 +488,26 @@ class TestCompanyUpdate:
 
         with pytest.raises(PydanticValidationError):
             CompanyUpdate(description="ab")
+
+    def test_update_with_settings(self):
+        """Verify CompanyUpdate accepts and serializes a CompanySettingsUpdate."""
+        # Given: A partial settings update
+        settings = CompanySettingsUpdate(
+            character_autogen_starting_points=25,
+            permission_recoup_xp="WITHIN_SESSION",
+        )
+
+        # When: Wrapping in a CompanyUpdate and dumping
+        request = CompanyUpdate(settings=settings)
+        data = request.model_dump(exclude_unset=True, exclude_none=True, mode="json")
+
+        # Then: Only set settings fields appear
+        assert data == {
+            "settings": {
+                "character_autogen_starting_points": 25,
+                "permission_recoup_xp": "WITHIN_SESSION",
+            }
+        }
 
 
 class TestCompanyCreateConstraints:

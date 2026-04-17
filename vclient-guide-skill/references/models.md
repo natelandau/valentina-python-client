@@ -163,10 +163,41 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 
 ### CompanySettings
 
+Strict response model — all fields always populated by the server.
+
+| Field | Type | Required |
+|-------|------|----------|
+| character_autogen_xp_cost | int | yes |
+| character_autogen_num_choices | int | yes |
+| character_autogen_starting_points | int | yes |
+| permission_manage_campaign | ManageCampaignPermission | yes |
+| permission_grant_xp | GrantXPPermission | yes |
+| permission_free_trait_changes | FreeTraitChangesPermission | yes |
+| permission_recoup_xp | RecoupXPPermission | yes |
+
+### CompanySettingsCreate
+
+Request payload for `POST /companies`. All fields optional.
+
 | Field | Type | Required |
 |-------|------|----------|
 | character_autogen_xp_cost | int \| None | no |
 | character_autogen_num_choices | int \| None | no |
+| character_autogen_starting_points | int \| None | no |
+| permission_manage_campaign | ManageCampaignPermission \| None | no |
+| permission_grant_xp | GrantXPPermission \| None | no |
+| permission_free_trait_changes | FreeTraitChangesPermission \| None | no |
+| permission_recoup_xp | RecoupXPPermission \| None | no |
+
+### CompanySettingsUpdate
+
+Request payload for `PATCH /companies/{id}`. All fields optional.
+
+| Field | Type | Required |
+|-------|------|----------|
+| character_autogen_xp_cost | int \| None | no |
+| character_autogen_num_choices | int \| None | no |
+| character_autogen_starting_points | int \| None | no |
 | permission_manage_campaign | ManageCampaignPermission \| None | no |
 | permission_grant_xp | GrantXPPermission \| None | no |
 | permission_free_trait_changes | FreeTraitChangesPermission \| None | no |
@@ -179,7 +210,7 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 | name | str | 3-50 chars, required |
 | email | str | required |
 | description | str \| None | min 3 chars |
-| settings | CompanySettings \| None | optional |
+| settings | CompanySettingsCreate \| None | optional |
 
 ### CompanyUpdate
 
@@ -188,7 +219,7 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 | name | str \| None | 3-50 chars |
 | email | str \| None | — |
 | description | str \| None | min 3 chars |
-| settings | CompanySettings \| None | — |
+| settings | CompanySettingsUpdate \| None | — |
 
 ### NewCompanyResponse
 
