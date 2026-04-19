@@ -113,4 +113,4 @@ __all__ = (
     "users_service",
 )
 
-__version__ = "1.23.0"
+__version__ = "2.0.0"

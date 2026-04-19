@@ -1,3 +1,10 @@
+## v2.0.0 (2026-04-19)
+
+### Feat
+
+- **company**: support new company permissions
+- **system**: add latency and uptime fields to SystemHealth model
+
 ## v1.23.0 (2026-04-15)
 
 ### Feat
