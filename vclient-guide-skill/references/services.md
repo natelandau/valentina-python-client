@@ -360,9 +360,9 @@ Plus standard notes and assets sub-resource methods.
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `get_page()` | `*, limit, offset, userid: str \| None, characterid: str \| None, campaignid: str \| None` | `PaginatedResponse[Diceroll]` |
-| `list_all()` | `*, userid=, characterid=, campaignid=` | `list[Diceroll]` |
-| `iter_all()` | `*, limit, userid=, characterid=, campaignid=` | `AsyncIterator[Diceroll]` |
+| `get_page()` | `*, limit, offset, userid: str \| None, characterid: str \| None, campaignid: str \| None, character_type: CharacterType \| None` | `PaginatedResponse[Diceroll]` |
+| `list_all()` | `*, userid=, characterid=, campaignid=, character_type: CharacterType \| None` | `list[Diceroll]` |
+| `iter_all()` | `*, limit, userid=, characterid=, campaignid=, character_type: CharacterType \| None` | `AsyncIterator[Diceroll]` |
 | `get(diceroll_id)` | `diceroll_id: str` | `Diceroll` |
 | `create()` | `request: DicerollCreate \| None, **kwargs` | `Diceroll` |
 | `create_from_quickroll()` | `*, quickroll_id: str, character_id: str, comment: str \| None, difficulty: int = 6, num_desperation_dice: int = 0` | `Diceroll` |

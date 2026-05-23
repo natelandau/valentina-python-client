@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import DEFAULT_PAGE_LIMIT, CharacterType
 from vclient.endpoints import Endpoints
 from vclient.models import Diceroll, DicerollCreate, PaginatedResponse, _DicerollQuickrollCreate
 
@@ -40,15 +40,32 @@ class SyncDicerollService(SyncBaseService):
         userid: str | None = None,
         characterid: str | None = None,
         campaignid: str | None = None,
+        character_type: CharacterType | None = None,
     ) -> PaginatedResponse[Diceroll]:
-        """Retrieve a paginated page of dice rolls."""
+        """Retrieve a paginated page of dice rolls.
+
+        Args:
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+            userid: Filter by user ID.
+            characterid: Filter by character ID.
+            campaignid: Filter by campaign ID.
+            character_type: Filter by the associated character's type. Rolls with
+                no character are excluded when this filter is set.
+
+        Returns:
+            A PaginatedResponse containing Diceroll objects and pagination metadata.
+        """
         return self._get_paginated_as(
             self._format_endpoint(Endpoints.DICEROLLS),
             Diceroll,
             limit=limit,
             offset=offset,
             params=self._build_params(
-                userid=userid, characterid=characterid, campaignid=campaignid
+                userid=userid,
+                characterid=characterid,
+                campaignid=campaignid,
+                character_type=character_type,
             ),
         )
 
@@ -58,12 +75,27 @@ class SyncDicerollService(SyncBaseService):
         userid: str | None = None,
         characterid: str | None = None,
         campaignid: str | None = None,
+        character_type: CharacterType | None = None,
     ) -> list[Diceroll]:
-        """Retrieve all dice rolls."""
+        """Retrieve all dice rolls.
+
+        Args:
+            userid: Filter by user ID.
+            characterid: Filter by character ID.
+            campaignid: Filter by campaign ID.
+            character_type: Filter by the associated character's type. Rolls with
+                no character are excluded when this filter is set.
+
+        Returns:
+            A list of all Diceroll objects.
+        """
         return [
             diceroll
             for diceroll in self.iter_all(
-                userid=userid, characterid=characterid, campaignid=campaignid
+                userid=userid,
+                characterid=characterid,
+                campaignid=campaignid,
+                character_type=character_type,
             )
         ]
 
@@ -73,14 +105,30 @@ class SyncDicerollService(SyncBaseService):
         userid: str | None = None,
         characterid: str | None = None,
         campaignid: str | None = None,
+        character_type: CharacterType | None = None,
         limit: int = 100,
     ) -> Iterator[Diceroll]:
-        """Iterate through all dice rolls."""
+        """Iterate through all dice rolls.
+
+        Args:
+            userid: Filter by user ID.
+            characterid: Filter by character ID.
+            campaignid: Filter by campaign ID.
+            character_type: Filter by the associated character's type. Rolls with
+                no character are excluded when this filter is set.
+            limit: Items per page (default 100 for efficiency).
+
+        Yields:
+            Individual Diceroll objects.
+        """
         for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.DICEROLLS),
             limit=limit,
             params=self._build_params(
-                userid=userid, characterid=characterid, campaignid=campaignid
+                userid=userid,
+                characterid=characterid,
+                campaignid=campaignid,
+                character_type=character_type,
             ),
         ):
             yield Diceroll.model_validate(item)

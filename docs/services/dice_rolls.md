@@ -28,13 +28,13 @@ dicerolls = dicerolls_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 
 ### Pagination
 
-Filter rolls by user, character, or campaign using optional query parameters.
+Filter rolls by user, character, campaign, or character type using optional query parameters.
 
-| Method                                                          | Returns                       | Description           |
-| --------------------------------------------------------------- | ----------------------------- | --------------------- |
-| `get_page(limit?, offset?, userid?, characterid?, campaignid?)` | `PaginatedResponse[Diceroll]` | Get a page of rolls   |
-| `list_all(userid?, characterid?, campaignid?)`                  | `list[Diceroll]`              | Get all rolls         |
-| `iter_all(userid?, characterid?, campaignid?, limit?)`          | `AsyncIterator[Diceroll]`     | Iterate through rolls |
+| Method                                                                           | Returns                       | Description           |
+| -------------------------------------------------------------------------------- | ----------------------------- | --------------------- |
+| `get_page(limit?, offset?, userid?, characterid?, campaignid?, character_type?)` | `PaginatedResponse[Diceroll]` | Get a page of rolls   |
+| `list_all(userid?, characterid?, campaignid?, character_type?)`                  | `list[Diceroll]`              | Get all rolls         |
+| `iter_all(userid?, characterid?, campaignid?, character_type?, limit?)`          | `AsyncIterator[Diceroll]`     | Iterate through rolls |
 
 ## Examples
 
@@ -88,6 +88,12 @@ character_rolls = await dicerolls.list_all(characterid="character_id")
 
 # Get all rolls in a campaign
 campaign_rolls = await dicerolls.list_all(campaignid="campaign_id")
+
+# Get all rolls made by player characters in a campaign
+player_rolls = await dicerolls.list_all(
+    campaignid="campaign_id",
+    character_type="PLAYER",
+)
 
 # Iterate through all rolls (memory-efficient)
 async for roll in dicerolls.iter_all():
