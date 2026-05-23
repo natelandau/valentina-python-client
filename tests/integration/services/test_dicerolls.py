@@ -105,12 +105,16 @@ class TestDicerollServiceGetPage:
                 "userid": "user123",
                 "characterid": "character123",
                 "campaignid": "campaign123",
+                "character_type": "PLAYER",
             },
         ).respond(200, json=paginated_dicerolls_response)
 
         # When: Getting a page of dicerolls with filters
         result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").get_page(
-            userid="user123", characterid="character123", campaignid="campaign123"
+            userid="user123",
+            characterid="character123",
+            campaignid="campaign123",
+            character_type="PLAYER",
         )
 
         # Then: Returns paginated Diceroll objects
@@ -124,6 +128,28 @@ class TestDicerollServiceGetPage:
         assert result.items[0].result.total_result == 1
         assert result.items[0].result.total_result_type == "SUCCESS"
         assert result.items[0].result.total_result_humanized == "Success"
+
+    @respx.mock
+    async def test_get_page_with_character_type_filter(
+        self, vclient, base_url, paginated_dicerolls_response
+    ):
+        """Verify get_page filters by character_type alone."""
+        # Given: A mocked diceroll endpoint expecting only the character_type filter
+        route = respx.get(
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
+            params={"limit": "10", "offset": "0", "character_type": "STORYTELLER"},
+        ).respond(200, json=paginated_dicerolls_response)
+
+        # When: Getting a page filtered by character type
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").get_page(
+            character_type="STORYTELLER"
+        )
+
+        # Then: Returns paginated Diceroll objects
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert len(result.items) == 1
+        assert isinstance(result.items[0], Diceroll)
 
     @respx.mock
     async def test_get_page_with_pagination(self, vclient, base_url, paginated_dicerolls_response):
@@ -185,12 +211,16 @@ class TestDicerollServiceListAll:
                 "userid": "user123",
                 "characterid": "character123",
                 "campaignid": "campaign123",
+                "character_type": "PLAYER",
             },
         ).respond(200, json=paginated_dicerolls_response)
 
         # When: Getting all dicerolls with filters
         result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").list_all(
-            userid="user123", characterid="character123", campaignid="campaign123"
+            userid="user123",
+            characterid="character123",
+            campaignid="campaign123",
+            character_type="PLAYER",
         )
 
         # Then: Returns list of Diceroll objects
@@ -201,6 +231,28 @@ class TestDicerollServiceListAll:
         assert result[0].id == "diceroll123"
         assert result[0].result is not None
         assert result[0].result.total_result == 1
+
+    @respx.mock
+    async def test_list_all_with_character_type_filter(
+        self, vclient, base_url, paginated_dicerolls_response
+    ):
+        """Verify list_all filters by character_type alone."""
+        # Given: A mocked diceroll endpoint expecting only the character_type filter
+        route = respx.get(
+            f"{base_url}{Endpoints.DICEROLLS.format(company_id='company123', user_id='user123')}",
+            params={"character_type": "NPC"},
+        ).respond(200, json=paginated_dicerolls_response)
+
+        # When: Getting all dicerolls filtered by character type
+        result = await vclient.dicerolls("on-behalf-of-user", company_id="company123").list_all(
+            character_type="NPC"
+        )
+
+        # Then: Returns list of Diceroll objects
+        assert route.called
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], Diceroll)
 
 
 class TestDicerollServiceIterAll:
