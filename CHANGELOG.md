@@ -1,3 +1,9 @@
+## v2.1.0 (2026-05-23)
+
+### Feat
+
+- **dicerolls**: add character_type filter to list endpoints (#71)
+
 ## v2.0.0 (2026-04-19)
 
 ### Feat
