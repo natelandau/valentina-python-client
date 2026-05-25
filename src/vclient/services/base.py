@@ -430,17 +430,19 @@ class BaseService:
         path: str,
         *,
         params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Make a GET request.
 
         Args:
             path: API endpoint path.
             params: Query parameters.
+            headers: Additional headers (e.g. an Accept override for binary downloads).
 
         Returns:
             The HTTP response.
         """
-        return await self._request("GET", path, params=params)
+        return await self._request("GET", path, params=params, headers=headers)
 
     def _merge_on_behalf_of_header(
         self,

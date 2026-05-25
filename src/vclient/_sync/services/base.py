@@ -381,17 +381,24 @@ class SyncBaseService:
             return None
         return SyncBaseService._parse_rate_limit_header_value(rate_limit_header, "r")
 
-    def _get(self, path: str, *, params: dict[str, Any] | None = None) -> httpx.Response:
+    def _get(
+        self,
+        path: str,
+        *,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
         """Make a GET request.
 
         Args:
             path: API endpoint path.
             params: Query parameters.
+            headers: Additional headers (e.g. an Accept override for binary downloads).
 
         Returns:
             The HTTP response.
         """
-        return self._request("GET", path, params=params)
+        return self._request("GET", path, params=params, headers=headers)
 
     def _merge_on_behalf_of_header(self, headers: dict[str, str] | None) -> dict[str, str] | None:
         """Merge the On-Behalf-Of header into headers when _on_behalf_of is set.

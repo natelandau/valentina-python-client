@@ -34,6 +34,7 @@ from vclient.models import (
     Note,
     Quickroll,
     RollStatistics,
+    ServerLogEntry,
     SheetSection,
     SystemHealth,
     Trait,
@@ -55,6 +56,7 @@ SINGLE = "single"
 NO_CONTENT = "no_content"
 RAW_JSON = "raw_json"
 LIST = "list"
+BYTES = "bytes"
 
 
 class RouteSpec(NamedTuple):
@@ -63,9 +65,9 @@ class RouteSpec(NamedTuple):
     Attributes:
         method: HTTP method (GET, POST, PATCH, PUT, DELETE).
         pattern: Endpoint URL pattern from the Endpoints class.
-        style: Response style — one of PAGINATED, SINGLE, LIST, NO_CONTENT, or RAW_JSON.
+        style: Response style: one of PAGINATED, SINGLE, LIST, NO_CONTENT, RAW_JSON, or BYTES.
         model_class: The Pydantic model class used for auto-generating responses,
-            or None for NO_CONTENT and RAW_JSON routes.
+            or None for NO_CONTENT, RAW_JSON, and BYTES routes.
     """
 
     method: str
@@ -107,6 +109,8 @@ class Routes:
     ADMIN_DEVELOPER_AUDIT_LOGS_LIST = RouteSpec(
         "GET", Endpoints.ADMIN_DEVELOPER_AUDIT_LOGS, PAGINATED, AuditLog
     )
+    ADMIN_LOGS_TAIL = RouteSpec("GET", Endpoints.ADMIN_LOGS, LIST, ServerLogEntry)
+    ADMIN_LOGS_DOWNLOAD = RouteSpec("GET", Endpoints.ADMIN_LOGS_DOWNLOAD, BYTES, None)
 
     # Developer self-service
     DEVELOPERS_ME_GET = RouteSpec("GET", Endpoints.DEVELOPER_ME, SINGLE, MeDeveloper)

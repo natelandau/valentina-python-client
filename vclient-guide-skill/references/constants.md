@@ -100,6 +100,12 @@ AuditOperation = Literal["CREATE", "UPDATE", "DELETE"]
 AuditLogInclude = Literal["request_details"]
 ```
 
+### Server Logs
+
+```python
+LogLevel = Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+```
+
 ## Configuration Constants
 
 ```python
@@ -109,6 +115,9 @@ DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_DELAY = 1.0       # seconds
 DEFAULT_PAGE_LIMIT = 10
 MAX_PAGE_LIMIT = 100
+DEFAULT_LOG_TAIL_LIMIT = 100
+MIN_LOG_TAIL_LIMIT = 1
+MAX_LOG_TAIL_LIMIT = 500
 DEFAULT_RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
 IDEMPOTENT_HTTP_METHODS = frozenset({"GET", "PUT", "DELETE"})
 

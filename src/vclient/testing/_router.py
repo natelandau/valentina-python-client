@@ -43,6 +43,7 @@ from vclient.models import (
     Note,
     Quickroll,
     RollStatistics,
+    ServerLogEntry,
     SheetSection,
     SystemHealth,
     Trait,
@@ -89,6 +90,7 @@ from vclient.testing._factories import (
     NoteFactory,
     QuickrollFactory,
     RollStatisticsFactory,
+    ServerLogEntryFactory,
     SheetSectionFactory,
     SystemHealthFactory,
     TraitCategoryFactory,
@@ -101,7 +103,7 @@ from vclient.testing._factories import (
     WerewolfAuspiceFactory,
     WerewolfTribeFactory,
 )
-from vclient.testing._routes import LIST, NO_CONTENT, PAGINATED, RAW_JSON, Routes, RouteSpec
+from vclient.testing._routes import BYTES, LIST, NO_CONTENT, PAGINATED, RAW_JSON, Routes, RouteSpec
 
 _FACTORY_MAP: dict[type, type[ModelFactory]] = {
     AuditLog: AuditLogFactory,
@@ -135,6 +137,7 @@ _FACTORY_MAP: dict[type, type[ModelFactory]] = {
     Note: NoteFactory,
     Quickroll: QuickrollFactory,
     RollStatistics: RollStatisticsFactory,
+    ServerLogEntry: ServerLogEntryFactory,
     SheetSection: SheetSectionFactory,
     SystemHealth: SystemHealthFactory,
     Trait: TraitFactory,
@@ -208,7 +211,7 @@ class _Route:
 
         return True
 
-    def respond(self) -> httpx.Response:
+    def respond(self) -> httpx.Response:  # noqa: PLR0911
         """Generate an httpx.Response for this route."""
         if self.override_json is not None:
             return httpx.Response(
@@ -221,6 +224,13 @@ class _Route:
 
         if self.style == RAW_JSON:
             return httpx.Response(status_code=200, json={})
+
+        if self.style == BYTES:
+            return httpx.Response(
+                status_code=200,
+                content=b"PK\x03\x04fake-log-archive",
+                headers={"Content-Disposition": 'attachment; filename="vapi-logs-fake.zip"'},
+            )
 
         if self.model_class is None:
             msg = f"model_class required for style {self.style}"

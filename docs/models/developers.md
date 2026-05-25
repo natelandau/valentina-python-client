@@ -41,3 +41,26 @@ Request body for updating your developer profile.
 | ---------- | ------------- | ------------------ |
 | `username` | `str \| None` | Updated username   |
 | `email`    | `str \| None` | Updated email      |
+
+## ServerLogEntry
+
+A single parsed server log entry returned by `tail_logs()` on the [Global Admin Service](../services/global_admin.md). Every field is nullable because individual log lines may omit values or fail to parse as structured JSON. When a line is not valid JSON, the original text is available on `raw`.
+
+| Field       | Type             | Description                                  |
+| ----------- | ---------------- | -------------------------------------------- |
+| `timestamp` | `str \| None`    | Log entry timestamp                          |
+| `level`     | `str \| None`    | Log level                                    |
+| `name`      | `str \| None`    | Logger name                                  |
+| `message`   | `str \| None`    | Log message                                  |
+| `exception` | `str \| None`    | Formatted exception traceback, if any        |
+| `extra`     | `dict[str, Any]` | Additional structured fields (defaults to `{}`) |
+| `raw`       | `str \| None`    | Original line when the entry is not valid JSON |
+
+## ServerLogArchive
+
+A downloaded server-log zip archive returned by `download_logs()` on the [Global Admin Service](../services/global_admin.md). This is a frozen dataclass rather than a Pydantic model. Pair the server-provided filename with the raw zip bytes to write the archive straight to disk.
+
+| Field      | Type    | Description                                          |
+| ---------- | ------- | --------------------------------------------------- |
+| `filename` | `str`   | Filename parsed from the server's `Content-Disposition` |
+| `content`  | `bytes` | Raw zip archive bytes                               |

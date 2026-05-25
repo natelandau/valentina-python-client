@@ -1312,3 +1312,20 @@ class TestOnBehalfOfHeader:
         request = route.calls[0].request
         assert request.headers[ON_BEHALF_OF_HEADER] == "user-uuid-123"
         assert request.headers["Idempotency-Key"] == "idem-key-456"
+
+
+class TestGetCustomHeaders:
+    """Tests for BaseService._get custom header forwarding."""
+
+    @respx.mock
+    async def test_get_forwards_custom_headers(self, base_service, base_url):
+        """Verify _get forwards caller-supplied headers such as Accept."""
+        # Given: A mocked endpoint
+        route = respx.get(f"{base_url}/custom").respond(200, json={})
+
+        # When: Issuing a GET with a custom Accept header
+        await base_service._get("/custom", headers={"Accept": "application/zip"})
+
+        # Then: The request carried the custom Accept header
+        assert route.called
+        assert route.calls.last.request.headers["accept"] == "application/zip"

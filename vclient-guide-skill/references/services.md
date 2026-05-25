@@ -444,6 +444,17 @@ Plus standard notes and assets sub-resource methods.
 | `list_all_audit_logs(developer_id)` | `developer_id: str, *, company_id=, (same filters)` | `list[AuditLog \| AuditLogDetail]` |
 | `iter_all_audit_logs(developer_id)` | `developer_id: str, *, limit, company_id=, (same filters)` | `AsyncIterator[AuditLog \| AuditLogDetail]` |
 
+### Server Logs
+
+Requires global admin. Raises `AuthorizationError` (403) for non-admins and `ConflictError` (409) when file logging is disabled on the server.
+
+| Method | Parameters | Returns |
+|--------|-----------|---------|
+| `tail_logs()` | `*, level: LogLevel \| None = None, limit: int = 100` | `list[ServerLogEntry]` |
+| `download_logs()` | None | `ServerLogArchive` |
+
+`tail_logs()` returns the most recent entries, newest first. `level` filters by minimum severity (omitted = server default). `limit` is clamped to 1-500. `download_logs()` returns a zip archive of the server logs.
+
 ---
 
 ## OptionsService

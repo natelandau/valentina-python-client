@@ -71,6 +71,7 @@ class TestConstantMap:
             "BookInclude",
             "ChapterInclude",
             "CharacterInclude",
+            "LogLevel",
             "UserInclude",
         }
 
