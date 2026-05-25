@@ -11,6 +11,7 @@ from vclient.models.global_admin import (
     DeveloperCreate,
     DeveloperUpdate,
     DeveloperWithApiKey,
+    ServerLogEntry,
 )
 
 
@@ -315,3 +316,52 @@ class TestDeveloperUpdate:
             "email": "new@example.com",
             "is_global_admin": True,
         }
+
+
+class TestServerLogEntry:
+    """Tests for ServerLogEntry model."""
+
+    def test_full_payload_round_trip(self):
+        """Verify a full log entry payload validates with all fields set."""
+        # Given: A complete log entry payload
+        payload = {
+            "timestamp": "2026-05-25T12:00:00.123Z",
+            "level": "INFO",
+            "name": "vapi.server",
+            "message": "Request completed",
+            "exception": None,
+            "extra": {"status_code": 200, "path": "/api/v1/companies"},
+            "raw": None,
+        }
+
+        # When: Validating the payload
+        entry = ServerLogEntry.model_validate(payload)
+
+        # Then: Fields are populated
+        assert entry.timestamp == "2026-05-25T12:00:00.123Z"
+        assert entry.level == "INFO"
+        assert entry.name == "vapi.server"
+        assert entry.extra == {"status_code": 200, "path": "/api/v1/companies"}
+        assert entry.raw is None
+
+    def test_all_fields_optional_with_extra_default(self):
+        """Verify an empty payload validates and extra defaults to an empty dict."""
+        # When: Validating an empty payload
+        entry = ServerLogEntry.model_validate({})
+
+        # Then: Every field defaults and extra is an empty dict
+        assert entry.timestamp is None
+        assert entry.level is None
+        assert entry.extra == {}
+
+    def test_extra_defaults_are_independent(self):
+        """Verify each instance gets its own extra dict (no shared mutable default)."""
+        # Given: Two entries built from empty payloads
+        first = ServerLogEntry.model_validate({})
+        second = ServerLogEntry.model_validate({})
+
+        # When: Mutating one instance's extra
+        first.extra["k"] = "v"
+
+        # Then: The other instance is unaffected
+        assert second.extra == {}

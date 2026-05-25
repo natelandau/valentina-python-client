@@ -107,6 +107,7 @@ from .global_admin import (
     DeveloperCreate,
     DeveloperUpdate,
     DeveloperWithApiKey,
+    ServerLogEntry,
 )
 from .pagination import PaginatedResponse
 from .shared import (
@@ -222,6 +223,7 @@ __all__ = [
     "QuickrollCreate",
     "QuickrollUpdate",
     "RollStatistics",
+    "ServerLogEntry",
     "SheetSection",
     "SystemHealth",
     "Trait",

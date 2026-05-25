@@ -1,8 +1,9 @@
 """Pydantic models for Global Admin API responses."""
 
 from datetime import datetime
+from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from vclient.constants import PermissionLevel
 
@@ -70,10 +71,27 @@ class DeveloperUpdate(BaseModel):
     is_global_admin: bool | None = None
 
 
+class ServerLogEntry(BaseModel):
+    """A single parsed server log entry from the admin logs tail endpoint.
+
+    Every field is nullable because individual log lines may omit values or fail
+    to parse as structured JSON (in which case ``raw`` holds the original line).
+    """
+
+    timestamp: str | None = None
+    level: str | None = None
+    name: str | None = None
+    message: str | None = None
+    exception: str | None = None
+    extra: dict[str, Any] = Field(default_factory=dict)
+    raw: str | None = None
+
+
 __all__ = [
     "Developer",
     "DeveloperCompanyPermission",
     "DeveloperCreate",
     "DeveloperUpdate",
     "DeveloperWithApiKey",
+    "ServerLogEntry",
 ]
