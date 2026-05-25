@@ -1,5 +1,6 @@
 """Pydantic models for Global Admin API responses."""
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
@@ -87,11 +88,24 @@ class ServerLogEntry(BaseModel):
     raw: str | None = None
 
 
+@dataclass(frozen=True)
+class ServerLogArchive:
+    """A downloaded server-log zip archive.
+
+    Pairs the server-provided ``Content-Disposition`` filename with the raw zip
+    bytes so callers can write the archive straight to disk.
+    """
+
+    filename: str
+    content: bytes
+
+
 __all__ = [
     "Developer",
     "DeveloperCompanyPermission",
     "DeveloperCreate",
     "DeveloperUpdate",
     "DeveloperWithApiKey",
+    "ServerLogArchive",
     "ServerLogEntry",
 ]

@@ -1,5 +1,6 @@
 """Tests for vclient.api.models.global_admin."""
 
+import dataclasses
 from datetime import UTC, datetime
 
 import pytest
@@ -11,6 +12,7 @@ from vclient.models.global_admin import (
     DeveloperCreate,
     DeveloperUpdate,
     DeveloperWithApiKey,
+    ServerLogArchive,
     ServerLogEntry,
 )
 
@@ -365,3 +367,25 @@ class TestServerLogEntry:
 
         # Then: The other instance is unaffected
         assert second.extra == {}
+
+
+class TestServerLogArchive:
+    """Tests for ServerLogArchive dataclass."""
+
+    def test_holds_filename_and_content(self):
+        """Verify the archive exposes its filename and raw bytes."""
+        # When: Building an archive
+        archive = ServerLogArchive(filename="vapi-logs.zip", content=b"PK\x03\x04")
+
+        # Then: Both fields are accessible
+        assert archive.filename == "vapi-logs.zip"
+        assert archive.content == b"PK\x03\x04"
+
+    def test_is_frozen(self):
+        """Verify the archive is immutable."""
+        # Given: An archive
+        archive = ServerLogArchive(filename="vapi-logs.zip", content=b"PK")
+
+        # When/Then: Reassigning a field raises FrozenInstanceError
+        with pytest.raises(dataclasses.FrozenInstanceError):
+            archive.filename = "other.zip"
