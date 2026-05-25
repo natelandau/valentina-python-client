@@ -38,6 +38,7 @@ from vclient.models import (
     Note,
     Quickroll,
     RollStatistics,
+    ServerLogEntry,
     SheetSection,
     SystemHealth,
     Trait,
@@ -241,6 +242,11 @@ class RollStatisticsFactory(ModelFactory[RollStatistics]):
     __use_defaults__ = True
 
 
+class ServerLogEntryFactory(ModelFactory[ServerLogEntry]):
+    __model__ = ServerLogEntry
+    __use_defaults__ = True
+
+
 class SheetSectionFactory(ModelFactory[SheetSection]):
     __model__ = SheetSection
     __use_defaults__ = True
@@ -337,6 +343,7 @@ __all__ = [
     "NoteFactory",
     "QuickrollFactory",
     "RollStatisticsFactory",
+    "ServerLogEntryFactory",
     "SheetSectionFactory",
     "SystemHealthFactory",
     "TraitCategoryFactory",

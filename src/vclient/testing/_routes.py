@@ -34,6 +34,7 @@ from vclient.models import (
     Note,
     Quickroll,
     RollStatistics,
+    ServerLogEntry,
     SheetSection,
     SystemHealth,
     Trait,
@@ -55,6 +56,7 @@ SINGLE = "single"
 NO_CONTENT = "no_content"
 RAW_JSON = "raw_json"
 LIST = "list"
+BYTES = "bytes"
 
 
 class RouteSpec(NamedTuple):
@@ -107,6 +109,8 @@ class Routes:
     ADMIN_DEVELOPER_AUDIT_LOGS_LIST = RouteSpec(
         "GET", Endpoints.ADMIN_DEVELOPER_AUDIT_LOGS, PAGINATED, AuditLog
     )
+    ADMIN_LOGS_TAIL = RouteSpec("GET", Endpoints.ADMIN_LOGS, LIST, ServerLogEntry)
+    ADMIN_LOGS_DOWNLOAD = RouteSpec("GET", Endpoints.ADMIN_LOGS_DOWNLOAD, BYTES, None)
 
     # Developer self-service
     DEVELOPERS_ME_GET = RouteSpec("GET", Endpoints.DEVELOPER_ME, SINGLE, MeDeveloper)
