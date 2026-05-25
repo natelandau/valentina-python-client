@@ -125,3 +125,65 @@ class TestTailLogs:
         # When/Then: Tailing logs raises ConflictError
         with pytest.raises(ConflictError):
             await vclient.global_admin.tail_logs()
+
+
+class TestDownloadLogs:
+    """Tests for GlobalAdminService.download_logs."""
+
+    @respx.mock
+    async def test_download_logs_returns_archive(self, vclient, base_url):
+        """Verify download_logs returns the zip bytes and parsed filename."""
+        # Given: A mocked download endpoint streaming zip bytes with a filename
+        route = respx.get(f"{base_url}{Endpoints.ADMIN_LOGS_DOWNLOAD}").respond(
+            200,
+            content=b"PK\x03\x04fake-zip-bytes",
+            headers={
+                "Content-Disposition": 'attachment; filename="vapi-logs-20260525T120000Z.zip"'
+            },
+        )
+
+        # When: Downloading the log archive
+        archive = await vclient.global_admin.download_logs()
+
+        # Then: The archive carries the filename and raw bytes
+        assert route.called
+        assert archive.filename == "vapi-logs-20260525T120000Z.zip"
+        assert archive.content == b"PK\x03\x04fake-zip-bytes"
+
+    @respx.mock
+    async def test_download_logs_sends_zip_accept_header(self, vclient, base_url):
+        """Verify download_logs requests application/zip."""
+        # Given: A mocked download endpoint
+        route = respx.get(f"{base_url}{Endpoints.ADMIN_LOGS_DOWNLOAD}").respond(
+            200, content=b"PK", headers={"Content-Disposition": 'attachment; filename="x.zip"'}
+        )
+
+        # When: Downloading the log archive
+        await vclient.global_admin.download_logs()
+
+        # Then: The request asked for a zip
+        assert route.calls.last.request.headers["accept"] == "application/zip"
+
+    @respx.mock
+    async def test_download_logs_falls_back_when_no_filename(self, vclient, base_url):
+        """Verify a missing Content-Disposition yields the fallback filename."""
+        # Given: A mocked endpoint with no Content-Disposition header
+        respx.get(f"{base_url}{Endpoints.ADMIN_LOGS_DOWNLOAD}").respond(200, content=b"PK")
+
+        # When: Downloading the log archive
+        archive = await vclient.global_admin.download_logs()
+
+        # Then: The fallback filename is used
+        assert archive.filename == "vapi-logs.zip"
+
+    @respx.mock
+    async def test_download_logs_raises_conflict_when_disabled(self, vclient, base_url):
+        """Verify a 409 response raises ConflictError."""
+        # Given: A mocked endpoint returning 409
+        respx.get(f"{base_url}{Endpoints.ADMIN_LOGS_DOWNLOAD}").respond(
+            409, json={"detail": "File logging is not enabled"}
+        )
+
+        # When/Then: Downloading raises ConflictError
+        with pytest.raises(ConflictError):
+            await vclient.global_admin.download_logs()

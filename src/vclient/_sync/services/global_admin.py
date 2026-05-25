@@ -1,6 +1,7 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Service for interacting with the Global Admin API."""
 
+import re
 from collections.abc import Iterator, Sequence
 from datetime import datetime
 
@@ -24,9 +25,33 @@ from vclient.models import (
     DeveloperUpdate,
     DeveloperWithApiKey,
     PaginatedResponse,
+    ServerLogArchive,
     ServerLogEntry,
 )
 from vclient.services._audit_params import _build_audit_params
+
+_CONTENT_DISPOSITION_FILENAME = re.compile('filename=(?:"([^"]+)"|([^;]+))', re.IGNORECASE)
+
+
+def _filename_from_content_disposition(header: str | None, *, fallback: str) -> str:
+    """Extract the attachment filename from a Content-Disposition header.
+
+    Return ``fallback`` when the header is absent or contains no filename so callers
+    always get a usable name for the downloaded archive.
+
+    Args:
+        header: The raw Content-Disposition header value, or None.
+        fallback: Filename to return when none can be parsed.
+
+    Returns:
+        The parsed filename, or the fallback.
+    """
+    if not header:
+        return fallback
+    match = _CONTENT_DISPOSITION_FILENAME.search(header)
+    if not match:
+        return fallback
+    return (match.group(1) or match.group(2)).strip()
 
 
 class SyncGlobalAdminService(SyncBaseService):
@@ -439,3 +464,22 @@ class SyncGlobalAdminService(SyncBaseService):
         params = self._build_params(level=level, limit=clamped_limit)
         response = self._get(Endpoints.ADMIN_LOGS, params=params)
         return [ServerLogEntry.model_validate(item) for item in response.json()]
+
+    def download_logs(self) -> ServerLogArchive:
+        """Download a zip archive of the server log files.
+
+        Stream the active log file plus rotated backups as a single zip. Requires
+        global admin privileges and that file logging is enabled on the server.
+
+        Returns:
+            A ServerLogArchive with the server-provided filename and raw zip bytes.
+
+        Raises:
+            AuthorizationError: If you don't have global admin privileges.
+            ConflictError: If file logging is not enabled or no log files exist.
+        """
+        response = self._get(Endpoints.ADMIN_LOGS_DOWNLOAD, headers={"Accept": "application/zip"})
+        filename = _filename_from_content_disposition(
+            response.headers.get("Content-Disposition"), fallback="vapi-logs.zip"
+        )
+        return ServerLogArchive(filename=filename, content=response.content)
