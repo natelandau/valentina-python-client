@@ -972,6 +972,29 @@ All optional: `username`, `email`, `is_global_admin`.
 | name | str \| None | no |
 | permission | PermissionLevel | yes |
 
+### ServerLogEntry
+
+A single parsed server log line. All fields nullable to tolerate partial or malformed lines.
+
+| Field | Type | Required |
+|-------|------|----------|
+| timestamp | str \| None | no |
+| level | str \| None | no |
+| name | str \| None | no |
+| message | str \| None | no |
+| exception | str \| None | no |
+| extra | dict[str, Any] | no (default={}) |
+| raw | str \| None | no |
+
+### ServerLogArchive
+
+Frozen dataclass (not a Pydantic model) returned by `download_logs()`.
+
+| Field | Type | Required |
+|-------|------|----------|
+| filename | str | yes |
+| content | bytes | yes |
+
 ---
 
 ## Pagination
