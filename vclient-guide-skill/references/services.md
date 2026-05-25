@@ -451,7 +451,7 @@ Requires global admin. Raises `AuthorizationError` (403) for non-admins and `Con
 | Method | Parameters | Returns |
 |--------|-----------|---------|
 | `tail_logs()` | `*, level: LogLevel \| None = None, limit: int = 100` | `list[ServerLogEntry]` |
-| `download_logs()` | — | `ServerLogArchive` |
+| `download_logs()` | None | `ServerLogArchive` |
 
 `tail_logs()` returns the most recent entries, newest first. `level` filters by minimum severity (omitted = server default). `limit` is clamped to 1-500. `download_logs()` returns a zip archive of the server logs.
 
