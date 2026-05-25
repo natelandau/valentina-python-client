@@ -21,6 +21,11 @@ IDEMPOTENT_HTTP_METHODS: frozenset[str] = frozenset({"GET", "PUT", "DELETE"})
 DEFAULT_PAGE_LIMIT = 10
 MAX_PAGE_LIMIT = 100
 
+# Server log tail defaults
+DEFAULT_LOG_TAIL_LIMIT = 100
+MIN_LOG_TAIL_LIMIT = 1
+MAX_LOG_TAIL_LIMIT = 500
+
 # HTTP Status Code Ranges (5xx Server Errors)
 HTTP_500_INTERNAL_SERVER_ERROR = 500
 HTTP_600_UPPER_BOUND = 600
@@ -77,6 +82,7 @@ GameVersion = Literal["V4", "V5"]
 GrantXPPermission = Literal["UNRESTRICTED", "PLAYER", "STORYTELLER"]
 HunterCreed = Literal["ENTREPRENEURIAL", "FAITHFUL", "INQUISITIVE", "MARTIAL", "UNDERGROUND"]
 HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
+LogLevel = Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
 RecoupXPPermission = Literal["UNRESTRICTED", "DENIED", "WITHIN_SESSION"]
