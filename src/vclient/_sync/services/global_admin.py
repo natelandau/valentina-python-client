@@ -5,7 +5,16 @@ from collections.abc import Iterator, Sequence
 from datetime import datetime
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT, AuditEntityType, AuditLogInclude, AuditOperation
+from vclient.constants import (
+    DEFAULT_LOG_TAIL_LIMIT,
+    DEFAULT_PAGE_LIMIT,
+    MAX_LOG_TAIL_LIMIT,
+    MIN_LOG_TAIL_LIMIT,
+    AuditEntityType,
+    AuditLogInclude,
+    AuditOperation,
+    LogLevel,
+)
 from vclient.endpoints import Endpoints
 from vclient.models import (
     AuditLog,
@@ -15,6 +24,7 @@ from vclient.models import (
     DeveloperUpdate,
     DeveloperWithApiKey,
     PaginatedResponse,
+    ServerLogEntry,
 )
 from vclient.services._audit_params import _build_audit_params
 
@@ -404,3 +414,28 @@ class SyncGlobalAdminService(SyncBaseService):
             params=params,
         ):
             yield model.model_validate(item)
+
+    def tail_logs(
+        self, *, level: LogLevel | None = None, limit: int = DEFAULT_LOG_TAIL_LIMIT
+    ) -> list[ServerLogEntry]:
+        """Tail the most recent server log entries, newest first.
+
+        Inspect on-disk server logs without shelling into the host. Requires global
+        admin privileges and that file logging is enabled on the server.
+
+        Args:
+            level: Minimum log level to include. Defaults to the server's configured
+                level when omitted.
+            limit: Maximum number of entries to return. Clamped to 1-500 (default 100).
+
+        Returns:
+            A list of ServerLogEntry objects, newest first.
+
+        Raises:
+            AuthorizationError: If you don't have global admin privileges.
+            ConflictError: If file logging is not enabled on the server.
+        """
+        clamped_limit = min(max(limit, MIN_LOG_TAIL_LIMIT), MAX_LOG_TAIL_LIMIT)
+        params = self._build_params(level=level, limit=clamped_limit)
+        response = self._get(Endpoints.ADMIN_LOGS, params=params)
+        return [ServerLogEntry.model_validate(item) for item in response.json()]
