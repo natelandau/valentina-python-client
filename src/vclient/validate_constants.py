@@ -77,6 +77,7 @@ CONSTANT_MAP: dict[str, ConstantMapping] = {
     "HunterCreed": ConstantMapping("characters", "HunterCreed"),
     "HunterEdgeType": ConstantMapping("characters", "HunterEdgeType"),
     "ManageCampaignPermission": ConstantMapping("companies", "PermissionManageCampaign"),
+    "ManageNPCPermission": ConstantMapping("companies", "PermissionManageNPC"),
     "PermissionLevel": ConstantMapping("companies", "CompanyPermission"),
     "RecoupXPPermission": ConstantMapping("companies", "PermissionsRecoupXP"),
     "RollResultType": ConstantMapping("gameplay", "RollResultType"),

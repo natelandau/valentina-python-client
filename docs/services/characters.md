@@ -29,6 +29,19 @@ Visibility of `STORYTELLER` characters depends on the acting user's role:
   - Fetching a `STORYTELLER` character by ID, or any of its sub-resources (traits, inventory, notes, assets, statistics), raises `AuthorizationError` (403).
 - Only `STORYTELLER` and `ADMIN` roles may `create()` a character with `type="STORYTELLER"` or `update()` an existing character's `type` to `STORYTELLER`. A `PLAYER` attempting either raises `AuthorizationError` (403).
 
+### NPC management
+
+NPC management is gated by the company's `settings.permission_manage_npc` setting (`ManageNPCPermission`):
+
+- `UNRESTRICTED` (default): any approved company member may manage NPC characters.
+- `STORYTELLER`: only `STORYTELLER` and `ADMIN` roles may manage NPC characters. A `PLAYER` attempting any of the following raises `AuthorizationError` (403):
+  - Creating an `NPC` character, or converting an existing character to `type="NPC"`.
+  - Updating or deleting an `NPC` character.
+  - Adding, updating, or deleting an `NPC` character's traits or inventory items.
+  - Uploading or deleting an `NPC` character's images.
+
+Viewing an `NPC` character and rolling dice for an `NPC` are never affected by this setting; any approved member may always access those endpoints.
+
 ## Player and creator assignment
 
 The `user_player_id` and `user_creator_id` fields on `Character` are both nullable, and their values are constrained by character `type`:

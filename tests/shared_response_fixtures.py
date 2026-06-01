@@ -220,6 +220,7 @@ def company_response_data() -> dict:
             "character_autogen_num_choices": 3,
             "character_autogen_starting_points": 5,
             "permission_manage_campaign": "UNRESTRICTED",
+            "permission_manage_npc": "UNRESTRICTED",
             "permission_grant_xp": "UNRESTRICTED",
             "permission_free_trait_changes": "UNRESTRICTED",
             "permission_recoup_xp": "UNRESTRICTED",

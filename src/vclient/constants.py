@@ -84,6 +84,7 @@ HunterCreed = Literal["ENTREPRENEURIAL", "FAITHFUL", "INQUISITIVE", "MARTIAL", "
 HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
 LogLevel = Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
+ManageNPCPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
 RecoupXPPermission = Literal["UNRESTRICTED", "DENIED", "WITHIN_SESSION"]
 RollResultType = Literal["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"]
