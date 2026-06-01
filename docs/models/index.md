@@ -75,6 +75,7 @@ from vclient.constants import CharacterClass, UserRole, GameVersion
 | `UserRole`                   | `ADMIN`, `STORYTELLER`, `PLAYER`                 |
 | `PermissionLevel`            | `USER`, `ADMIN`, `OWNER`, `REVOKE`               |
 | `ManageCampaignPermission`   | `UNRESTRICTED`, `STORYTELLER`                    |
+| `ManageNPCPermission`        | `UNRESTRICTED`, `STORYTELLER`                    |
 | `GrantXPPermission`          | `UNRESTRICTED`, `PLAYER`, `STORYTELLER`          |
 | `FreeTraitChangesPermission` | `UNRESTRICTED`, `WITHIN_24_HOURS`, `STORYTELLER` |
 

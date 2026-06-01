@@ -53,6 +53,7 @@ Response model for company configuration. All fields are always populated by the
 | `character_autogen_num_choices`   | `int`                         | Number of autogen choices presented (1-10)              |
 | `character_autogen_starting_points` | `int`                       | Starting-points budget copied onto finalized chargen characters (0-100) |
 | `permission_manage_campaign`      | `ManageCampaignPermission`    | Who may manage campaigns                                |
+| `permission_manage_npc`           | `ManageNPCPermission`         | Who may create and manage NPC characters                |
 | `permission_grant_xp`             | `GrantXPPermission`           | Who may grant XP                                        |
 | `permission_free_trait_changes`   | `FreeTraitChangesPermission`  | When trait changes are free                             |
 | `permission_recoup_xp`            | `RecoupXPPermission`          | When XP may be recouped                                 |
@@ -67,6 +68,7 @@ Request payload for `POST /companies`. All fields optional — the server applie
 | `character_autogen_num_choices`   | `int \| None`                           | Override default number of choices       |
 | `character_autogen_starting_points` | `int \| None`                         | Override default starting-points budget  |
 | `permission_manage_campaign`      | `ManageCampaignPermission \| None`      | Override default                         |
+| `permission_manage_npc`           | `ManageNPCPermission \| None`           | Override default                         |
 | `permission_grant_xp`             | `GrantXPPermission \| None`             | Override default                         |
 | `permission_free_trait_changes`   | `FreeTraitChangesPermission \| None`    | Override default                         |
 | `permission_recoup_xp`            | `RecoupXPPermission \| None`            | Override default                         |
@@ -81,6 +83,7 @@ Request payload for `PATCH /companies/{id}`. All fields optional — omitted fie
 | `character_autogen_num_choices`   | `int \| None`                           | New number of choices                    |
 | `character_autogen_starting_points` | `int \| None`                         | New starting-points budget               |
 | `permission_manage_campaign`      | `ManageCampaignPermission \| None`      | New value                                |
+| `permission_manage_npc`           | `ManageNPCPermission \| None`           | New value                                |
 | `permission_grant_xp`             | `GrantXPPermission \| None`             | New value                                |
 | `permission_free_trait_changes`   | `FreeTraitChangesPermission \| None`    | New value                                |
 | `permission_recoup_xp`            | `RecoupXPPermission \| None`            | New value                                |

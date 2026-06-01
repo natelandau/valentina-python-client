@@ -232,6 +232,7 @@ class TestCompaniesServiceCreate:
             character_autogen_xp_cost=15,
             character_autogen_num_choices=5,
             permission_manage_campaign="STORYTELLER",
+            permission_manage_npc="STORYTELLER",
             permission_grant_xp="PLAYER",
             permission_free_trait_changes="WITHIN_24_HOURS",
         )
@@ -260,6 +261,7 @@ class TestCompaniesServiceCreate:
         assert body["settings"]["character_autogen_xp_cost"] == 15
         assert body["settings"]["character_autogen_num_choices"] == 5
         assert body["settings"]["permission_manage_campaign"] == "STORYTELLER"
+        assert body["settings"]["permission_manage_npc"] == "STORYTELLER"
         assert body["settings"]["permission_grant_xp"] == "PLAYER"
         assert body["settings"]["permission_free_trait_changes"] == "WITHIN_24_HOURS"
 

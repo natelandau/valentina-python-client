@@ -171,6 +171,7 @@ Strict response model — all fields always populated by the server.
 | character_autogen_num_choices | int | yes |
 | character_autogen_starting_points | int | yes |
 | permission_manage_campaign | ManageCampaignPermission | yes |
+| permission_manage_npc | ManageNPCPermission | yes |
 | permission_grant_xp | GrantXPPermission | yes |
 | permission_free_trait_changes | FreeTraitChangesPermission | yes |
 | permission_recoup_xp | RecoupXPPermission | yes |
@@ -185,6 +186,7 @@ Request payload for `POST /companies`. All fields optional.
 | character_autogen_num_choices | int \| None | no |
 | character_autogen_starting_points | int \| None | no |
 | permission_manage_campaign | ManageCampaignPermission \| None | no |
+| permission_manage_npc | ManageNPCPermission \| None | no |
 | permission_grant_xp | GrantXPPermission \| None | no |
 | permission_free_trait_changes | FreeTraitChangesPermission \| None | no |
 | permission_recoup_xp | RecoupXPPermission \| None | no |
@@ -199,6 +201,7 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | character_autogen_num_choices | int \| None | no |
 | character_autogen_starting_points | int \| None | no |
 | permission_manage_campaign | ManageCampaignPermission \| None | no |
+| permission_manage_npc | ManageNPCPermission \| None | no |
 | permission_grant_xp | GrantXPPermission \| None | no |
 | permission_free_trait_changes | FreeTraitChangesPermission \| None | no |
 | permission_recoup_xp | RecoupXPPermission \| None | no |

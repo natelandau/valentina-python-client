@@ -9,6 +9,7 @@ from vclient.constants import (
     FreeTraitChangesPermission,
     GrantXPPermission,
     ManageCampaignPermission,
+    ManageNPCPermission,
     PermissionLevel,
     RecoupXPPermission,
 )
@@ -27,6 +28,7 @@ class CompanySettings(BaseModel):
     character_autogen_num_choices: int
     character_autogen_starting_points: int
     permission_manage_campaign: ManageCampaignPermission
+    permission_manage_npc: ManageNPCPermission
     permission_grant_xp: GrantXPPermission
     permission_free_trait_changes: FreeTraitChangesPermission
     permission_recoup_xp: RecoupXPPermission
@@ -42,6 +44,7 @@ class CompanySettingsCreate(BaseModel):
     character_autogen_num_choices: int | None = None
     character_autogen_starting_points: int | None = None
     permission_manage_campaign: ManageCampaignPermission | None = None
+    permission_manage_npc: ManageNPCPermission | None = None
     permission_grant_xp: GrantXPPermission | None = None
     permission_free_trait_changes: FreeTraitChangesPermission | None = None
     permission_recoup_xp: RecoupXPPermission | None = None
@@ -57,6 +60,7 @@ class CompanySettingsUpdate(BaseModel):
     character_autogen_num_choices: int | None = None
     character_autogen_starting_points: int | None = None
     permission_manage_campaign: ManageCampaignPermission | None = None
+    permission_manage_npc: ManageNPCPermission | None = None
     permission_grant_xp: GrantXPPermission | None = None
     permission_free_trait_changes: FreeTraitChangesPermission | None = None
     permission_recoup_xp: RecoupXPPermission | None = None

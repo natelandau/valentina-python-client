@@ -67,6 +67,7 @@ PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
 
 ```python
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
+ManageNPCPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 GrantXPPermission = Literal["UNRESTRICTED", "PLAYER", "STORYTELLER"]
 FreeTraitChangesPermission = Literal["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"]
 RecoupXPPermission = Literal["UNRESTRICTED", "DENIED", "WITHIN_SESSION"]

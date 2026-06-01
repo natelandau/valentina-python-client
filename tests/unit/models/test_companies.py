@@ -5,7 +5,7 @@ import typing
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
-from vclient.constants import RecoupXPPermission
+from vclient.constants import ManageNPCPermission, RecoupXPPermission
 from vclient.models.companies import (
     Company,
     CompanyCreate,
@@ -28,6 +28,7 @@ class TestCompanySettings:
             "character_autogen_num_choices": 3,
             "character_autogen_starting_points": 15,
             "permission_manage_campaign": "UNRESTRICTED",
+            "permission_manage_npc": "UNRESTRICTED",
             "permission_grant_xp": "UNRESTRICTED",
             "permission_free_trait_changes": "UNRESTRICTED",
             "permission_recoup_xp": "DENIED",
@@ -43,6 +44,7 @@ class TestCompanySettings:
         assert settings.character_autogen_num_choices == 3
         assert settings.character_autogen_starting_points == 15
         assert settings.permission_manage_campaign == "UNRESTRICTED"
+        assert settings.permission_manage_npc == "UNRESTRICTED"
         assert settings.permission_grant_xp == "UNRESTRICTED"
         assert settings.permission_free_trait_changes == "UNRESTRICTED"
         assert settings.permission_recoup_xp == "DENIED"
@@ -54,6 +56,7 @@ class TestCompanySettings:
             "character_autogen_num_choices",
             "character_autogen_starting_points",
             "permission_manage_campaign",
+            "permission_manage_npc",
             "permission_grant_xp",
             "permission_free_trait_changes",
             "permission_recoup_xp",
@@ -91,6 +94,19 @@ class TestCompanySettings:
 
         # Then: Value round-trips
         assert settings.permission_recoup_xp == value
+
+    @pytest.mark.parametrize("value", typing.get_args(ManageNPCPermission))
+    def test_manage_npc_valid_values(self, value):
+        """Verify permission_manage_npc accepts each valid enum value."""
+        # Given: Full kwargs with the parametrized manage_npc value
+        kwargs = self._full_settings_kwargs()
+        kwargs["permission_manage_npc"] = value
+
+        # When: Constructing
+        settings = CompanySettings(**kwargs)
+
+        # Then: Value round-trips
+        assert settings.permission_manage_npc == value
 
 
 class TestCompanySettingsCreate:
@@ -215,6 +231,7 @@ class TestCompany:
                 character_autogen_num_choices=3,
                 character_autogen_starting_points=5,
                 permission_manage_campaign="UNRESTRICTED",
+                permission_manage_npc="UNRESTRICTED",
                 permission_grant_xp="UNRESTRICTED",
                 permission_free_trait_changes="UNRESTRICTED",
                 permission_recoup_xp="UNRESTRICTED",
@@ -238,6 +255,7 @@ class TestCompany:
             character_autogen_num_choices=3,
             character_autogen_starting_points=10,
             permission_manage_campaign="UNRESTRICTED",
+            permission_manage_npc="UNRESTRICTED",
             permission_grant_xp="UNRESTRICTED",
             permission_free_trait_changes="UNRESTRICTED",
             permission_recoup_xp="DENIED",
@@ -281,6 +299,7 @@ class TestCompany:
                 "character_autogen_num_choices": 3,
                 "character_autogen_starting_points": 5,
                 "permission_manage_campaign": "UNRESTRICTED",
+                "permission_manage_npc": "UNRESTRICTED",
                 "permission_grant_xp": "PLAYER",
                 "permission_free_trait_changes": "WITHIN_24_HOURS",
                 "permission_recoup_xp": "UNRESTRICTED",
