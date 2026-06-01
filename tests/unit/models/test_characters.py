@@ -55,6 +55,27 @@ class TestCharacter:
         assert character.character_trait_ids == []
         assert character.specialties == []
 
+    def test_character_null_user_ids(self) -> None:
+        """Verify Character model accepts null user_creator_id and user_player_id."""
+        # When: Creating a character without creator or player IDs
+        character = Character(
+            id="char123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            name="Johnny",
+            name_full="John Doe",
+            company_id="company123",
+            campaign_id="campaign123",
+        )
+
+        # Then: The user ID fields default to None
+        assert character.user_creator_id is None
+        assert character.user_player_id is None
+
     def test_character_all_fields(self) -> None:
         """Verify Character model with all fields populated."""
         # Given: Complete character data

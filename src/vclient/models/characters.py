@@ -190,8 +190,12 @@ class Character(BaseModel):
     concept_name: str | None = Field(default=None, description="Name of the character concept.")
 
     # Relationships
-    user_creator_id: str = Field(..., description="ID of the user who created the character.")
-    user_player_id: str = Field(..., description="ID of the user who plays the character.")
+    user_creator_id: str | None = Field(
+        default=None, description="ID of the user who created the character."
+    )
+    user_player_id: str | None = Field(
+        default=None, description="ID of the user who plays the character."
+    )
     company_id: str = Field(..., description="ID of the company.")
     campaign_id: str = Field(..., description="ID of the campaign.")
 

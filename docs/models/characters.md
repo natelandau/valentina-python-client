@@ -25,8 +25,8 @@ Models for player and non-player characters, including class-specific attributes
 | `name_full`           | `str`                        | First, last, and nickname                      |
 | `age`                 | `int \| None`                | Age                                            |
 | `biography`           | `str \| None`                | Biography                                      |
-| `user_creator_id`     | `str`                        | Creator user ID                                |
-| `user_player_id`      | `str`                        | Player user ID                                 |
+| `user_creator_id`     | `str \| None`                | Creator user ID                                |
+| `user_player_id`      | `str \| None`                | Player user ID                                 |
 | `company_id`          | `str`                        | Company ID                                     |
 | `campaign_id`         | `str`                        | Campaign ID                                    |
 | `concept_id`          | `str \| None`                | Concept ID                                     |

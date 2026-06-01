@@ -399,8 +399,8 @@ All fields optional. Same constraints as CampaignCreate.
 | nature | str \| None | no (3-50 chars) |
 | concept_id | str \| None | no |
 | concept_name | str \| None | no |
-| user_creator_id | str | yes |
-| user_player_id | str | yes |
+| user_creator_id | str \| None | no |
+| user_player_id | str \| None | no |
 | company_id | str | yes |
 | campaign_id | str | yes |
 | asset_ids | list[str] | no (default=[]) |
