@@ -29,6 +29,21 @@ Visibility of `STORYTELLER` characters depends on the acting user's role:
   - Fetching a `STORYTELLER` character by ID, or any of its sub-resources (traits, inventory, notes, assets, statistics), raises `AuthorizationError` (403).
 - Only `STORYTELLER` and `ADMIN` roles may `create()` a character with `type="STORYTELLER"` or `update()` an existing character's `type` to `STORYTELLER`. A `PLAYER` attempting either raises `AuthorizationError` (403).
 
+## Player and creator assignment
+
+The `user_player_id` and `user_creator_id` fields on `Character` are both nullable, and their values are constrained by character `type`:
+
+- `PLAYER` characters always have a non-null `user_player_id`. `NPC` and `STORYTELLER` characters always have `user_player_id = null`.
+- `user_creator_id` may be `null` if the creating user was deleted.
+
+Assignment rules are enforced server-side and surface as `ValidationError` (400):
+
+- Creating a `PLAYER` character without a `user_player_id` defaults it to the acting user.
+- Creating an `NPC` or `STORYTELLER` character with a non-null `user_player_id` raises `ValidationError` (400).
+- Assigning a `user_player_id` to an existing `NPC` or `STORYTELLER` character raises `ValidationError` (400).
+- Converting a `PLAYER` character to `NPC` or `STORYTELLER` automatically clears `user_player_id` to `null`. No explicit `user_player_id=None` is required in the request.
+- Converting an `NPC` or `STORYTELLER` character to `PLAYER` requires a `user_player_id` in the same `update()` call; omitting it raises `ValidationError` (400).
+
 ## Methods
 
 ### CRUD Operations

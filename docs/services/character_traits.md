@@ -30,6 +30,10 @@ traits = character_traits_service(
 | `create(TraitCreate, **kwargs)`         | `CharacterTrait` | Create a custom trait                                                       |
 | `delete(character_trait_id, currency?)` | `None`           | Delete a character trait. Optional `TraitModifyCurrency` to recoup the cost |
 
+!!! warning "NPC and Storyteller characters require `NO_COST`"
+
+    On `NPC` and `STORYTELLER` characters, every trait operation that takes a `currency` (`assign`, `bulk_assign`, `create`, `change_value`, and `delete`) accepts only `currency="NO_COST"`. Passing `"XP"` or `"STARTING_POINTS"` raises `ValidationError` (400). `PLAYER` characters accept all three currencies.
+
 ### Pagination
 
 | Method                                           | Returns                             | Description              |

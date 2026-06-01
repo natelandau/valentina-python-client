@@ -175,6 +175,8 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 
 **Access control:** `on_behalf_of` is required and sent on every request, including reads. `STORYTELLER` characters are visible only to `STORYTELLER`/`ADMIN` roles. For a `PLAYER`: list results omit `STORYTELLER` characters (filtering `character_type="STORYTELLER"` yields an empty page), and fetching a `STORYTELLER` character or any of its sub-resources (traits, inventory, notes, assets, statistics) raises `AuthorizationError` (403). Only `STORYTELLER`/`ADMIN` may create or convert a character to `type="STORYTELLER"`; a `PLAYER` attempting it raises `AuthorizationError` (403).
 
+**Player/creator assignment:** `Character.user_player_id` and `Character.user_creator_id` are both nullable. `PLAYER` characters always have a non-null `user_player_id`; `NPC`/`STORYTELLER` characters always have `user_player_id = null`. `user_creator_id` may be `null` if the creator was deleted. These rules are server-enforced and surface as `ValidationError` (400): creating a `PLAYER` without `user_player_id` defaults it to the acting user; creating an `NPC`/`STORYTELLER` with a non-null `user_player_id`, or assigning one to an existing `NPC`/`STORYTELLER`, is rejected; converting `PLAYER` → `NPC`/`STORYTELLER` auto-clears `user_player_id` (no explicit `None` needed); converting `NPC`/`STORYTELLER` → `PLAYER` requires a `user_player_id` in the same `update()`.
+
 ### CRUD Methods
 
 | Method | Parameters | Returns |
@@ -237,6 +239,8 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 | `change_value(character_trait_id, new_value, currency)` | `character_trait_id: str, new_value: int, currency: TraitModifyCurrency` | `CharacterTrait` |
 
 **TraitModifyCurrency values:** `"XP"`, `"STARTING_POINTS"`, `"NO_COST"`
+
+**NPC/STORYTELLER currency restriction:** On `NPC` and `STORYTELLER` characters, every method taking a `currency` (`assign`, `bulk_assign`, `create`, `change_value`, `delete`) accepts only `"NO_COST"`. Passing `"XP"` or `"STARTING_POINTS"` raises `ValidationError` (400). `PLAYER` characters accept all three.
 
 ---
 
