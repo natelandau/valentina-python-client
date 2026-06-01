@@ -1,3 +1,11 @@
+## v2.2.0 (2026-06-01)
+
+### Feat
+
+- **characters**: make creator and player IDs nullable on Character
+- **characters**: remove DEVELOPER character type
+- **global-admin**: add server-log tail and download endpoints (#72)
+
 ## v2.1.0 (2026-05-23)
 
 ### Feat
