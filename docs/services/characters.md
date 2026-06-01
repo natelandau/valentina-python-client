@@ -17,6 +17,18 @@ characters = characters_service(
 )
 ```
 
+The `on_behalf_of` user ID is required and is sent on every request, including reads. The acting user's role determines what is visible.
+
+## Access control
+
+Visibility of `STORYTELLER` characters depends on the acting user's role:
+
+- `PLAYER` and `NPC` characters are visible to every approved company member.
+- `STORYTELLER` characters are visible only to `STORYTELLER` and `ADMIN` roles. For a `PLAYER`:
+  - List results omit `STORYTELLER` characters (filtering with `character_type="STORYTELLER"` returns an empty page).
+  - Fetching a `STORYTELLER` character by ID, or any of its sub-resources (traits, inventory, notes, assets, statistics), raises `AuthorizationError` (403).
+- Only `STORYTELLER` and `ADMIN` roles may `create()` a character with `type="STORYTELLER"` or `update()` an existing character's `type` to `STORYTELLER`. A `PLAYER` attempting either raises `AuthorizationError` (403).
+
 ## Methods
 
 ### CRUD Operations

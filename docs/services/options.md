@@ -44,7 +44,7 @@ Character-related enumerations:
 | `AutoGenExperienceLevel` | Experience levels for auto-generated characters                  |
 | `CharacterClass`         | Available character classes (Vampire, Werewolf, etc.)            |
 | `CharacterStatus`        | Character status values (ALIVE, DEAD, ARCHIVED)                  |
-| `CharacterType`          | Character visibility types (PLAYER, NPC, STORYTELLER, DEVELOPER) |
+| `CharacterType`          | Character visibility types (PLAYER, NPC, STORYTELLER)            |
 | `GameVersion`            | Supported World of Darkness versions                             |
 | `HunterEdgeType`         | Hunter edge categories                                           |
 | `InventoryItemType`      | Types of inventory items                                         |

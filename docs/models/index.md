@@ -58,7 +58,7 @@ from vclient.constants import CharacterClass, UserRole, GameVersion
 | Enum                     | Values                                                            |
 | ------------------------ | ----------------------------------------------------------------- |
 | `CharacterClass`         | `VAMPIRE`, `WEREWOLF`, `MAGE`, `HUNTER`, `GHOUL`, `MORTAL`        |
-| `CharacterType`          | `PLAYER`, `NPC`, `STORYTELLER`, `DEVELOPER`                       |
+| `CharacterType`          | `PLAYER`, `NPC`, `STORYTELLER`                                    |
 | `CharacterStatus`        | `ALIVE`, `DEAD`                                                   |
 | `CharacterInventoryType` | `BOOK`, `CONSUMABLE`, `ENCHANTED`, `EQUIPMENT`, `OTHER`, `WEAPON` |
 

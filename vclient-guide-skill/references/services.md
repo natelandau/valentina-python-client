@@ -173,6 +173,8 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 **Factory:** `characters_service(on_behalf_of, company_id=)` / `sync_characters_service(...)`
 **Scoping:** on_behalf_of, company_id
 
+**Access control:** `on_behalf_of` is required and sent on every request, including reads. `STORYTELLER` characters are visible only to `STORYTELLER`/`ADMIN` roles. For a `PLAYER`: list results omit `STORYTELLER` characters (filtering `character_type="STORYTELLER"` yields an empty page), and fetching a `STORYTELLER` character or any of its sub-resources (traits, inventory, notes, assets, statistics) raises `AuthorizationError` (403). Only `STORYTELLER`/`ADMIN` may create or convert a character to `type="STORYTELLER"`; a `PLAYER` attempting it raises `AuthorizationError` (403).
+
 ### CRUD Methods
 
 | Method | Parameters | Returns |
@@ -355,6 +357,8 @@ Plus standard notes and assets sub-resource methods.
 **Access:** `client.dicerolls(on_behalf_of, company_id=)`
 **Factory:** `dicerolls_service(on_behalf_of, company_id=)` / `sync_dicerolls_service(...)`
 **Scoping:** on_behalf_of, company_id
+
+**Access control:** `on_behalf_of` is required and sent on every request, including reads. For a `PLAYER`, list results omit rolls tied to `STORYTELLER` characters (rolls with no character are unaffected), and fetching such a roll by ID raises `AuthorizationError` (403).
 
 ### Methods
 

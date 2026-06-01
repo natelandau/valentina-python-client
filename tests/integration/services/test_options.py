@@ -22,7 +22,7 @@ def options_response_data() -> dict:
             "AutoGenExperienceLevel": ["NEW", "INTERMEDIATE", "ADVANCED", "ELITE"],
             "CharacterClass": ["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"],
             "CharacterStatus": ["ALIVE", "DEAD"],
-            "CharacterType": ["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"],
+            "CharacterType": ["PLAYER", "NPC", "STORYTELLER"],
             "GameVersion": ["V4", "V5"],
             "HunterEdgeType": ["ASSETS", "APTITUDES", "ENDOWMENTS"],
             "InventoryItemType": [

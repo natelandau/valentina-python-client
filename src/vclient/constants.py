@@ -75,7 +75,7 @@ CharacterInventoryType = Literal[
     "WEAPON",
 ]
 CharacterStatus = Literal["ALIVE", "DEAD"]
-CharacterType = Literal["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"]
+CharacterType = Literal["PLAYER", "NPC", "STORYTELLER"]
 DiceSize = Literal[4, 6, 8, 10, 20, 100]
 FreeTraitChangesPermission = Literal["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"]
 GameVersion = Literal["V4", "V5"]

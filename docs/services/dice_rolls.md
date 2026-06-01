@@ -16,6 +16,8 @@ from vclient import dicerolls_service
 dicerolls = dicerolls_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
+The `on_behalf_of` user ID is required and is sent on every request, including reads. For a `PLAYER`, list results omit rolls tied to `STORYTELLER` characters (rolls with no character are unaffected), and fetching such a roll by ID raises `AuthorizationError` (403).
+
 ## Methods
 
 ### CRUD Operations

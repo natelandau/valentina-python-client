@@ -10,7 +10,7 @@ These are the valid values for typed fields throughout the models. Import from `
 
 ```python
 CharacterClass = Literal["VAMPIRE", "WEREWOLF", "MAGE", "HUNTER", "GHOUL", "MORTAL"]
-CharacterType = Literal["PLAYER", "NPC", "STORYTELLER", "DEVELOPER"]
+CharacterType = Literal["PLAYER", "NPC", "STORYTELLER"]
 CharacterStatus = Literal["ALIVE", "DEAD"]
 GameVersion = Literal["V4", "V5"]
 ```
