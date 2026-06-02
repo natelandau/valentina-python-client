@@ -436,21 +436,37 @@ Plus standard notes and assets sub-resource methods.
 **Factory:** `global_admin_service()` / `sync_global_admin_service()`
 **Scoping:** None
 
-### Methods
+Requires a global-admin API key. No `on_behalf_of` parameter on any method. User methods also surface archived users and bypass normal role-hierarchy restrictions.
+
+### Developer Methods
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `get_page()` | `*, limit, offset, is_global_admin: bool \| None` | `PaginatedResponse[Developer]` |
-| `list_all()` | `*, is_global_admin=` | `list[Developer]` |
-| `iter_all()` | `*, limit, is_global_admin=` | `AsyncIterator[Developer]` |
-| `get(developer_id)` | `developer_id: str` | `Developer` |
-| `create()` | `request: DeveloperCreate \| None, **kwargs` | `Developer` |
-| `update(developer_id)` | `developer_id: str, request: DeveloperUpdate \| None, **kwargs` | `Developer` |
-| `delete(developer_id)` | `developer_id: str` | `None` |
+| `get_developer_page()` | `*, limit, offset, is_global_admin: bool \| None` | `PaginatedResponse[Developer]` |
+| `list_all_developers()` | `*, is_global_admin=` | `list[Developer]` |
+| `iter_all_developers()` | `*, limit, is_global_admin=` | `AsyncIterator[Developer]` |
+| `get_developer(developer_id)` | `developer_id: str` | `Developer` |
+| `create_developer()` | `request: DeveloperCreate \| None, **kwargs` | `Developer` |
+| `update_developer(developer_id)` | `developer_id: str, request: DeveloperUpdate \| None, **kwargs` | `Developer` |
+| `delete_developer(developer_id)` | `developer_id: str` | `None` |
 | `create_api_key(developer_id)` | `developer_id: str` | `DeveloperWithApiKey` |
 | `get_audit_log_page(developer_id)` | `developer_id: str, *, limit, offset, company_id=, acting_user_id=, user_id=, campaign_id=, book_id=, chapter_id=, character_id=, entity_type=, operation=, date_from=, date_to=, include=` | `PaginatedResponse[AuditLog \| AuditLogDetail]` |
 | `list_all_audit_logs(developer_id)` | `developer_id: str, *, company_id=, (same filters)` | `list[AuditLog \| AuditLogDetail]` |
 | `iter_all_audit_logs(developer_id)` | `developer_id: str, *, limit, company_id=, (same filters)` | `AsyncIterator[AuditLog \| AuditLogDetail]` |
+
+### User Methods
+
+Cross-company user management. Archived users are included in results and can be restored via `update_user`. Role hierarchy is bypassed (all roles assignable regardless of the acting developer's own role).
+
+| Method | Parameters | Returns |
+|--------|-----------|---------|
+| `get_user_page()` | `*, company_id: str \| None, role: UserRole \| None, email: str \| None, is_archived: bool \| None, limit, offset` | `PaginatedResponse[AdminUser]` |
+| `list_all_users()` | `*, company_id=, role=, email=, is_archived=` | `list[AdminUser]` |
+| `iter_all_users()` | `*, limit, company_id=, role=, email=, is_archived=` | `AsyncIterator[AdminUser]` |
+| `get_user(user_id)` | `user_id: str` | `AdminUser` |
+| `create_user()` | `request: AdminUserCreate \| None, **kwargs` | `AdminUser` |
+| `update_user(user_id)` | `user_id: str, request: AdminUserUpdate \| None, **kwargs` | `AdminUser` |
+| `delete_user(user_id)` | `user_id: str` | `None` |
 
 ### Server Logs
 

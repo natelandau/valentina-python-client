@@ -975,6 +975,46 @@ All optional: `username`, `email`, `is_global_admin`.
 | name | str \| None | no |
 | permission | PermissionLevel | yes |
 
+### AdminUser (extends User)
+
+Returned by `GlobalAdminService` user methods. Adds archival state to the standard `User` fields. Archived users are not visible through the regular `UsersService`.
+
+| Field | Type | Required |
+|-------|------|----------|
+| is_archived | bool | yes |
+
+### AdminUserCreate
+
+Request payload for `GlobalAdminService.create_user()`. Creates a user in any company regardless of role hierarchy.
+
+| Field | Type | Constraints |
+|-------|------|------------|
+| company_id | str | required |
+| username | str | required |
+| email | str | required |
+| role | UserRole | required |
+| name_first | str \| None | optional |
+| name_last | str \| None | optional |
+| discord_profile | DiscordProfileUpdate \| None | optional |
+| google_profile | GoogleProfile \| None | optional |
+| github_profile | GitHubProfile \| None | optional |
+
+### AdminUserUpdate
+
+Request payload for `GlobalAdminService.update_user()`. All fields optional. Setting `is_archived=False` restores an archived user.
+
+| Field | Type | Constraints |
+|-------|------|------------|
+| name_first | str \| None | optional |
+| name_last | str \| None | optional |
+| username | str \| None | optional |
+| email | str \| None | optional |
+| role | UserRole \| None | optional |
+| discord_profile | DiscordProfileUpdate \| None | optional |
+| google_profile | GoogleProfile \| None | optional |
+| github_profile | GitHubProfile \| None | optional |
+| is_archived | bool \| None | optional |
+
 ### ServerLogEntry
 
 A single parsed server log line. All fields nullable to tolerate partial or malformed lines.
