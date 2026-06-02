@@ -3,6 +3,7 @@
 from polyfactory.factories.pydantic_factory import ModelFactory
 
 from vclient.models import (
+    AdminUser,
     Asset,
     AuditLog,
     AuditLogDetail,
@@ -272,6 +273,12 @@ class TraitFactory(ModelFactory[Trait]):
     __use_defaults__ = True
 
 
+class AdminUserFactory(ModelFactory[AdminUser]):
+    __model__ = AdminUser
+    __use_defaults__ = True
+    role = "PLAYER"
+
+
 class UserFactory(ModelFactory[User]):
     __model__ = User
     __use_defaults__ = True
@@ -306,6 +313,7 @@ class WerewolfTribeFactory(ModelFactory[WerewolfTribe]):
 
 
 __all__ = [
+    "AdminUserFactory",
     "AssetFactory",
     "AuditLogDetailFactory",
     "AuditLogFactory",
