@@ -160,7 +160,7 @@ def sync_global_admin_service() -> "SyncGlobalAdminService":
     Example:
         ```python
         admins = sync_global_admin_service()
-        developers = await admins.list_all()
+        developers = await admins.list_all_developers()
         ```
     """
     from vclient._sync.services.global_admin import SyncGlobalAdminService

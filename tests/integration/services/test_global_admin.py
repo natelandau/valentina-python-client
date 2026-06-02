@@ -565,6 +565,23 @@ class TestGlobalAdminServiceUsers:
         assert result.items[0].is_archived is False
 
     @respx.mock
+    async def test_get_user_page_is_archived_false_is_sent(
+        self, vclient, base_url, paginated_admin_users_response
+    ):
+        """Verify is_archived=False is sent as a filter and not silently dropped."""
+        # Given: a mocked endpoint expecting is_archived=false in the query
+        route = respx.get(
+            f"{base_url}{Endpoints.ADMIN_USERS}",
+            params={"limit": "10", "offset": "0", "is_archived": "false"},
+        ).respond(200, json=paginated_admin_users_response)
+
+        # When: filtering for non-archived users
+        await vclient.global_admin.get_user_page(is_archived=False)
+
+        # Then: the false filter was included in the request
+        assert route.called
+
+    @respx.mock
     async def test_list_all_users(self, vclient, base_url, admin_user_response_data):
         """Verify list_all_users paginates through all admin users."""
         # Given: a single full page
