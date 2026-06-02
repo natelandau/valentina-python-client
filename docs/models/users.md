@@ -151,3 +151,59 @@ Request body for approving an unapproved user.
 | Field  | Type       | Description                         |
 | ------ | ---------- | ----------------------------------- |
 | `role` | `UserRole` | Role to assign to the approved user |
+
+## AdminUser
+
+Returned by all `GlobalAdminService` user methods. Extends `User` with an `is_archived` field that is always present, allowing global admins to see and restore soft-deleted users.
+
+| Field                  | Type                       | Description                                   |
+| ---------------------- | -------------------------- | --------------------------------------------- |
+| `id`                   | `str`                      | Unique identifier                             |
+| `date_created`         | `datetime`                 | Creation timestamp                            |
+| `date_modified`        | `datetime`                 | Last modified timestamp                       |
+| `name_first`           | `str`                      | First name                                    |
+| `name_last`            | `str`                      | Last name                                     |
+| `username`             | `str`                      | Username                                      |
+| `email`                | `str`                      | Email address                                 |
+| `role`                 | `UserRole`                 | Role (ADMIN, STORYTELLER, PLAYER, UNAPPROVED) |
+| `company_id`           | `str`                      | Company ID                                    |
+| `discord_profile`      | `DiscordProfile \| None`   | Discord information                           |
+| `google_profile`       | `GoogleProfile \| None`    | Google account information                    |
+| `github_profile`       | `GitHubProfile \| None`    | GitHub account information                    |
+| `campaign_experience`  | `list[CampaignExperience]` | XP per campaign                               |
+| `asset_ids`            | `list[str]`                | Owned asset IDs                               |
+| `lifetime_xp`          | `int`                      | Lifetime XP earned                            |
+| `lifetime_cool_points` | `int`                      | Lifetime cool points earned                   |
+| `is_archived`          | `bool`                     | Whether the user has been soft-deleted        |
+
+## AdminUserCreate
+
+Request body for creating a user via the global-admin service. Requires a `company_id` because the global-admin service operates across all companies.
+
+| Field             | Type                     | Description                                   |
+| ----------------- | ------------------------ | --------------------------------------------- |
+| `company_id`      | `str`                    | Company the user belongs to (required)        |
+| `username`        | `str`                    | Username (required)                           |
+| `email`           | `str`                    | Email address (required)                      |
+| `role`            | `UserRole`               | Role (ADMIN, STORYTELLER, PLAYER, UNAPPROVED) |
+| `name_first`      | `str \| None`            | First name                                    |
+| `name_last`       | `str \| None`            | Last name                                     |
+| `discord_profile` | `DiscordProfile \| None` | Discord information                           |
+| `google_profile`  | `GoogleProfile \| None`  | Google account information                    |
+| `github_profile`  | `GitHubProfile \| None`  | GitHub account information                    |
+
+## AdminUserUpdate
+
+Request body for updating a user via the global-admin service. All fields are optional; include only the fields that need to change. Set `is_archived=False` to restore a soft-deleted user.
+
+| Field             | Type                     | Description                                          |
+| ----------------- | ------------------------ | ---------------------------------------------------- |
+| `name_first`      | `str \| None`            | Updated first name                                   |
+| `name_last`       | `str \| None`            | Updated last name                                    |
+| `username`        | `str \| None`            | Updated username                                     |
+| `email`           | `str \| None`            | Updated email address                                |
+| `role`            | `UserRole \| None`       | Updated role                                         |
+| `discord_profile` | `DiscordProfile \| None` | Updated Discord information                          |
+| `google_profile`  | `GoogleProfile \| None`  | Updated Google account information                   |
+| `github_profile`  | `GitHubProfile \| None`  | Updated GitHub account information                   |
+| `is_archived`     | `bool \| None`           | Set to `False` to restore a soft-deleted user        |

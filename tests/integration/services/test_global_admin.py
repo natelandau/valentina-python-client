@@ -7,7 +7,7 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import AuthorizationError, NotFoundError
-from vclient.models import Developer, DeveloperWithApiKey, PaginatedResponse
+from vclient.models import AdminUser, Developer, DeveloperWithApiKey, PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 
@@ -57,7 +57,7 @@ class TestGlobalAdminServiceGetPage:
         ).respond(200, json=paginated_developers_response)
 
         # When: Getting a page of developers
-        result = await vclient.global_admin.get_page()
+        result = await vclient.global_admin.get_developer_page()
 
         # Then: Returns PaginatedResponse with Developer objects
         assert route.called
@@ -85,7 +85,7 @@ class TestGlobalAdminServiceGetPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.global_admin.get_page(limit=25, offset=50)
+        result = await vclient.global_admin.get_developer_page(limit=25, offset=50)
 
         # Then: Request was made with correct params
         assert route.called
@@ -104,7 +104,7 @@ class TestGlobalAdminServiceGetPage:
         ).respond(200, json=paginated_developers_response)
 
         # When: Getting a page filtered by global admin status
-        result = await vclient.global_admin.get_page(is_global_admin=True)
+        result = await vclient.global_admin.get_developer_page(is_global_admin=True)
 
         # Then: Request was made with filter param
         assert route.called
@@ -132,7 +132,7 @@ class TestGlobalAdminServiceListAll:
         )
 
         # When: Calling list_all
-        result = await vclient.global_admin.list_all()
+        result = await vclient.global_admin.list_all_developers()
 
         # Then: Returns list of Developer objects
         assert isinstance(result, list)
@@ -157,7 +157,7 @@ class TestGlobalAdminServiceListAll:
         )
 
         # When: Calling list_all with filter
-        result = await vclient.global_admin.list_all(is_global_admin=False)
+        result = await vclient.global_admin.list_all_developers(is_global_admin=False)
 
         # Then: Returns filtered list
         assert len(result) == 1
@@ -201,7 +201,7 @@ class TestGlobalAdminServiceIterAll:
         )
 
         # When: Iterating through all developers
-        developers = [dev async for dev in vclient.global_admin.iter_all(limit=1)]
+        developers = [dev async for dev in vclient.global_admin.iter_all_developers(limit=1)]
 
         # Then: All developers are yielded as Developer objects
         assert len(developers) == 2
@@ -223,7 +223,7 @@ class TestGlobalAdminServiceGet:
         ).respond(200, json=developer_response_data)
 
         # When: Getting the developer
-        result = await vclient.global_admin.get(developer_id)
+        result = await vclient.global_admin.get_developer(developer_id)
 
         # Then: Returns Developer object with correct data
         assert route.called
@@ -243,7 +243,7 @@ class TestGlobalAdminServiceGet:
 
         # When/Then: Getting the developer raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.global_admin.get(developer_id)
+            await vclient.global_admin.get_developer(developer_id)
 
     @respx.mock
     async def test_get_developer_unauthorized(self, vclient, base_url):
@@ -256,7 +256,7 @@ class TestGlobalAdminServiceGet:
 
         # When/Then: Getting the developer raises AuthorizationError
         with pytest.raises(AuthorizationError):
-            await vclient.global_admin.get(developer_id)
+            await vclient.global_admin.get_developer(developer_id)
 
 
 class TestGlobalAdminServiceCreate:
@@ -271,7 +271,7 @@ class TestGlobalAdminServiceCreate:
         )
 
         # When: Creating a developer with minimal data
-        result = await vclient.global_admin.create(
+        result = await vclient.global_admin.create_developer(
             username="testuser",
             email="test@example.com",
         )
@@ -300,7 +300,7 @@ class TestGlobalAdminServiceCreate:
         )
 
         # When: Creating a developer with global admin
-        result = await vclient.global_admin.create(
+        result = await vclient.global_admin.create_developer(
             username="adminuser",
             email="admin@example.com",
             is_global_admin=True,
@@ -331,7 +331,7 @@ class TestGlobalAdminServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating the developer username
-        result = await vclient.global_admin.update(developer_id, username="newusername")
+        result = await vclient.global_admin.update_developer(developer_id, username="newusername")
 
         # Then: Returns updated Developer object
         assert route.called
@@ -360,7 +360,7 @@ class TestGlobalAdminServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating multiple fields
-        result = await vclient.global_admin.update(
+        result = await vclient.global_admin.update_developer(
             developer_id,
             email="new@example.com",
             is_global_admin=True,
@@ -386,7 +386,7 @@ class TestGlobalAdminServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.global_admin.update(developer_id, username="newname")
+            await vclient.global_admin.update_developer(developer_id, username="newname")
 
 
 class TestGlobalAdminServiceDelete:
@@ -402,7 +402,7 @@ class TestGlobalAdminServiceDelete:
         ).respond(204)
 
         # When: Deleting the developer
-        result = await vclient.global_admin.delete(developer_id)
+        result = await vclient.global_admin.delete_developer(developer_id)
 
         # Then: Request was made and returns None
         assert route.called
@@ -419,7 +419,7 @@ class TestGlobalAdminServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.global_admin.delete(developer_id)
+            await vclient.global_admin.delete_developer(developer_id)
 
     @respx.mock
     async def test_delete_developer_unauthorized(self, vclient, base_url):
@@ -432,7 +432,7 @@ class TestGlobalAdminServiceDelete:
 
         # When/Then: Deleting raises AuthorizationError
         with pytest.raises(AuthorizationError):
-            await vclient.global_admin.delete(developer_id)
+            await vclient.global_admin.delete_developer(developer_id)
 
 
 class TestGlobalAdminServiceCreateApiKey:
@@ -505,3 +505,236 @@ class TestGlobalAdminServiceClientIntegration:
 
         # Then: Returns the same instance
         assert service1 is service2
+
+
+@pytest.fixture
+def admin_user_response_data() -> dict:
+    """Return sample admin user response data."""
+    return {
+        "id": "507f1f77bcf86cd799439099",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "username": "playerone",
+        "email": "player@example.com",
+        "role": "PLAYER",
+        "company_id": "company123",
+        "is_archived": False,
+    }
+
+
+@pytest.fixture
+def paginated_admin_users_response(admin_user_response_data) -> dict:
+    """Return sample paginated admin users response."""
+    return {
+        "items": [admin_user_response_data],
+        "limit": 10,
+        "offset": 0,
+        "total": 1,
+    }
+
+
+class TestGlobalAdminServiceUsers:
+    """Tests for GlobalAdminService cross-company user methods."""
+
+    @respx.mock
+    async def test_get_user_page_with_filters(
+        self, vclient, base_url, paginated_admin_users_response
+    ):
+        """Verify get_user_page sends filters and returns AdminUser objects."""
+        # Given: a mocked admin users list endpoint with filters
+        route = respx.get(
+            f"{base_url}{Endpoints.ADMIN_USERS}",
+            params={
+                "limit": "10",
+                "offset": "0",
+                "company_id": "company123",
+                "role": "PLAYER",
+                "is_archived": "true",
+            },
+        ).respond(200, json=paginated_admin_users_response)
+
+        # When: listing users filtered by company, role, and archived state
+        result = await vclient.global_admin.get_user_page(
+            company_id="company123", role="PLAYER", is_archived=True
+        )
+
+        # Then: filters were sent and AdminUser objects returned
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert isinstance(result.items[0], AdminUser)
+        assert result.items[0].is_archived is False
+
+    @respx.mock
+    async def test_get_user_page_is_archived_false_is_sent(
+        self, vclient, base_url, paginated_admin_users_response
+    ):
+        """Verify is_archived=False is sent as a filter and not silently dropped."""
+        # Given: a mocked endpoint expecting is_archived=false in the query
+        route = respx.get(
+            f"{base_url}{Endpoints.ADMIN_USERS}",
+            params={"limit": "10", "offset": "0", "is_archived": "false"},
+        ).respond(200, json=paginated_admin_users_response)
+
+        # When: filtering for non-archived users
+        await vclient.global_admin.get_user_page(is_archived=False)
+
+        # Then: the false filter was included in the request
+        assert route.called
+
+    @respx.mock
+    async def test_list_all_users(self, vclient, base_url, admin_user_response_data):
+        """Verify list_all_users paginates across multiple pages and stops at the end."""
+        # Given: two pages, each holding one user, with total exceeding the page size
+        user2 = {**admin_user_response_data, "id": "u2", "username": "playertwo"}
+        respx.get(
+            f"{base_url}{Endpoints.ADMIN_USERS}",
+            params={"limit": "100", "offset": "0"},
+        ).respond(
+            200,
+            json={"items": [admin_user_response_data], "limit": 100, "offset": 0, "total": 2},
+        )
+        respx.get(
+            f"{base_url}{Endpoints.ADMIN_USERS}",
+            params={"limit": "100", "offset": "100"},
+        ).respond(
+            200,
+            json={"items": [user2], "limit": 100, "offset": 100, "total": 2},
+        )
+
+        # When: listing all users
+        result = await vclient.global_admin.list_all_users()
+
+        # Then: both pages are collected as AdminUser objects and pagination terminates
+        assert len(result) == 2
+        assert all(isinstance(u, AdminUser) for u in result)
+        assert [u.username for u in result] == ["playerone", "playertwo"]
+
+    @respx.mock
+    async def test_iter_all_users(self, vclient, base_url, admin_user_response_data):
+        """Verify iter_all_users yields AdminUser objects."""
+        # Given: a single page of results
+        respx.get(f"{base_url}{Endpoints.ADMIN_USERS}").respond(
+            200,
+            json={"items": [admin_user_response_data], "limit": 100, "offset": 0, "total": 1},
+        )
+
+        # When: iterating all users
+        users = [u async for u in vclient.global_admin.iter_all_users(limit=100)]
+
+        # Then: one AdminUser is yielded
+        assert len(users) == 1
+        assert isinstance(users[0], AdminUser)
+
+    @respx.mock
+    async def test_get_user_returns_archived(self, vclient, base_url, admin_user_response_data):
+        """Verify get_user returns an archived user."""
+        # Given: an archived user at the detail endpoint
+        archived = {**admin_user_response_data, "is_archived": True}
+        user_id = archived["id"]
+        route = respx.get(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            200, json=archived
+        )
+
+        # When: fetching the user by id
+        result = await vclient.global_admin.get_user(user_id)
+
+        # Then: the archived user is returned
+        assert route.called
+        assert isinstance(result, AdminUser)
+        assert result.is_archived is True
+
+    @respx.mock
+    async def test_create_user(self, vclient, base_url, admin_user_response_data):
+        """Verify create_user posts company_id and returns an AdminUser."""
+        # Given: a mocked create endpoint
+        route = respx.post(f"{base_url}{Endpoints.ADMIN_USERS}").respond(
+            201, json=admin_user_response_data
+        )
+
+        # When: creating a user via kwargs
+        result = await vclient.global_admin.create_user(
+            company_id="company123", username="playerone", email="player@example.com", role="PLAYER"
+        )
+
+        # Then: the request body carried company_id and an AdminUser is returned
+        assert route.called
+        sent = json.loads(route.calls.last.request.content)
+        assert sent["company_id"] == "company123"
+        assert isinstance(result, AdminUser)
+
+    @respx.mock
+    async def test_update_user_restores(self, vclient, base_url, admin_user_response_data):
+        """Verify update_user can restore a soft-deleted user via is_archived=False."""
+        # Given: a mocked update endpoint
+        user_id = admin_user_response_data["id"]
+        route = respx.patch(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            200, json=admin_user_response_data
+        )
+
+        # When: restoring the user
+        result = await vclient.global_admin.update_user(user_id, is_archived=False)
+
+        # Then: is_archived False was sent and an AdminUser is returned
+        assert route.called
+        sent = json.loads(route.calls.last.request.content)
+        assert sent == {"is_archived": False}
+        assert isinstance(result, AdminUser)
+
+    @respx.mock
+    async def test_delete_user(self, vclient, base_url, admin_user_response_data):
+        """Verify delete_user soft-deletes and returns None."""
+        # Given: a mocked delete endpoint
+        user_id = admin_user_response_data["id"]
+        route = respx.delete(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            204
+        )
+
+        # When: deleting the user
+        result = await vclient.global_admin.delete_user(user_id)
+
+        # Then: nothing is returned
+        assert route.called
+        assert result is None
+
+    @respx.mock
+    async def test_user_methods_send_no_on_behalf_of(
+        self, vclient, base_url, admin_user_response_data
+    ):
+        """Verify admin user methods do not send an On-Behalf-Of header."""
+        # Given: a mocked detail endpoint
+        user_id = admin_user_response_data["id"]
+        route = respx.get(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            200, json=admin_user_response_data
+        )
+
+        # When: fetching the user
+        await vclient.global_admin.get_user(user_id)
+
+        # Then: no On-Behalf-Of header was attached
+        assert "On-Behalf-Of" not in route.calls.last.request.headers
+
+    @respx.mock
+    async def test_get_user_not_found(self, vclient, base_url):
+        """Verify getting a non-existent user raises NotFoundError."""
+        # Given: a mocked endpoint returning 404
+        user_id = "nonexistent"
+        respx.get(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            404, json={"detail": "User not found"}
+        )
+
+        # When/Then: getting the user raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.global_admin.get_user(user_id)
+
+    @respx.mock
+    async def test_get_user_unauthorized(self, vclient, base_url):
+        """Verify getting a user without admin access raises AuthorizationError."""
+        # Given: a mocked endpoint returning 403
+        user_id = "507f1f77bcf86cd799439099"
+        respx.get(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            403, json={"detail": "Global admin access required"}
+        )
+
+        # When/Then: getting the user raises AuthorizationError
+        with pytest.raises(AuthorizationError):
+            await vclient.global_admin.get_user(user_id)

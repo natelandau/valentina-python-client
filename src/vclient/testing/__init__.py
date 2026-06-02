@@ -15,6 +15,7 @@ except ImportError as e:
 from vclient._sync.testing import SyncFakeVClient
 from vclient.testing._client import FakeVClient
 from vclient.testing._factories import (
+    AdminUserFactory,
     AssetFactory,
     AuditLogDetailFactory,
     AuditLogFactory,
@@ -68,6 +69,7 @@ from vclient.testing._factories import (
 from vclient.testing._routes import Routes, RouteSpec
 
 __all__ = [
+    "AdminUserFactory",
     "AssetFactory",
     "AuditLogDetailFactory",
     "AuditLogFactory",

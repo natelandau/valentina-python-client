@@ -122,6 +122,17 @@ class UserDetail(User):
     )
 
 
+class AdminUser(User):
+    """Response model for a user returned by the global-admin user endpoints.
+
+    Extends the tenant-scoped ``User`` with ``is_archived``, which is always
+    present on the admin endpoints so callers can identify soft-deleted users
+    directly from the response body.
+    """
+
+    is_archived: bool
+
+
 # -----------------------------------------------------------------------------
 # User Request Models
 # -----------------------------------------------------------------------------
@@ -194,6 +205,27 @@ class UserUpdate(BaseModel):
     github_profile: GitHubProfile | None = None
 
 
+class AdminUserCreate(UserCreate):
+    """Request body for creating a user as a global admin.
+
+    Extends the tenant-scoped ``UserCreate`` with an explicit ``company_id`` for
+    the target company. The server rejects ``UNAPPROVED``/``DEACTIVATED`` roles
+    on create, so no client-side role restriction is applied here.
+    """
+
+    company_id: str
+
+
+class AdminUserUpdate(UserUpdate):
+    """Request body for updating any user as a global admin.
+
+    Extends the tenant-scoped ``UserUpdate`` with ``is_archived``. Set it to
+    ``False`` to restore a soft-deleted user.
+    """
+
+    is_archived: bool | None = None
+
+
 class UserApproveDTO(BaseModel):
     """Approve an unapproved user and assign a role."""
 
@@ -262,6 +294,9 @@ class _ExperienceAddRemove(BaseModel):
 
 
 __all__ = [
+    "AdminUser",
+    "AdminUserCreate",
+    "AdminUserUpdate",
     "CampaignExperience",
     "DiscordProfile",
     "GitHubProfile",

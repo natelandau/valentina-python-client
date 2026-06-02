@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    AdminUser,
     Asset,
     AuditLog,
     BulkAssignTraitResponse,
@@ -111,6 +112,13 @@ class Routes:
     )
     ADMIN_LOGS_TAIL = RouteSpec("GET", Endpoints.ADMIN_LOGS, LIST, ServerLogEntry)
     ADMIN_LOGS_DOWNLOAD = RouteSpec("GET", Endpoints.ADMIN_LOGS_DOWNLOAD, BYTES, None)
+
+    # Admin users (cross-company, global-admin only)
+    ADMIN_USERS_LIST = RouteSpec("GET", Endpoints.ADMIN_USERS, PAGINATED, AdminUser)
+    ADMIN_USERS_GET = RouteSpec("GET", Endpoints.ADMIN_USER, SINGLE, AdminUser)
+    ADMIN_USERS_CREATE = RouteSpec("POST", Endpoints.ADMIN_USERS, SINGLE, AdminUser)
+    ADMIN_USERS_UPDATE = RouteSpec("PATCH", Endpoints.ADMIN_USER, SINGLE, AdminUser)
+    ADMIN_USERS_DELETE = RouteSpec("DELETE", Endpoints.ADMIN_USER, NO_CONTENT, None)
 
     # Developer self-service
     DEVELOPERS_ME_GET = RouteSpec("GET", Endpoints.DEVELOPER_ME, SINGLE, MeDeveloper)
