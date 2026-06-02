@@ -13,9 +13,13 @@ from vclient.constants import (
     AuditLogInclude,
     AuditOperation,
     LogLevel,
+    UserRole,
 )
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    AdminUser,
+    AdminUserCreate,
+    AdminUserUpdate,
     AuditLog,
     AuditLogDetail,
     Developer,
@@ -236,6 +240,180 @@ class GlobalAdminService(BaseService):
             AuthorizationError: If you don't have global admin privileges.
         """
         await self._delete(Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id))
+
+    async def get_user_page(
+        self,
+        *,
+        company_id: str | None = None,
+        role: UserRole | None = None,
+        email: str | None = None,
+        is_archived: bool | None = None,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> PaginatedResponse[AdminUser]:
+        """Retrieve a paginated page of users across all companies.
+
+        Authenticates with the global-admin API key only; no On-Behalf-Of header
+        is sent. Archived (soft-deleted) users are included when
+        ``is_archived=True``.
+
+        Args:
+            company_id: Filter to a single company.
+            role: Filter by user role.
+            email: Filter by exact email match.
+            is_archived: Filter by archived state.
+            limit: Maximum number of items to return (0-100, default 10).
+            offset: Number of items to skip from the beginning (default 0).
+
+        Returns:
+            A PaginatedResponse containing AdminUser objects and pagination metadata.
+        """
+        params = self._build_params(
+            company_id=company_id, role=role, email=email, is_archived=is_archived
+        )
+        return await self._get_paginated_as(
+            Endpoints.ADMIN_USERS,
+            AdminUser,
+            limit=limit,
+            offset=offset,
+            params=params,
+        )
+
+    async def list_all_users(
+        self,
+        *,
+        company_id: str | None = None,
+        role: UserRole | None = None,
+        email: str | None = None,
+        is_archived: bool | None = None,
+    ) -> list[AdminUser]:
+        """Retrieve all users across all companies.
+
+        Automatically paginates through all results. Use ``get_user_page()`` for
+        paginated access or ``iter_all_users()`` for memory-efficient streaming.
+
+        Args:
+            company_id: Filter to a single company.
+            role: Filter by user role.
+            email: Filter by exact email match.
+            is_archived: Filter by archived state.
+
+        Returns:
+            A list of all matching AdminUser objects.
+        """
+        return [
+            user
+            async for user in self.iter_all_users(
+                company_id=company_id, role=role, email=email, is_archived=is_archived
+            )
+        ]
+
+    async def iter_all_users(
+        self,
+        *,
+        limit: int = 100,
+        company_id: str | None = None,
+        role: UserRole | None = None,
+        email: str | None = None,
+        is_archived: bool | None = None,
+    ) -> AsyncIterator[AdminUser]:
+        """Iterate through all users across all companies.
+
+        Yields individual users, automatically fetching subsequent pages until all
+        matching users have been retrieved.
+
+        Args:
+            limit: Items per page (default 100 for efficiency).
+            company_id: Filter to a single company.
+            role: Filter by user role.
+            email: Filter by exact email match.
+            is_archived: Filter by archived state.
+
+        Yields:
+            Individual AdminUser objects.
+        """
+        params = self._build_params(
+            company_id=company_id, role=role, email=email, is_archived=is_archived
+        )
+        async for item in self._iter_all_pages(
+            Endpoints.ADMIN_USERS,
+            limit=limit,
+            params=params,
+        ):
+            yield AdminUser.model_validate(item)
+
+    async def get_user(self, user_id: str) -> AdminUser:
+        """Retrieve a single user by ID, including archived users.
+
+        Args:
+            user_id: The ID of the user to retrieve.
+
+        Returns:
+            The AdminUser object, with ``is_archived`` reflecting soft-delete state.
+        """
+        response = await self._get(Endpoints.ADMIN_USER.format(user_id=user_id))
+        return AdminUser.model_validate(response.json())
+
+    async def create_user(
+        self,
+        request: AdminUserCreate | None = None,
+        **kwargs,
+    ) -> AdminUser:
+        """Create a user in a target company.
+
+        The role assignment matrix enforced on company-scoped endpoints does not
+        apply here, but the server still rejects ``UNAPPROVED``/``DEACTIVATED`` on
+        create.
+
+        Args:
+            request: An AdminUserCreate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for AdminUserCreate if request is not provided.
+                Requires: company_id, username, email, role.
+
+        Returns:
+            The newly created AdminUser object.
+        """
+        body = request if request is not None else self._validate_request(AdminUserCreate, **kwargs)
+        response = await self._post(
+            Endpoints.ADMIN_USERS,
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return AdminUser.model_validate(response.json())
+
+    async def update_user(
+        self,
+        user_id: str,
+        request: AdminUserUpdate | None = None,
+        **kwargs,
+    ) -> AdminUser:
+        """Update any user by ID, bypassing the company-scoped role hierarchy.
+
+        Set ``is_archived=False`` to restore a soft-deleted user.
+
+        Args:
+            user_id: The ID of the user to update.
+            request: An AdminUserUpdate model, OR pass fields as keyword arguments.
+            **kwargs: Fields for AdminUserUpdate if request is not provided.
+
+        Returns:
+            The updated AdminUser object.
+        """
+        body = request if request is not None else self._validate_request(AdminUserUpdate, **kwargs)
+        response = await self._patch(
+            Endpoints.ADMIN_USER.format(user_id=user_id),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return AdminUser.model_validate(response.json())
+
+    async def delete_user(self, user_id: str) -> None:
+        """Soft-delete a user by ID.
+
+        The deletion is reversible via ``update_user(user_id, is_archived=False)``.
+
+        Args:
+            user_id: The ID of the user to soft-delete.
+        """
+        await self._delete(Endpoints.ADMIN_USER.format(user_id=user_id))
 
     async def create_api_key(self, developer_id: str) -> DeveloperWithApiKey:
         """Generate a new API key for a developer.

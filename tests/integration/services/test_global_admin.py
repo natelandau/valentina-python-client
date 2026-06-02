@@ -7,7 +7,7 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import AuthorizationError, NotFoundError
-from vclient.models import Developer, DeveloperWithApiKey, PaginatedResponse
+from vclient.models import AdminUser, Developer, DeveloperWithApiKey, PaginatedResponse
 
 pytestmark = pytest.mark.anyio
 
@@ -505,3 +505,181 @@ class TestGlobalAdminServiceClientIntegration:
 
         # Then: Returns the same instance
         assert service1 is service2
+
+
+@pytest.fixture
+def admin_user_response_data() -> dict:
+    """Return sample admin user response data."""
+    return {
+        "id": "507f1f77bcf86cd799439099",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "username": "playerone",
+        "email": "player@example.com",
+        "role": "PLAYER",
+        "company_id": "company123",
+        "is_archived": False,
+    }
+
+
+@pytest.fixture
+def paginated_admin_users_response(admin_user_response_data) -> dict:
+    """Return sample paginated admin users response."""
+    return {
+        "items": [admin_user_response_data],
+        "limit": 10,
+        "offset": 0,
+        "total": 1,
+    }
+
+
+class TestGlobalAdminServiceUsers:
+    """Tests for GlobalAdminService cross-company user methods."""
+
+    @respx.mock
+    async def test_get_user_page_with_filters(
+        self, vclient, base_url, paginated_admin_users_response
+    ):
+        """Verify get_user_page sends filters and returns AdminUser objects."""
+        # Given: a mocked admin users list endpoint with filters
+        route = respx.get(
+            f"{base_url}{Endpoints.ADMIN_USERS}",
+            params={
+                "limit": "10",
+                "offset": "0",
+                "company_id": "company123",
+                "role": "PLAYER",
+                "is_archived": "true",
+            },
+        ).respond(200, json=paginated_admin_users_response)
+
+        # When: listing users filtered by company, role, and archived state
+        result = await vclient.global_admin.get_user_page(
+            company_id="company123", role="PLAYER", is_archived=True
+        )
+
+        # Then: filters were sent and AdminUser objects returned
+        assert route.called
+        assert isinstance(result, PaginatedResponse)
+        assert isinstance(result.items[0], AdminUser)
+        assert result.items[0].is_archived is False
+
+    @respx.mock
+    async def test_list_all_users(self, vclient, base_url, admin_user_response_data):
+        """Verify list_all_users paginates through all admin users."""
+        # Given: a single full page
+        respx.get(f"{base_url}{Endpoints.ADMIN_USERS}").respond(
+            200,
+            json={"items": [admin_user_response_data], "limit": 100, "offset": 0, "total": 1},
+        )
+
+        # When: listing all users
+        result = await vclient.global_admin.list_all_users()
+
+        # Then: the user is returned as an AdminUser
+        assert len(result) == 1
+        assert isinstance(result[0], AdminUser)
+
+    @respx.mock
+    async def test_iter_all_users(self, vclient, base_url, admin_user_response_data):
+        """Verify iter_all_users yields AdminUser objects."""
+        # Given: a single page of results
+        respx.get(f"{base_url}{Endpoints.ADMIN_USERS}").respond(
+            200,
+            json={"items": [admin_user_response_data], "limit": 100, "offset": 0, "total": 1},
+        )
+
+        # When: iterating all users
+        users = [u async for u in vclient.global_admin.iter_all_users(limit=100)]
+
+        # Then: one AdminUser is yielded
+        assert len(users) == 1
+        assert isinstance(users[0], AdminUser)
+
+    @respx.mock
+    async def test_get_user_returns_archived(self, vclient, base_url, admin_user_response_data):
+        """Verify get_user returns an archived user."""
+        # Given: an archived user at the detail endpoint
+        archived = {**admin_user_response_data, "is_archived": True}
+        user_id = archived["id"]
+        route = respx.get(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            200, json=archived
+        )
+
+        # When: fetching the user by id
+        result = await vclient.global_admin.get_user(user_id)
+
+        # Then: the archived user is returned
+        assert route.called
+        assert isinstance(result, AdminUser)
+        assert result.is_archived is True
+
+    @respx.mock
+    async def test_create_user(self, vclient, base_url, admin_user_response_data):
+        """Verify create_user posts company_id and returns an AdminUser."""
+        # Given: a mocked create endpoint
+        route = respx.post(f"{base_url}{Endpoints.ADMIN_USERS}").respond(
+            201, json=admin_user_response_data
+        )
+
+        # When: creating a user via kwargs
+        result = await vclient.global_admin.create_user(
+            company_id="company123", username="playerone", email="player@example.com", role="PLAYER"
+        )
+
+        # Then: the request body carried company_id and an AdminUser is returned
+        assert route.called
+        sent = json.loads(route.calls.last.request.content)
+        assert sent["company_id"] == "company123"
+        assert isinstance(result, AdminUser)
+
+    @respx.mock
+    async def test_update_user_restores(self, vclient, base_url, admin_user_response_data):
+        """Verify update_user can restore a soft-deleted user via is_archived=False."""
+        # Given: a mocked update endpoint
+        user_id = admin_user_response_data["id"]
+        route = respx.patch(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            200, json=admin_user_response_data
+        )
+
+        # When: restoring the user
+        result = await vclient.global_admin.update_user(user_id, is_archived=False)
+
+        # Then: is_archived False was sent and an AdminUser is returned
+        assert route.called
+        sent = json.loads(route.calls.last.request.content)
+        assert sent == {"is_archived": False}
+        assert isinstance(result, AdminUser)
+
+    @respx.mock
+    async def test_delete_user(self, vclient, base_url, admin_user_response_data):
+        """Verify delete_user soft-deletes and returns None."""
+        # Given: a mocked delete endpoint
+        user_id = admin_user_response_data["id"]
+        route = respx.delete(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            204
+        )
+
+        # When: deleting the user
+        result = await vclient.global_admin.delete_user(user_id)
+
+        # Then: nothing is returned
+        assert route.called
+        assert result is None
+
+    @respx.mock
+    async def test_user_methods_send_no_on_behalf_of(
+        self, vclient, base_url, admin_user_response_data
+    ):
+        """Verify admin user methods do not send an On-Behalf-Of header."""
+        # Given: a mocked detail endpoint
+        user_id = admin_user_response_data["id"]
+        route = respx.get(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            200, json=admin_user_response_data
+        )
+
+        # When: fetching the user
+        await vclient.global_admin.get_user(user_id)
+
+        # Then: no On-Behalf-Of header was attached
+        assert "On-Behalf-Of" not in route.calls.last.request.headers
