@@ -220,6 +220,39 @@ class TestCharacter:
 
         assert "status" in str(exc_info.value)
 
+    def test_child_resource_counts(self) -> None:
+        """Verify child-resource count fields default to 0 and accept values."""
+        # Given: Minimal valid Character kwargs
+        base_kwargs = {
+            "id": "char123",
+            "date_created": "2024-01-15T10:30:00Z",
+            "date_modified": "2024-01-15T10:30:00Z",
+            "character_class": "VAMPIRE",
+            "game_version": "V5",
+            "name_first": "John",
+            "name_last": "Doe",
+            "name": "Johnny",
+            "name_full": "John Doe",
+            "company_id": "company123",
+            "campaign_id": "campaign123",
+        }
+
+        # When: Creating a character with no count values
+        defaults = Character(**base_kwargs)
+
+        # Then: Count fields default to 0
+        assert defaults.num_inventory_items == 0
+        assert defaults.num_notes == 0
+        assert defaults.num_assets == 0
+
+        # When: Creating a character with explicit count values
+        populated = Character(**base_kwargs, num_inventory_items=3, num_notes=2, num_assets=4)
+
+        # Then: Count fields reflect the provided values
+        assert populated.num_inventory_items == 3
+        assert populated.num_notes == 2
+        assert populated.num_assets == 4
+
 
 class TestCharacterCreate:
     """Tests for CharacterCreate model."""

@@ -222,6 +222,13 @@ class Character(BaseModel):
         default=None, description="Hunter-specific attributes."
     )
 
+    # Child-resource counts
+    num_inventory_items: int = Field(
+        default=0, description="Number of active inventory items on the character."
+    )
+    num_notes: int = Field(default=0, description="Number of active notes on the character.")
+    num_assets: int = Field(default=0, description="Number of active assets on the character.")
+
 
 class CharacterDetail(Character):
     """Character response with optional embedded child resources.

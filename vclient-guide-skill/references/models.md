@@ -419,6 +419,9 @@ All fields optional. Same constraints as CampaignCreate.
 | werewolf_attributes | WerewolfAttributes \| None | no |
 | mage_attributes | MageAttributes \| None | no |
 | hunter_attributes | HunterAttributes \| None | no |
+| num_inventory_items | int | no (default=0) |
+| num_notes | int | no (default=0) |
+| num_assets | int | no (default=0) |
 
 ### CharacterDetail (extends Character)
 

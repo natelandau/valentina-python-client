@@ -41,6 +41,9 @@ Models for player and non-player characters, including class-specific attributes
 | `werewolf_attributes` | `WerewolfAttributes \| None` | Werewolf-specific data                         |
 | `hunter_attributes`   | `HunterAttributes \| None`   | Hunter-specific data                           |
 | `mage_attributes`     | `MageAttributes \| None`     | Mage-specific data                             |
+| `num_inventory_items` | `int`                        | Active inventory item count (excludes archived) |
+| `num_notes`           | `int`                        | Active note count (excludes archived)          |
+| `num_assets`          | `int`                        | Active asset count (excludes archived)         |
 
 ## VampireAttributes
 
