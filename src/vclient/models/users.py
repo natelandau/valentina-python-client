@@ -96,6 +96,10 @@ class User(BaseModel):
     asset_ids: list[str] = Field(default_factory=list)
     lifetime_xp: int = 0
     lifetime_cool_points: int = 0
+    num_quickrolls: int = 0
+    num_notes: int = 0
+    num_assets: int = 0
+    num_characters: int = 0
 
 
 class UserDetail(User):

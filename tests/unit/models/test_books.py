@@ -54,6 +54,35 @@ class TestCampaignBook:
         assert book.description is None
         assert book.asset_ids == []
 
+    def test_child_resource_counts(self):
+        """Verify child-resource count fields default to 0 and accept values."""
+        defaults = CampaignBook(
+            id="book123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Book",
+            number=1,
+            campaign_id="campaign123",
+        )
+        assert defaults.num_chapters == 0
+        assert defaults.num_notes == 0
+        assert defaults.num_assets == 0
+
+        populated = CampaignBook(
+            id="book123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Book",
+            number=1,
+            campaign_id="campaign123",
+            num_chapters=4,
+            num_notes=2,
+            num_assets=6,
+        )
+        assert populated.num_chapters == 4
+        assert populated.num_notes == 2
+        assert populated.num_assets == 6
+
 
 class TestBookCreate:
     """Tests for BookCreate model."""

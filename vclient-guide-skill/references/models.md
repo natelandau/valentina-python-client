@@ -263,6 +263,10 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | asset_ids | list[str] | no (default=[]) |
 | lifetime_xp | int | no (default=0) |
 | lifetime_cool_points | int | no (default=0) |
+| num_quickrolls | int | no (default=0) |
+| num_notes | int | no (default=0) |
+| num_assets | int | no (default=0) |
+| num_characters | int | no (default=0) |
 
 ### UserDetail (extends User)
 
@@ -359,6 +363,12 @@ All fields optional. Same fields as UserCreate (without role).
 | desperation | int | no (default=0) |
 | danger | int | no (default=0) |
 | company_id | str | yes |
+| num_books | int | no (default=0) |
+| num_chapters | int | no (default=0) |
+| num_notes | int | no (default=0) |
+| num_player_characters | int | no (default=0) |
+| num_storyteller_characters | int | no (default=0) |
+| num_npc_characters | int | no (default=0) |
 
 ### CampaignCreate
 
@@ -413,6 +423,9 @@ All fields optional. Same constraints as CampaignCreate.
 | werewolf_attributes | WerewolfAttributes \| None | no |
 | mage_attributes | MageAttributes \| None | no |
 | hunter_attributes | HunterAttributes \| None | no |
+| num_inventory_items | int | no (default=0) |
+| num_notes | int | no (default=0) |
+| num_assets | int | no (default=0) |
 
 ### CharacterDetail (extends Character)
 
@@ -734,6 +747,9 @@ For creating custom traits on a character.
 | asset_ids | list[str] | no (default=[]) |
 | number | int | yes |
 | campaign_id | str | yes |
+| num_chapters | int | no (default=0) |
+| num_notes | int | no (default=0) |
+| num_assets | int | no (default=0) |
 
 ### CampaignBookDetail (extends CampaignBook)
 
@@ -758,6 +774,8 @@ For creating custom traits on a character.
 | asset_ids | list[str] | no (default=[]) |
 | number | int | yes |
 | book_id | str | yes |
+| num_notes | int | no (default=0) |
+| num_assets | int | no (default=0) |
 
 ### CampaignChapterDetail (extends CampaignChapter)
 

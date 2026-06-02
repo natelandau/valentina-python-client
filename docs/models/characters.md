@@ -8,39 +8,42 @@ Models for player and non-player characters, including class-specific attributes
 
 ## Character
 
-| Field                 | Type                         | Description                                    |
-| --------------------- | ---------------------------- | ---------------------------------------------- |
-| `id`                  | `str`                        | Unique identifier                              |
-| `date_created`        | `datetime`                   | Creation timestamp                             |
-| `date_modified`       | `datetime`                   | Last modified timestamp                        |
-| `is_temporary`        | `bool`                       | Whether the character is temporary             |
-| `character_class`     | `CharacterClass`             | VAMPIRE, WEREWOLF, MAGE, HUNTER, GHOUL, MORTAL |
-| `type`                | `CharacterType`              | PLAYER, NPC, STORYTELLER                       |
-| `game_version`        | `GameVersion`                | V4 or V5                                       |
-| `status`              | `CharacterStatus`            | ALIVE or DEAD                                  |
-| `name_first`          | `str`                        | First name                                     |
-| `name_last`           | `str`                        | Last name                                      |
-| `name_nick`           | `str \| None`                | Nickname                                       |
-| `name`                | `str`                        | First and last name                            |
-| `name_full`           | `str`                        | First, last, and nickname                      |
-| `age`                 | `int \| None`                | Age                                            |
-| `biography`           | `str \| None`                | Biography                                      |
-| `user_creator_id`     | `str \| None`                | Creator user ID                                |
-| `user_player_id`      | `str \| None`                | Player user ID                                 |
-| `company_id`          | `str`                        | Company ID                                     |
-| `campaign_id`         | `str`                        | Campaign ID                                    |
-| `concept_id`          | `str \| None`                | Concept ID                                     |
-| `concept_name`        | `str \| None`                | Concept name                                   |
-| `starting_points`     | `int`                        | Starting experience points                     |
-| `demeanor`            | `str \| None`                | demeanor                                       |
-| `nature`              | `str \| None`                | nature                                         |
-| `asset_ids`           | `list[str]`                  | Asset IDs                                      |
-| `specialties`         | `list[CharacterSpecialty]`   | Character specialties                          |
-| `character_trait_ids` | `list[str]`                  | Character trait IDs                            |
-| `vampire_attributes`  | `VampireAttributes \| None`  | Vampire-specific data                          |
-| `werewolf_attributes` | `WerewolfAttributes \| None` | Werewolf-specific data                         |
-| `hunter_attributes`   | `HunterAttributes \| None`   | Hunter-specific data                           |
-| `mage_attributes`     | `MageAttributes \| None`     | Mage-specific data                             |
+| Field                 | Type                         | Description                                     |
+| --------------------- | ---------------------------- | ----------------------------------------------- |
+| `id`                  | `str`                        | Unique identifier                               |
+| `date_created`        | `datetime`                   | Creation timestamp                              |
+| `date_modified`       | `datetime`                   | Last modified timestamp                         |
+| `is_temporary`        | `bool`                       | Whether the character is temporary              |
+| `character_class`     | `CharacterClass`             | VAMPIRE, WEREWOLF, MAGE, HUNTER, GHOUL, MORTAL  |
+| `type`                | `CharacterType`              | PLAYER, NPC, STORYTELLER                        |
+| `game_version`        | `GameVersion`                | V4 or V5                                        |
+| `status`              | `CharacterStatus`            | ALIVE or DEAD                                   |
+| `name_first`          | `str`                        | First name                                      |
+| `name_last`           | `str`                        | Last name                                       |
+| `name_nick`           | `str \| None`                | Nickname                                        |
+| `name`                | `str`                        | First and last name                             |
+| `name_full`           | `str`                        | First, last, and nickname                       |
+| `age`                 | `int \| None`                | Age                                             |
+| `biography`           | `str \| None`                | Biography                                       |
+| `user_creator_id`     | `str \| None`                | Creator user ID                                 |
+| `user_player_id`      | `str \| None`                | Player user ID                                  |
+| `company_id`          | `str`                        | Company ID                                      |
+| `campaign_id`         | `str`                        | Campaign ID                                     |
+| `concept_id`          | `str \| None`                | Concept ID                                      |
+| `concept_name`        | `str \| None`                | Concept name                                    |
+| `starting_points`     | `int`                        | Starting experience points                      |
+| `demeanor`            | `str \| None`                | demeanor                                        |
+| `nature`              | `str \| None`                | nature                                          |
+| `asset_ids`           | `list[str]`                  | Asset IDs                                       |
+| `specialties`         | `list[CharacterSpecialty]`   | Character specialties                           |
+| `character_trait_ids` | `list[str]`                  | Character trait IDs                             |
+| `vampire_attributes`  | `VampireAttributes \| None`  | Vampire-specific data                           |
+| `werewolf_attributes` | `WerewolfAttributes \| None` | Werewolf-specific data                          |
+| `hunter_attributes`   | `HunterAttributes \| None`   | Hunter-specific data                            |
+| `mage_attributes`     | `MageAttributes \| None`     | Mage-specific data                              |
+| `num_inventory_items` | `int`                        | Active inventory item count (excludes archived) |
+| `num_notes`           | `int`                        | Active note count (excludes archived)           |
+| `num_assets`          | `int`                        | Active asset count (excludes archived)          |
 
 ## VampireAttributes
 

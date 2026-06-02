@@ -26,6 +26,12 @@ class Campaign(BaseModel):
     desperation: int = 0
     danger: int = 0
     company_id: str
+    num_books: int = 0
+    num_chapters: int = 0
+    num_notes: int = 0
+    num_player_characters: int = 0
+    num_storyteller_characters: int = 0
+    num_npc_characters: int = 0
 
 
 # -----------------------------------------------------------------------------

@@ -97,6 +97,32 @@ class TestCampaignChapter:
                 # Missing book_id
             )
 
+    def test_child_resource_counts(self):
+        """Verify child-resource count fields default to 0 and accept values."""
+        defaults = CampaignChapter(
+            id="chapter123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Chapter",
+            number=1,
+            book_id="book123",
+        )
+        assert defaults.num_notes == 0
+        assert defaults.num_assets == 0
+
+        populated = CampaignChapter(
+            id="chapter123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Chapter",
+            number=1,
+            book_id="book123",
+            num_notes=3,
+            num_assets=5,
+        )
+        assert populated.num_notes == 3
+        assert populated.num_assets == 5
+
 
 class TestChapterCreate:
     """Tests for ChapterCreate model."""
