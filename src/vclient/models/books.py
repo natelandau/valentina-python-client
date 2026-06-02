@@ -22,6 +22,9 @@ class CampaignBook(BaseModel):
     asset_ids: list[str] = Field(default_factory=list, description="List of associated asset IDs.")
     number: int = Field(..., description="Book number within the campaign.")
     campaign_id: str = Field(..., description="ID of the parent campaign.")
+    num_chapters: int = Field(default=0, description="Number of active chapters in the book.")
+    num_notes: int = Field(default=0, description="Number of active notes on the book.")
+    num_assets: int = Field(default=0, description="Number of active assets on the book.")
 
 
 class CampaignBookDetail(CampaignBook):

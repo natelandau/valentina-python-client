@@ -740,6 +740,9 @@ For creating custom traits on a character.
 | asset_ids | list[str] | no (default=[]) |
 | number | int | yes |
 | campaign_id | str | yes |
+| num_chapters | int | no (default=0) |
+| num_notes | int | no (default=0) |
+| num_assets | int | no (default=0) |
 
 ### CampaignBookDetail (extends CampaignBook)
 
