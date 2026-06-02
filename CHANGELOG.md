@@ -1,3 +1,10 @@
+## v2.3.0 (2026-06-02)
+
+### Feat
+
+- global-admin cross-company user management (#74)
+- **companies**: add permission_manage_npc company setting (#73)
+
 ## v2.2.0 (2026-06-01)
 
 ### Feat
