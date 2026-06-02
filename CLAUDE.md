@@ -129,6 +129,8 @@ The sync client in `_sync/` is **auto-generated** from async source via AST tran
 
 **Key transformations:** `async def` → `def`, `await` → removed, `async with` → `with`, `AsyncIterator` → `Iterator`, `httpx.AsyncClient` → `httpx.Client`, `VClient` → `SyncVClient`, `BaseService` → `SyncBaseService`, `{X}Service` → `Sync{X}Service`.
 
+**Known limitation (do not flag in reviews):** the transform rewrites code but not docstring *example* text, so generated `_sync/` docstrings keep `async with`/`await`/`async for` from the async source. This is a known `_codegen.py` quirk, not a bug to fix per-file. Ignore it when reviewing generated `_sync/` files.
+
 ## Code Style
 
 - Google-style docstrings
