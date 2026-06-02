@@ -136,14 +136,12 @@ class GlobalAdminService(BaseService):
             >>> async for developer in client.global_admin.iter_all_developers():
             ...     print(developer.username)
         """
-        params = {}
-        if is_global_admin is not None:
-            params["is_global_admin"] = is_global_admin
+        params = self._build_params(is_global_admin=is_global_admin)
 
         async for item in self._iter_all_pages(
             Endpoints.ADMIN_DEVELOPERS,
             limit=limit,
-            params=params or None,
+            params=params,
         ):
             yield Developer.model_validate(item)
 

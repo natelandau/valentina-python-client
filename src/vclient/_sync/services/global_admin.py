@@ -129,12 +129,8 @@ class SyncGlobalAdminService(SyncBaseService):
             >>> async for developer in client.global_admin.iter_all_developers():
             ...     print(developer.username)
         """
-        params = {}
-        if is_global_admin is not None:
-            params["is_global_admin"] = is_global_admin
-        for item in self._iter_all_pages(
-            Endpoints.ADMIN_DEVELOPERS, limit=limit, params=params or None
-        ):
+        params = self._build_params(is_global_admin=is_global_admin)
+        for item in self._iter_all_pages(Endpoints.ADMIN_DEVELOPERS, limit=limit, params=params):
             yield Developer.model_validate(item)
 
     def get_developer(self, developer_id: str) -> Developer:

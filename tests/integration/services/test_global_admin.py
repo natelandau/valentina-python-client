@@ -583,19 +583,31 @@ class TestGlobalAdminServiceUsers:
 
     @respx.mock
     async def test_list_all_users(self, vclient, base_url, admin_user_response_data):
-        """Verify list_all_users paginates through all admin users."""
-        # Given: a single full page
-        respx.get(f"{base_url}{Endpoints.ADMIN_USERS}").respond(
+        """Verify list_all_users paginates across multiple pages and stops at the end."""
+        # Given: two pages, each holding one user, with total exceeding the page size
+        user2 = {**admin_user_response_data, "id": "u2", "username": "playertwo"}
+        respx.get(
+            f"{base_url}{Endpoints.ADMIN_USERS}",
+            params={"limit": "100", "offset": "0"},
+        ).respond(
             200,
-            json={"items": [admin_user_response_data], "limit": 100, "offset": 0, "total": 1},
+            json={"items": [admin_user_response_data], "limit": 100, "offset": 0, "total": 2},
+        )
+        respx.get(
+            f"{base_url}{Endpoints.ADMIN_USERS}",
+            params={"limit": "100", "offset": "100"},
+        ).respond(
+            200,
+            json={"items": [user2], "limit": 100, "offset": 100, "total": 2},
         )
 
         # When: listing all users
         result = await vclient.global_admin.list_all_users()
 
-        # Then: the user is returned as an AdminUser
-        assert len(result) == 1
-        assert isinstance(result[0], AdminUser)
+        # Then: both pages are collected as AdminUser objects and pagination terminates
+        assert len(result) == 2
+        assert all(isinstance(u, AdminUser) for u in result)
+        assert [u.username for u in result] == ["playerone", "playertwo"]
 
     @respx.mock
     async def test_iter_all_users(self, vclient, base_url, admin_user_response_data):
@@ -700,3 +712,29 @@ class TestGlobalAdminServiceUsers:
 
         # Then: no On-Behalf-Of header was attached
         assert "On-Behalf-Of" not in route.calls.last.request.headers
+
+    @respx.mock
+    async def test_get_user_not_found(self, vclient, base_url):
+        """Verify getting a non-existent user raises NotFoundError."""
+        # Given: a mocked endpoint returning 404
+        user_id = "nonexistent"
+        respx.get(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            404, json={"detail": "User not found"}
+        )
+
+        # When/Then: getting the user raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.global_admin.get_user(user_id)
+
+    @respx.mock
+    async def test_get_user_unauthorized(self, vclient, base_url):
+        """Verify getting a user without admin access raises AuthorizationError."""
+        # Given: a mocked endpoint returning 403
+        user_id = "507f1f77bcf86cd799439099"
+        respx.get(f"{base_url}{Endpoints.ADMIN_USER.format(user_id=user_id)}").respond(
+            403, json={"detail": "Global admin access required"}
+        )
+
+        # When/Then: getting the user raises AuthorizationError
+        with pytest.raises(AuthorizationError):
+            await vclient.global_admin.get_user(user_id)

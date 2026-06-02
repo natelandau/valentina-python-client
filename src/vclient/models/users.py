@@ -205,40 +205,24 @@ class UserUpdate(BaseModel):
     github_profile: GitHubProfile | None = None
 
 
-class AdminUserCreate(BaseModel):
+class AdminUserCreate(UserCreate):
     """Request body for creating a user as a global admin.
 
-    Unlike the tenant-scoped ``UserCreate``, the target company is explicit via
-    ``company_id``. The server rejects ``UNAPPROVED``/``DEACTIVATED`` roles on
-    create, so no client-side role restriction is applied here.
+    Extends the tenant-scoped ``UserCreate`` with an explicit ``company_id`` for
+    the target company. The server rejects ``UNAPPROVED``/``DEACTIVATED`` roles
+    on create, so no client-side role restriction is applied here.
     """
 
     company_id: str
-    username: str = Field(min_length=3, max_length=50)
-    email: str
-    role: UserRole
-    name_first: Annotated[str, Field(min_length=3, max_length=50)] | None = None
-    name_last: Annotated[str, Field(min_length=3, max_length=50)] | None = None
-    discord_profile: DiscordProfileUpdate | None = None
-    google_profile: GoogleProfile | None = None
-    github_profile: GitHubProfile | None = None
 
 
-class AdminUserUpdate(BaseModel):
+class AdminUserUpdate(UserUpdate):
     """Request body for updating any user as a global admin.
 
-    Only include fields that need to change. Set ``is_archived`` to ``False`` to
-    restore a soft-deleted user.
+    Extends the tenant-scoped ``UserUpdate`` with ``is_archived``. Set it to
+    ``False`` to restore a soft-deleted user.
     """
 
-    name_first: Annotated[str, Field(min_length=3, max_length=50)] | None = None
-    name_last: Annotated[str, Field(min_length=3, max_length=50)] | None = None
-    username: Annotated[str, Field(min_length=3, max_length=50)] | None = None
-    email: str | None = None
-    role: UserRole | None = None
-    discord_profile: DiscordProfileUpdate | None = None
-    google_profile: GoogleProfile | None = None
-    github_profile: GitHubProfile | None = None
     is_archived: bool | None = None
 
 
