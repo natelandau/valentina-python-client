@@ -18,3 +18,4 @@ docs/plans/
 _site/
 docs/superpowers/
 .superpowers/
+.agent/
