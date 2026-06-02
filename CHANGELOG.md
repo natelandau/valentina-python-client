@@ -1,3 +1,9 @@
+## v2.4.0 (2026-06-02)
+
+### Feat
+
+- add child-resource count fields to response models (#75)
+
 ## v2.3.0 (2026-06-02)
 
 ### Feat
