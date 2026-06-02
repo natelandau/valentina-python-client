@@ -57,7 +57,7 @@ class TestGlobalAdminServiceGetPage:
         ).respond(200, json=paginated_developers_response)
 
         # When: Getting a page of developers
-        result = await vclient.global_admin.get_page()
+        result = await vclient.global_admin.get_developer_page()
 
         # Then: Returns PaginatedResponse with Developer objects
         assert route.called
@@ -85,7 +85,7 @@ class TestGlobalAdminServiceGetPage:
         )
 
         # When: Getting a page with custom pagination
-        result = await vclient.global_admin.get_page(limit=25, offset=50)
+        result = await vclient.global_admin.get_developer_page(limit=25, offset=50)
 
         # Then: Request was made with correct params
         assert route.called
@@ -104,7 +104,7 @@ class TestGlobalAdminServiceGetPage:
         ).respond(200, json=paginated_developers_response)
 
         # When: Getting a page filtered by global admin status
-        result = await vclient.global_admin.get_page(is_global_admin=True)
+        result = await vclient.global_admin.get_developer_page(is_global_admin=True)
 
         # Then: Request was made with filter param
         assert route.called
@@ -132,7 +132,7 @@ class TestGlobalAdminServiceListAll:
         )
 
         # When: Calling list_all
-        result = await vclient.global_admin.list_all()
+        result = await vclient.global_admin.list_all_developers()
 
         # Then: Returns list of Developer objects
         assert isinstance(result, list)
@@ -157,7 +157,7 @@ class TestGlobalAdminServiceListAll:
         )
 
         # When: Calling list_all with filter
-        result = await vclient.global_admin.list_all(is_global_admin=False)
+        result = await vclient.global_admin.list_all_developers(is_global_admin=False)
 
         # Then: Returns filtered list
         assert len(result) == 1
@@ -201,7 +201,7 @@ class TestGlobalAdminServiceIterAll:
         )
 
         # When: Iterating through all developers
-        developers = [dev async for dev in vclient.global_admin.iter_all(limit=1)]
+        developers = [dev async for dev in vclient.global_admin.iter_all_developers(limit=1)]
 
         # Then: All developers are yielded as Developer objects
         assert len(developers) == 2
@@ -223,7 +223,7 @@ class TestGlobalAdminServiceGet:
         ).respond(200, json=developer_response_data)
 
         # When: Getting the developer
-        result = await vclient.global_admin.get(developer_id)
+        result = await vclient.global_admin.get_developer(developer_id)
 
         # Then: Returns Developer object with correct data
         assert route.called
@@ -243,7 +243,7 @@ class TestGlobalAdminServiceGet:
 
         # When/Then: Getting the developer raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.global_admin.get(developer_id)
+            await vclient.global_admin.get_developer(developer_id)
 
     @respx.mock
     async def test_get_developer_unauthorized(self, vclient, base_url):
@@ -256,7 +256,7 @@ class TestGlobalAdminServiceGet:
 
         # When/Then: Getting the developer raises AuthorizationError
         with pytest.raises(AuthorizationError):
-            await vclient.global_admin.get(developer_id)
+            await vclient.global_admin.get_developer(developer_id)
 
 
 class TestGlobalAdminServiceCreate:
@@ -271,7 +271,7 @@ class TestGlobalAdminServiceCreate:
         )
 
         # When: Creating a developer with minimal data
-        result = await vclient.global_admin.create(
+        result = await vclient.global_admin.create_developer(
             username="testuser",
             email="test@example.com",
         )
@@ -300,7 +300,7 @@ class TestGlobalAdminServiceCreate:
         )
 
         # When: Creating a developer with global admin
-        result = await vclient.global_admin.create(
+        result = await vclient.global_admin.create_developer(
             username="adminuser",
             email="admin@example.com",
             is_global_admin=True,
@@ -331,7 +331,7 @@ class TestGlobalAdminServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating the developer username
-        result = await vclient.global_admin.update(developer_id, username="newusername")
+        result = await vclient.global_admin.update_developer(developer_id, username="newusername")
 
         # Then: Returns updated Developer object
         assert route.called
@@ -360,7 +360,7 @@ class TestGlobalAdminServiceUpdate:
         ).respond(200, json=updated_data)
 
         # When: Updating multiple fields
-        result = await vclient.global_admin.update(
+        result = await vclient.global_admin.update_developer(
             developer_id,
             email="new@example.com",
             is_global_admin=True,
@@ -386,7 +386,7 @@ class TestGlobalAdminServiceUpdate:
 
         # When/Then: Updating raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.global_admin.update(developer_id, username="newname")
+            await vclient.global_admin.update_developer(developer_id, username="newname")
 
 
 class TestGlobalAdminServiceDelete:
@@ -402,7 +402,7 @@ class TestGlobalAdminServiceDelete:
         ).respond(204)
 
         # When: Deleting the developer
-        result = await vclient.global_admin.delete(developer_id)
+        result = await vclient.global_admin.delete_developer(developer_id)
 
         # Then: Request was made and returns None
         assert route.called
@@ -419,7 +419,7 @@ class TestGlobalAdminServiceDelete:
 
         # When/Then: Deleting raises NotFoundError
         with pytest.raises(NotFoundError):
-            await vclient.global_admin.delete(developer_id)
+            await vclient.global_admin.delete_developer(developer_id)
 
     @respx.mock
     async def test_delete_developer_unauthorized(self, vclient, base_url):
@@ -432,7 +432,7 @@ class TestGlobalAdminServiceDelete:
 
         # When/Then: Deleting raises AuthorizationError
         with pytest.raises(AuthorizationError):
-            await vclient.global_admin.delete(developer_id)
+            await vclient.global_admin.delete_developer(developer_id)
 
 
 class TestGlobalAdminServiceCreateApiKey:

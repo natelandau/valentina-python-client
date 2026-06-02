@@ -56,16 +56,16 @@ def _filename_from_content_disposition(header: str | None, *, fallback: str) -> 
 class GlobalAdminService(BaseService):
     """Service for global admin operations in the Valentina API.
 
-    Provides methods to create, retrieve, update, and delete developer accounts,
-    as well as manage API keys. Requires global admin privileges.
+    Provides cross-company management of developer accounts and their API keys,
+    plus server log access. Requires global admin privileges.
 
     Example:
         >>> async with VClient() as client:
-        ...     developers = await client.global_admin.list_all()
-        ...     developer = await client.global_admin.get("developer_id")
+        ...     developers = await client.global_admin.list_all_developers()
+        ...     developer = await client.global_admin.get_developer("developer_id")
     """
 
-    async def get_page(
+    async def get_developer_page(
         self,
         *,
         limit: int = DEFAULT_PAGE_LIMIT,
@@ -93,11 +93,11 @@ class GlobalAdminService(BaseService):
             params=params,
         )
 
-    async def list_all(self, *, is_global_admin: bool | None = None) -> list[Developer]:
+    async def list_all_developers(self, *, is_global_admin: bool | None = None) -> list[Developer]:
         """Retrieve all developer accounts.
 
-        Automatically paginates through all results. Use `get_page()` for paginated access
-        or `iter_all()` for memory-efficient streaming of large datasets.
+        Automatically paginates through all results. Use `get_developer_page()` for paginated
+        access or `iter_all_developers()` for memory-efficient streaming of large datasets.
 
         Args:
             is_global_admin: Optional filter by global admin status.
@@ -105,9 +105,12 @@ class GlobalAdminService(BaseService):
         Returns:
             A list of all Developer objects.
         """
-        return [developer async for developer in self.iter_all(is_global_admin=is_global_admin)]
+        return [
+            developer
+            async for developer in self.iter_all_developers(is_global_admin=is_global_admin)
+        ]
 
-    async def iter_all(
+    async def iter_all_developers(
         self,
         *,
         limit: int = 100,
@@ -126,7 +129,7 @@ class GlobalAdminService(BaseService):
             Individual Developer objects.
 
         Example:
-            >>> async for developer in client.global_admin.iter_all():
+            >>> async for developer in client.global_admin.iter_all_developers():
             ...     print(developer.username)
         """
         params = {}
@@ -140,7 +143,7 @@ class GlobalAdminService(BaseService):
         ):
             yield Developer.model_validate(item)
 
-    async def get(self, developer_id: str) -> Developer:
+    async def get_developer(self, developer_id: str) -> Developer:
         """Retrieve detailed information about a specific developer.
 
         Args:
@@ -156,7 +159,7 @@ class GlobalAdminService(BaseService):
         response = await self._get(Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id))
         return Developer.model_validate(response.json())
 
-    async def create(
+    async def create_developer(
         self,
         request: DeveloperCreate | None = None,
         **kwargs,
@@ -187,7 +190,7 @@ class GlobalAdminService(BaseService):
         )
         return Developer.model_validate(response.json())
 
-    async def update(
+    async def update_developer(
         self,
         developer_id: str,
         request: DeveloperUpdate | None = None,
@@ -220,7 +223,7 @@ class GlobalAdminService(BaseService):
         )
         return Developer.model_validate(response.json())
 
-    async def delete(self, developer_id: str) -> None:
+    async def delete_developer(self, developer_id: str) -> None:
         """Remove a developer account from the system.
 
         The developer's API key will be invalidated immediately.
