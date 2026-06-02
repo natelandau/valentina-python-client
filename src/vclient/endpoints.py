@@ -29,6 +29,8 @@ class Endpoints:
     ADMIN_DEVELOPER_AUDIT_LOGS = f"{ADMIN_DEVELOPER}/audit-logs"
     ADMIN_LOGS = f"{_BASE}/admin/logs"
     ADMIN_LOGS_DOWNLOAD = f"{ADMIN_LOGS}/download"
+    ADMIN_USERS = f"{_BASE}/admin/users"
+    ADMIN_USER = f"{_BASE}/admin/users/{{user_id}}"
 
     # Developer endpoints (self-service)
     DEVELOPER_ME = f"{_BASE}/developers/me"
