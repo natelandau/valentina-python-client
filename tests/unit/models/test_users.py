@@ -22,6 +22,7 @@ from vclient.models import (
     UserCreate,
     UserUpdate,
 )
+from vclient.models.users import AdminUser, AdminUserCreate, AdminUserUpdate
 
 
 class TestDiscordProfile:
@@ -913,3 +914,66 @@ class TestUserDetail:
         payload = _VALID_USER_PAYLOAD | {"quickrolls": "not-a-list"}
         with pytest.raises(PydanticValidationError):
             UserDetail.model_validate(payload)
+
+
+class TestAdminUser:
+    """Tests for AdminUser model."""
+
+    def test_admin_user_requires_is_archived(self):
+        """Verify AdminUser exposes is_archived alongside inherited User fields."""
+        # Given: data for an archived user
+        data = {
+            "id": "u1",
+            "date_created": "2024-01-15T10:30:00Z",
+            "date_modified": "2024-01-15T10:30:00Z",
+            "username": "alice",
+            "email": "alice@example.com",
+            "role": "PLAYER",
+            "company_id": "c1",
+            "is_archived": True,
+        }
+
+        # When: validating into an AdminUser
+        user = AdminUser.model_validate(data)
+
+        # Then: is_archived is present and inherited fields resolve
+        assert user.is_archived is True
+        assert user.username == "alice"
+        assert user.company_id == "c1"
+
+
+class TestAdminUserCreate:
+    """Tests for AdminUserCreate model."""
+
+    def test_admin_user_create_requires_company_id(self):
+        """Verify AdminUserCreate carries the target company_id and omits unset fields."""
+        # Given: a minimal create request
+        body = AdminUserCreate(
+            company_id="c1", username="bob", email="bob@example.com", role="PLAYER"
+        )
+
+        # When: dumping for the wire
+        dumped = body.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: only the set fields are present
+        assert dumped == {
+            "company_id": "c1",
+            "username": "bob",
+            "email": "bob@example.com",
+            "role": "PLAYER",
+        }
+
+
+class TestAdminUserUpdate:
+    """Tests for AdminUserUpdate model."""
+
+    def test_admin_user_update_restore_sends_false(self):
+        """Verify is_archived=False round-trips so a soft-deleted user can be restored."""
+        # Given: an update that restores a user
+        body = AdminUserUpdate(is_archived=False)
+
+        # When: dumping with exclude_none
+        dumped = body.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: is_archived False is retained (not dropped as None)
+        assert dumped == {"is_archived": False}

@@ -122,6 +122,17 @@ class UserDetail(User):
     )
 
 
+class AdminUser(User):
+    """Response model for a user returned by the global-admin user endpoints.
+
+    Extends the tenant-scoped ``User`` with ``is_archived``, which is always
+    present on the admin endpoints so callers can identify soft-deleted users
+    directly from the response body.
+    """
+
+    is_archived: bool
+
+
 # -----------------------------------------------------------------------------
 # User Request Models
 # -----------------------------------------------------------------------------
@@ -194,6 +205,43 @@ class UserUpdate(BaseModel):
     github_profile: GitHubProfile | None = None
 
 
+class AdminUserCreate(BaseModel):
+    """Request body for creating a user as a global admin.
+
+    Unlike the tenant-scoped ``UserCreate``, the target company is explicit via
+    ``company_id``. The server rejects ``UNAPPROVED``/``DEACTIVATED`` roles on
+    create, so no client-side role restriction is applied here.
+    """
+
+    company_id: str
+    username: str = Field(min_length=3, max_length=50)
+    email: str
+    role: UserRole
+    name_first: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    name_last: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    discord_profile: DiscordProfileUpdate | None = None
+    google_profile: GoogleProfile | None = None
+    github_profile: GitHubProfile | None = None
+
+
+class AdminUserUpdate(BaseModel):
+    """Request body for updating any user as a global admin.
+
+    Only include fields that need to change. Set ``is_archived`` to ``False`` to
+    restore a soft-deleted user.
+    """
+
+    name_first: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    name_last: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    username: Annotated[str, Field(min_length=3, max_length=50)] | None = None
+    email: str | None = None
+    role: UserRole | None = None
+    discord_profile: DiscordProfileUpdate | None = None
+    google_profile: GoogleProfile | None = None
+    github_profile: GitHubProfile | None = None
+    is_archived: bool | None = None
+
+
 class UserApproveDTO(BaseModel):
     """Approve an unapproved user and assign a role."""
 
@@ -262,6 +310,9 @@ class _ExperienceAddRemove(BaseModel):
 
 
 __all__ = [
+    "AdminUser",
+    "AdminUserCreate",
+    "AdminUserUpdate",
     "CampaignExperience",
     "DiscordProfile",
     "GitHubProfile",
