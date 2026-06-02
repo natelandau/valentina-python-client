@@ -338,6 +338,7 @@ class TestUser:
 
     def test_child_resource_counts(self):
         """Verify child-resource count fields default to 0 and accept values."""
+        # Given: base required fields for a User
         base_kwargs = {
             "id": "user123",
             "date_created": "2024-01-15T10:30:00Z",
@@ -347,12 +348,17 @@ class TestUser:
             "role": "PLAYER",
             "company_id": "company123",
         }
+
+        # When: creating a User without count fields
         defaults = User(**base_kwargs)
+
+        # Then: all count fields default to 0
         assert defaults.num_quickrolls == 0
         assert defaults.num_notes == 0
         assert defaults.num_assets == 0
         assert defaults.num_characters == 0
 
+        # When: creating a User with explicit count values
         populated = User(
             **base_kwargs,
             num_quickrolls=2,
@@ -360,6 +366,8 @@ class TestUser:
             num_assets=1,
             num_characters=5,
         )
+
+        # Then: count fields reflect the provided values
         assert populated.num_quickrolls == 2
         assert populated.num_notes == 3
         assert populated.num_assets == 1
