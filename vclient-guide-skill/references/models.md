@@ -767,6 +767,8 @@ For creating custom traits on a character.
 | asset_ids | list[str] | no (default=[]) |
 | number | int | yes |
 | book_id | str | yes |
+| num_notes | int | no (default=0) |
+| num_assets | int | no (default=0) |
 
 ### CampaignChapterDetail (extends CampaignChapter)
 
