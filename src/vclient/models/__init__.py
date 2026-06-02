@@ -127,6 +127,9 @@ from .user_lookup import (
     UserLookupResult,
 )
 from .users import (
+    AdminUser,
+    AdminUserCreate,
+    AdminUserUpdate,
     CampaignExperience,
     DiscordProfile,
     DiscordProfileUpdate,
@@ -146,6 +149,9 @@ from .users import (
 )
 
 __all__ = [
+    "AdminUser",
+    "AdminUserCreate",
+    "AdminUserUpdate",
     "Asset",
     "AuditLog",
     "AuditLogDetail",
