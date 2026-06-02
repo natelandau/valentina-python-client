@@ -26,6 +26,10 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `asset_ids`            | `list[str]`                | Owned asset IDs                               |
 | `lifetime_xp`          | `int`                      | Lifetime XP earned                            |
 | `lifetime_cool_points` | `int`                      | Lifetime cool points earned                   |
+| `num_quickrolls`       | `int`                      | Active quick-roll count owned by the user     |
+| `num_notes`            | `int`                      | Active note count authored by the user        |
+| `num_assets`           | `int`                      | Active asset count owned by the user          |
+| `num_characters`       | `int`                      | Active character count played by the user     |
 
 ## UserDetail
 

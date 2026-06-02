@@ -263,6 +263,10 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | asset_ids | list[str] | no (default=[]) |
 | lifetime_xp | int | no (default=0) |
 | lifetime_cool_points | int | no (default=0) |
+| num_quickrolls | int | no (default=0) |
+| num_notes | int | no (default=0) |
+| num_assets | int | no (default=0) |
+| num_characters | int | no (default=0) |
 
 ### UserDetail (extends User)
 
