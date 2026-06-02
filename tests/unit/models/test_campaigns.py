@@ -50,6 +50,42 @@ class TestCampaign:
         assert campaign.desperation == 0
         assert campaign.danger == 0
 
+    def test_child_resource_counts(self):
+        """Verify child-resource count fields default to 0 and accept values."""
+        defaults = Campaign(
+            id="campaign123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Campaign",
+            company_id="company123",
+        )
+        assert defaults.num_books == 0
+        assert defaults.num_chapters == 0
+        assert defaults.num_notes == 0
+        assert defaults.num_player_characters == 0
+        assert defaults.num_storyteller_characters == 0
+        assert defaults.num_npc_characters == 0
+
+        populated = Campaign(
+            id="campaign123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Campaign",
+            company_id="company123",
+            num_books=2,
+            num_chapters=5,
+            num_notes=3,
+            num_player_characters=4,
+            num_storyteller_characters=1,
+            num_npc_characters=7,
+        )
+        assert populated.num_books == 2
+        assert populated.num_chapters == 5
+        assert populated.num_notes == 3
+        assert populated.num_player_characters == 4
+        assert populated.num_storyteller_characters == 1
+        assert populated.num_npc_characters == 7
+
 
 class TestCampaignCreate:
     """Tests for CampaignCreate model."""

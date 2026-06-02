@@ -359,6 +359,12 @@ All fields optional. Same fields as UserCreate (without role).
 | desperation | int | no (default=0) |
 | danger | int | no (default=0) |
 | company_id | str | yes |
+| num_books | int | no (default=0) |
+| num_chapters | int | no (default=0) |
+| num_notes | int | no (default=0) |
+| num_player_characters | int | no (default=0) |
+| num_storyteller_characters | int | no (default=0) |
+| num_npc_characters | int | no (default=0) |
 
 ### CampaignCreate
 
