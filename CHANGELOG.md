@@ -1,3 +1,9 @@
+## v2.4.2 (2026-06-03)
+
+### Fix
+
+- **logging**: include query params in request log lines
+
 ## v2.4.1 (2026-06-03)
 
 ### Fix
