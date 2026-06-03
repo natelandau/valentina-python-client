@@ -111,6 +111,23 @@ class TestDictionaryServiceGetPage:
         assert isinstance(result.items[0], DictionaryTerm)
         assert result.items[0].term == "Test Term"
 
+    @respx.mock
+    async def test_get_page_allows_reference_limit(
+        self, vclient, base_url, paginated_dictionary_terms_response
+    ):
+        """Verify the dictionary accepts a limit up to 1000 without clamping to 100."""
+        # Given: An endpoint expecting the reference max limit (1000)
+        route = respx.get(
+            f"{base_url}{Endpoints.DICTIONARY_TERMS.format(company_id='company123')}",
+            params={"limit": "1000", "offset": "0"},
+        ).respond(200, json=paginated_dictionary_terms_response)
+
+        # When: Requesting a page with limit=1000
+        await vclient.dictionary("on-behalf-of-user", company_id="company123").get_page(limit=1000)
+
+        # Then: The request used limit=1000 rather than the 100 cap
+        assert route.called
+
 
 class TestDictionaryServiceListAll:
     """Tests for DictionaryService.list_all method."""
@@ -142,7 +159,7 @@ class TestDictionaryServiceListAll:
         # Given: A mocked endpoint expecting filter params
         route = respx.get(
             f"{base_url}{Endpoints.DICTIONARY_TERMS.format(company_id='company123')}",
-            params={"limit": "100", "offset": "0", "term": "Test"},
+            params={"limit": "1000", "offset": "0", "term": "Test"},
         ).respond(200, json=paginated_dictionary_terms_response)
 
         # When: Listing all dictionary terms with filters

@@ -49,6 +49,8 @@ Services that return collections provide three methods for accessing paginated d
 | `list_all()` | `list[T]`              | Fetch all items across all pages into a list    |
 | `iter_all()` | `AsyncIterator[T]` / `Iterator[T]` | Memory-efficient streaming through all pages    |
 
+The default `limit` is 10 and the maximum is 100. Reference (catalog) endpoints are the exception: the [Character Blueprint](character_blueprint.md) and [Dictionary](dictionary.md) services accept a `limit` of up to 1000, letting you fetch an entire catalog in one request. Any `limit` above the endpoint's maximum is clamped down to it.
+
 ### PaginatedResponse Model
 
 The `PaginatedResponse` object contains both the results and metadata about the current page:

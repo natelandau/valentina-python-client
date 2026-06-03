@@ -14,6 +14,10 @@ from vclient import character_blueprint_service
 blueprint = character_blueprint_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
+!!! note "Higher page limit"
+
+    These are reference (catalog) endpoints serving bounded, slowly-changing data, so they accept a `limit` of up to **1000** per request (other services cap `limit` at 100). To pull a whole catalog in one call, pass an explicit `limit`, for example `get_traits_page(limit=1000)`. The `list_all_*` and `iter_all_*` methods already fetch 1000 per page automatically.
+
 ## Methods
 
 ### Sections

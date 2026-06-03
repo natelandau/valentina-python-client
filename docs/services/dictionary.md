@@ -31,7 +31,11 @@ dictionary = dictionary_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 | ------------------------------------------- | ----------------------------------- | ------------------------------------ |
 | `get_page(limit=10, offset=0, term=None)`   | `PaginatedResponse[DictionaryTerm]` | Retrieve a paginated page of terms   |
 | `list_all(term=None)`                       | `list[DictionaryTerm]`              | Retrieve all terms (auto-paginated)  |
-| `iter_all(term=None, limit=100)`            | `AsyncIterator[DictionaryTerm]`     | Iterate through all terms            |
+| `iter_all(term=None, limit=1000)`           | `AsyncIterator[DictionaryTerm]`     | Iterate through all terms            |
+
+!!! note "Higher page limit"
+
+    The dictionary is a reference (catalog) endpoint, so `get_page` accepts a `limit` of up to **1000** per request (other services cap `limit` at 100). Pass `get_page(limit=1000)` to fetch a full dictionary in one call. `list_all` and `iter_all` fetch 1000 per page automatically.
 
 ## Examples
 

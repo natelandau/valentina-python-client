@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from vclient.constants import (
     DEFAULT_PAGE_LIMIT,
+    MAX_REFERENCE_PAGE_LIMIT,
     BlueprintTraitOrderBy,
     CharacterClass,
     GameVersion,
@@ -65,6 +66,7 @@ class CharacterBlueprintService(BaseService):
             SheetSection,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version, character_class=character_class),
         )
 
@@ -91,6 +93,8 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all character blueprint sections."""
         async for section in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_SECTIONS),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version, character_class=character_class),
         ):
             yield SheetSection.model_validate(section)
@@ -122,6 +126,7 @@ class CharacterBlueprintService(BaseService):
             TraitCategory,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 game_version=game_version,
                 section_id=section_id,
@@ -156,6 +161,8 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all character blueprint categories."""
         async for category in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_CATEGORIES),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 game_version=game_version,
                 section_id=section_id,
@@ -191,6 +198,7 @@ class CharacterBlueprintService(BaseService):
             TraitSubcategory,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 game_version=game_version,
                 category_id=category_id,
@@ -225,6 +233,8 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all character blueprint subcategories."""
         async for subcategory in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_SUBCATEGORIES),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 game_version=game_version,
                 category_id=category_id,
@@ -264,6 +274,7 @@ class CharacterBlueprintService(BaseService):
             Trait,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 character_class=character_class,
                 category_id=category_id,
@@ -314,6 +325,8 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all character blueprint traits."""
         async for trait in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 character_class=character_class,
                 category_id=category_id,
@@ -347,6 +360,7 @@ class CharacterBlueprintService(BaseService):
             CharacterConcept,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
         )
 
     async def list_all_concepts(self) -> list[CharacterConcept]:
@@ -357,6 +371,8 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all character concepts."""
         async for concept in self._iter_all_pages(
             self._format_endpoint(Endpoints.CONCEPTS),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
         ):
             yield CharacterConcept.model_validate(concept)
 
@@ -383,6 +399,7 @@ class CharacterBlueprintService(BaseService):
             VampireClan,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         )
 
@@ -398,6 +415,8 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all vampire clans."""
         async for clan in self._iter_all_pages(
             self._format_endpoint(Endpoints.VAMPIRE_CLANS),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         ):
             yield VampireClan.model_validate(clan)
@@ -425,6 +444,7 @@ class CharacterBlueprintService(BaseService):
             WerewolfAuspice,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         )
 
@@ -442,6 +462,8 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all werewolf auspices."""
         async for auspice in self._iter_all_pages(
             self._format_endpoint(Endpoints.WEREWOLF_AUSPICES),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         ):
             yield WerewolfAuspice.model_validate(auspice)
@@ -471,6 +493,7 @@ class CharacterBlueprintService(BaseService):
             WerewolfTribe,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         )
 
@@ -486,6 +509,8 @@ class CharacterBlueprintService(BaseService):
         """Iterate through all werewolf tribes."""
         async for tribe in self._iter_all_pages(
             self._format_endpoint(Endpoints.WEREWOLF_TRIBES),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         ):
             yield WerewolfTribe.model_validate(tribe)

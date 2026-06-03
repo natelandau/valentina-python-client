@@ -252,6 +252,8 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 
 Provides read-only access to the character sheet template (sections, categories, subcategories, traits, concepts, clans, tribes, auspices).
 
+**Higher page limit:** As a reference/catalog service, every `get_*_page()` method accepts `limit` up to **1000** (other services cap at 100). `list_all_*()`/`iter_all_*()` fetch 1000 per page automatically.
+
 ### Sheet Structure Methods
 
 Each level (sections, categories, subcategories, traits) has the standard pagination triple:
@@ -382,6 +384,8 @@ Plus standard notes and assets sub-resource methods.
 **Access:** `client.dictionary(on_behalf_of=, company_id=)` — `on_behalf_of` is optional (not required by API)
 **Factory:** `dictionary_service(on_behalf_of=, company_id=)` / `sync_dictionary_service(...)`
 **Scoping:** company_id
+
+**Higher page limit:** As a reference/catalog service, `get_page()` accepts `limit` up to **1000** (other services cap at 100). `list_all()`/`iter_all()` fetch 1000 per page automatically.
 
 ### Methods
 

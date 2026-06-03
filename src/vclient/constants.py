@@ -20,6 +20,9 @@ IDEMPOTENT_HTTP_METHODS: frozenset[str] = frozenset({"GET", "PUT", "DELETE"})
 # Pagination defaults
 DEFAULT_PAGE_LIMIT = 10
 MAX_PAGE_LIMIT = 100
+# Reference/catalog list endpoints serve bounded seed data and allow fetching a
+# full catalog in one request, so they accept a higher per-request limit.
+MAX_REFERENCE_PAGE_LIMIT = 1000
 
 # Server log tail defaults
 DEFAULT_LOG_TAIL_LIMIT = 100

@@ -3,7 +3,7 @@
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import DEFAULT_PAGE_LIMIT, MAX_REFERENCE_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
     DictionaryTerm,
@@ -53,6 +53,7 @@ class DictionaryService(BaseService):
             DictionaryTerm,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(term=term),
         )
 
@@ -61,12 +62,13 @@ class DictionaryService(BaseService):
         return [term async for term in self.iter_all(term=term)]
 
     async def iter_all(
-        self, *, term: str | None = None, limit: int = 100
+        self, *, term: str | None = None, limit: int = MAX_REFERENCE_PAGE_LIMIT
     ) -> AsyncIterator[DictionaryTerm]:
         """Iterate through all dictionary terms."""
         async for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.DICTIONARY_TERMS),
             limit=limit,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(term=term),
         ):
             yield DictionaryTerm.model_validate(item)

@@ -112,6 +112,8 @@ await svc.create(name="My Campaign")
 - `.next_offset: int` - computed next offset
 - `.total_pages: int`, `.current_page: int` - computed helpers
 
+Default `limit` is 10, max is 100. Exception: the reference/catalog services (`CharacterBlueprintService`, `DictionaryService`) accept `limit` up to 1000 so a full catalog fits in one request. Limits above the endpoint max are clamped down.
+
 ### Error Handling
 
 All exceptions inherit from `APIError` and follow RFC 9457 Problem Details. Import from `vclient.exceptions`:

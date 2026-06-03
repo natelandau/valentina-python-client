@@ -413,6 +413,21 @@ class TestBaseServicePagination:
         assert route.called
 
     @respx.mock
+    async def test_get_paginated_respects_custom_max_limit(self, base_service, base_url):
+        """Verify limit is clamped to a caller-supplied max_limit instead of the default."""
+        # Given: An endpoint expecting the reference max limit (1000)
+        route = respx.get(f"{base_url}/items", params={"limit": "1000", "offset": "0"}).respond(
+            200,
+            json={"items": [], "limit": 1000, "offset": 0, "total": 0},
+        )
+
+        # When: Calling _get_paginated with a raised max_limit and excessive limit
+        await base_service._get_paginated("/items", limit=5000, max_limit=1000)
+
+        # Then: Request was made with the limit clamped to max_limit
+        assert route.called
+
+    @respx.mock
     async def test_iter_all_pages(self, base_service, base_url):
         """Verify _iter_all_pages iterates through all pages."""
         # Given: Mocked endpoints for 3 pages of data

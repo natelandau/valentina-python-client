@@ -5,7 +5,13 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT, BlueprintTraitOrderBy, CharacterClass, GameVersion
+from vclient.constants import (
+    DEFAULT_PAGE_LIMIT,
+    MAX_REFERENCE_PAGE_LIMIT,
+    BlueprintTraitOrderBy,
+    CharacterClass,
+    GameVersion,
+)
 from vclient.endpoints import Endpoints
 from vclient.models import (
     CharacterConcept,
@@ -58,6 +64,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             SheetSection,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version, character_class=character_class),
         )
 
@@ -84,6 +91,8 @@ class SyncCharacterBlueprintService(SyncBaseService):
         """Iterate through all character blueprint sections."""
         for section in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_SECTIONS),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version, character_class=character_class),
         ):
             yield SheetSection.model_validate(section)
@@ -110,6 +119,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             TraitCategory,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 game_version=game_version, section_id=section_id, character_class=character_class
             ),
@@ -140,6 +150,8 @@ class SyncCharacterBlueprintService(SyncBaseService):
         """Iterate through all character blueprint categories."""
         for category in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_CATEGORIES),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 game_version=game_version, section_id=section_id, character_class=character_class
             ),
@@ -168,6 +180,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             TraitSubcategory,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 game_version=game_version, category_id=category_id, character_class=character_class
             ),
@@ -198,6 +211,8 @@ class SyncCharacterBlueprintService(SyncBaseService):
         """Iterate through all character blueprint subcategories."""
         for subcategory in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_SUBCATEGORIES),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 game_version=game_version, category_id=category_id, character_class=character_class
             ),
@@ -232,6 +247,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             Trait,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 character_class=character_class,
                 category_id=category_id,
@@ -282,6 +298,8 @@ class SyncCharacterBlueprintService(SyncBaseService):
         """Iterate through all character blueprint traits."""
         for trait in self._iter_all_pages(
             self._format_endpoint(Endpoints.BLUEPRINT_TRAITS),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(
                 character_class=character_class,
                 category_id=category_id,
@@ -306,7 +324,11 @@ class SyncCharacterBlueprintService(SyncBaseService):
     ) -> PaginatedResponse[CharacterConcept]:
         """Get a paginated page of character concepts."""
         return self._get_paginated_as(
-            self._format_endpoint(Endpoints.CONCEPTS), CharacterConcept, limit=limit, offset=offset
+            self._format_endpoint(Endpoints.CONCEPTS),
+            CharacterConcept,
+            limit=limit,
+            offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
         )
 
     def list_all_concepts(self) -> list[CharacterConcept]:
@@ -315,7 +337,11 @@ class SyncCharacterBlueprintService(SyncBaseService):
 
     def iter_all_concepts(self) -> Iterator[CharacterConcept]:
         """Iterate through all character concepts."""
-        for concept in self._iter_all_pages(self._format_endpoint(Endpoints.CONCEPTS)):
+        for concept in self._iter_all_pages(
+            self._format_endpoint(Endpoints.CONCEPTS),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
+        ):
             yield CharacterConcept.model_validate(concept)
 
     def get_concept(self, *, concept_id: str) -> CharacterConcept:
@@ -336,6 +362,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             VampireClan,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         )
 
@@ -351,6 +378,8 @@ class SyncCharacterBlueprintService(SyncBaseService):
         """Iterate through all vampire clans."""
         for clan in self._iter_all_pages(
             self._format_endpoint(Endpoints.VAMPIRE_CLANS),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         ):
             yield VampireClan.model_validate(clan)
@@ -375,6 +404,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             WerewolfAuspice,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         )
 
@@ -390,6 +420,8 @@ class SyncCharacterBlueprintService(SyncBaseService):
         """Iterate through all werewolf auspices."""
         for auspice in self._iter_all_pages(
             self._format_endpoint(Endpoints.WEREWOLF_AUSPICES),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         ):
             yield WerewolfAuspice.model_validate(auspice)
@@ -416,6 +448,7 @@ class SyncCharacterBlueprintService(SyncBaseService):
             WerewolfTribe,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         )
 
@@ -431,6 +464,8 @@ class SyncCharacterBlueprintService(SyncBaseService):
         """Iterate through all werewolf tribes."""
         for tribe in self._iter_all_pages(
             self._format_endpoint(Endpoints.WEREWOLF_TRIBES),
+            limit=MAX_REFERENCE_PAGE_LIMIT,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(game_version=game_version),
         ):
             yield WerewolfTribe.model_validate(tribe)

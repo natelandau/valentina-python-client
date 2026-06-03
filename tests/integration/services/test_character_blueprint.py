@@ -343,6 +343,56 @@ class TestCharacterBlueprintServiceSections:
         assert len(result.items) == 1
 
     @respx.mock
+    async def test_get_sections_page_allows_reference_limit(
+        self, vclient, base_url, paginated_section_response
+    ) -> None:
+        """Verify reference endpoints accept a limit up to 1000 without clamping to 100."""
+        # Given: An endpoint expecting the reference max limit (1000)
+        company_id = "company123"
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_SECTIONS.format(company_id=company_id)}",
+            params={"limit": "1000", "offset": "0"},
+        ).mock(return_value=Response(200, json=paginated_section_response))
+
+        # When: Requesting a page with limit=1000
+        await vclient.character_blueprint(
+            "on-behalf-of-user", company_id=company_id
+        ).get_sections_page(limit=1000)
+
+        # Then: The request used limit=1000 rather than the 100 cap
+        assert route.called
+
+    @respx.mock
+    async def test_iter_all_sections_uses_reference_page_size(
+        self, vclient, base_url, section_response_data
+    ) -> None:
+        """Verify iter_all_sections auto-pages with the 1000 reference page size."""
+        # Given: An endpoint expecting limit=1000 per page
+        company_id = "company123"
+        paginated_response = {
+            "items": [section_response_data],
+            "limit": 1000,
+            "offset": 0,
+            "total": 1,
+        }
+        route = respx.get(
+            f"{base_url}{Endpoints.BLUEPRINT_SECTIONS.format(company_id=company_id)}",
+            params={"limit": "1000", "offset": "0"},
+        ).mock(return_value=Response(200, json=paginated_response))
+
+        # When: Iterating through all sections
+        sections = [
+            section
+            async for section in vclient.character_blueprint(
+                "on-behalf-of-user", company_id=company_id
+            ).iter_all_sections()
+        ]
+
+        # Then: The request fetched a 1000-item page
+        assert route.called
+        assert len(sections) == 1
+
+    @respx.mock
     async def test_list_all_sections(self, vclient, base_url, section_response_data) -> None:
         """Verify list_all_sections returns all sections across pages."""
         # Given: A mocked endpoint that returns paginated results

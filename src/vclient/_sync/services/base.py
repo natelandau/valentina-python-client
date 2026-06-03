@@ -592,20 +592,23 @@ class SyncBaseService:
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         params: dict[str, Any] | None = None,
+        max_limit: int = MAX_PAGE_LIMIT,
     ) -> PaginatedResponse[dict[str, Any]]:
         """Make a paginated GET request.
 
         Args:
             path: API endpoint path.
-            limit: Maximum number of items to return (0-100, default 10).
+            limit: Maximum number of items to return (default 10).
             offset: Number of items to skip from the beginning (default 0).
             params: Additional query parameters.
+            max_limit: Upper bound the limit is clamped to (default 100). Reference/catalog
+                endpoints pass a higher bound (MAX_REFERENCE_PAGE_LIMIT).
 
         Returns:
             A PaginatedResponse containing the items and pagination metadata.
         """
         request_params = {
-            "limit": min(max(limit, 0), MAX_PAGE_LIMIT),
+            "limit": min(max(limit, 0), max_limit),
             "offset": max(offset, 0),
             **(params or {}),
         }
@@ -620,20 +623,25 @@ class SyncBaseService:
         limit: int = DEFAULT_PAGE_LIMIT,
         offset: int = 0,
         params: dict[str, Any] | None = None,
+        max_limit: int = MAX_PAGE_LIMIT,
     ) -> PaginatedResponse[T]:
         """Make a paginated GET request and parse items into the given model class.
 
         Args:
             path: API endpoint path.
             model_class: Pydantic model class to validate each item into.
-            limit: Maximum number of items to return (0-100, default 10).
+            limit: Maximum number of items to return (default 10).
             offset: Number of items to skip from the beginning (default 0).
             params: Additional query parameters.
+            max_limit: Upper bound the limit is clamped to (default 100). Reference/catalog
+                endpoints pass a higher bound (MAX_REFERENCE_PAGE_LIMIT).
 
         Returns:
             A PaginatedResponse containing validated model instances.
         """
-        response = self._get_paginated(path, limit=limit, offset=offset, params=params)
+        response = self._get_paginated(
+            path, limit=limit, offset=offset, params=params, max_limit=max_limit
+        )
         return PaginatedResponse(
             items=[model_class.model_validate(item) for item in response.items],
             limit=response.limit,
@@ -642,7 +650,12 @@ class SyncBaseService:
         )
 
     def _iter_all_pages(
-        self, path: str, *, limit: int = MAX_PAGE_LIMIT, params: dict[str, Any] | None = None
+        self,
+        path: str,
+        *,
+        limit: int = MAX_PAGE_LIMIT,
+        params: dict[str, Any] | None = None,
+        max_limit: int = MAX_PAGE_LIMIT,
     ) -> Iterator[dict[str, Any]]:
         """Iterate through all pages of a paginated endpoint.
 
@@ -653,6 +666,8 @@ class SyncBaseService:
             path: API endpoint path.
             limit: Items per page (default 100 for efficiency).
             params: Additional query parameters.
+            max_limit: Upper bound the per-page limit is clamped to (default 100).
+                Reference/catalog endpoints pass a higher bound (MAX_REFERENCE_PAGE_LIMIT).
 
         Yields:
             Individual items from the paginated response.
@@ -665,7 +680,9 @@ class SyncBaseService:
         """
         offset = 0
         while True:
-            page = self._get_paginated(path, limit=limit, offset=offset, params=params)
+            page = self._get_paginated(
+                path, limit=limit, offset=offset, params=params, max_limit=max_limit
+            )
             for item in page.items:
                 yield item
             if not page.has_more:
@@ -673,7 +690,12 @@ class SyncBaseService:
             offset = page.next_offset
 
     def _get_all(
-        self, path: str, *, limit: int = MAX_PAGE_LIMIT, params: dict[str, Any] | None = None
+        self,
+        path: str,
+        *,
+        limit: int = MAX_PAGE_LIMIT,
+        params: dict[str, Any] | None = None,
+        max_limit: int = MAX_PAGE_LIMIT,
     ) -> list[dict[str, Any]]:
         """Fetch all items from a paginated endpoint.
 
@@ -685,8 +707,13 @@ class SyncBaseService:
             path: API endpoint path.
             limit: Items per page (default 100 for efficiency).
             params: Additional query parameters.
+            max_limit: Upper bound the per-page limit is clamped to (default 100).
+                Reference/catalog endpoints pass a higher bound (MAX_REFERENCE_PAGE_LIMIT).
 
         Returns:
             A list of all items from all pages.
         """
-        return [item for item in self._iter_all_pages(path, limit=limit, params=params)]
+        return [
+            item
+            for item in self._iter_all_pages(path, limit=limit, params=params, max_limit=max_limit)
+        ]

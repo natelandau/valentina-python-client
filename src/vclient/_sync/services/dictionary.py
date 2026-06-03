@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT
+from vclient.constants import DEFAULT_PAGE_LIMIT, MAX_REFERENCE_PAGE_LIMIT
 from vclient.endpoints import Endpoints
 from vclient.models import (
     DictionaryTerm,
@@ -48,6 +48,7 @@ class SyncDictionaryService(SyncBaseService):
             DictionaryTerm,
             limit=limit,
             offset=offset,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(term=term),
         )
 
@@ -55,11 +56,14 @@ class SyncDictionaryService(SyncBaseService):
         """Retrieve all dictionary terms."""
         return [term for term in self.iter_all(term=term)]
 
-    def iter_all(self, *, term: str | None = None, limit: int = 100) -> Iterator[DictionaryTerm]:
+    def iter_all(
+        self, *, term: str | None = None, limit: int = MAX_REFERENCE_PAGE_LIMIT
+    ) -> Iterator[DictionaryTerm]:
         """Iterate through all dictionary terms."""
         for item in self._iter_all_pages(
             self._format_endpoint(Endpoints.DICTIONARY_TERMS),
             limit=limit,
+            max_limit=MAX_REFERENCE_PAGE_LIMIT,
             params=self._build_params(term=term),
         ):
             yield DictionaryTerm.model_validate(item)
