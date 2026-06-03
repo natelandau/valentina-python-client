@@ -150,8 +150,9 @@ class StructuredHandler(logging.Handler):
         extra = getattr(record, "extra", {})
         method = extra.get("method", "")
         url = extra.get("url", "")
+        params = extra.get("params") or ""
         status = extra.get("status", "")
-        print(f"{record.levelname} | {record.message} | {method} {url} {status}")
+        print(f"{record.levelname} | {record.message} | {method} {url} {params} {status}")
 
 
 # Enable vclient logs
@@ -161,13 +162,15 @@ logger.enable("vclient")
 logging.getLogger("vclient").addHandler(StructuredHandler())
 logging.getLogger("vclient").setLevel(logging.DEBUG)
 
-# Output: DEBUG | Request complete | GET /companies 200
+# Output: DEBUG | Request complete | GET /companies {'limit': 50, 'offset': 100} 200
 ```
 
 By default each request emits a single `Request complete` line at DEBUG, carrying the
-method, URL, status, elapsed time, and request ID. The pre-flight `Send request` line is
-logged at TRACE (level 5), so it stays out of normal DEBUG output. To surface in-flight
-requests when diagnosing a hang, lower the level below DEBUG:
+method, URL, query params, status, elapsed time, and request ID. The `params` field
+includes pagination values such as `limit` and `offset`, so paginated calls to the same
+path are distinguishable rather than appearing as duplicate requests. The pre-flight
+`Send request` line is logged at TRACE (level 5), so it stays out of normal DEBUG output.
+To surface in-flight requests when diagnosing a hang, lower the level below DEBUG:
 
 ```python
 # Show the "Send request" line too (TRACE = 5, below DEBUG)

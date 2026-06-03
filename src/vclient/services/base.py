@@ -176,7 +176,9 @@ class BaseService:
         config = self._client._config  # noqa: SLF001
         max_attempts = config.max_retries + 1 if config.auto_retry_rate_limit else 1
         retry_statuses = config.retry_statuses
-        request_logger = logger.bind(method=method, url=path)
+        # Bind params so paginated requests are distinguishable in logs; without
+        # limit/offset, identical paths look like duplicate (thundering-herd) calls.
+        request_logger = logger.bind(method=method, url=path, params=params)
 
         # TRACE so the in-flight request is visible only when diagnosing hangs; the
         # "Request complete" DEBUG line below is the superset record for normal use.
@@ -211,7 +213,7 @@ class BaseService:
                 continue
 
             try:
-                self._raise_for_status(response, method, path)
+                self._raise_for_status(response, method, path, params=params)
                 self._log_success_response(response, request_logger)
                 return response  # noqa: TRY300
             except RateLimitError as e:
@@ -287,13 +289,21 @@ class BaseService:
             if header_id:
                 response_data["request_id"] = header_id
 
-    def _raise_for_status(self, response: httpx.Response, method: str, url: str) -> None:
+    def _raise_for_status(
+        self,
+        response: httpx.Response,
+        method: str,
+        url: str,
+        params: dict[str, Any] | None = None,
+    ) -> None:
         """Raise appropriate exception for error responses.
 
         Args:
             response: The HTTP response to check.
             method: The HTTP method of the request.
             url: The URL path of the request.
+            params: The query parameters of the request, logged to disambiguate
+                paginated calls that share the same path.
 
         Raises:
             AuthenticationError: For 401 responses.
@@ -319,7 +329,11 @@ class BaseService:
         self._inject_request_id_fallback(response_data, response)
 
         error_logger = logger.bind(
-            method=method, url=url, status=status_code, request_id=response_data.get("request_id")
+            method=method,
+            url=url,
+            params=params,
+            status=status_code,
+            request_id=response_data.get("request_id"),
         )
 
         if status_code == 429:  # noqa: PLR2004

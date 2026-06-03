@@ -168,7 +168,7 @@ class SyncBaseService:
         config = self._client._config
         max_attempts = config.max_retries + 1 if config.auto_retry_rate_limit else 1
         retry_statuses = config.retry_statuses
-        request_logger = logger.bind(method=method, url=path)
+        request_logger = logger.bind(method=method, url=path, params=params)
         request_logger.trace("Send request")
         last_error: RateLimitError | ServerError | None = None
         for attempt in range(max_attempts):
@@ -196,7 +196,7 @@ class SyncBaseService:
                 time.sleep(delay)
                 continue
             try:
-                self._raise_for_status(response, method, path)
+                self._raise_for_status(response, method, path, params=params)
                 self._log_success_response(response, request_logger)
                 return response
             except RateLimitError as e:
@@ -260,13 +260,17 @@ class SyncBaseService:
             if header_id:
                 response_data["request_id"] = header_id
 
-    def _raise_for_status(self, response: httpx.Response, method: str, url: str) -> None:
+    def _raise_for_status(
+        self, response: httpx.Response, method: str, url: str, params: dict[str, Any] | None = None
+    ) -> None:
         """Raise appropriate exception for error responses.
 
         Args:
             response: The HTTP response to check.
             method: The HTTP method of the request.
             url: The URL path of the request.
+            params: The query parameters of the request, logged to disambiguate
+                paginated calls that share the same path.
 
         Raises:
             AuthenticationError: For 401 responses.
@@ -289,7 +293,11 @@ class SyncBaseService:
             message = response.text or f"HTTP {status_code}"
         self._inject_request_id_fallback(response_data, response)
         error_logger = logger.bind(
-            method=method, url=url, status=status_code, request_id=response_data.get("request_id")
+            method=method,
+            url=url,
+            params=params,
+            status=status_code,
+            request_id=response_data.get("request_id"),
         )
         if status_code == 429:
             retry_after = self._parse_retry_after(response)

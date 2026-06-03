@@ -112,6 +112,68 @@ class TestRequestLogging:
         assert receive.extra["status"] == 200
 
     @respx.mock
+    async def test_log_request_includes_query_params(
+        self, base_url, api_key, caplog, enable_vclient_logging
+    ):
+        """Verify query params appear in request logs so paginated calls are distinguishable."""
+        # Given: A mocked endpoint that accepts pagination params
+        respx.get(f"{base_url}/test").respond(200, json={"ok": True})
+
+        with caplog.at_level(TRACE_LEVEL, logger="vclient"):
+            # When: Making a GET request with limit/offset params
+            async with VClient(base_url=base_url, api_key=api_key) as client:
+                service = ConcreteService(client)
+                await service._get("/test", params={"limit": 50, "offset": 100})
+
+        # Then: Both the send and complete lines carry the params for disambiguation
+        send = _find_record(caplog, "Send request")
+        assert send is not None
+        assert send.extra["params"] == {"limit": 50, "offset": 100}
+
+        receive = _find_record(caplog, "Request complete")
+        assert receive is not None
+        assert receive.extra["params"] == {"limit": 50, "offset": 100}
+
+    @respx.mock
+    async def test_log_request_params_none_when_absent(
+        self, base_url, api_key, caplog, enable_vclient_logging
+    ):
+        """Verify the params field is present (None) when no query params are sent."""
+        # Given: A mocked endpoint
+        respx.get(f"{base_url}/test").respond(200, json={"ok": True})
+
+        with caplog.at_level(logging.DEBUG, logger="vclient"):
+            # When: Making a GET request without params
+            async with VClient(base_url=base_url, api_key=api_key) as client:
+                service = ConcreteService(client)
+                await service._get("/test")
+
+        # Then: The params field is present and None
+        receive = _find_record(caplog, "Request complete")
+        assert receive is not None
+        assert receive.extra["params"] is None
+
+    @respx.mock
+    async def test_log_error_includes_query_params(
+        self, base_url, api_key, caplog, enable_vclient_logging
+    ):
+        """Verify error logs carry query params so a failing paginated call is identifiable."""
+        # Given: An endpoint that returns 404
+        respx.get(f"{base_url}/test").respond(404, json={"detail": "Not found"})
+
+        with caplog.at_level(logging.DEBUG, logger="vclient"):
+            # When: Making a paginated request that returns 404
+            async with VClient(base_url=base_url, api_key=api_key) as client:
+                service = ConcreteService(client)
+                with pytest.raises(Exception):  # noqa: B017
+                    await service._get("/test", params={"limit": 25, "offset": 0})
+
+        # Then: The 404 log carries the params
+        record = _find_record(caplog, "Return 404")
+        assert record is not None
+        assert record.extra["params"] == {"limit": 25, "offset": 0}
+
+    @respx.mock
     async def test_log_send_request_hidden_at_debug(
         self, base_url, api_key, caplog, enable_vclient_logging
     ):
