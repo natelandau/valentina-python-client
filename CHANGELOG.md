@@ -1,3 +1,9 @@
+## v2.5.0 (2026-06-03)
+
+### Feat
+
+- **pagination**: raise limit cap to 1000 on reference endpoints
+
 ## v2.4.2 (2026-06-03)
 
 ### Fix
