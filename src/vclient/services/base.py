@@ -178,7 +178,9 @@ class BaseService:
         retry_statuses = config.retry_statuses
         request_logger = logger.bind(method=method, url=path)
 
-        request_logger.debug("Send request")
+        # TRACE so the in-flight request is visible only when diagnosing hangs; the
+        # "Request complete" DEBUG line below is the superset record for normal use.
+        request_logger.trace("Send request")
 
         last_error: RateLimitError | ServerError | None = None
 
@@ -268,7 +270,7 @@ class BaseService:
         header_request_id = response.headers.get(REQUEST_ID_HEADER)
         if header_request_id:
             success_bind["request_id"] = header_request_id
-        request_logger.bind(**success_bind).debug("Receive response")
+        request_logger.bind(**success_bind).debug("Request complete")
 
     @staticmethod
     def _inject_request_id_fallback(

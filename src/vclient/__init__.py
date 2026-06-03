@@ -28,6 +28,9 @@ class _PropagateHandler(_logging.Handler):
 _logger.add(
     _PropagateHandler(),
     format="{message}",
+    # Forward TRACE too (e.g. the "Send request" line) and let the consumer's
+    # stdlib logging level decide what to show; the sink must not pre-filter it.
+    level="TRACE",
     filter=lambda record: record["name"].startswith("vclient"),
 )
 

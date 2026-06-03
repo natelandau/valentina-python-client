@@ -14,6 +14,9 @@ from vclient.services.base import BaseService
 
 pytestmark = pytest.mark.anyio
 
+# Loguru's TRACE level maps to stdlib levelno 5 (below DEBUG)
+TRACE_LEVEL = 5
+
 
 class ConcreteService(BaseService):
     """Concrete implementation of BaseService for testing."""
@@ -82,7 +85,37 @@ class TestRequestLogging:
     async def test_log_request_start_and_response(
         self, base_url, api_key, caplog, enable_vclient_logging
     ):
-        """Verify 'Send request' and 'Receive response' logged at DEBUG with structured fields."""
+        """Verify 'Send request' logs at TRACE and 'Request complete' at DEBUG with fields."""
+        # Given: A mocked endpoint
+        respx.get(f"{base_url}/test").respond(200, json={"ok": True})
+
+        # TRACE (loguru level 5) so the send line is captured alongside DEBUG records
+        with caplog.at_level(TRACE_LEVEL, logger="vclient"):
+            # When: Making a GET request
+            async with VClient(base_url=base_url, api_key=api_key) as client:
+                service = ConcreteService(client)
+                await service._get("/test")
+
+        # Then: "Send request" is present at TRACE with correct structured fields
+        send = _find_record(caplog, "Send request")
+        assert send is not None
+        assert send.levelno == TRACE_LEVEL
+        assert send.extra["method"] == "GET"
+        assert send.extra["url"] == "/test"
+
+        # Then: "Request complete" is present at DEBUG with correct structured fields
+        receive = _find_record(caplog, "Request complete")
+        assert receive is not None
+        assert receive.levelno == logging.DEBUG
+        assert receive.extra["method"] == "GET"
+        assert receive.extra["url"] == "/test"
+        assert receive.extra["status"] == 200
+
+    @respx.mock
+    async def test_log_send_request_hidden_at_debug(
+        self, base_url, api_key, caplog, enable_vclient_logging
+    ):
+        """Verify 'Send request' is suppressed when capturing only at DEBUG and above."""
         # Given: A mocked endpoint
         respx.get(f"{base_url}/test").respond(200, json={"ok": True})
 
@@ -92,20 +125,9 @@ class TestRequestLogging:
                 service = ConcreteService(client)
                 await service._get("/test")
 
-        # Then: "Send request" is present at DEBUG with correct structured fields
-        send = _find_record(caplog, "Send request")
-        assert send is not None
-        assert send.levelno == logging.DEBUG
-        assert send.extra["method"] == "GET"
-        assert send.extra["url"] == "/test"
-
-        # Then: "Receive response" is present at DEBUG with correct structured fields
-        receive = _find_record(caplog, "Receive response")
-        assert receive is not None
-        assert receive.levelno == logging.DEBUG
-        assert receive.extra["method"] == "GET"
-        assert receive.extra["url"] == "/test"
-        assert receive.extra["status"] == 200
+        # Then: only the single "Request complete" line shows; no "Send request" noise
+        assert _find_record(caplog, "Send request") is None
+        assert _find_record(caplog, "Request complete") is not None
 
     @respx.mock
     async def test_log_retry_on_rate_limit(
@@ -388,8 +410,8 @@ class TestRequestIdLogging:
                 service = ConcreteService(client)
                 await service._get("/test")
 
-        # Then: Receive response log includes request_id
-        record = _find_record(caplog, "Receive response")
+        # Then: Request complete log includes request_id
+        record = _find_record(caplog, "Request complete")
         assert record is not None
         assert record.extra["request_id"] == "req_success123"
 
@@ -407,8 +429,8 @@ class TestRequestIdLogging:
                 service = ConcreteService(client)
                 await service._get("/test")
 
-        # Then: Receive response log does not include request_id
-        record = _find_record(caplog, "Receive response")
+        # Then: Request complete log does not include request_id
+        record = _find_record(caplog, "Request complete")
         assert record is not None
         assert "request_id" not in record.extra
 

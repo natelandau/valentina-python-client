@@ -161,15 +161,25 @@ logger.enable("vclient")
 logging.getLogger("vclient").addHandler(StructuredHandler())
 logging.getLogger("vclient").setLevel(logging.DEBUG)
 
-# Output: DEBUG | Send request | GET /companies
-# Output: DEBUG | Receive response | GET /companies 200
+# Output: DEBUG | Request complete | GET /companies 200
+```
+
+By default each request emits a single `Request complete` line at DEBUG, carrying the
+method, URL, status, elapsed time, and request ID. The pre-flight `Send request` line is
+logged at TRACE (level 5), so it stays out of normal DEBUG output. To surface in-flight
+requests when diagnosing a hang, lower the level below DEBUG:
+
+```python
+# Show the "Send request" line too (TRACE = 5, below DEBUG)
+logging.getLogger("vclient").setLevel(5)
 ```
 
 ### Log Levels
 
-| Level   | Events                                                                                |
+| Level   | Events                                                                                 |
 | ------- | ------------------------------------------------------------------------------------- |
-| DEBUG   | Request start, response received, 404 not found                                       |
+| TRACE   | Request start (in-flight visibility; hidden at DEBUG and above)                        |
+| DEBUG   | Request complete, 404 not found                                                        |
 | INFO    | Client initialization, client close                                                   |
 | WARNING | Retries (rate limit, server error, network), validation errors (400), conflicts (409) |
 | ERROR   | Authentication failures (401), authorization failures (403), retries exhausted        |

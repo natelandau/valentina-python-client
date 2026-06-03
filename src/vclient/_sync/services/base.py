@@ -169,7 +169,7 @@ class SyncBaseService:
         max_attempts = config.max_retries + 1 if config.auto_retry_rate_limit else 1
         retry_statuses = config.retry_statuses
         request_logger = logger.bind(method=method, url=path)
-        request_logger.debug("Send request")
+        request_logger.trace("Send request")
         last_error: RateLimitError | ServerError | None = None
         for attempt in range(max_attempts):
             try:
@@ -243,7 +243,7 @@ class SyncBaseService:
         header_request_id = response.headers.get(REQUEST_ID_HEADER)
         if header_request_id:
             success_bind["request_id"] = header_request_id
-        request_logger.bind(**success_bind).debug("Receive response")
+        request_logger.bind(**success_bind).debug("Request complete")
 
     @staticmethod
     def _inject_request_id_fallback(
