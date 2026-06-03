@@ -1,3 +1,9 @@
+## v2.4.1 (2026-06-03)
+
+### Fix
+
+- **logging**: emit one log line per request by default
+
 ## v2.4.0 (2026-06-02)
 
 ### Feat
