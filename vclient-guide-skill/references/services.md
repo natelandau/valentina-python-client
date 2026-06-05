@@ -119,7 +119,7 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 |--------|-----------|---------|
 | `register(request=None, **kwargs)` | `request: UserRegisterDTO \| None, **kwargs` | `User` |
 
-**Register kwargs:** `username: str, email: str, name_first: str | None, name_last: str | None, discord_profile: DiscordProfileUpdate | None, google_profile: GoogleProfile | None, github_profile: GitHubProfile | None`
+**Register kwargs:** `username: str, email: str, name_first: str | None, name_last: str | None, discord_profile: DiscordProfileUpdate | None, google_profile: GoogleProfile | None, github_profile: GitHubProfile | None, apple_profile: AppleProfile | None`
 
 ---
 

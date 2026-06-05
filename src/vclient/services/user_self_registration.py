@@ -57,7 +57,8 @@ class UserSelfRegistrationService(BaseService):
                 name_first (str | None), name_last (str | None),
                 discord_profile (DiscordProfileUpdate | None),
                 google_profile (GoogleProfile | None),
-                github_profile (GitHubProfile | None).
+                github_profile (GitHubProfile | None),
+                apple_profile (AppleProfile | None).
 
         Returns:
             The newly registered User object.
