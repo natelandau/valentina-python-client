@@ -4,6 +4,7 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 
 from vclient.models import (
     AdminUser,
+    AppleProfile,
     Asset,
     AuditLog,
     AuditLogDetail,
@@ -63,6 +64,11 @@ class AuditLogFactory(ModelFactory[AuditLog]):
 
 class AuditLogDetailFactory(ModelFactory[AuditLogDetail]):
     __model__ = AuditLogDetail
+    __use_defaults__ = True
+
+
+class AppleProfileFactory(ModelFactory[AppleProfile]):
+    __model__ = AppleProfile
     __use_defaults__ = True
 
 
@@ -314,6 +320,7 @@ class WerewolfTribeFactory(ModelFactory[WerewolfTribe]):
 
 __all__ = [
     "AdminUserFactory",
+    "AppleProfileFactory",
     "AssetFactory",
     "AuditLogDetailFactory",
     "AuditLogFactory",
