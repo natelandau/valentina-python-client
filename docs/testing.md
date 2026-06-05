@@ -216,45 +216,61 @@ campaigns = CampaignFactory.batch(5)
 
 ## Available Factories
 
-Every public response model has a corresponding factory. All factories are exported from `vclient.testing`:
+Every public response model (and the nested models they contain, such as the auth provider profiles) has a corresponding factory. All factories are exported from `vclient.testing`:
 
-| Factory                                        | Model                                |
-| ---------------------------------------------- | ------------------------------------ |
-| `AppleProfileFactory`                          | `AppleProfile`                       |
-| `AssetFactory`                                 | `Asset`                              |
-| `CampaignFactory`                              | `Campaign`                           |
-| `CampaignBookFactory`                          | `CampaignBook`                       |
-| `CampaignChapterFactory`                       | `CampaignChapter`                    |
-| `CampaignExperienceFactory`                    | `CampaignExperience`                 |
-| `CharacterFactory`                             | `Character`                          |
-| `CharacterConceptFactory`                      | `CharacterConcept`                   |
-| `CharacterTraitFactory`                        | `CharacterTrait`                     |
-| `CharacterTraitValueOptionsResponseFactory`    | `CharacterTraitValueOptionsResponse` |
-| `ChargenSessionResponseFactory`                | `ChargenSessionResponse`             |
-| `CompanyFactory`                               | `Company`                            |
-| `CompanyPermissionsFactory`                    | `CompanyPermissions`                 |
-| `DeveloperFactory`                             | `Developer`                          |
-| `DeveloperWithApiKeyFactory`                   | `DeveloperWithApiKey`                |
-| `DicerollFactory`                              | `Diceroll`                           |
-| `DictionaryTermFactory`                        | `DictionaryTerm`                     |
-| `GitHubProfileFactory`                         | `GitHubProfile`                      |
-| `GoogleProfileFactory`                         | `GoogleProfile`                      |
-| `InventoryItemFactory`                         | `InventoryItem`                      |
-| `MeDeveloperFactory`                           | `MeDeveloper`                        |
-| `MeDeveloperWithApiKeyFactory`                 | `MeDeveloperWithApiKey`              |
-| `NewCompanyResponseFactory`                    | `NewCompanyResponse`                 |
-| `NoteFactory`                                  | `Note`                               |
-| `QuickrollFactory`                             | `Quickroll`                          |
-| `RollStatisticsFactory`                        | `RollStatistics`                     |
-| `SheetSectionFactory`                          | `SheetSection`                       |
-| `SystemHealthFactory`                          | `SystemHealth`                       |
-| `TraitCategoryFactory`                         | `TraitCategory`                      |
-| `TraitFactory`                                 | `Trait`                              |
-| `UserFactory`                                  | `User`                               |
-| `VampireClanFactory`                           | `VampireClan`                        |
-| `GiftAttributesFactory`                        | `GiftAttributes`                     |
-| `WerewolfAuspiceFactory`                       | `WerewolfAuspice`                    |
-| `WerewolfTribeFactory`                         | `WerewolfTribe`                      |
+| Factory                                     | Model                                |
+| ------------------------------------------- | ------------------------------------ |
+| `AdminUserFactory`                          | `AdminUser`                          |
+| `AppleProfileFactory`                       | `AppleProfile`                       |
+| `AssetFactory`                              | `Asset`                              |
+| `AuditLogDetailFactory`                     | `AuditLogDetail`                     |
+| `AuditLogFactory`                           | `AuditLog`                           |
+| `BulkAssignTraitFailureFactory`             | `BulkAssignTraitFailure`             |
+| `BulkAssignTraitResponseFactory`            | `BulkAssignTraitResponse`            |
+| `BulkAssignTraitSuccessFactory`             | `BulkAssignTraitSuccess`             |
+| `CampaignBookDetailFactory`                 | `CampaignBookDetail`                 |
+| `CampaignBookFactory`                       | `CampaignBook`                       |
+| `CampaignChapterDetailFactory`              | `CampaignChapterDetail`              |
+| `CampaignChapterFactory`                    | `CampaignChapter`                    |
+| `CampaignExperienceFactory`                 | `CampaignExperience`                 |
+| `CampaignFactory`                           | `Campaign`                           |
+| `CharacterConceptFactory`                   | `CharacterConcept`                   |
+| `CharacterDetailFactory`                    | `CharacterDetail`                    |
+| `CharacterFactory`                          | `Character`                          |
+| `CharacterFullSheetFactory`                 | `CharacterFullSheet`                 |
+| `CharacterTraitFactory`                     | `CharacterTrait`                     |
+| `CharacterTraitValueOptionsResponseFactory` | `CharacterTraitValueOptionsResponse` |
+| `ChargenSessionResponseFactory`             | `ChargenSessionResponse`             |
+| `CompanyFactory`                            | `Company`                            |
+| `CompanyPermissionsFactory`                 | `CompanyPermissions`                 |
+| `DeveloperFactory`                          | `Developer`                          |
+| `DeveloperWithApiKeyFactory`                | `DeveloperWithApiKey`                |
+| `DicerollFactory`                           | `Diceroll`                           |
+| `DictionaryTermFactory`                     | `DictionaryTerm`                     |
+| `FullSheetTraitCategoryFactory`             | `FullSheetTraitCategory`             |
+| `FullSheetTraitSectionFactory`              | `FullSheetTraitSection`              |
+| `FullSheetTraitSubcategoryFactory`          | `FullSheetTraitSubcategory`          |
+| `GitHubProfileFactory`                      | `GitHubProfile`                      |
+| `GoogleProfileFactory`                      | `GoogleProfile`                      |
+| `InventoryItemFactory`                      | `InventoryItem`                      |
+| `MeDeveloperFactory`                        | `MeDeveloper`                        |
+| `MeDeveloperWithApiKeyFactory`              | `MeDeveloperWithApiKey`              |
+| `NewCompanyResponseFactory`                 | `NewCompanyResponse`                 |
+| `NoteFactory`                               | `Note`                               |
+| `QuickrollFactory`                          | `Quickroll`                          |
+| `RollStatisticsFactory`                     | `RollStatistics`                     |
+| `ServerLogEntryFactory`                     | `ServerLogEntry`                     |
+| `SheetSectionFactory`                       | `SheetSection`                       |
+| `SystemHealthFactory`                       | `SystemHealth`                       |
+| `TraitCategoryFactory`                      | `TraitCategory`                      |
+| `TraitFactory`                              | `Trait`                              |
+| `TraitSubcategoryFactory`                   | `TraitSubcategory`                   |
+| `UserDetailFactory`                         | `UserDetail`                         |
+| `UserFactory`                               | `User`                               |
+| `UserLookupResultFactory`                   | `UserLookupResult`                   |
+| `VampireClanFactory`                        | `VampireClan`                        |
+| `WerewolfAuspiceFactory`                    | `WerewolfAuspice`                    |
+| `WerewolfTribeFactory`                      | `WerewolfTribe`                      |
 
 ## How It Works
 
