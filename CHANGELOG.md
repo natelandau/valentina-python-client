@@ -1,3 +1,9 @@
+## v2.6.0 (2026-06-05)
+
+### Feat
+
+- support Apple as a third-party auth provider (#76)
+
 ## v2.5.0 (2026-06-03)
 
 ### Feat
