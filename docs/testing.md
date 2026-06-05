@@ -220,6 +220,7 @@ Every public response model has a corresponding factory. All factories are expor
 
 | Factory                                        | Model                                |
 | ---------------------------------------------- | ------------------------------------ |
+| `AppleProfileFactory`                          | `AppleProfile`                       |
 | `AssetFactory`                                 | `Asset`                              |
 | `CampaignFactory`                              | `Campaign`                           |
 | `CampaignBookFactory`                          | `CampaignBook`                       |
@@ -236,6 +237,8 @@ Every public response model has a corresponding factory. All factories are expor
 | `DeveloperWithApiKeyFactory`                   | `DeveloperWithApiKey`                |
 | `DicerollFactory`                              | `Diceroll`                           |
 | `DictionaryTermFactory`                        | `DictionaryTerm`                     |
+| `GitHubProfileFactory`                         | `GitHubProfile`                      |
+| `GoogleProfileFactory`                         | `GoogleProfile`                      |
 | `InventoryItemFactory`                         | `InventoryItem`                      |
 | `MeDeveloperFactory`                           | `MeDeveloper`                        |
 | `MeDeveloperWithApiKeyFactory`                 | `MeDeveloperWithApiKey`              |

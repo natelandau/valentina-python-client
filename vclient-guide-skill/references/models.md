@@ -294,7 +294,7 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 
 ### UserUpdate
 
-All fields optional. Same fields as UserCreate (without role).
+All fields optional. Same fields as UserCreate, with `role` becoming optional.
 
 ### UserRegisterDTO
 

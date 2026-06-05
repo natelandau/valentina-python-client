@@ -4,7 +4,7 @@ icon: lucide/users
 
 # User Models
 
-Models for users, their Discord profiles, campaign experience, and quickrolls.
+Models for users, their linked auth provider profiles (Discord, Google, GitHub, Apple), campaign experience, and quickrolls.
 
 ## User
 

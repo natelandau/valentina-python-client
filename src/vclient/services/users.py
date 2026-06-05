@@ -334,7 +334,11 @@ class UsersService(BaseService):
             **kwargs: Fields for UserCreate if request is not provided.
                 Accepts: username (str, required), email (str, required),
                 role (UserRole, required),
-                discord_profile (DiscordProfile | None).
+                name_first (str | None), name_last (str | None),
+                discord_profile (DiscordProfileUpdate | None),
+                google_profile (GoogleProfile | None),
+                github_profile (GitHubProfile | None),
+                apple_profile (AppleProfile | None).
 
         Returns:
             The newly created User object.
@@ -373,9 +377,13 @@ class UsersService(BaseService):
             user_id: The ID of the user to update.
             request: A UserUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserUpdate if request is not provided.
-                Accepts: name (str | None), email (str | None),
+                Accepts: username (str | None), email (str | None),
                 role (UserRole | None),
-                discord_profile (DiscordProfile | None).
+                name_first (str | None), name_last (str | None),
+                discord_profile (DiscordProfileUpdate | None),
+                google_profile (GoogleProfile | None),
+                github_profile (GitHubProfile | None),
+                apple_profile (AppleProfile | None).
 
         Returns:
             The updated User object.

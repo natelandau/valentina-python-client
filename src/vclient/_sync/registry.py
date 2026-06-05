@@ -195,7 +195,7 @@ def sync_user_lookup_service() -> "SyncUserLookupService":
     """Create a SyncUserLookupService using the default client.
 
     Discover which companies a person has a user record in by searching
-    via email, Discord ID, Google ID, or GitHub ID.
+    via email, Discord ID, Google ID, GitHub ID, or Apple ID.
 
     Returns:
         SyncUserLookupService: A service instance for cross-company user lookup.
