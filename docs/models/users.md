@@ -22,6 +22,7 @@ Models for users, their Discord profiles, campaign experience, and quickrolls.
 | `discord_profile`      | `DiscordProfile \| None`   | Discord information                           |
 | `google_profile`       | `GoogleProfile \| None`    | Google account information                    |
 | `github_profile`       | `GitHubProfile \| None`    | GitHub account information                    |
+| `apple_profile`        | `AppleProfile \| None`     | Apple account information                     |
 | `campaign_experience`  | `list[CampaignExperience]` | XP per campaign                               |
 | `asset_ids`            | `list[str]`                | Owned asset IDs                               |
 | `lifetime_xp`          | `int`                      | Lifetime XP earned                            |
@@ -91,6 +92,14 @@ Use the `UserInclude` type alias from `vclient.constants` to get editor autocomp
 | `email`       | `str \| None` | GitHub email       |
 | `profile_url` | `str \| None` | GitHub profile URL |
 
+## AppleProfile
+
+| Field      | Type          | Description         |
+| ---------- | ------------- | ------------------- |
+| `id`       | `str \| None` | Apple user ID       |
+| `email`    | `str \| None` | Apple email address |
+| `fullname` | `str \| None` | Full name           |
+
 ## UserRegisterDTO
 
 Request body for registering a user via SSO onboarding.
@@ -104,6 +113,7 @@ Request body for registering a user via SSO onboarding.
 | `discord_profile` | `DiscordProfile \| None` | Discord information      |
 | `google_profile`  | `GoogleProfile \| None`  | Google account info      |
 | `github_profile`  | `GitHubProfile \| None`  | GitHub account info      |
+| `apple_profile`   | `AppleProfile \| None`   | Apple account info       |
 
 ## UserMergeDTO
 
@@ -174,6 +184,7 @@ Returned by all `GlobalAdminService` user methods. Extends `User` with an `is_ar
 | `discord_profile`      | `DiscordProfile \| None`   | Discord information                           |
 | `google_profile`       | `GoogleProfile \| None`    | Google account information                    |
 | `github_profile`       | `GitHubProfile \| None`    | GitHub account information                    |
+| `apple_profile`        | `AppleProfile \| None`     | Apple account information                     |
 | `campaign_experience`  | `list[CampaignExperience]` | XP per campaign                               |
 | `asset_ids`            | `list[str]`                | Owned asset IDs                               |
 | `lifetime_xp`          | `int`                      | Lifetime XP earned                            |
@@ -199,6 +210,7 @@ Request body for creating a user via the global-admin service. Requires a `compa
 | `discord_profile` | `DiscordProfile \| None` | Discord information                           |
 | `google_profile`  | `GoogleProfile \| None`  | Google account information                    |
 | `github_profile`  | `GitHubProfile \| None`  | GitHub account information                    |
+| `apple_profile`   | `AppleProfile \| None`   | Apple account information                     |
 
 ## AdminUserUpdate
 
@@ -214,4 +226,5 @@ Request body for updating a user via the global-admin service. All fields are op
 | `discord_profile` | `DiscordProfile \| None` | Updated Discord information                          |
 | `google_profile`  | `GoogleProfile \| None`  | Updated Google account information                   |
 | `github_profile`  | `GitHubProfile \| None`  | Updated GitHub account information                   |
+| `apple_profile`   | `AppleProfile \| None`   | Updated Apple account information                    |
 | `is_archived`     | `bool \| None`           | Set to `False` to restore a soft-deleted user        |

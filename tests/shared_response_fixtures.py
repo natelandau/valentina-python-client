@@ -197,6 +197,11 @@ def user_response_data() -> dict:
             "username": "testuser",
             "email": "test@github.com",
         },
+        "apple_profile": {
+            "id": "001234.abcd5678",
+            "email": "test@privaterelay.appleid.com",
+            "fullname": "Test User",
+        },
         "campaign_experience": [
             {"campaign_id": "campaign1", "xp_current": 50, "xp_total": 100, "cool_points": 5}
         ],

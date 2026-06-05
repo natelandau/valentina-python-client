@@ -38,6 +38,14 @@ class GitHubProfile(BaseModel):
     profile_url: str | None = None
 
 
+class AppleProfile(BaseModel):
+    """Apple profile model."""
+
+    id: str | None = None
+    email: str | None = None
+    fullname: str | None = None
+
+
 class DiscordProfile(BaseModel):
     """Discord profile information for a user.
 
@@ -92,6 +100,7 @@ class User(BaseModel):
     discord_profile: DiscordProfile | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
+    apple_profile: AppleProfile | None = None
     campaign_experience: list[CampaignExperience] = Field(default_factory=list)
     asset_ids: list[str] = Field(default_factory=list)
     lifetime_xp: int = 0
@@ -168,6 +177,7 @@ class UserRegisterDTO(BaseModel):
     discord_profile: DiscordProfileUpdate | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
+    apple_profile: AppleProfile | None = None
 
 
 class UserMergeDTO(BaseModel):
@@ -191,6 +201,7 @@ class UserCreate(BaseModel):
     discord_profile: DiscordProfileUpdate | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
+    apple_profile: AppleProfile | None = None
 
 
 class UserUpdate(BaseModel):
@@ -207,6 +218,7 @@ class UserUpdate(BaseModel):
     discord_profile: DiscordProfileUpdate | None = None
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
+    apple_profile: AppleProfile | None = None
 
 
 class AdminUserCreate(UserCreate):
@@ -301,6 +313,7 @@ __all__ = [
     "AdminUser",
     "AdminUserCreate",
     "AdminUserUpdate",
+    "AppleProfile",
     "CampaignExperience",
     "DiscordProfile",
     "GitHubProfile",
