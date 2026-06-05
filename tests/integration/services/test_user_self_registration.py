@@ -7,7 +7,7 @@ import respx
 
 from vclient.endpoints import Endpoints
 from vclient.exceptions import RequestValidationError
-from vclient.models import User, UserRegisterDTO
+from vclient.models import AppleProfile, User, UserRegisterDTO
 
 pytestmark = pytest.mark.anyio
 
@@ -73,6 +73,35 @@ class TestUserSelfRegistrationServiceRegister:
         assert "discord_profile" not in body
         assert "google_profile" not in body
         assert "github_profile" not in body
+        assert "apple_profile" not in body
+
+    @respx.mock
+    async def test_register_user_with_apple_profile(self, vclient, base_url, user_response_data):
+        """Verify apple_profile is included in the register request body."""
+        # Given: A mocked register endpoint
+        company_id = "company123"
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_REGISTER.format(company_id=company_id)}"
+        ).respond(201, json=user_response_data)
+
+        # When: Registering a user with an Apple profile
+        result = await vclient.user_self_registration(company_id=company_id).register(
+            username="testuser",
+            email="test@example.com",
+            apple_profile=AppleProfile(
+                id="001234.abcd5678",
+                email="test@privaterelay.appleid.com",
+            ),
+        )
+
+        # Then: The Apple profile is serialized into the request body
+        assert route.called
+        assert isinstance(result, User)
+        body = json.loads(route.calls.last.request.content)
+        assert body["apple_profile"] == {
+            "id": "001234.abcd5678",
+            "email": "test@privaterelay.appleid.com",
+        }
 
     @respx.mock
     async def test_register_user_validation_error(self, vclient):

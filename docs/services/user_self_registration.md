@@ -22,15 +22,16 @@ svc = user_self_registration_service(company_id="COMPANY_ID")
 
 ### `register()` Parameters
 
-| Parameter        | Type           | Required | Description                          |
-| ---------------- | -------------- | -------- | ------------------------------------ |
-| `username`       | `str`          | Yes      | Unique username for the new account  |
-| `email`          | `str`          | Yes      | Email address for the new account    |
-| `name_first`     | `str \| None`  | No       | First name                           |
-| `name_last`      | `str \| None`  | No       | Last name                            |
-| `discord_profile`| `str \| None`  | No       | Discord profile identifier           |
-| `google_profile` | `str \| None`  | No       | Google profile identifier            |
-| `github_profile` | `str \| None`  | No       | GitHub profile identifier            |
+| Parameter         | Type                           | Required | Description                         |
+| ----------------- | ------------------------------ | -------- | ----------------------------------- |
+| `username`        | `str`                          | Yes      | Unique username for the new account |
+| `email`           | `str`                          | Yes      | Email address for the new account   |
+| `name_first`      | `str \| None`                  | No       | First name                          |
+| `name_last`       | `str \| None`                  | No       | Last name                           |
+| `discord_profile` | `DiscordProfileUpdate \| None` | No       | Discord profile information         |
+| `google_profile`  | `GoogleProfile \| None`        | No       | Google profile information          |
+| `github_profile`  | `GitHubProfile \| None`        | No       | GitHub profile information          |
+| `apple_profile`   | `AppleProfile \| None`         | No       | Apple profile information           |
 
 ## Examples
 
@@ -83,13 +84,15 @@ with SyncVClient(base_url="https://api.valentina-noir.com", api_key="...") as cl
 ### With social profile links
 
 ```python
+from vclient.models import AppleProfile, DiscordProfileUpdate
+
 user = await svc.register(
     username="jane_doe",
     email="jane@example.com",
     name_first="Jane",
     name_last="Doe",
-    discord_profile="jane_doe#1234",
-    github_profile="janedoe",
+    discord_profile=DiscordProfileUpdate(id="123456789", username="jane_doe"),
+    apple_profile=AppleProfile(id="001234.abcd5678", email="jane@privaterelay.appleid.com"),
 )
 ```
 

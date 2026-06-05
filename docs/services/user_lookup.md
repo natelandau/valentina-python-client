@@ -4,7 +4,7 @@ icon: lucide/search
 
 # User Lookup Service
 
-Look up users across companies for login and registration flows. Discover which of your companies a person has a user record in by searching via email, Discord ID, Google ID, or GitHub ID.
+Look up users across companies for login and registration flows. Discover which of your companies a person has a user record in by searching via email, Discord ID, Google ID, GitHub ID, or Apple ID.
 
 Unlike other user operations, this service is not scoped to a single company — it searches across all companies where you have permission.
 
@@ -33,6 +33,7 @@ async with VClient() as client:
 | `by_discord_id(discord_id)` | `list[UserLookupResult]` | Look up by Discord profile ID |
 | `by_google_id(google_id)` | `list[UserLookupResult]`  | Look up by Google profile ID  |
 | `by_github_id(github_id)` | `list[UserLookupResult]`  | Look up by GitHub profile ID  |
+| `by_apple_id(apple_id)`   | `list[UserLookupResult]`  | Look up by Apple profile ID   |
 
 All methods return an empty list when no matches are found.
 

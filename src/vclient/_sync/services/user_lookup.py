@@ -10,7 +10,7 @@ class SyncUserLookupService(SyncBaseService):
     """Service for looking up users across companies.
 
     Discover which companies a person has a user record in by searching
-    via email, Discord ID, Google ID, or GitHub ID.
+    via email, Discord ID, Google ID, GitHub ID, or Apple ID.
 
     Example:
         >>> async with SyncVClient() as client:
@@ -65,4 +65,16 @@ class SyncUserLookupService(SyncBaseService):
             List of companies where a matching user was found. Empty list if no matches.
         """
         response = self._get(Endpoints.USERS_LOOKUP, params={"github_id": github_id})
+        return [UserLookupResult.model_validate(item) for item in response.json()]
+
+    def by_apple_id(self, apple_id: str) -> list[UserLookupResult]:
+        """Look up a user by Apple profile ID.
+
+        Args:
+            apple_id: Apple profile ID to search for.
+
+        Returns:
+            List of companies where a matching user was found. Empty list if no matches.
+        """
+        response = self._get(Endpoints.USERS_LOOKUP, params={"apple_id": apple_id})
         return [UserLookupResult.model_validate(item) for item in response.json()]

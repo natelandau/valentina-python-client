@@ -259,6 +259,7 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | discord_profile | DiscordProfile \| None | no |
 | google_profile | GoogleProfile \| None | no |
 | github_profile | GitHubProfile \| None | no |
+| apple_profile | AppleProfile \| None | no |
 | campaign_experience | list[CampaignExperience] | no (default=[]) |
 | asset_ids | list[str] | no (default=[]) |
 | lifetime_xp | int | no (default=0) |
@@ -289,10 +290,11 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | discord_profile | DiscordProfileUpdate \| None | — |
 | google_profile | GoogleProfile \| None | — |
 | github_profile | GitHubProfile \| None | — |
+| apple_profile | AppleProfile \| None | — |
 
 ### UserUpdate
 
-All fields optional. Same fields as UserCreate (without role).
+All fields optional. Same fields as UserCreate, with `role` becoming optional.
 
 ### UserRegisterDTO
 
@@ -305,6 +307,7 @@ All fields optional. Same fields as UserCreate (without role).
 | discord_profile | DiscordProfileUpdate \| None | no |
 | google_profile | GoogleProfile \| None | no |
 | github_profile | GitHubProfile \| None | no |
+| apple_profile | AppleProfile \| None | no |
 
 ### UserMergeDTO
 
@@ -344,6 +347,7 @@ All fields optional. Same fields as UserCreate (without role).
 **DiscordProfile:** `id`, `username`, `global_name`, `avatar_id`, `avatar_url`, `discriminator`, `email`, `verified` — all optional.
 **GoogleProfile:** `id`, `email`, `verified_email`, `username`, `name_first`, `name_last`, `avatar_url`, `locale` — all optional.
 **GitHubProfile:** `id`, `login`, `username`, `avatar_url`, `email`, `profile_url` — all optional.
+**AppleProfile:** `id`, `email`, `fullname` — all optional.
 **DiscordProfileUpdate:** Same fields as DiscordProfile minus `avatar_url`.
 
 ---
@@ -1016,6 +1020,7 @@ Request payload for `GlobalAdminService.create_user()`. Creates a user in any co
 | discord_profile | DiscordProfileUpdate \| None | optional |
 | google_profile | GoogleProfile \| None | optional |
 | github_profile | GitHubProfile \| None | optional |
+| apple_profile | AppleProfile \| None | optional |
 
 ### AdminUserUpdate
 
@@ -1031,6 +1036,7 @@ Request payload for `GlobalAdminService.update_user()`. All fields optional. Set
 | discord_profile | DiscordProfileUpdate \| None | optional |
 | google_profile | GoogleProfile \| None | optional |
 | github_profile | GitHubProfile \| None | optional |
+| apple_profile | AppleProfile \| None | optional |
 | is_archived | bool \| None | optional |
 
 ### ServerLogEntry

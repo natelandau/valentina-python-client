@@ -119,7 +119,7 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 |--------|-----------|---------|
 | `register(request=None, **kwargs)` | `request: UserRegisterDTO \| None, **kwargs` | `User` |
 
-**Register kwargs:** `username: str, email: str, name_first: str | None, name_last: str | None, discord_profile: DiscordProfileUpdate | None, google_profile: GoogleProfile | None, github_profile: GitHubProfile | None`
+**Register kwargs:** `username: str, email: str, name_first: str | None, name_last: str | None, discord_profile: DiscordProfileUpdate | None, google_profile: GoogleProfile | None, github_profile: GitHubProfile | None, apple_profile: AppleProfile | None`
 
 ---
 
@@ -415,6 +415,7 @@ Plus standard notes and assets sub-resource methods.
 | `by_discord_id(discord_id)` | `discord_id: str` | `list[UserLookupResult]` |
 | `by_google_id(google_id)` | `google_id: str` | `list[UserLookupResult]` |
 | `by_github_id(github_id)` | `github_id: str` | `list[UserLookupResult]` |
+| `by_apple_id(apple_id)` | `apple_id: str` | `list[UserLookupResult]` |
 
 ---
 

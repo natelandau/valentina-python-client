@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError as PydanticValidationError
 
 from vclient.models import (
+    AppleProfile,
     Asset,
     CampaignExperience,
     DiscordProfile,
@@ -176,6 +177,50 @@ class TestGitHubProfile:
         }
 
 
+class TestAppleProfile:
+    """Tests for AppleProfile model."""
+
+    def test_all_fields_default_to_none(self):
+        """Verify all fields default to None."""
+        # When: Creating profile with no arguments
+        profile = AppleProfile()
+
+        # Then: All values are None
+        assert profile.id is None
+        assert profile.email is None
+        assert profile.fullname is None
+
+    def test_partial_profile(self):
+        """Verify partial profile creation."""
+        # When: Creating profile with some values
+        profile = AppleProfile(
+            id="apple123",
+            email="user@privaterelay.appleid.com",
+        )
+
+        # Then: Specified values are set, others are None
+        assert profile.id == "apple123"
+        assert profile.email == "user@privaterelay.appleid.com"
+        assert profile.fullname is None
+
+    def test_model_dump_excludes_none(self):
+        """Verify model_dump with exclude_none works correctly."""
+        # Given: Profile with some values set
+        profile = AppleProfile(
+            id="apple123",
+            fullname="Test User",
+        )
+
+        # When: Dumping with exclude_none
+        data = profile.model_dump(exclude_none=True)
+
+        # Then: Only non-None values are included
+        assert data == {
+            "id": "apple123",
+            "fullname": "Test User",
+        }
+
+
 class TestCampaignExperience:
     """Tests for CampaignExperience model."""
 
@@ -236,6 +281,7 @@ class TestUser:
         assert user.discord_profile is None
         assert user.google_profile is None
         assert user.github_profile is None
+        assert user.apple_profile is None
         assert user.campaign_experience == []
         assert user.asset_ids == []
 
@@ -245,6 +291,7 @@ class TestUser:
         discord = DiscordProfile(id="discord123", username="testuser")
         google = GoogleProfile(id="google123", email="user@gmail.com")
         github = GitHubProfile(id="github123", login="testuser")
+        apple = AppleProfile(id="apple123", email="full@privaterelay.appleid.com")
         experience = CampaignExperience(campaign_id="campaign1", xp_current=50)
 
         # When: Creating user with all fields
@@ -261,6 +308,7 @@ class TestUser:
             discord_profile=discord,
             google_profile=google,
             github_profile=github,
+            apple_profile=apple,
             campaign_experience=[experience],
             asset_ids=["asset1", "asset2"],
         )
@@ -270,6 +318,7 @@ class TestUser:
         assert user.discord_profile.id == "discord123"
         assert user.google_profile.id == "google123"
         assert user.github_profile.id == "github123"
+        assert user.apple_profile.id == "apple123"
         assert len(user.campaign_experience) == 1
         assert user.campaign_experience[0].xp_current == 50
         assert user.asset_ids == ["asset1", "asset2"]
@@ -300,6 +349,11 @@ class TestUser:
                 "id": "github123",
                 "login": "apiuser",
             },
+            "apple_profile": {
+                "id": "apple123",
+                "email": "apiuser@privaterelay.appleid.com",
+                "fullname": "API User",
+            },
             "campaign_experience": [
                 {"campaign_id": "campaign1", "xp_current": 100, "xp_total": 200, "cool_points": 10}
             ],
@@ -318,6 +372,7 @@ class TestUser:
         assert user.discord_profile.username == "apiuser"
         assert user.google_profile.email == "apiuser@gmail.com"
         assert user.github_profile.login == "apiuser"
+        assert user.apple_profile.fullname == "API User"
         assert user.campaign_experience[0].xp_current == 100
 
     def test_invalid_role_rejected(self):
@@ -397,6 +452,7 @@ class TestUserCreate:
         assert request.discord_profile is None
         assert request.google_profile is None
         assert request.github_profile is None
+        assert request.apple_profile is None
 
     def test_full_request(self):
         """Verify creating request with all fields."""
@@ -404,6 +460,7 @@ class TestUserCreate:
         discord = DiscordProfileUpdate(id="discord123", username="testuser")
         google = GoogleProfile(id="google123", email="user@gmail.com")
         github = GitHubProfile(id="github123", login="testuser")
+        apple = AppleProfile(id="apple123")
 
         # When: Creating request with all fields
         request = UserCreate(
@@ -415,6 +472,7 @@ class TestUserCreate:
             discord_profile=discord,
             google_profile=google,
             github_profile=github,
+            apple_profile=apple,
         )
 
         # Then: All fields are set correctly
@@ -424,6 +482,7 @@ class TestUserCreate:
         assert request.discord_profile.id == "discord123"
         assert request.google_profile.id == "google123"
         assert request.github_profile.id == "github123"
+        assert request.apple_profile.id == "apple123"
 
     def test_name_validation_min_length(self):
         """Verify name minimum length validation."""
@@ -503,6 +562,7 @@ class TestUserUpdate:
         assert request.discord_profile is None
         assert request.google_profile is None
         assert request.github_profile is None
+        assert request.apple_profile is None
 
     def test_partial_update(self):
         """Verify creating request with some fields."""

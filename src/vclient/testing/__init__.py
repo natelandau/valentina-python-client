@@ -16,6 +16,7 @@ from vclient._sync.testing import SyncFakeVClient
 from vclient.testing._client import FakeVClient
 from vclient.testing._factories import (
     AdminUserFactory,
+    AppleProfileFactory,
     AssetFactory,
     AuditLogDetailFactory,
     AuditLogFactory,
@@ -70,6 +71,7 @@ from vclient.testing._routes import Routes, RouteSpec
 
 __all__ = [
     "AdminUserFactory",
+    "AppleProfileFactory",
     "AssetFactory",
     "AuditLogDetailFactory",
     "AuditLogFactory",
