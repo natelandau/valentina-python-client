@@ -194,12 +194,12 @@ class TestAppleProfile:
         """Verify partial profile creation."""
         # When: Creating profile with some values
         profile = AppleProfile(
-            id="001234.abcd5678",
+            id="apple123",
             email="user@privaterelay.appleid.com",
         )
 
         # Then: Specified values are set, others are None
-        assert profile.id == "001234.abcd5678"
+        assert profile.id == "apple123"
         assert profile.email == "user@privaterelay.appleid.com"
         assert profile.fullname is None
 
@@ -207,7 +207,7 @@ class TestAppleProfile:
         """Verify model_dump with exclude_none works correctly."""
         # Given: Profile with some values set
         profile = AppleProfile(
-            id="001234.abcd5678",
+            id="apple123",
             fullname="Test User",
         )
 
@@ -216,7 +216,7 @@ class TestAppleProfile:
 
         # Then: Only non-None values are included
         assert data == {
-            "id": "001234.abcd5678",
+            "id": "apple123",
             "fullname": "Test User",
         }
 
@@ -291,7 +291,7 @@ class TestUser:
         discord = DiscordProfile(id="discord123", username="testuser")
         google = GoogleProfile(id="google123", email="user@gmail.com")
         github = GitHubProfile(id="github123", login="testuser")
-        apple = AppleProfile(id="001234.abcd5678", email="full@privaterelay.appleid.com")
+        apple = AppleProfile(id="apple123", email="full@privaterelay.appleid.com")
         experience = CampaignExperience(campaign_id="campaign1", xp_current=50)
 
         # When: Creating user with all fields
@@ -318,7 +318,7 @@ class TestUser:
         assert user.discord_profile.id == "discord123"
         assert user.google_profile.id == "google123"
         assert user.github_profile.id == "github123"
-        assert user.apple_profile.id == "001234.abcd5678"
+        assert user.apple_profile.id == "apple123"
         assert len(user.campaign_experience) == 1
         assert user.campaign_experience[0].xp_current == 50
         assert user.asset_ids == ["asset1", "asset2"]
@@ -350,7 +350,7 @@ class TestUser:
                 "login": "apiuser",
             },
             "apple_profile": {
-                "id": "001234.abcd5678",
+                "id": "apple123",
                 "email": "apiuser@privaterelay.appleid.com",
                 "fullname": "API User",
             },
@@ -460,7 +460,7 @@ class TestUserCreate:
         discord = DiscordProfileUpdate(id="discord123", username="testuser")
         google = GoogleProfile(id="google123", email="user@gmail.com")
         github = GitHubProfile(id="github123", login="testuser")
-        apple = AppleProfile(id="001234.abcd5678")
+        apple = AppleProfile(id="apple123")
 
         # When: Creating request with all fields
         request = UserCreate(
@@ -482,7 +482,7 @@ class TestUserCreate:
         assert request.discord_profile.id == "discord123"
         assert request.google_profile.id == "google123"
         assert request.github_profile.id == "github123"
-        assert request.apple_profile.id == "001234.abcd5678"
+        assert request.apple_profile.id == "apple123"
 
     def test_name_validation_min_length(self):
         """Verify name minimum length validation."""
