@@ -415,6 +415,7 @@ Plus standard notes and assets sub-resource methods.
 | `by_discord_id(discord_id)` | `discord_id: str` | `list[UserLookupResult]` |
 | `by_google_id(google_id)` | `google_id: str` | `list[UserLookupResult]` |
 | `by_github_id(github_id)` | `github_id: str` | `list[UserLookupResult]` |
+| `by_apple_id(apple_id)` | `apple_id: str` | `list[UserLookupResult]` |
 
 ---
 

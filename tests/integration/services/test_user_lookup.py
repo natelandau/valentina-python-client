@@ -109,6 +109,27 @@ class TestUserLookupServiceByGithubId:
         assert isinstance(results[0], UserLookupResult)
 
 
+class TestUserLookupServiceByAppleId:
+    """Tests for UserLookupService.by_apple_id method."""
+
+    @respx.mock
+    async def test_by_apple_id(self, vclient, base_url, lookup_result_data):
+        """Verify by_apple_id returns list of UserLookupResult."""
+        # Given: A mocked lookup endpoint
+        route = respx.get(
+            f"{base_url}{Endpoints.USERS_LOOKUP}",
+            params={"apple_id": "001234.abcd5678"},
+        ).respond(200, json=[lookup_result_data])
+
+        # When: Looking up by Apple ID
+        results = await vclient.user_lookup.by_apple_id("001234.abcd5678")
+
+        # Then: Returns list of UserLookupResult
+        assert route.called
+        assert len(results) == 1
+        assert isinstance(results[0], UserLookupResult)
+
+
 class TestUserLookupServiceEmptyResults:
     """Tests for empty result handling."""
 
