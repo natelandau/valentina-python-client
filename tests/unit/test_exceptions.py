@@ -12,6 +12,7 @@ from vclient.exceptions import (
     RateLimitError,
     RequestValidationError,
     ServerError,
+    UnprocessableEntityError,
     ValidationError,
 )
 
@@ -625,3 +626,60 @@ class TestSpecificErrors:
         # When/Then: Specific error can be caught as base APIError
         with pytest.raises(APIError):
             raise NotFoundError(msg, status_code=404)
+
+
+class TestUnprocessableEntityError:
+    """Tests for UnprocessableEntityError."""
+
+    def test_init_with_response_data(self):
+        """Verify creating a 422 error exposes the machine-readable code."""
+        # When: Creating an error from a 422 problem-details response
+        error = UnprocessableEntityError(
+            message="Provider token failed verification",
+            status_code=422,
+            response_data={
+                "detail": "Provider token failed verification",
+                "code": "TOKEN_VERIFICATION_FAILED",
+            },
+        )
+
+        # Then: Status code and code extension are exposed
+        assert error.status_code == 422
+        assert error.code == "TOKEN_VERIFICATION_FAILED"
+        assert isinstance(error, APIError)
+
+
+class TestAPIErrorCodeProperty:
+    """Tests for the APIError.code extension property."""
+
+    def test_code_present(self):
+        """Verify code returns the machine-readable extension when present."""
+        # When: Creating an error whose response includes a code extension
+        error = ConflictError(
+            message="Identity already linked",
+            status_code=409,
+            response_data={"code": "IDENTITY_ALREADY_LINKED"},
+        )
+
+        # Then: The code is exposed
+        assert error.code == "IDENTITY_ALREADY_LINKED"
+
+    def test_code_absent(self):
+        """Verify code returns None when the response has no code extension."""
+        # When: Creating an error without a code extension
+        error = APIError("Something went wrong", status_code=500, response_data={})
+
+        # Then: The code is None
+        assert error.code is None
+
+    def test_str_includes_code(self):
+        """Verify the string representation includes the code when present."""
+        # When: Formatting an error that carries a code
+        error = UnprocessableEntityError(
+            message="bad token",
+            status_code=422,
+            response_data={"detail": "bad token", "code": "TOKEN_VERIFICATION_FAILED"},
+        )
+
+        # Then: The code appears in the string output
+        assert "Code: TOKEN_VERIFICATION_FAILED" in str(error)

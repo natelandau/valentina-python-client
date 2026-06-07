@@ -14,6 +14,7 @@ from vclient.exceptions import (
     NotFoundError,
     RateLimitError,
     ServerError,
+    UnprocessableEntityError,
     ValidationError,
 )
 from vclient.models.pagination import PaginatedResponse
@@ -78,6 +79,7 @@ class TestBaseServiceErrorHandling:
             (403, AuthorizationError),
             (404, NotFoundError),
             (409, ConflictError),
+            (422, UnprocessableEntityError),
             (429, RateLimitError),
             (500, ServerError),
             (502, ServerError),

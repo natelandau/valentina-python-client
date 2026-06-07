@@ -65,6 +65,10 @@ class APIError(Exception):
         if self.detail and self.detail not in (self.message, self.title):
             parts.append(f"Detail: {self.detail}")
 
+        # Add machine-readable code for branching on specific failures
+        if self.code:
+            parts.append(f"Code: {self.code}")
+
         # Add instance URI for debugging
         if self.instance:
             parts.append(f"Instance: {self.instance}")
@@ -94,6 +98,15 @@ class APIError(Exception):
         """Get the server-generated request ID for error correlation."""
         return self.response_data.get("request_id")
 
+    @property
+    def code(self) -> str | None:
+        """Get the machine-readable error code extension (e.g. TOKEN_VERIFICATION_FAILED).
+
+        RFC 9457 extension member set by endpoints that need callers to branch
+        on the specific failure rather than the HTTP status alone.
+        """
+        return self.response_data.get("code")
+
 
 class AuthenticationError(APIError):
     """Raised when authentication fails (401 Unauthorized).
@@ -117,6 +130,16 @@ class ConflictError(APIError):
     """Raised when there is a conflict (409 Conflict).
 
     Common cause is reusing an idempotency key with a different request body.
+    """
+
+
+class UnprocessableEntityError(APIError):
+    """Raised when a request is well-formed but cannot be processed (422 Unprocessable Entity).
+
+    Returned by the identity endpoints when a provider token fails
+    verification or when creating a user requires an email the provider did
+    not supply. Check the `code` property (TOKEN_VERIFICATION_FAILED,
+    EMAIL_REQUIRED) to branch on the specific failure.
     """
 
 

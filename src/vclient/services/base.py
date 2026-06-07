@@ -30,6 +30,7 @@ from vclient.exceptions import (
     RateLimitError,
     RequestValidationError,
     ServerError,
+    UnprocessableEntityError,
     ValidationError,
 )
 from vclient.models.pagination import PaginatedResponse
@@ -289,7 +290,7 @@ class BaseService:
             if header_id:
                 response_data["request_id"] = header_id
 
-    def _raise_for_status(
+    def _raise_for_status(  # noqa: C901
         self,
         response: httpx.Response,
         method: str,
@@ -311,6 +312,7 @@ class BaseService:
             NotFoundError: For 404 responses.
             ValidationError: For 400 responses.
             ConflictError: For 409 responses.
+            UnprocessableEntityError: For 422 responses.
             RateLimitError: For 429 responses.
             ServerError: For 5xx responses.
             APIError: For other error responses.
@@ -362,6 +364,10 @@ class BaseService:
         if status_code == 409:  # noqa: PLR2004
             error_logger.warning("Return 409 conflict")
             raise ConflictError(message, status_code, response_data)
+
+        if status_code == 422:  # noqa: PLR2004
+            error_logger.warning("Reject with unprocessable entity error")
+            raise UnprocessableEntityError(message, status_code, response_data)
 
         if HTTP_500_INTERNAL_SERVER_ERROR <= status_code < HTTP_600_UPPER_BOUND:
             raise ServerError(message, status_code, response_data)

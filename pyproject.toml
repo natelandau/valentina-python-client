@@ -132,6 +132,7 @@
         ]
         per-file-ignores = { "src/vclient/_sync/**" = [
             "C416",    # Unnecessary list comprehension (AST unparser artifact)
+            "C901",    # Function too complex (noqa stripped by AST codegen)
             "D",       # Docstring formatting (AST unparser doesn't preserve style)
             "E501",    # Line too long
             "ERA001",  # Commented-out code false positives
