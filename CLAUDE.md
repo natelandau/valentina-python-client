@@ -155,7 +155,7 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details forma
 | `RateLimitError`           | 429         | Rate limited (has `.retry_after`, `.remaining`)               |
 | `ServerError`              | 5xx         | Server errors                                                 |
 
-All have `.status_code`, `.title`, `.detail`, `.instance` properties from RFC 9457.
+All have `.status_code`, `.title`, `.detail`, `.instance` properties from RFC 9457, plus a `.code` property for machine-readable error codes.
 
 ## Constants Validation
 
