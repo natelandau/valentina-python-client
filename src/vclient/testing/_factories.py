@@ -33,6 +33,7 @@ from vclient.models import (
     FullSheetTraitSubcategory,
     GitHubProfile,
     GoogleProfile,
+    IdentityResolution,
     InventoryItem,
     MeDeveloper,
     MeDeveloperWithApiKey,
@@ -214,6 +215,11 @@ class GoogleProfileFactory(ModelFactory[GoogleProfile]):
     __use_defaults__ = True
 
 
+class IdentityResolutionFactory(ModelFactory[IdentityResolution]):
+    __model__ = IdentityResolution
+    __use_defaults__ = True
+
+
 class InventoryItemFactory(ModelFactory[InventoryItem]):
     __model__ = InventoryItem
     __use_defaults__ = True
@@ -351,6 +357,7 @@ __all__ = [
     "FullSheetTraitSubcategoryFactory",
     "GitHubProfileFactory",
     "GoogleProfileFactory",
+    "IdentityResolutionFactory",
     "InventoryItemFactory",
     "MeDeveloperFactory",
     "MeDeveloperWithApiKeyFactory",

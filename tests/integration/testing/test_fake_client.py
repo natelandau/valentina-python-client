@@ -2,9 +2,23 @@
 
 import pytest
 
-from vclient.models import Campaign, Company, PaginatedResponse, SystemHealth
-from vclient.registry import campaigns_service, companies_service, system_service, users_service
-from vclient.testing import FakeVClient
+from vclient.exceptions import ConflictError, UnprocessableEntityError
+from vclient.models import (
+    Campaign,
+    Company,
+    IdentityResolution,
+    PaginatedResponse,
+    SystemHealth,
+    User,
+)
+from vclient.registry import (
+    campaigns_service,
+    companies_service,
+    identity_service,
+    system_service,
+    users_service,
+)
+from vclient.testing import FakeVClient, Routes, UserFactory
 
 pytestmark = pytest.mark.anyio
 
@@ -127,3 +141,78 @@ class TestFakeVClientOverrides:
 
             # Then the overridden data is returned
             assert result[0].id == "custom-user"
+
+
+class TestIdentityRoutes:
+    """FakeVClient should serve the identity resolution routes."""
+
+    async def test_identify_default_response(self):
+        """Verify the identify route returns a factory-built IdentityResolution."""
+        async with FakeVClient():
+            # When identifying a provider login with no overrides
+            result = await identity_service(company_id="company123").identify(
+                provider="apple",
+                token="fake-token",  # noqa: S106
+            )
+
+            # Then a valid IdentityResolution is returned
+            assert isinstance(result, IdentityResolution)
+            assert result.resolution in {"matched", "linked", "created"}
+
+    async def test_identify_set_response(self):
+        """Verify set_response overrides the identify route."""
+        async with FakeVClient() as client:
+            # Given an overridden identify response
+            user = UserFactory.build()
+            override = IdentityResolution(resolution="created", user=user)
+            client.set_response(Routes.IDENTITY_IDENTIFY, model=override)
+
+            # When identifying a provider login
+            result = await identity_service(company_id="company123").identify(
+                provider="google",
+                token="fake-token",  # noqa: S106
+            )
+
+            # Then the override is returned
+            assert result.resolution == "created"
+            assert result.user.id == user.id
+
+    async def test_identify_set_error(self):
+        """Verify set_error simulates a 422 verification failure."""
+        async with FakeVClient() as client:
+            # Given the identify route configured to fail verification
+            client.set_error(Routes.IDENTITY_IDENTIFY, status_code=422, detail="bad token")
+
+            # When/Then identifying raises UnprocessableEntityError
+            with pytest.raises(UnprocessableEntityError):
+                await identity_service(company_id="company123").identify(
+                    provider="apple",
+                    token="expired",  # noqa: S106
+                )
+
+    async def test_link_identity_default_response(self):
+        """Verify the link route returns a factory-built User."""
+        async with FakeVClient():
+            # When linking an identity with no overrides
+            result = await users_service("user123", company_id="company123").link_identity(
+                "user123",
+                provider="discord",
+                token="fake-token",  # noqa: S106
+            )
+
+            # Then a valid User is returned
+            assert isinstance(result, User)
+
+    async def test_link_identity_set_error_conflict(self):
+        """Verify set_error simulates an identity conflict."""
+        async with FakeVClient() as client:
+            # Given the link route configured to conflict
+            client.set_error(Routes.USERS_IDENTITY_LINK, status_code=409, detail="already linked")
+
+            # When/Then linking raises ConflictError
+            with pytest.raises(ConflictError):
+                await users_service("user123", company_id="company123").link_identity(
+                    "user123",
+                    provider="apple",
+                    token="fake-token",  # noqa: S106
+                )
