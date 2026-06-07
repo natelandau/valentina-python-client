@@ -35,6 +35,7 @@ if TYPE_CHECKING:
         DicerollService,
         DictionaryService,
         GlobalAdminService,
+        IdentityService,
         OptionsService,
         SystemService,
         UserLookupService,
@@ -268,6 +269,33 @@ def user_self_registration_service(
         ```
     """
     return default_client().user_self_registration(company_id=company_id)
+
+
+def identity_service(*, company_id: str | None = None) -> "IdentityService":
+    """Create a company-scoped IdentityService using the default client.
+
+    Resolves verified provider logins (Apple/Google ID tokens, Discord/GitHub
+    access tokens) to canonical users. Does not require an acting user, only
+    developer API key authentication.
+
+    Args:
+        company_id: The ID of the company to resolve identities in. If not
+            provided, uses the default_company_id from the client config.
+
+    Returns:
+        IdentityService: A service instance for identity resolution.
+
+    Raises:
+        RuntimeError: If no default client has been configured.
+        ValueError: If no company_id provided and no default configured.
+
+    Example:
+        ```python
+        identity = identity_service()
+        result = await identity.identify(provider="google", token="<id-token>")
+        ```
+    """
+    return default_client().identity(company_id=company_id)
 
 
 def campaigns_service(

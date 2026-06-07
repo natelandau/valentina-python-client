@@ -19,6 +19,7 @@ from vclient.registry import (
     dicerolls_service,
     dictionary_service,
     global_admin_service,
+    identity_service,
     options_service,
     system_service,
     users_service,
@@ -36,6 +37,7 @@ from vclient.services import (
     DicerollService,
     DictionaryService,
     GlobalAdminService,
+    IdentityService,
     OptionsService,
     SystemService,
     UsersService,
@@ -212,6 +214,31 @@ class TestGlobalAdminService:
 
         # Then: A GlobalAdminService is returned with the correct client
         assert isinstance(service, GlobalAdminService)
+        assert service._client is client
+
+
+class TestIdentityService:
+    """Tests for identity_service factory function."""
+
+    def test_identity_service_raises_when_not_configured(self) -> None:
+        """Verify identity_service raises RuntimeError when no client is configured."""
+        # Given: No default client configured
+
+        # When/Then: Calling identity_service raises RuntimeError
+        with pytest.raises(RuntimeError, match="No default client configured"):
+            identity_service(company_id="company123")
+
+    def test_identity_service_returns_service_instance(self, base_url, api_key) -> None:
+        """Verify identity_service returns an IdentityService with the default client."""
+        # Given: A configured default client
+        client = VClient(base_url=base_url, api_key=api_key)
+        configure_default_client(client)
+
+        # When: Getting the identity service
+        service = identity_service(company_id="company123")
+
+        # Then: An IdentityService is returned with the correct client
+        assert isinstance(service, IdentityService)
         assert service._client is client
 
 
