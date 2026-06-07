@@ -46,7 +46,9 @@ class APIError(Exception):
         Includes RFC 9457 Problem Details fields when available:
         - status code and title
         - detail message
+        - machine-readable code
         - instance URI
+        - request ID
         """
         parts: list[str] = []
 
