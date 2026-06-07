@@ -22,6 +22,7 @@ Exception
     ├── AuthorizationError         # 403
     ├── NotFoundError              # 404
     ├── ConflictError              # 409
+    ├── UnprocessableEntityError   # 422 (check .code for specific failure)
     ├── ValidationError            # 400 (adds .invalid_parameters)
     ├── RequestValidationError     # client-side (adds .errors)
     ├── RateLimitError             # 429 (adds .retry_after, .remaining)
@@ -39,8 +40,20 @@ Every exception exposes these properties. All are nullable because the server ma
 | `.detail` | `str \| None` | `response_data["detail"]` | Human-readable explanation — suitable for display |
 | `.instance` | `str \| None` | `response_data["instance"]` | URI reference to the specific failure occurrence |
 | `.request_id` | `str \| None` | `response_data["request_id"]` | Correlate with server logs — **always log this** |
+| `.code` | `str \| None` | `response_data["code"]` | Machine-readable error code extension; `None` on most errors |
 | `.response_data` | `dict[str, Any]` | raw body | The full RFC 9457 payload |
 | `.message` | `str` | constructor arg | The initial exception message |
+
+### Machine-readable error codes (`.code`)
+
+Some endpoints set a `code` extension member in the RFC 9457 body to let callers branch on the specific failure without parsing `.detail` text.
+
+| Code | Exception | Endpoint | Meaning |
+|------|-----------|----------|---------|
+| `TOKEN_VERIFICATION_FAILED` | `UnprocessableEntityError` (422) | `IdentityService.identify()`, `UsersService.link_identity()` | The provider rejected or could not verify the credential |
+| `EMAIL_REQUIRED` | `UnprocessableEntityError` (422) | `IdentityService.identify()` | Creating a new user but provider supplied no email and none was passed in the request |
+| `IDENTITY_ALREADY_LINKED` | `ConflictError` (409) | `UsersService.link_identity()` | The provider identity belongs to a different user, or the target user already has a different identity from this provider |
+| `PROVIDER_UNAVAILABLE` | `ServerError` (sent with HTTP 503; `ServerError` covers all 5xx) | `IdentityService.identify()` | The identity provider is unreachable |
 
 ### String formatting
 
@@ -76,6 +89,25 @@ except NotFoundError:
 ### `ConflictError` (409)
 
 Most commonly raised when an idempotency key is reused with a different request body. If you see this, regenerate your idempotency key; don't retry with the same key.
+
+### `UnprocessableEntityError` (422)
+
+Raised by the identity endpoints when a request is well-formed but cannot be processed. Always check `.code` to determine the specific failure:
+
+```python
+from vclient.exceptions import UnprocessableEntityError
+
+try:
+    result = await identity_svc.identify(provider="google", token=id_token)
+except UnprocessableEntityError as e:
+    if e.code == "TOKEN_VERIFICATION_FAILED":
+        # The provider rejected the credential; ask the user to log in again
+        raise
+    if e.code == "EMAIL_REQUIRED":
+        # Need to collect the user's email before retrying
+        raise
+    raise  # unexpected code
+```
 
 ### `ValidationError` (400) — server-side
 

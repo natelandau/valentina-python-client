@@ -7,6 +7,7 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 - [Shared Models](#shared-models)
 - [Companies](#companies)
 - [Users](#users)
+  - [Identity Resolution](#identity-resolution)
 - [Campaigns](#campaigns)
 - [Characters](#characters)
 - [Character Traits](#character-traits)
@@ -315,6 +316,39 @@ All fields optional. Same fields as UserCreate, with `role` becoming optional.
 |-------|------|----------|
 | primary_user_id | str | yes |
 | secondary_user_id | str | yes |
+
+### Identity Resolution
+
+#### UserIdentifyDTO
+
+Request body for `IdentityService.identify()`. Fields `username` and `email` apply only when a new user is created.
+
+| Field | Type | Constraints |
+|-------|------|------------|
+| provider | IdentityProvider | required |
+| token | str | required, min length 1 |
+| username | str \| None | optional |
+| email | str \| None | optional |
+
+#### UserIdentityLinkDTO
+
+Request body for `UsersService.link_identity()`.
+
+| Field | Type | Constraints |
+|-------|------|------------|
+| provider | IdentityProvider | required |
+| token | str | required, min length 1 |
+
+#### IdentityResolution
+
+Response model from `IdentityService.identify()`. Reports how the API resolved the credential.
+
+| Field | Type | Required |
+|-------|------|----------|
+| resolution | IdentityResolutionType | yes |
+| user | User | yes |
+
+**Resolution values:** `"matched"` (existing provider identity found), `"linked"` (auto-linked by provider-verified email), `"created"` (new UNAPPROVED user registered).
 
 ### CampaignExperience
 

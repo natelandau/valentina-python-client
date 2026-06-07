@@ -63,6 +63,17 @@ UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
 ```
 
+### Identity
+
+These constants are client-side only and are **not** validated against the `/options` endpoint.
+
+```python
+IdentityProvider = Literal["apple", "google", "discord", "github"]
+IdentityResolutionType = Literal["matched", "linked", "created"]
+```
+
+`IdentityProvider` is the credential source passed to `IdentityService.identify()` and `UsersService.link_identity()`. `IdentityResolutionType` is the outcome reported in `IdentityResolution.resolution`.
+
 ### Company Settings Permissions
 
 ```python
