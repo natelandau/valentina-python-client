@@ -73,6 +73,7 @@ assert user.assets is None          # not requested
 | `approve_user(user_id, role)`                           | `User`                    | Approve a user and assign a role    |
 | `deny_user(user_id)`                                    | `None`                    | Deny an unapproved user             |
 | `merge(primary_user_id, secondary_user_id)`             | `User`                    | Merge unapproved user into primary  |
+| `link_identity(user_id, provider=..., token=...)`       | `User`                    | Attach a verified provider identity |
 
 ### Statistics
 
@@ -314,7 +315,26 @@ merged_user = await users.merge(
 print(f"Merged into: {merged_user.username}")
 ```
 
+### Link a Provider Identity
+
+Connect an existing user account to a verified provider credential. This is the connect-your-account flow: the user is already logged in and wants to link their Discord, Google, GitHub, or Apple account so future logins can use that provider.
+
+The API verifies the credential with the provider before linking. Only the account owner, or a company admin acting on another user's behalf, may link an identity.
+
+```python
+updated = await users.link_identity(
+    "USER_ID",
+    provider="discord",
+    token=discord_access_token,
+)
+```
+
+If the provider identity already belongs to a different user, or the target user already has a different identity from the same provider, a `ConflictError` is raised with `code == "IDENTITY_ALREADY_LINKED"`.
+
+Linking prevents duplicate accounts before they exist. Use `merge()` to clean up duplicates that already exist, including accounts with Apple private-relay emails that can never be auto-linked by `IdentityService.identify()`.
+
 ## Related Documentation
 
-- [Response Models](../models/users.md) - View `User`, `UserMergeDTO`, `UserApproveDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [Response Models](../models/users.md) - View `User`, `UserMergeDTO`, `UserApproveDTO`, `UserIdentityLinkDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
+- [IdentityService](identity.md) - Verified provider login resolution (API-key-only, no `on_behalf_of` required)
 - [UserSelfRegistrationService](user_self_registration.md) - SSO user registration

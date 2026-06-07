@@ -252,6 +252,7 @@ Every public response model (and the nested models they contain, such as the aut
 | `FullSheetTraitSubcategoryFactory`          | `FullSheetTraitSubcategory`          |
 | `GitHubProfileFactory`                      | `GitHubProfile`                      |
 | `GoogleProfileFactory`                      | `GoogleProfile`                      |
+| `IdentityResolutionFactory`                 | `IdentityResolution`                 |
 | `InventoryItemFactory`                      | `InventoryItem`                      |
 | `MeDeveloperFactory`                        | `MeDeveloper`                        |
 | `MeDeveloperWithApiKeyFactory`              | `MeDeveloperWithApiKey`              |
