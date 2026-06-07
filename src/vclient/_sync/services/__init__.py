@@ -14,6 +14,7 @@ from .developers import SyncDeveloperService
 from .dicerolls import SyncDicerollService
 from .dictionary import SyncDictionaryService
 from .global_admin import SyncGlobalAdminService
+from .identity import SyncIdentityService
 from .options import SyncOptionsService
 from .system import SyncSystemService
 from .user_lookup import SyncUserLookupService
@@ -34,6 +35,7 @@ __all__ = [
     "SyncDicerollService",
     "SyncDictionaryService",
     "SyncGlobalAdminService",
+    "SyncIdentityService",
     "SyncOptionsService",
     "SyncSystemService",
     "SyncUserLookupService",

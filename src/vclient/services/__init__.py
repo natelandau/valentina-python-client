@@ -13,6 +13,7 @@ from .developers import DeveloperService
 from .dicerolls import DicerollService
 from .dictionary import DictionaryService
 from .global_admin import GlobalAdminService
+from .identity import IdentityService
 from .options import OptionsService
 from .system import SystemService
 from .user_lookup import UserLookupService
@@ -33,6 +34,7 @@ __all__ = [
     "DicerollService",
     "DictionaryService",
     "GlobalAdminService",
+    "IdentityService",
     "OptionsService",
     "SystemService",
     "UserLookupService",

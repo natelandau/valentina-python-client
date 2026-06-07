@@ -49,6 +49,7 @@ class Endpoints:
     USER = f"{USERS}/{{user_id}}"
     USER_REGISTER = f"{USERS}/register"
     USER_MERGE = f"{USERS}/merge"
+    USER_IDENTITIES = f"{USER}/identities"
     USER_APPROVE = f"{USER}/approve"
     USER_DENY = f"{USER}/deny"
     USER_STATISTICS = f"{USER}/statistics"
@@ -63,6 +64,9 @@ class Endpoints:
     USER_NOTE = f"{USER_NOTES}/{{note_id}}"
     USER_QUICKROLLS = f"{USER}/quickrolls"
     USER_QUICKROLL = f"{USER_QUICKROLLS}/{{quickroll_id}}"
+
+    # Identity resolution endpoints
+    AUTH_IDENTIFY = f"{COMPANY}/auth/identify"
 
     # Campaign endpoints
     CAMPAIGNS = f"{COMPANY}/campaigns"
