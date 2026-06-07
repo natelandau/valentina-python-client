@@ -4,7 +4,7 @@ import mimetypes
 from collections.abc import AsyncIterator, Sequence
 from typing import TYPE_CHECKING
 
-from vclient.constants import DEFAULT_PAGE_LIMIT, UserInclude, UserRole
+from vclient.constants import DEFAULT_PAGE_LIMIT, IdentityProvider, UserInclude, UserRole
 from vclient.endpoints import Endpoints
 from vclient.models import (
     Asset,
@@ -21,6 +21,7 @@ from vclient.models import (
     UserApproveDTO,
     UserCreate,
     UserDetail,
+    UserIdentityLinkDTO,
     UserMergeDTO,
     UserUpdate,
     _ExperienceAddRemove,
@@ -196,6 +197,47 @@ class UsersService(BaseService):
         )
         response = await self._post(
             self._format_endpoint(Endpoints.USER_MERGE),
+            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+        )
+        return User.model_validate(response.json())
+
+    async def link_identity(
+        self,
+        user_id: str,
+        *,
+        provider: IdentityProvider,
+        token: str,
+    ) -> User:
+        """Attach an additional verified provider identity to a user.
+
+        Use for "connect your account" settings flows: a user already
+        authenticated via one provider presents a credential from a second
+        provider, which the API verifies and links to the same user. Only the
+        acting user themselves or a company ADMIN may link identities.
+        Re-linking the same identity is idempotent and refreshes the stored
+        profile.
+
+        Args:
+            user_id: The ID of the user receiving the identity.
+            provider: The identity provider that issued the credential.
+            token: The provider credential (OIDC ID token for apple/google,
+                OAuth access token for discord/github).
+
+        Returns:
+            The updated User object.
+
+        Raises:
+            RequestValidationError: If the input parameters fail client-side validation.
+            AuthorizationError: If the acting user is neither the target user nor an admin.
+            ConflictError: If the identity belongs to another user, or the user
+                already has a different identity from this provider
+                (code IDENTITY_ALREADY_LINKED).
+            UnprocessableEntityError: If the provider token fails verification
+                (code TOKEN_VERIFICATION_FAILED).
+        """
+        body = self._validate_request(UserIdentityLinkDTO, provider=provider, token=token)
+        response = await self._post(
+            self._format_endpoint(Endpoints.USER_IDENTITIES, user_id=user_id),
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return User.model_validate(response.json())
