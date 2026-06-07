@@ -5,7 +5,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-from vclient.constants import UserRole
+from vclient.constants import IdentityProvider, IdentityResolutionType, UserRole
 from vclient.models.characters import Character
 from vclient.models.shared import Asset, Note
 
@@ -146,6 +146,19 @@ class AdminUser(User):
     is_archived: bool
 
 
+class IdentityResolution(BaseModel):
+    """Response model for the identify endpoint.
+
+    Reports the canonical user a verified provider login resolved to and how
+    the resolution happened: ``matched`` (existing provider identity),
+    ``linked`` (auto-linked by provider-verified email), or ``created``
+    (a new UNAPPROVED user was registered).
+    """
+
+    resolution: IdentityResolutionType
+    user: User
+
+
 # -----------------------------------------------------------------------------
 # User Request Models
 # -----------------------------------------------------------------------------
@@ -185,6 +198,26 @@ class UserMergeDTO(BaseModel):
 
     primary_user_id: str
     secondary_user_id: str
+
+
+class UserIdentifyDTO(BaseModel):
+    """Resolve a verified provider credential to a canonical user.
+
+    ``username`` and ``email`` apply only when the API creates a new user;
+    ``email`` is required there only if the provider did not supply one.
+    """
+
+    provider: IdentityProvider
+    token: str = Field(min_length=1)
+    username: str | None = None
+    email: str | None = None
+
+
+class UserIdentityLinkDTO(BaseModel):
+    """Attach an additional verified provider identity to an existing user."""
+
+    provider: IdentityProvider
+    token: str = Field(min_length=1)
 
 
 class UserCreate(BaseModel):
@@ -318,6 +351,7 @@ __all__ = [
     "DiscordProfile",
     "GitHubProfile",
     "GoogleProfile",
+    "IdentityResolution",
     "Quickroll",
     "QuickrollCreate",
     "QuickrollUpdate",
@@ -325,6 +359,8 @@ __all__ = [
     "UserApproveDTO",
     "UserCreate",
     "UserDetail",
+    "UserIdentifyDTO",
+    "UserIdentityLinkDTO",
     "UserMergeDTO",
     "UserRegisterDTO",
     "UserUpdate",

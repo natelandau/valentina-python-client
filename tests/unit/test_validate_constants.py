@@ -71,6 +71,8 @@ class TestConstantMap:
             "BookInclude",
             "ChapterInclude",
             "CharacterInclude",
+            "IdentityProvider",
+            "IdentityResolutionType",
             "LogLevel",
             "UserInclude",
         }
