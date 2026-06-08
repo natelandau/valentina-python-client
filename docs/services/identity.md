@@ -105,4 +105,3 @@ except UnprocessableEntityError as e:
 ## Related Documentation
 
 - [Users](users.md) - `link_identity()` for connect-your-account flows, and the merge workflow for cleaning up pre-existing duplicates
-- [User Self Registration](user_self_registration.md) - assertion-style registration without a provider credential

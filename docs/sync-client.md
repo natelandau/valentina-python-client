@@ -71,7 +71,6 @@ Every async factory function has a sync counterpart prefixed with `sync_`:
 | `dictionary_service()`               | `sync_dictionary_service()`               |
 | `character_blueprint_service()`      | `sync_character_blueprint_service()`      |
 | `options_service()`                  | `sync_options_service()`                  |
-| `user_self_registration_service()`   | `sync_user_self_registration_service()`   |
 | `identity_service()`                 | `sync_identity_service()`                 |
 
 Factory functions work the same way — create a `SyncVClient` first, then call the factory from any module:

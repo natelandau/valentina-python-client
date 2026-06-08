@@ -180,19 +180,6 @@ class DiscordProfileUpdate(BaseModel):
     verified: bool | None = None
 
 
-class UserRegisterDTO(BaseModel):
-    """Register a new user via SSO onboarding (no requesting_user_id required)."""
-
-    name_first: str | None = None
-    name_last: str | None = None
-    username: str
-    email: str
-    discord_profile: DiscordProfileUpdate | None = None
-    google_profile: GoogleProfile | None = None
-    github_profile: GitHubProfile | None = None
-    apple_profile: AppleProfile | None = None
-
-
 class UserMergeDTO(BaseModel):
     """Merge an UNAPPROVED user into an existing primary user."""
 
@@ -231,10 +218,6 @@ class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50)
     email: str
     role: UserRole
-    discord_profile: DiscordProfileUpdate | None = None
-    google_profile: GoogleProfile | None = None
-    github_profile: GitHubProfile | None = None
-    apple_profile: AppleProfile | None = None
 
 
 class UserUpdate(BaseModel):
@@ -248,10 +231,6 @@ class UserUpdate(BaseModel):
     username: Annotated[str, Field(min_length=3, max_length=50)] | None = None
     email: str | None = None
     role: UserRole | None = None
-    discord_profile: DiscordProfileUpdate | None = None
-    google_profile: GoogleProfile | None = None
-    github_profile: GitHubProfile | None = None
-    apple_profile: AppleProfile | None = None
 
 
 class AdminUserCreate(UserCreate):
@@ -260,9 +239,16 @@ class AdminUserCreate(UserCreate):
     Extends the tenant-scoped ``UserCreate`` with an explicit ``company_id`` for
     the target company. The server rejects ``UNAPPROVED``/``DEACTIVATED`` roles
     on create, so no client-side role restriction is applied here.
+
+    Unlike the tenant-scoped surface, the global-admin endpoints still accept
+    provider profile writes, so the four profile fields are declared here.
     """
 
     company_id: str
+    discord_profile: DiscordProfileUpdate | None = None
+    google_profile: GoogleProfile | None = None
+    github_profile: GitHubProfile | None = None
+    apple_profile: AppleProfile | None = None
 
 
 class AdminUserUpdate(UserUpdate):
@@ -270,9 +256,16 @@ class AdminUserUpdate(UserUpdate):
 
     Extends the tenant-scoped ``UserUpdate`` with ``is_archived``. Set it to
     ``False`` to restore a soft-deleted user.
+
+    Unlike the tenant-scoped surface, the global-admin endpoints still accept
+    provider profile writes, so the four profile fields are declared here.
     """
 
     is_archived: bool | None = None
+    discord_profile: DiscordProfileUpdate | None = None
+    google_profile: GoogleProfile | None = None
+    github_profile: GitHubProfile | None = None
+    apple_profile: AppleProfile | None = None
 
 
 class UserApproveDTO(BaseModel):
@@ -362,7 +355,6 @@ __all__ = [
     "UserIdentifyDTO",
     "UserIdentityLinkDTO",
     "UserMergeDTO",
-    "UserRegisterDTO",
     "UserUpdate",
     "_ExperienceAddRemove",
 ]

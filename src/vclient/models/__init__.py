@@ -148,7 +148,6 @@ from .users import (
     UserIdentifyDTO,
     UserIdentityLinkDTO,
     UserMergeDTO,
-    UserRegisterDTO,
     UserUpdate,
     _ExperienceAddRemove as _ExperienceAddRemove,
 )
@@ -254,7 +253,6 @@ __all__ = [
     "UserIdentityLinkDTO",
     "UserLookupResult",
     "UserMergeDTO",
-    "UserRegisterDTO",
     "UserUpdate",
     "VampireAttributes",
     "VampireAttributesCreate",

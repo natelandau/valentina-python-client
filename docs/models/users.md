@@ -100,21 +100,6 @@ Use the `UserInclude` type alias from `vclient.constants` to get editor autocomp
 | `email`    | `str \| None` | Apple email address |
 | `fullname` | `str \| None` | Full name           |
 
-## UserRegisterDTO
-
-Request body for registering a user via SSO onboarding.
-
-| Field             | Type                     | Description              |
-| ----------------- | ------------------------ | ------------------------ |
-| `username`        | `str`                    | Username (required)      |
-| `email`           | `str`                    | Email address (required) |
-| `name_first`      | `str \| None`            | First name               |
-| `name_last`       | `str \| None`            | Last name                |
-| `discord_profile` | `DiscordProfile \| None` | Discord information      |
-| `google_profile`  | `GoogleProfile \| None`  | Google account info      |
-| `github_profile`  | `GitHubProfile \| None`  | GitHub account info      |
-| `apple_profile`   | `AppleProfile \| None`   | Apple account info       |
-
 ## UserMergeDTO
 
 Request body for merging an unapproved user into an existing primary user.

@@ -311,24 +311,22 @@ class SyncUsersService(SyncBaseService):
     def create(self, request: UserCreate | None = None, **kwargs) -> User:
         """Create a new user within a company.
 
-        The user is automatically added to the company's user list. The Discord profile
-        is optional and is not used for authentication but is included for Discord bot
-        integration.
+        The user is automatically added to the company's user list.
 
-        The initial ``role`` cannot be ``UNAPPROVED`` (use :meth:`register` for SSO
-        onboarding) or ``DEACTIVATED`` (not a creation path); either will surface as
-        ``ValidationError``.
+        Provider identities (Discord, Google, GitHub, Apple) cannot be set here;
+        any provider-profile values passed are silently ignored. Resolve them
+        through the verified identity endpoints instead
+        (:meth:`SyncIdentityService.identify` or :meth:`SyncUsersService.link_identity`).
+
+        The initial ``role`` cannot be ``UNAPPROVED`` or ``DEACTIVATED`` (not a
+        creation path); either will surface as ``ValidationError``.
 
         Args:
             request: A UserCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for UserCreate if request is not provided.
                 Accepts: username (str, required), email (str, required),
                 role (UserRole, required),
-                name_first (str | None), name_last (str | None),
-                discord_profile (DiscordProfileUpdate | None),
-                google_profile (GoogleProfile | None),
-                github_profile (GitHubProfile | None),
-                apple_profile (AppleProfile | None).
+                name_first (str | None), name_last (str | None).
 
         Returns:
             The newly created User object.
@@ -364,11 +362,12 @@ class SyncUsersService(SyncBaseService):
             **kwargs: Fields for UserUpdate if request is not provided.
                 Accepts: username (str | None), email (str | None),
                 role (UserRole | None),
-                name_first (str | None), name_last (str | None),
-                discord_profile (DiscordProfileUpdate | None),
-                google_profile (GoogleProfile | None),
-                github_profile (GitHubProfile | None),
-                apple_profile (AppleProfile | None).
+                name_first (str | None), name_last (str | None).
+
+        Provider identities (Discord, Google, GitHub, Apple) cannot be changed
+        here; any provider-profile values passed are silently ignored. Resolve
+        them through the verified identity endpoints instead
+        (:meth:`SyncIdentityService.identify` or :meth:`SyncUsersService.link_identity`).
 
         Returns:
             The updated User object.
