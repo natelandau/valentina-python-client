@@ -1,3 +1,9 @@
+## v2.8.0 (2026-06-08)
+
+### Feat
+
+- **users**: add unlink_identity to disconnect a provider (#79)
+
 ## v2.7.0 (2026-06-08)
 
 ### Feat
