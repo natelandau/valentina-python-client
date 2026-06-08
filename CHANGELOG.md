@@ -1,3 +1,10 @@
+## v2.7.0 (2026-06-08)
+
+### Feat
+
+- **users**: remove unverified user registration and profile writes (#78)
+- add verified identity resolution for provider logins (#77)
+
 ## v2.6.0 (2026-06-05)
 
 ### Feat
