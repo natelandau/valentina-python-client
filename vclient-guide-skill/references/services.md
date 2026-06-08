@@ -166,6 +166,8 @@ Resolves verified provider credentials to canonical users. Forward the credentia
 | `UnprocessableEntityError` | 422 | `EMAIL_REQUIRED` | Creating a user but provider supplied no email and none was passed |
 | `ServerError` | 503 | `PROVIDER_UNAVAILABLE` | Provider is unreachable (HTTP 503; `ServerError` covers all 5xx) |
 
+**Apple/Google audience requirement:** Token verification for `apple` and `google` checks whether the token's audience (bundle ID or OAuth client ID) appears in the union of the server's environment allowlists and the audiences registered on the calling developer's profile. If both are empty for a given app, `TOKEN_VERIFICATION_FAILED` is raised. Register audiences via `client.developer.update_me(provider_audiences={"apple": [...], "google": [...]})`.
+
 **Testing:** Use `Routes.IDENTITY_IDENTIFY` with `FakeVClient.set_response()` or `set_error()` (e.g. `set_error(Routes.IDENTITY_IDENTIFY, status_code=422, code="TOKEN_VERIFICATION_FAILED")` to test branching on `APIError.code`).
 
 ---

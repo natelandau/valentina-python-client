@@ -63,6 +63,19 @@ ProviderAudiences = dict[
 - Each provider may have at most 20 audience strings.
 - Each audience string must be 1-255 characters.
 
+## DeveloperUpdate
+
+Admin-side request body for updating any developer account. Used with `GlobalAdminService.update_developer()`.
+
+| Field                | Type                        | Description                                         |
+| -------------------- | --------------------------- | --------------------------------------------------- |
+| `username`           | `str \| None`               | Updated username                                    |
+| `email`              | `str \| None`               | Updated email                                       |
+| `is_global_admin`    | `bool \| None`              | Grant or revoke global admin status                 |
+| `provider_audiences` | `ProviderAudiences \| None` | Per-provider OIDC audience allowlists to register   |
+
+All fields are optional. See [ProviderAudiences](#provideraudiences) for the audience format and constraints.
+
 ## ServerLogEntry
 
 A single parsed server log entry returned by `tail_logs()` on the [Global Admin Service](../services/global_admin.md). Every field is nullable because individual log lines may omit values or fail to parse as structured JSON. When a line is not valid JSON, the original text is available on `raw`.

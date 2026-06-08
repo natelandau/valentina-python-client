@@ -50,6 +50,17 @@ The API tries the following steps in order and reports which one succeeded in th
 | `UnprocessableEntityError` | 422    | `EMAIL_REQUIRED`            | Creation needs an `email` the provider didn't send |
 | `ServerError`              | 503    | `PROVIDER_UNAVAILABLE`      | The provider could not be reached                  |
 
+## Audience Registration
+
+Apple and Google tokens carry an audience claim identifying the app they were issued to (for example, a bundle ID like `com.example.iosapp` or an OAuth client ID). The API accepts a token only when its audience appears in the combined allowlist formed by two sources:
+
+1. The server's own environment allowlists (configured by the platform operator).
+2. The per-developer audiences you register on your developer profile via `update_me(provider_audiences={"apple": [...], "google": [...]})` on the [Developer Service](developers.md).
+
+If your app's identifier is absent from both sources, `identify()` raises `UnprocessableEntityError` with code `TOKEN_VERIFICATION_FAILED`. Register your bundle ID or client ID once, and the API will accept tokens from that app.
+
+Discord and GitHub use OAuth access tokens, which do not carry audience claims, so they are not affected by this requirement.
+
 ## Examples
 
 ### Identify a Provider Login (Async)

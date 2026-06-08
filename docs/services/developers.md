@@ -73,3 +73,4 @@ print(f"New API Key: {result.api_key}")
 ## Related Documentation
 
 - [Response Models](../models/developers.md) - View `MeDeveloper` and `MeDeveloperWithApiKey` model schemas
+- [Identity Service](identity.md) - Registering `provider_audiences` is what enables Apple and Google verified logins for your apps
