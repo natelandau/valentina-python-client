@@ -119,6 +119,7 @@ from .shared import (
     Note,
     NoteCreate,
     NoteUpdate,
+    ProviderAudiences,
     RollStatistics,
     Trait,
 )
@@ -232,6 +233,7 @@ __all__ = [
     "NoteCreate",
     "NoteUpdate",
     "PaginatedResponse",
+    "ProviderAudiences",
     "Quickroll",
     "QuickrollCreate",
     "QuickrollUpdate",

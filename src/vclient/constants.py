@@ -85,11 +85,12 @@ GameVersion = Literal["V4", "V5"]
 GrantXPPermission = Literal["UNRESTRICTED", "PLAYER", "STORYTELLER"]
 HunterCreed = Literal["ENTREPRENEURIAL", "FAITHFUL", "INQUISITIVE", "MARTIAL", "UNDERGROUND"]
 HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
-# Identity resolution enums are client-side only; the API does not expose them
-# via /options, so they are intentionally absent from CONSTANT_MAP in
-# validate_constants.py.
+# Identity resolution and OIDC enums are client-side only; the API does not
+# expose them via /options, so they are intentionally absent from CONSTANT_MAP
+# in validate_constants.py.
 IdentityProvider = Literal["apple", "google", "discord", "github"]
 IdentityResolutionType = Literal["matched", "linked", "created"]
+OIDCProvider = Literal["apple", "google"]
 LogLevel = Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 ManageNPCPermission = Literal["UNRESTRICTED", "STORYTELLER"]

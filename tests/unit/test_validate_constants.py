@@ -74,6 +74,7 @@ class TestConstantMap:
             "IdentityProvider",
             "IdentityResolutionType",
             "LogLevel",
+            "OIDCProvider",
             "UserInclude",
         }
 

@@ -41,7 +41,9 @@ class SyncDeveloperService(SyncBaseService):
         Args:
             request: A MeDeveloperUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for MeDeveloperUpdate if request is not provided.
-                Accepts: username (str | None), email (str | None).
+                Accepts: username (str | None), email (str | None),
+                provider_audiences (ProviderAudiences | None): per-provider OIDC
+                audience allowlists ({"apple": [...], "google": [...]}).
 
         Returns:
             The updated MeDeveloper object.

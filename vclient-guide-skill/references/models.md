@@ -969,6 +969,7 @@ For creating custom traits on a character.
 | email | str | yes |
 | key_generated | datetime \| None | no |
 | companies | list[MeDeveloperCompanyPermission] | yes |
+| provider_audiences | ProviderAudiences | no (default: {}) |
 
 ### MeDeveloperWithApiKey (extends MeDeveloper)
 
@@ -978,7 +979,7 @@ For creating custom traits on a character.
 
 ### MeDeveloperUpdate
 
-`username` (str \| None), `email` (str \| None) — both optional.
+All optional: `username` (str \| None), `email` (str \| None), `provider_audiences` (ProviderAudiences \| None).
 
 ### MeDeveloperCompanyPermission
 
@@ -1004,6 +1005,7 @@ For creating custom traits on a character.
 | key_generated | datetime \| None | no |
 | is_global_admin | bool | yes |
 | companies | list[DeveloperCompanyPermission] | yes |
+| provider_audiences | ProviderAudiences | no (default: {}) |
 
 ### DeveloperWithApiKey (extends Developer)
 
@@ -1021,7 +1023,7 @@ For creating custom traits on a character.
 
 ### DeveloperUpdate
 
-All optional: `username`, `email`, `is_global_admin`.
+All optional: `username`, `email`, `is_global_admin`, `provider_audiences` (ProviderAudiences \| None).
 
 ### DeveloperCompanyPermission
 

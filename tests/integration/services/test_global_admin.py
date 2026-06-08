@@ -376,6 +376,37 @@ class TestGlobalAdminServiceUpdate:
         assert body == {"email": "new@example.com", "is_global_admin": True}
 
     @respx.mock
+    async def test_update_developer_provider_audiences(
+        self, vclient, base_url, developer_response_data
+    ):
+        """Verify updating provider_audiences sends audiences in the request body."""
+        # Given: A mocked update endpoint returning data with provider_audiences
+        developer_id = "507f1f77bcf86cd799439011"
+        updated_data = {
+            **developer_response_data,
+            "provider_audiences": {"google": ["1234-abc.apps.googleusercontent.com"]},
+        }
+        route = respx.patch(
+            f"{base_url}{Endpoints.ADMIN_DEVELOPER.format(developer_id=developer_id)}"
+        ).respond(200, json=updated_data)
+
+        # When: Updating provider_audiences via kwargs
+        result = await vclient.global_admin.update_developer(
+            developer_id,
+            provider_audiences={"google": ["1234-abc.apps.googleusercontent.com"]},
+        )
+
+        # Then: The request body contains provider_audiences
+        assert route.called
+        request = route.calls.last.request
+        body = json.loads(request.content)
+        assert body == {"provider_audiences": {"google": ["1234-abc.apps.googleusercontent.com"]}}
+
+        # And: The returned model reflects the audiences
+        assert isinstance(result, Developer)
+        assert result.provider_audiences == {"google": ["1234-abc.apps.googleusercontent.com"]}
+
+    @respx.mock
     async def test_update_developer_not_found(self, vclient, base_url):
         """Verify updating non-existent developer raises NotFoundError."""
         # Given: A mocked endpoint returning 404

@@ -7,6 +7,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from vclient.constants import PermissionLevel
+from vclient.models.shared import ProviderAudiences
 
 
 class DeveloperCompanyPermission(BaseModel):
@@ -34,6 +35,7 @@ class Developer(BaseModel):
     key_generated: datetime | None
     is_global_admin: bool
     companies: list[DeveloperCompanyPermission]
+    provider_audiences: ProviderAudiences = Field(default_factory=dict)
 
 
 class DeveloperWithApiKey(Developer):
@@ -70,6 +72,7 @@ class DeveloperUpdate(BaseModel):
     username: str | None = None
     email: str | None = None
     is_global_admin: bool | None = None
+    provider_audiences: ProviderAudiences | None = None
 
 
 class ServerLogEntry(BaseModel):
