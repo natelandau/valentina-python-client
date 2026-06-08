@@ -118,6 +118,30 @@ class TestBaseServiceErrorHandling:
         assert "Internal Server Error" in exc_info.value.message
 
     @respx.mock
+    async def test_error_with_json_list_body(self, base_service, base_url):
+        """Verify a JSON array error body still raises the mapped exception."""
+        # Given: An endpoint returning 500 with a JSON list body
+        respx.get(f"{base_url}/error").respond(500, json=[{"msg": "bad gateway body"}])
+
+        # When/Then: The mapped ServerError is raised, not AttributeError
+        with pytest.raises(ServerError) as exc_info:
+            await base_service._get("/error")
+        assert isinstance(exc_info.value.message, str)
+
+    @respx.mock
+    async def test_error_with_list_detail(self, base_service, base_url):
+        """Verify a list-typed detail field yields a str message."""
+        # Given: A 422 with FastAPI-style list detail
+        respx.get(f"{base_url}/error").respond(
+            422, json={"detail": [{"loc": ["body", "token"], "msg": "field required"}]}
+        )
+
+        # When/Then: The message is a string, not the raw list
+        with pytest.raises(UnprocessableEntityError) as exc_info:
+            await base_service._get("/error")
+        assert isinstance(exc_info.value.message, str)
+
+    @respx.mock
     async def test_validation_error_includes_invalid_parameters(self, base_service, base_url):
         """Verify ValidationError includes invalid_parameters from response."""
         # Given: A mocked endpoint returning a validation error with invalid_parameters

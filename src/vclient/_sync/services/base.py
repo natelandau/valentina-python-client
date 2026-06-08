@@ -289,10 +289,12 @@ class SyncBaseService:
         status_code = response.status_code
         try:
             response_data = response.json()
-            message = response_data.get("detail", response.text)
-        except (ValueError, KeyError, TypeError):
+        except ValueError:
             response_data = {}
-            message = response.text or f"HTTP {status_code}"
+        if not isinstance(response_data, dict):
+            response_data = {}
+        detail = response_data.get("detail")
+        message = detail if isinstance(detail, str) else response.text or f"HTTP {status_code}"
         self._inject_request_id_fallback(response_data, response)
         error_logger = logger.bind(
             method=method,
