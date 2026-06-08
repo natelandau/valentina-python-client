@@ -299,6 +299,7 @@ except APIError as e:
 
 ```python
 import pytest
+from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError, RateLimitError, ValidationError
 from vclient.testing import FakeVClient, Routes
 
@@ -310,18 +311,20 @@ async def test_handles_missing_user():
 
 async def test_surfaces_invalid_parameters():
     async with FakeVClient() as client:
-        client.set_error(
-            Routes.CAMPAIGNS_CREATE,
+        # set_error() covers detail and code; use the low-level add_route()
+        # for other extension members such as invalid_parameters
+        client.add_route(
+            "POST",
+            Endpoints.CAMPAIGNS,
             status_code=400,
-            detail="validation failed",
-            response_data={
+            json={
                 "title": "Bad Request",
                 "detail": "validation failed",
                 "invalid_parameters": [{"field": "name", "message": "required"}],
             },
         )
         with pytest.raises(ValidationError) as exc_info:
-            await client.campaigns(on_behalf_of="u", company_id="c").create(name="")
+            await client.campaigns(on_behalf_of="u", company_id="c").create(name="abc")
         assert exc_info.value.invalid_parameters[0]["field"] == "name"
 
 async def test_handles_rate_limit():
