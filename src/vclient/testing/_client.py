@@ -172,6 +172,7 @@ class FakeVClient(VClient):
         *,
         status_code: int,
         detail: str | None = None,
+        code: str | None = None,
         params: dict[str, str] | None = None,
     ) -> None:
         """Override a route to return an error response.
@@ -180,6 +181,9 @@ class FakeVClient(VClient):
             route: A ``RouteSpec`` from the ``Routes`` class identifying the endpoint.
             status_code: The HTTP status code to return.
             detail: Optional error detail message. Defaults to ``"Error {status_code}"``.
+            code: Optional machine-readable error code, an RFC 9457 extension
+                member exposed as ``APIError.code`` (e.g.
+                ``"TOKEN_VERIFICATION_FAILED"``). Omitted from the body when not set.
             params: Optional path parameter values to match against. When set,
                 the error override only applies to requests whose URL path segments
                 match all specified values.
@@ -190,4 +194,6 @@ class FakeVClient(VClient):
             "detail": detail or f"Error {status_code}",
             "request_id": request_id,
         }
+        if code is not None:
+            body["code"] = code
         self._router.add_route(method, pattern, json=body, status_code=status_code, params=params)

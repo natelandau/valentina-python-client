@@ -181,14 +181,20 @@ class TestIdentityRoutes:
         """Verify set_error simulates a 422 verification failure."""
         async with FakeVClient() as client:
             # Given the identify route configured to fail verification
-            client.set_error(Routes.IDENTITY_IDENTIFY, status_code=422, detail="bad token")
+            client.set_error(
+                Routes.IDENTITY_IDENTIFY,
+                status_code=422,
+                detail="bad token",
+                code="TOKEN_VERIFICATION_FAILED",
+            )
 
-            # When/Then identifying raises UnprocessableEntityError
-            with pytest.raises(UnprocessableEntityError):
+            # When/Then identifying raises UnprocessableEntityError with the code
+            with pytest.raises(UnprocessableEntityError) as exc_info:
                 await identity_service(company_id="company123").identify(
                     provider="apple",
                     token="expired",  # noqa: S106
                 )
+            assert exc_info.value.code == "TOKEN_VERIFICATION_FAILED"
 
     async def test_link_identity_default_response(self):
         """Verify the link route returns a factory-built User."""
@@ -207,12 +213,18 @@ class TestIdentityRoutes:
         """Verify set_error simulates an identity conflict."""
         async with FakeVClient() as client:
             # Given the link route configured to conflict
-            client.set_error(Routes.USERS_IDENTITY_LINK, status_code=409, detail="already linked")
+            client.set_error(
+                Routes.USERS_IDENTITY_LINK,
+                status_code=409,
+                detail="already linked",
+                code="IDENTITY_ALREADY_LINKED",
+            )
 
-            # When/Then linking raises ConflictError
-            with pytest.raises(ConflictError):
+            # When/Then linking raises ConflictError with the code
+            with pytest.raises(ConflictError) as exc_info:
                 await users_service("user123", company_id="company123").link_identity(
                     "user123",
                     provider="apple",
                     token="fake-token",  # noqa: S106
                 )
+            assert exc_info.value.code == "IDENTITY_ALREADY_LINKED"

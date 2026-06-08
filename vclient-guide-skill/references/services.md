@@ -80,7 +80,7 @@ Complete method signatures for every service class.
 **Semantics:** Verifies the provider credential and attaches the identity. Re-linking the same identity is idempotent (refreshes stored profile).
 **Error codes:** `ConflictError` (409, code `IDENTITY_ALREADY_LINKED`) when the identity belongs to another user or the user already has a different identity from this provider. `UnprocessableEntityError` (422, code `TOKEN_VERIFICATION_FAILED`) when token verification fails.
 
-**Testing:** Use `Routes.USERS_IDENTITY_LINK` with `FakeVClient.set_response()` or `set_error()`.
+**Testing:** Use `Routes.USERS_IDENTITY_LINK` with `FakeVClient.set_response()` or `set_error()` (e.g. `set_error(Routes.USERS_IDENTITY_LINK, status_code=409, code="IDENTITY_ALREADY_LINKED")` to test branching on `APIError.code`).
 
 ### Unapproved User Management
 
@@ -166,7 +166,7 @@ Resolves verified provider credentials to canonical users. Forward the credentia
 | `UnprocessableEntityError` | 422 | `EMAIL_REQUIRED` | Creating a user but provider supplied no email and none was passed |
 | `ServerError` | 503 | `PROVIDER_UNAVAILABLE` | Provider is unreachable (HTTP 503; `ServerError` covers all 5xx) |
 
-**Testing:** Use `Routes.IDENTITY_IDENTIFY` with `FakeVClient.set_response()` or `set_error()`.
+**Testing:** Use `Routes.IDENTITY_IDENTIFY` with `FakeVClient.set_response()` or `set_error()` (e.g. `set_error(Routes.IDENTITY_IDENTIFY, status_code=422, code="TOKEN_VERIFICATION_FAILED")` to test branching on `APIError.code`).
 
 ---
 

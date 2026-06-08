@@ -174,6 +174,21 @@ You can include a custom error message with the `detail` parameter:
 client.set_error(Routes.USERS_GET, status_code=403, detail="Insufficient permissions")
 ```
 
+Use the `code` parameter to set a machine-readable error code, exposed on the raised exception as `APIError.code`. This lets you test application logic that branches on specific codes:
+
+```python
+client.set_error(
+    Routes.IDENTITY_IDENTIFY,
+    status_code=422,
+    detail="Provider token failed verification",
+    code="TOKEN_VERIFICATION_FAILED",
+)
+
+with pytest.raises(UnprocessableEntityError) as exc_info:
+    await identity_service(company_id="company-1").identify(provider="apple", token="expired")
+assert exc_info.value.code == "TOKEN_VERIFICATION_FAILED"
+```
+
 ### Route Constants
 
 Every API endpoint has a named constant on the `Routes` class, exported from `vclient.testing`. Constants follow the naming convention `{SERVICE}_{OPERATION}` -- for example, `USERS_LIST`, `BOOKS_RENUMBER`, `CHAPTERS_NOTES_CREATE`. Nested resources include the parent in the name (e.g., `CHARACTERS_INVENTORY_LIST`, `CHAPTERS_ASSETS_UPLOAD`).

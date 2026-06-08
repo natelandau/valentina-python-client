@@ -295,7 +295,7 @@ except APIError as e:
 
 ## Testing Error Paths
 
-`FakeVClient.set_error()` simulates server errors without real HTTP. Pair with route constants from `Routes`:
+`FakeVClient.set_error()` simulates server errors without real HTTP. Pair with route constants from `Routes`. Pass `code=` to set the machine-readable `APIError.code` extension member when testing logic that branches on specific codes (e.g. `set_error(Routes.IDENTITY_IDENTIFY, status_code=422, code="TOKEN_VERIFICATION_FAILED")`):
 
 ```python
 import pytest
