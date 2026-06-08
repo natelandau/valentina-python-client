@@ -85,6 +85,11 @@ GameVersion = Literal["V4", "V5"]
 GrantXPPermission = Literal["UNRESTRICTED", "PLAYER", "STORYTELLER"]
 HunterCreed = Literal["ENTREPRENEURIAL", "FAITHFUL", "INQUISITIVE", "MARTIAL", "UNDERGROUND"]
 HunterEdgeType = Literal["ASSETS", "APTITUDES", "ENDOWMENTS"]
+IdentityProvider = Literal["apple", "google", "discord", "github"]
+IdentityResolutionType = Literal["matched", "linked", "created"]
+# OIDCProvider is client-side only; the API does not expose it via /options,
+# so it is intentionally absent from CONSTANT_MAP in validate_constants.py.
+OIDCProvider = Literal["apple", "google"]
 LogLevel = Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 ManageCampaignPermission = Literal["UNRESTRICTED", "STORYTELLER"]
 ManageNPCPermission = Literal["UNRESTRICTED", "STORYTELLER"]

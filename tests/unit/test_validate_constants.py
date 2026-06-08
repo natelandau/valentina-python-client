@@ -72,6 +72,7 @@ class TestConstantMap:
             "ChapterInclude",
             "CharacterInclude",
             "LogLevel",
+            "OIDCProvider",
             "UserInclude",
         }
 
@@ -162,6 +163,8 @@ class TestValidate:
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
             "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
                 "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
             },
             "assets": {
@@ -241,7 +244,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -321,7 +328,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -402,7 +413,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -414,6 +429,22 @@ class TestValidate:
         # Then: Unmapped option detected
         assert result.is_valid is False
         assert result.unmapped_api_options == {"characters": ["NewOptionType"]}
+
+    def test_skips_ignored_api_options(self):
+        """Verify validate ignores informational options listed in IGNORED_API_OPTIONS."""
+        # Given: the autogen percentile table (an ignored option) alongside a real unmapped one
+        api_options = {
+            "character_autogeneration": {
+                "CharacterClassPercentileChance": ["MORTAL: 0-50", "VAMPIRE: 51-60"],
+                "NewOptionType": ["FOO", "BAR"],
+            },
+        }
+
+        # When: Validating
+        result = validate(api_options)
+
+        # Then: only the genuinely unmapped option is reported
+        assert result.unmapped_api_options == {"character_autogeneration": ["NewOptionType"]}
 
     def test_skips_related_keys(self):
         """Verify validate ignores _related keys in the API response."""
@@ -480,7 +511,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -558,7 +593,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -585,7 +624,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "25/25 constants in sync" in captured.out
+        assert "27/27 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""

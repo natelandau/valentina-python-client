@@ -63,6 +63,26 @@ UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"
 PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
 ```
 
+### Identity
+
+```python
+IdentityProvider = Literal["apple", "google", "discord", "github"]
+IdentityResolutionType = Literal["matched", "linked", "created"]
+# OIDCProvider is client-side only and is NOT validated against /options
+OIDCProvider = Literal["apple", "google"]
+```
+
+`IdentityProvider` is the credential source passed to `IdentityService.identify()` and `UsersService.link_identity()`. `IdentityResolutionType` is the outcome reported in `IdentityResolution.resolution`. `OIDCProvider` restricts the keys in `ProviderAudiences` to the two OIDC-capable providers.
+
+### ProviderAudiences type alias
+
+```python
+from vclient.models import ProviderAudiences
+# dict[OIDCProvider, list[str]]  — max 20 entries per provider; each 1-255 chars
+```
+
+Used as the field type for `provider_audiences` on `MeDeveloper`, `MeDeveloperUpdate`, `Developer`, and `DeveloperUpdate`.
+
 ### Company Settings Permissions
 
 ```python

@@ -2,9 +2,10 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from vclient.constants import PermissionLevel
+from vclient.models.shared import ProviderAudiences
 
 
 class MeDeveloperCompanyPermission(BaseModel):
@@ -31,6 +32,7 @@ class MeDeveloper(BaseModel):
     email: str
     key_generated: datetime | None
     companies: list[MeDeveloperCompanyPermission]
+    provider_audiences: ProviderAudiences = Field(default_factory=dict)
 
 
 class MeDeveloperWithApiKey(MeDeveloper):
@@ -55,6 +57,7 @@ class MeDeveloperUpdate(BaseModel):
 
     username: str | None = None
     email: str | None = None
+    provider_audiences: ProviderAudiences | None = None
 
 
 __all__ = [

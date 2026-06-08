@@ -1,8 +1,11 @@
 """Tests for vclient.api.models.users."""
 
+import typing
+
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
+from vclient.constants import IdentityResolutionType
 from vclient.models import (
     AppleProfile,
     Asset,
@@ -11,6 +14,7 @@ from vclient.models import (
     DiscordProfileUpdate,
     GitHubProfile,
     GoogleProfile,
+    IdentityResolution,
     Note,
     NoteCreate,
     NoteUpdate,
@@ -21,6 +25,8 @@ from vclient.models import (
     User,
     UserApproveDTO,
     UserCreate,
+    UserIdentifyDTO,
+    UserIdentityLinkDTO,
     UserUpdate,
 )
 from vclient.models.users import AdminUser, AdminUserCreate, AdminUserUpdate
@@ -1074,3 +1080,91 @@ class TestAdminUserUpdate:
 
         # Then: is_archived False is retained (not dropped as None)
         assert dumped == {"is_archived": False}
+
+
+class TestUserIdentifyDTO:
+    """Tests for UserIdentifyDTO model."""
+
+    def test_minimal_fields(self):
+        """Verify provider and token are sufficient."""
+        # When: Creating the DTO with only required fields
+        dto = UserIdentifyDTO(provider="apple", token="eyJraWQi...")  # noqa: S106
+
+        # Then: Optional fields default to None
+        assert dto.provider == "apple"
+        assert dto.token == "eyJraWQi..."  # noqa: S105
+        assert dto.username is None
+        assert dto.email is None
+
+    def test_optional_create_fields(self):
+        """Verify username and email are accepted for the create path."""
+        # When: Creating the DTO with the optional create-only fields
+        dto = UserIdentifyDTO(
+            provider="github",
+            token="gho_abc",  # noqa: S106
+            username="octocat",
+            email="octo@example.com",
+        )
+
+        # Then: All fields are set
+        assert dto.username == "octocat"
+        assert dto.email == "octo@example.com"
+
+    def test_unknown_provider_rejected(self):
+        """Verify an unsupported provider fails validation."""
+        # When/Then: An unknown provider raises a validation error
+        with pytest.raises(PydanticValidationError):
+            UserIdentifyDTO(provider="myspace", token="x")  # noqa: S106
+
+    def test_empty_token_rejected(self):
+        """Verify an empty token fails validation."""
+        # When/Then: An empty token raises a validation error
+        with pytest.raises(PydanticValidationError):
+            UserIdentifyDTO(provider="apple", token="")
+
+
+class TestUserIdentityLinkDTO:
+    """Tests for UserIdentityLinkDTO model."""
+
+    def test_required_fields(self):
+        """Verify provider and token are required and stored."""
+        # When: Creating the DTO
+        dto = UserIdentityLinkDTO(provider="discord", token="access-token")  # noqa: S106
+
+        # Then: Fields are set
+        assert dto.provider == "discord"
+        assert dto.token == "access-token"  # noqa: S105
+
+    def test_empty_token_rejected(self):
+        """Verify an empty token fails validation."""
+        # When/Then: An empty token raises a validation error
+        with pytest.raises(PydanticValidationError):
+            UserIdentityLinkDTO(provider="discord", token="")
+
+
+class TestIdentityResolution:
+    """Tests for IdentityResolution model."""
+
+    @staticmethod
+    def _user_data() -> dict:
+        """Build a minimal valid user response payload."""
+        return _VALID_USER_PAYLOAD | {"role": "UNAPPROVED"}
+
+    @pytest.mark.parametrize("resolution", typing.get_args(IdentityResolutionType))
+    def test_valid_resolutions(self, resolution):
+        """Verify each resolution value parses with an embedded user."""
+        # When: Validating an identify response
+        result = IdentityResolution.model_validate(
+            {"resolution": resolution, "user": self._user_data()}
+        )
+
+        # Then: The resolution and embedded user are parsed
+        assert result.resolution == resolution
+        assert isinstance(result.user, User)
+        assert result.user.username == "testuser"
+
+    def test_unknown_resolution_rejected(self):
+        """Verify an unknown resolution value fails validation."""
+        # When/Then: An unknown resolution raises a validation error
+        with pytest.raises(PydanticValidationError):
+            IdentityResolution.model_validate({"resolution": "upserted", "user": self._user_data()})

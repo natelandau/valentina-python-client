@@ -188,7 +188,9 @@ class SyncGlobalAdminService(SyncBaseService):
             request: A DeveloperUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for DeveloperUpdate if request is not provided.
                 Accepts: username (str | None), email (str | None),
-                is_global_admin (bool | None).
+                is_global_admin (bool | None),
+                provider_audiences (ProviderAudiences | None): per-provider OIDC
+                audience allowlists ({"apple": [...], "google": [...]}).
 
         Returns:
             The updated Developer object.

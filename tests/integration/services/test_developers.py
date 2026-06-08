@@ -138,6 +138,33 @@ class TestDeveloperServiceUpdateMe:
         assert body == {"username": "newusername", "email": "new@example.com"}
 
     @respx.mock
+    async def test_update_me_provider_audiences(
+        self, vclient, base_url, me_developer_response_data
+    ):
+        """Verify updating provider_audiences sends audiences in the request body."""
+        # Given: A mocked update endpoint returning data with provider_audiences
+        updated_data = {
+            **me_developer_response_data,
+            "provider_audiences": {"apple": ["com.example.iosapp"]},
+        }
+        route = respx.patch(f"{base_url}{Endpoints.DEVELOPER_ME}").respond(200, json=updated_data)
+
+        # When: Updating provider_audiences via kwargs
+        result = await vclient.developer.update_me(
+            provider_audiences={"apple": ["com.example.iosapp"]}
+        )
+
+        # Then: The request body contains provider_audiences
+        assert route.called
+        request = route.calls.last.request
+        body = json.loads(request.content)
+        assert body == {"provider_audiences": {"apple": ["com.example.iosapp"]}}
+
+        # And: The returned model reflects the audiences
+        assert isinstance(result, MeDeveloper)
+        assert result.provider_audiences == {"apple": ["com.example.iosapp"]}
+
+    @respx.mock
     async def test_update_me_unauthenticated(self, vclient, base_url):
         """Verify update_me raises AuthenticationError when not authenticated."""
         # Given: A mocked endpoint returning 401

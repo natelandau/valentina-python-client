@@ -28,6 +28,7 @@ from vclient.models import (
     Diceroll,
     DictionaryTerm,
     FullSheetTraitCategory,
+    IdentityResolution,
     InventoryItem,
     MeDeveloper,
     MeDeveloperWithApiKey,
@@ -147,12 +148,17 @@ class Routes:
     USERS_APPROVE = RouteSpec("POST", Endpoints.USER_APPROVE, SINGLE, User)
     USERS_DENY = RouteSpec("POST", Endpoints.USER_DENY, NO_CONTENT, None)
     USERS_MERGE = RouteSpec("POST", Endpoints.USER_MERGE, SINGLE, User)
+    USERS_IDENTITY_LINK = RouteSpec("POST", Endpoints.USER_IDENTITIES, SINGLE, User)
 
     # User self-registration (no On-Behalf-Of required)
     USER_SELF_REGISTRATION_REGISTER = RouteSpec("POST", Endpoints.USER_REGISTER, SINGLE, User)
+
     USERS_STATISTICS = RouteSpec("GET", Endpoints.USER_STATISTICS, SINGLE, RollStatistics)
     # User lookup (cross-company)
     USERS_LOOKUP = RouteSpec("GET", Endpoints.USERS_LOOKUP, LIST, UserLookupResult)
+
+    # Identity resolution (no On-Behalf-Of required)
+    IDENTITY_IDENTIFY = RouteSpec("POST", Endpoints.AUTH_IDENTIFY, SINGLE, IdentityResolution)
 
     # User assets
     USERS_ASSETS_LIST = RouteSpec("GET", Endpoints.USER_ASSETS, PAGINATED, Asset)

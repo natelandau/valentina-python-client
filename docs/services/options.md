@@ -60,9 +60,11 @@ Character-related enumerations:
 
 ### Users
 
-| Key        | Values                           | Description          |
-| ---------- | -------------------------------- | -------------------- |
-| `UserRole` | `ADMIN`, `STORYTELLER`, `PLAYER` | Available user roles |
+| Key                  | Values                                  | Description                                                                          |
+| -------------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
+| `UserRole`           | `ADMIN`, `STORYTELLER`, `PLAYER`        | Available user roles                                                                  |
+| `IdentityProvider`   | `apple`, `google`, `discord`, `github`  | Providers accepted by [identity verification](identity.md)                            |
+| `IdentityResolution` | `matched`, `linked`, `created`          | Resolution outcomes returned by [`identify()`](identity.md#resolution-order)      |
 
 ### Gameplay
 

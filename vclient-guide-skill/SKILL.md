@@ -52,6 +52,7 @@ VClient
 ├── .user_lookup             # No scoping (property)
 ├── .users(on_behalf_of, company_id=)
 ├── .user_self_registration(company_id=)   # no on_behalf_of — API key auth only
+├── .identity(company_id=)                 # no on_behalf_of, API key auth only
 ├── .campaigns(on_behalf_of, company_id=)
 ├── .books(on_behalf_of, campaign_id, company_id=)
 ├── .chapters(on_behalf_of, campaign_id, book_id, company_id=)
@@ -79,7 +80,11 @@ async with VClient(base_url="...", api_key="...", default_company_id="comp-1") a
     svc = campaigns_service(on_behalf_of="u1")
 ```
 
-Sync equivalents use the `sync_` prefix: `sync_campaigns_service(...)`.
+Sync equivalents use the `sync_` prefix: `sync_campaigns_service(...)`, `sync_identity_service(...)`.
+
+### Verified Identity Resolution
+
+Use `IdentityService.identify()` to resolve a third-party provider login (Apple, Google, Discord, GitHub) to a canonical Valentina user. The service handles three cases automatically: matching an existing provider identity, auto-linking by provider-verified email, and creating a new UNAPPROVED user. To connect an additional provider to an existing authenticated user, use `UsersService.link_identity()`. For Apple and Google, the token's audience must appear in the union of the server allowlists and the per-developer audiences registered via `client.developer.update_me(provider_audiences={...})`; see `references/services.md` for full parameter and error-code details.
 
 ### Standard Service Methods
 
@@ -126,6 +131,7 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details. Impo
 | `ValidationError` | 400 | Server validation failed (check `.invalid_parameters`) |
 | `RequestValidationError` | - | Client-side Pydantic validation (pre-request) |
 | `ConflictError` | 409 | Idempotency key conflict |
+| `UnprocessableEntityError` | 422 | Well-formed request that cannot be processed (identity endpoints; check `.code`) |
 | `RateLimitError` | 429 | Rate limited (check `.retry_after`, `.remaining`) |
 | `ServerError` | 5xx | Server error |
 

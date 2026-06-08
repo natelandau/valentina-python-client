@@ -17,6 +17,88 @@ from vclient.models.global_admin import (
 )
 
 
+def _developer_payload() -> dict:
+    """Return a minimal valid Developer payload."""
+    now = "2024-01-15T10:30:00Z"
+    return {
+        "id": "507f1f77bcf86cd799439011",
+        "date_created": now,
+        "date_modified": now,
+        "username": "testuser",
+        "email": "test@example.com",
+        "key_generated": None,
+        "is_global_admin": False,
+        "companies": [],
+    }
+
+
+class TestAdminProviderAudiences:
+    """Tests for the provider_audiences field on admin developer models."""
+
+    def test_update_accepts_provider_audiences(self):
+        """Verify provider_audiences accepts apple and google keys."""
+        # When: Creating an update with audiences for both providers
+        dto = DeveloperUpdate(
+            provider_audiences={
+                "apple": ["com.example.iosapp"],
+                "google": ["1234-abc.apps.googleusercontent.com"],
+            }
+        )
+
+        # Then: The audiences are stored
+        assert dto.provider_audiences == {
+            "apple": ["com.example.iosapp"],
+            "google": ["1234-abc.apps.googleusercontent.com"],
+        }
+
+    def test_update_defaults_to_none(self):
+        """Verify provider_audiences is omitted unless set."""
+        # When: Creating an update without audiences
+        dto = DeveloperUpdate(username="dev")
+
+        # Then: The field defaults to None and is excluded from dumps
+        assert dto.provider_audiences is None
+        assert "provider_audiences" not in dto.model_dump(exclude_none=True)
+
+    def test_unknown_provider_key_rejected(self):
+        """Verify non-OIDC provider keys fail validation."""
+        # When/Then: A discord key raises a validation error
+        with pytest.raises(ValidationError):
+            DeveloperUpdate(provider_audiences={"discord": ["abc"]})
+
+    def test_more_than_twenty_audiences_rejected(self):
+        """Verify the per-provider audience cap is enforced client-side."""
+        # When/Then: 21 audiences raise a validation error
+        with pytest.raises(ValidationError):
+            DeveloperUpdate(provider_audiences={"apple": [f"aud-{i}" for i in range(21)]})
+
+    def test_audience_length_limits_rejected(self):
+        """Verify empty and over-long audience strings fail validation."""
+        # When/Then: An empty audience raises a validation error
+        with pytest.raises(ValidationError):
+            DeveloperUpdate(provider_audiences={"apple": [""]})
+
+        # When/Then: A 256-char audience raises a validation error
+        with pytest.raises(ValidationError):
+            DeveloperUpdate(provider_audiences={"apple": ["a" * 256]})
+
+    def test_response_defaults_to_empty_dict(self):
+        """Verify developer responses without the field still parse."""
+        # When: Validating a developer payload predating the field
+        developer = Developer.model_validate(_developer_payload())
+
+        # Then: provider_audiences defaults to empty
+        assert developer.provider_audiences == {}
+
+    def test_limits_accepted_at_boundary(self):
+        """Verify exactly 20 audiences of 255 chars each are accepted."""
+        # When: Creating an update at the documented limits
+        dto = DeveloperUpdate(provider_audiences={"apple": ["a" * 255] * 20})
+
+        # Then: The audiences are stored
+        assert len(dto.provider_audiences["apple"]) == 20
+
+
 class TestDeveloperCompanyPermission:
     """Tests for DeveloperCompanyPermission model."""
 
@@ -278,6 +360,7 @@ class TestDeveloperUpdate:
         assert request.username is None
         assert request.email is None
         assert request.is_global_admin is None
+        assert request.provider_audiences is None
 
     def test_partial_update(self):
         """Verify partial update with some fields."""

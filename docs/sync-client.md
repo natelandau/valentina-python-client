@@ -58,19 +58,21 @@ with SyncVClient() as client:
 
 Every async factory function has a sync counterpart prefixed with `sync_`:
 
-| Async                            | Sync                                  |
-| -------------------------------- | ------------------------------------- |
-| `companies_service()`            | `sync_companies_service()`            |
-| `users_service()`                | `sync_users_service()`                |
-| `campaigns_service()`            | `sync_campaigns_service()`            |
-| `characters_service()`           | `sync_characters_service()`           |
-| `character_traits_service()`     | `sync_character_traits_service()`     |
-| `books_service()`                | `sync_books_service()`                |
-| `chapters_service()`             | `sync_chapters_service()`             |
-| `dicerolls_service()`            | `sync_dicerolls_service()`            |
-| `dictionary_service()`           | `sync_dictionary_service()`           |
-| `character_blueprint_service()`  | `sync_character_blueprint_service()`  |
-| `options_service()`              | `sync_options_service()`              |
+| Async                                | Sync                                      |
+| ------------------------------------ | ----------------------------------------- |
+| `companies_service()`                | `sync_companies_service()`                |
+| `users_service()`                    | `sync_users_service()`                    |
+| `campaigns_service()`                | `sync_campaigns_service()`                |
+| `characters_service()`               | `sync_characters_service()`               |
+| `character_traits_service()`         | `sync_character_traits_service()`         |
+| `books_service()`                    | `sync_books_service()`                    |
+| `chapters_service()`                 | `sync_chapters_service()`                 |
+| `dicerolls_service()`                | `sync_dicerolls_service()`                |
+| `dictionary_service()`               | `sync_dictionary_service()`               |
+| `character_blueprint_service()`      | `sync_character_blueprint_service()`      |
+| `options_service()`                  | `sync_options_service()`                  |
+| `user_self_registration_service()`   | `sync_user_self_registration_service()`   |
+| `identity_service()`                 | `sync_identity_service()`                 |
 
 Factory functions work the same way — create a `SyncVClient` first, then call the factory from any module:
 

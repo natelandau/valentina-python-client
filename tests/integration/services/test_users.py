@@ -1,10 +1,17 @@
 """Tests for vclient.services.users."""
 
+import json
+
 import pytest
 import respx
 
 from vclient.endpoints import Endpoints
-from vclient.exceptions import NotFoundError, RequestValidationError
+from vclient.exceptions import (
+    AuthorizationError,
+    ConflictError,
+    NotFoundError,
+    RequestValidationError,
+)
 from vclient.models import (
     Asset,
     CampaignExperience,
@@ -1257,3 +1264,87 @@ class TestUsersServiceFactoryMethod:
 
         # Then: The service has the company_id stored
         assert service._company_id == "company123"
+
+
+class TestUsersServiceLinkIdentity:
+    """Tests for UsersService.link_identity method."""
+
+    @respx.mock
+    async def test_link_identity_success(self, vclient, base_url, user_response_data):
+        """Verify linking a provider identity returns the updated User."""
+        # Given: A mocked identities endpoint
+        company_id = "company123"
+        route = respx.post(
+            f"{base_url}{Endpoints.USER_IDENTITIES.format(company_id=company_id, user_id='user123')}"
+        ).respond(200, json=user_response_data)
+
+        # When: Linking an apple identity to the user
+        result = await vclient.users("user123", company_id=company_id).link_identity(
+            "user123",
+            provider="apple",
+            token="eyJraWQi...",  # noqa: S106
+        )
+
+        # Then: The updated User is returned and the body carries the credential
+        assert route.called
+        assert isinstance(result, User)
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"provider": "apple", "token": "eyJraWQi..."}
+
+        # Then: The request acts on behalf of the user
+        assert route.calls.last.request.headers["On-Behalf-Of"] == "user123"
+
+    @respx.mock
+    async def test_link_identity_conflict(self, vclient, base_url):
+        """Verify a 409 response raises ConflictError with its code."""
+        # Given: The identity already belongs to another user
+        company_id = "company123"
+        respx.post(
+            f"{base_url}{Endpoints.USER_IDENTITIES.format(company_id=company_id, user_id='user123')}"
+        ).respond(
+            409,
+            json={
+                "detail": "This identity is already linked to another user.",
+                "code": "IDENTITY_ALREADY_LINKED",
+            },
+        )
+
+        # When/Then: The conflict surfaces with its code
+        with pytest.raises(ConflictError) as exc_info:
+            await vclient.users("user123", company_id=company_id).link_identity(
+                "user123",
+                provider="apple",
+                token="eyJraWQi...",  # noqa: S106
+            )
+        assert exc_info.value.code == "IDENTITY_ALREADY_LINKED"
+
+    @respx.mock
+    async def test_link_identity_forbidden(self, vclient, base_url):
+        """Verify a 403 response raises AuthorizationError."""
+        # Given: A non-admin acting on another user's account
+        company_id = "company123"
+        respx.post(
+            f"{base_url}{Endpoints.USER_IDENTITIES.format(company_id=company_id, user_id='other456')}"
+        ).respond(
+            403,
+            json={"detail": "Only the user themselves or an admin can link identities"},
+        )
+
+        # When/Then: The request is denied
+        with pytest.raises(AuthorizationError):
+            await vclient.users("user123", company_id=company_id).link_identity(
+                "other456",
+                provider="apple",
+                token="eyJraWQi...",  # noqa: S106
+            )
+
+    @respx.mock
+    async def test_link_identity_missing_token_fails_client_side(self, vclient):
+        """Verify an empty token raises RequestValidationError before any request."""
+        # When/Then: Client-side validation rejects the empty token
+        with pytest.raises(RequestValidationError):
+            await vclient.users("user123", company_id="company123").link_identity(
+                "user123",
+                provider="apple",
+                token="",
+            )

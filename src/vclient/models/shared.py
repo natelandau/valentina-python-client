@@ -9,9 +9,20 @@ from vclient.constants import (
     AssetType,
     CharacterClass,
     GameVersion,
+    OIDCProvider,
     SpecialtyType,
     WerewolfRenown,
 )
+
+# Per-provider OIDC audience allowlists registered by a developer. Mirrors the
+# API's limits: apple/google only, max 20 audiences per provider, 1-255 chars each.
+ProviderAudiences = dict[
+    OIDCProvider,
+    Annotated[
+        list[Annotated[str, Field(min_length=1, max_length=255)]],
+        Field(max_length=20),
+    ],
+]
 
 # -----------------------------------------------------------------------------
 # Utility  Models
@@ -188,6 +199,7 @@ __all__ = [
     "Note",
     "NoteCreate",
     "NoteUpdate",
+    "ProviderAudiences",
     "RollStatistics",
     "Trait",
 ]

@@ -2,9 +2,14 @@
 
 import pytest
 
-from vclient._sync.registry import sync_books_service, sync_campaigns_service, sync_users_service
+from vclient._sync.registry import (
+    sync_books_service,
+    sync_campaigns_service,
+    sync_identity_service,
+    sync_users_service,
+)
 from vclient.exceptions import NotFoundError
-from vclient.models import CampaignBook
+from vclient.models import CampaignBook, IdentityResolution, User
 from vclient.testing import (
     CampaignBookFactory,
     CampaignFactory,
@@ -90,3 +95,32 @@ class TestSyncSetError:
             # Then a NotFoundError is raised
             with pytest.raises(NotFoundError):
                 sync_campaigns_service("on-behalf-of-user").get("nonexistent")
+
+
+class TestSyncIdentityRoutes:
+    """SyncFakeVClient should serve the identity resolution routes."""
+
+    def test_identify_default_response(self):
+        """Verify the identify route returns a factory-built IdentityResolution."""
+        with SyncFakeVClient():
+            # When identifying a provider login with no overrides
+            result = sync_identity_service(company_id="company123").identify(
+                provider="apple",
+                token="fake-token",  # noqa: S106
+            )
+
+            # Then a valid IdentityResolution is returned
+            assert isinstance(result, IdentityResolution)
+
+    def test_link_identity_default_response(self):
+        """Verify the link route returns a factory-built User."""
+        with SyncFakeVClient():
+            # When linking an identity with no overrides
+            result = sync_users_service("user123", company_id="company123").link_identity(
+                "user123",
+                provider="discord",
+                token="fake-token",  # noqa: S106
+            )
+
+            # Then a valid User is returned
+            assert isinstance(result, User)

@@ -129,6 +129,16 @@ update = DeveloperUpdate(
     is_global_admin=True
 )
 updated = await admins.update_developer(dev.id, update)
+
+# Register per-developer OIDC audiences so the developer's own apps
+# can issue tokens that the identity endpoint will accept.
+updated = await admins.update_developer(
+    dev.id,
+    provider_audiences={
+        "apple": ["com.example.iosapp"],
+        "google": ["1234-abc.apps.googleusercontent.com"],
+    },
+)
 ```
 
 ### Generate API Key

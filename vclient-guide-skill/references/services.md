@@ -7,6 +7,7 @@ Complete method signatures for every service class.
 - [CompaniesService](#companiesservice)
 - [UsersService](#usersservice)
 - [UserSelfRegistrationService](#userselfregistrationservice)
+- [IdentityService](#identityservice)
 - [CampaignsService](#campaignsservice)
 - [CharactersService](#charactersservice)
 - [CharacterTraitsService](#charactertraitsservice)
@@ -69,6 +70,18 @@ Complete method signatures for every service class.
 
 **Include options for `get()`:** `"quickrolls"`, `"notes"`, `"assets"`, `"characters"`
 
+### Identity Linking
+
+| Method | Parameters | Returns |
+|--------|-----------|---------|
+| `link_identity(user_id, *, provider, token)` | `user_id: str, provider: IdentityProvider, token: str` | `User` |
+
+**Auth:** `on_behalf_of` is required. Only the acting user themselves or a company ADMIN may call this.
+**Semantics:** Verifies the provider credential and attaches the identity. Re-linking the same identity is idempotent (refreshes stored profile).
+**Error codes:** `ConflictError` (409, code `IDENTITY_ALREADY_LINKED`) when the identity belongs to another user or the user already has a different identity from this provider. `UnprocessableEntityError` (422, code `TOKEN_VERIFICATION_FAILED`) when token verification fails.
+
+**Testing:** Use `Routes.USERS_IDENTITY_LINK` with `FakeVClient.set_response()` or `set_error()` (e.g. `set_error(Routes.USERS_IDENTITY_LINK, status_code=409, code="IDENTITY_ALREADY_LINKED")` to test branching on `APIError.code`).
+
 ### Unapproved User Management
 
 | Method | Parameters | Returns |
@@ -120,6 +133,42 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 | `register(request=None, **kwargs)` | `request: UserRegisterDTO \| None, **kwargs` | `User` |
 
 **Register kwargs:** `username: str, email: str, name_first: str | None, name_last: str | None, discord_profile: DiscordProfileUpdate | None, google_profile: GoogleProfile | None, github_profile: GitHubProfile | None, apple_profile: AppleProfile | None`
+
+---
+
+## IdentityService
+
+**Access:** `client.identity(company_id=)`
+**Factory:** `identity_service(company_id=)` / `sync_identity_service(company_id=)`
+**Scoping:** company_id (no on_behalf_of, API key auth only)
+
+Resolves verified provider credentials to canonical users. Forward the credential obtained from a provider's own login flow: an OIDC ID token for `apple`/`google`, or an OAuth access token for `discord`/`github`. The API verifies the credential with the provider, then resolves the user through:
+
+1. **matched** - an existing user already holds this provider identity
+2. **linked** - the identity was auto-linked to an existing user by provider-verified email
+3. **created** - a new UNAPPROVED user was registered (username/email in the request body apply only on this path)
+
+### Methods
+
+| Method | Parameters | Returns |
+|--------|-----------|---------|
+| `identify(request=None, **kwargs)` | `request: UserIdentifyDTO \| None, **kwargs` | `IdentityResolution` |
+
+**Identify kwargs:** `provider: IdentityProvider` (required), `token: str` (required, min length 1), `username: str \| None`, `email: str \| None`
+
+**Note:** `username` and `email` are used only when the API creates a new user; `email` is required on create only if the provider did not supply one.
+
+**Error codes raised by `identify()`:**
+
+| Exception | HTTP | Code | Cause |
+|-----------|------|------|-------|
+| `UnprocessableEntityError` | 422 | `TOKEN_VERIFICATION_FAILED` | Provider rejected the credential |
+| `UnprocessableEntityError` | 422 | `EMAIL_REQUIRED` | Creating a user but provider supplied no email and none was passed |
+| `ServerError` | 503 | `PROVIDER_UNAVAILABLE` | Provider is unreachable (HTTP 503; `ServerError` covers all 5xx) |
+
+**Apple/Google audience requirement:** Token verification for `apple` and `google` checks whether the token's audience (bundle ID or OAuth client ID) appears in the union of the server's environment allowlists and the audiences registered on the calling developer's profile. If both are empty for a given app, `TOKEN_VERIFICATION_FAILED` is raised. Register audiences via `client.developer.update_me(provider_audiences={"apple": [...], "google": [...]})`.
+
+**Testing:** Use `Routes.IDENTITY_IDENTIFY` with `FakeVClient.set_response()` or `set_error()` (e.g. `set_error(Routes.IDENTITY_IDENTIFY, status_code=422, code="TOKEN_VERIFICATION_FAILED")` to test branching on `APIError.code`).
 
 ---
 

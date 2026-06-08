@@ -7,6 +7,7 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 - [Shared Models](#shared-models)
 - [Companies](#companies)
 - [Users](#users)
+  - [Identity Resolution](#identity-resolution)
 - [Campaigns](#campaigns)
 - [Characters](#characters)
 - [Character Traits](#character-traits)
@@ -315,6 +316,39 @@ All fields optional. Same fields as UserCreate, with `role` becoming optional.
 |-------|------|----------|
 | primary_user_id | str | yes |
 | secondary_user_id | str | yes |
+
+### Identity Resolution
+
+#### UserIdentifyDTO
+
+Request body for `IdentityService.identify()`. Fields `username` and `email` apply only when a new user is created.
+
+| Field | Type | Constraints |
+|-------|------|------------|
+| provider | IdentityProvider | required |
+| token | str | required, min length 1 |
+| username | str \| None | optional |
+| email | str \| None | optional |
+
+#### UserIdentityLinkDTO
+
+Request body for `UsersService.link_identity()`.
+
+| Field | Type | Constraints |
+|-------|------|------------|
+| provider | IdentityProvider | required |
+| token | str | required, min length 1 |
+
+#### IdentityResolution
+
+Response model from `IdentityService.identify()`. Reports how the API resolved the credential.
+
+| Field | Type | Required |
+|-------|------|----------|
+| resolution | IdentityResolutionType | yes |
+| user | User | yes |
+
+**Resolution values:** `"matched"` (existing provider identity found), `"linked"` (auto-linked by provider-verified email), `"created"` (new UNAPPROVED user registered).
 
 ### CampaignExperience
 
@@ -935,6 +969,7 @@ For creating custom traits on a character.
 | email | str | yes |
 | key_generated | datetime \| None | no |
 | companies | list[MeDeveloperCompanyPermission] | yes |
+| provider_audiences | ProviderAudiences | no (default: {}) |
 
 ### MeDeveloperWithApiKey (extends MeDeveloper)
 
@@ -944,7 +979,7 @@ For creating custom traits on a character.
 
 ### MeDeveloperUpdate
 
-`username` (str \| None), `email` (str \| None) — both optional.
+All optional: `username` (str \| None), `email` (str \| None), `provider_audiences` (ProviderAudiences \| None).
 
 ### MeDeveloperCompanyPermission
 
@@ -970,6 +1005,7 @@ For creating custom traits on a character.
 | key_generated | datetime \| None | no |
 | is_global_admin | bool | yes |
 | companies | list[DeveloperCompanyPermission] | yes |
+| provider_audiences | ProviderAudiences | no (default: {}) |
 
 ### DeveloperWithApiKey (extends Developer)
 
@@ -987,7 +1023,7 @@ For creating custom traits on a character.
 
 ### DeveloperUpdate
 
-All optional: `username`, `email`, `is_global_admin`.
+All optional: `username`, `email`, `is_global_admin`, `provider_audiences` (ProviderAudiences \| None).
 
 ### DeveloperCompanyPermission
 

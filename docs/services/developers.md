@@ -47,6 +47,14 @@ updated = await developer.update_me(update)
 
 # Option 2: Pass fields as keyword arguments
 updated = await developer.update_me(username="new_username")
+
+# Option 3: Register per-developer OIDC audiences
+updated = await developer.update_me(
+    provider_audiences={
+        "apple": ["com.example.iosapp"],
+        "google": ["1234-abc.apps.googleusercontent.com"],
+    }
+)
 ```
 
 ### Regenerate API Key
@@ -65,3 +73,4 @@ print(f"New API Key: {result.api_key}")
 ## Related Documentation
 
 - [Response Models](../models/developers.md) - View `MeDeveloper` and `MeDeveloperWithApiKey` model schemas
+- [Identity Service](identity.md) - Registering `provider_audiences` is what enables Apple and Google verified logins for your apps

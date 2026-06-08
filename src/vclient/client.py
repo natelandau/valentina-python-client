@@ -34,6 +34,7 @@ if TYPE_CHECKING:
         DicerollService,
         DictionaryService,
         GlobalAdminService,
+        IdentityService,
         OptionsService,
         SystemService,
         UserLookupService,
@@ -359,6 +360,31 @@ class VClient:
         from vclient.services.user_self_registration import UserSelfRegistrationService
 
         return UserSelfRegistrationService(self, self._resolve_company_id(company_id))
+
+    def identity(self, *, company_id: str | None = None) -> "IdentityService":
+        """Get a company-scoped IdentityService.
+
+        Resolves verified provider logins (Apple/Google ID tokens,
+        Discord/GitHub access tokens) to canonical users. Does not require
+        an acting user, only developer API key authentication.
+
+        Args:
+            company_id: The ID of the company to resolve identities in. If not
+                provided, uses the default_company_id from config.
+
+        Returns:
+            An IdentityService instance.
+
+        Raises:
+            ValueError: If no company_id provided and no default configured.
+
+        Example:
+            >>> identity = client.identity()
+            >>> result = await identity.identify(provider="google", token="<id-token>")
+        """
+        from vclient.services.identity import IdentityService
+
+        return IdentityService(self, self._resolve_company_id(company_id))
 
     def campaigns(
         self,

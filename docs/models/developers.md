@@ -8,20 +8,21 @@ Models for developer accounts, API key management, and company permission grants
 
 ## Developer
 
-| Field             | Type                               | Description             |
-| ----------------- | ---------------------------------- | ----------------------- |
-| `id`              | `str`                              | Unique identifier       |
-| `date_created`    | `datetime`                         | Creation timestamp      |
-| `date_modified`   | `datetime`                         | Last modified timestamp |
-| `username`        | `str`                              | Username                |
-| `email`           | `str`                              | Email address           |
-| `key_generated`   | `datetime \| None`                 | API key generation time |
-| `is_global_admin` | `bool`                             | Global admin status     |
-| `companies`       | `list[DeveloperCompanyPermission]` | Company permissions     |
+| Field                | Type                               | Description                                                 |
+| -------------------- | ---------------------------------- | ----------------------------------------------------------- |
+| `id`                 | `str`                              | Unique identifier                                           |
+| `date_created`       | `datetime`                         | Creation timestamp                                          |
+| `date_modified`      | `datetime`                         | Last modified timestamp                                     |
+| `username`           | `str`                              | Username                                                    |
+| `email`              | `str`                              | Email address                                               |
+| `key_generated`      | `datetime \| None`                 | API key generation time                                     |
+| `is_global_admin`    | `bool`                             | Global admin status                                         |
+| `companies`          | `list[DeveloperCompanyPermission]` | Company permissions                                         |
+| `provider_audiences` | `ProviderAudiences`                | Per-provider OIDC audience allowlists (defaults to `{}`)    |
 
 ## MeDeveloper
 
-Your own developer profile. Contains the same fields as `Developer` but excludes the `is_global_admin` field for security.
+Your own developer profile. Contains the same fields as `Developer` but excludes the `is_global_admin` field for security. The `provider_audiences` field defaults to `{}` when absent from older API responses.
 
 ## MeDeveloperWithApiKey
 
@@ -37,10 +38,43 @@ All other fields are inherited from `MeDeveloper`.
 
 Request body for updating your developer profile.
 
-| Field      | Type          | Description        |
-| ---------- | ------------- | ------------------ |
-| `username` | `str \| None` | Updated username   |
-| `email`    | `str \| None` | Updated email      |
+| Field                | Type                        | Description                                         |
+| -------------------- | --------------------------- | --------------------------------------------------- |
+| `username`           | `str \| None`               | Updated username                                    |
+| `email`              | `str \| None`               | Updated email                                       |
+| `provider_audiences` | `ProviderAudiences \| None` | Per-provider OIDC audience allowlists to register   |
+
+See [ProviderAudiences](#provideraudiences) below.
+
+## ProviderAudiences
+
+A `dict` mapping OIDC provider keys (`"apple"` or `"google"`) to a list of audience strings. Lets a developer register their own client app identifiers so the API resolves tokens issued to those apps.
+
+```python
+ProviderAudiences = dict[
+    Literal["apple", "google"],
+    list[str],  # max 20 per provider; each 1-255 chars
+]
+```
+
+**Constraints enforced client-side:**
+
+- Keys must be `"apple"` or `"google"` (the `OIDCProvider` type).
+- Each provider may have at most 20 audience strings.
+- Each audience string must be 1-255 characters.
+
+## DeveloperUpdate
+
+Admin-side request body for updating any developer account. Used with `GlobalAdminService.update_developer()`.
+
+| Field                | Type                        | Description                                         |
+| -------------------- | --------------------------- | --------------------------------------------------- |
+| `username`           | `str \| None`               | Updated username                                    |
+| `email`              | `str \| None`               | Updated email                                       |
+| `is_global_admin`    | `bool \| None`              | Grant or revoke global admin status                 |
+| `provider_audiences` | `ProviderAudiences \| None` | Per-provider OIDC audience allowlists to register   |
+
+All fields are optional. See [ProviderAudiences](#provideraudiences) for the audience format and constraints.
 
 ## ServerLogEntry
 

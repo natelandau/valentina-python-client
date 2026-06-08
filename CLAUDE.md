@@ -81,7 +81,8 @@ VClient
 ├── chapters(campaign_id, book_id, on_behalf_of, company_id)
 ├── dicerolls(on_behalf_of, company_id)
 ├── character_autogen(on_behalf_of, company_id)
-├── user_self_registration(company_id)         # No on_behalf_of — API key auth only (SSO onboarding)
+├── user_self_registration(company_id)         # No on_behalf_of, API key auth only (SSO onboarding)
+├── identity(company_id)                       # No on_behalf_of, API key auth only (verified logins)
 └── ... etc
 ```
 
@@ -113,9 +114,9 @@ with SyncVClient(base_url="https://api.valentina-noir.com", api_key="...") as cl
 
 Constants for these names are in `constants.py`: `ENV_BASE_URL`, `ENV_API_KEY`, `ENV_DEFAULT_COMPANY_ID`.
 
-Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `user_self_registration_service`, `users_service`, etc.
+Factory functions in `registry.py`: `books_service`, `campaigns_service`, `chapters_service`, `characters_service`, `companies_service`, `dicerolls_service`, `dictionary_service`, `identity_service`, `user_self_registration_service`, `users_service`, etc.
 
-Sync factory functions in `_sync/registry.py`: `sync_books_service`, `sync_campaigns_service`, `sync_characters_service`, `sync_companies_service`, `sync_user_self_registration_service`, etc.
+Sync factory functions in `_sync/registry.py`: `sync_books_service`, `sync_campaigns_service`, `sync_characters_service`, `sync_companies_service`, `sync_identity_service`, `sync_user_self_registration_service`, etc.
 
 ## Sync Client (Code Generation)
 
@@ -142,18 +143,19 @@ The sync client in `_sync/` is **auto-generated** from async source via AST tran
 
 All exceptions inherit from `APIError` and follow RFC 9457 Problem Details format.
 
-| Exception                | HTTP Status | Use Case                                                  |
-| ------------------------ | ----------- | --------------------------------------------------------- |
-| `AuthenticationError`    | 401         | Invalid/missing API key                                   |
-| `AuthorizationError`     | 403         | Valid key, insufficient permissions                       |
-| `NotFoundError`          | 404         | Resource not found                                        |
-| `ValidationError`        | 400         | Server-side validation failed (has `.invalid_parameters`) |
-| `RequestValidationError` | -           | Client-side Pydantic validation (pre-request)             |
-| `ConflictError`          | 409         | Idempotency key reuse                                     |
-| `RateLimitError`         | 429         | Rate limited (has `.retry_after`, `.remaining`)           |
-| `ServerError`            | 5xx         | Server errors                                             |
+| Exception                  | HTTP Status | Use Case                                                      |
+| -------------------------- | ----------- | ------------------------------------------------------------- |
+| `AuthenticationError`      | 401         | Invalid/missing API key                                       |
+| `AuthorizationError`       | 403         | Valid key, insufficient permissions                           |
+| `NotFoundError`            | 404         | Resource not found                                            |
+| `ValidationError`          | 400         | Server-side validation failed (has `.invalid_parameters`)     |
+| `RequestValidationError`   | -           | Client-side Pydantic validation (pre-request)                 |
+| `ConflictError`            | 409         | Idempotency key reuse                                         |
+| `UnprocessableEntityError` | 422         | Request was well-formed but cannot be processed (has `.code`) |
+| `RateLimitError`           | 429         | Rate limited (has `.retry_after`, `.remaining`)               |
+| `ServerError`              | 5xx         | Server errors                                                 |
 
-All have `.status_code`, `.title`, `.detail`, `.instance` properties from RFC 9457.
+All have `.status_code`, `.title`, `.detail`, `.instance` properties from RFC 9457, plus a `.code` property for machine-readable error codes.
 
 ## Constants Validation
 

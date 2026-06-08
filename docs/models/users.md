@@ -166,6 +166,35 @@ Request body for approving an unapproved user.
 | ------ | ---------- | ----------------------------------- |
 | `role` | `UserRole` | Role to assign to the approved user |
 
+## UserIdentifyDTO
+
+Request body for resolving a verified provider login via `IdentityService.identify()`.
+
+| Field      | Type               | Description                                                         |
+| ---------- | ------------------ | ------------------------------------------------------------------- |
+| `provider` | `IdentityProvider` | Provider name: `"apple"`, `"google"`, `"discord"`, or `"github"`   |
+| `token`    | `str`              | Non-empty provider credential: OIDC ID token (apple/google) or OAuth access token (discord/github) |
+| `username` | `str \| None`      | Username to use only if a new user is created                       |
+| `email`    | `str \| None`      | Email to use on create, only if the provider supplied none          |
+
+## UserIdentityLinkDTO
+
+Request body for linking a provider identity to an existing user via `UsersService.link_identity()`.
+
+| Field      | Type               | Description                                                         |
+| ---------- | ------------------ | ------------------------------------------------------------------- |
+| `provider` | `IdentityProvider` | Provider name: `"apple"`, `"google"`, `"discord"`, or `"github"`   |
+| `token`    | `str`              | Non-empty provider credential: OIDC ID token (apple/google) or OAuth access token (discord/github) |
+
+## IdentityResolution
+
+Response model returned by `IdentityService.identify()`. Reports which resolution path the API took and the canonical user.
+
+| Field        | Type                                   | Description                                                                                              |
+| ------------ | -------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `resolution` | `"matched" \| "linked" \| "created"`   | `matched`: existing identity; `linked`: auto-linked by email; `created`: new `UNAPPROVED` user           |
+| `user`       | `User`                                 | The canonical user associated with the provider login                                                    |
+
 ## AdminUser
 
 Returned by all `GlobalAdminService` user methods. Extends `User` with an `is_archived` field that is always present, allowing global admins to see and restore soft-deleted users.
