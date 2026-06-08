@@ -1,8 +1,11 @@
 """Tests for vclient.api.models.users."""
 
+import typing
+
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
+from vclient.constants import IdentityResolutionType
 from vclient.models import (
     AppleProfile,
     Asset,
@@ -1145,17 +1148,9 @@ class TestIdentityResolution:
     @staticmethod
     def _user_data() -> dict:
         """Build a minimal valid user response payload."""
-        return {
-            "id": "507f1f77bcf86cd799439011",
-            "date_created": "2024-01-15T10:30:00Z",
-            "date_modified": "2024-01-15T10:30:00Z",
-            "username": "testuser",
-            "email": "test@example.com",
-            "role": "UNAPPROVED",
-            "company_id": "company123",
-        }
+        return _VALID_USER_PAYLOAD | {"role": "UNAPPROVED"}
 
-    @pytest.mark.parametrize("resolution", ["matched", "linked", "created"])
+    @pytest.mark.parametrize("resolution", typing.get_args(IdentityResolutionType))
     def test_valid_resolutions(self, resolution):
         """Verify each resolution value parses with an embedded user."""
         # When: Validating an identify response

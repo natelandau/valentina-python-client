@@ -1,10 +1,12 @@
 """Tests for vclient.services.identity."""
 
 import json
+import typing
 
 import pytest
 import respx
 
+from vclient.constants import IdentityResolutionType
 from vclient.endpoints import Endpoints
 from vclient.exceptions import RequestValidationError, UnprocessableEntityError
 from vclient.models import IdentityResolution, User, UserIdentifyDTO
@@ -24,7 +26,7 @@ class TestIdentityServiceIdentify:
     """Tests for IdentityService.identify method."""
 
     @respx.mock
-    @pytest.mark.parametrize("resolution", ["matched", "linked", "created"])
+    @pytest.mark.parametrize("resolution", typing.get_args(IdentityResolutionType))
     async def test_identify_with_kwargs(
         self, vclient, identify_url, user_response_data, resolution
     ):
