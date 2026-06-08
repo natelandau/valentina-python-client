@@ -91,6 +91,42 @@ CONSTANT_MAP: dict[str, ConstantMapping] = {
 }
 
 
+# API options that are informational tables rather than client-side enums, so
+# they intentionally have no local constant and must not be flagged as unmapped.
+# CharacterClassPercentileChance is a list of computed "CLASS: low-high" display
+# strings whose ranges shift with the class roster, so it cannot be a Literal.
+IGNORED_API_OPTIONS: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("character_autogeneration", "CharacterClassPercentileChance"),
+    }
+)
+
+
+def _find_unmapped_options(
+    api_options: dict[str, dict[str, list | dict]],
+    mapped_api_options: set[tuple[str, str]],
+) -> dict[str, list[str]]:
+    """Collect API options that have no local constant and are not intentionally ignored.
+
+    Skips ``_``-prefixed metadata keys, non-list values, and any option listed in
+    IGNORED_API_OPTIONS (informational tables rather than client-side enums).
+    """
+    unmapped_api_options: dict[str, list[str]] = {}
+    for category, options in api_options.items():
+        if not isinstance(options, dict):
+            continue
+        for option_name, option_values in options.items():
+            if option_name.startswith("_"):
+                continue
+            if not isinstance(option_values, list):
+                continue
+            if (category, option_name) in IGNORED_API_OPTIONS:
+                continue
+            if (category, option_name) not in mapped_api_options:
+                unmapped_api_options.setdefault(category, []).append(option_name)
+    return unmapped_api_options
+
+
 def validate(api_options: dict[str, dict[str, list | dict]]) -> ValidationResult:
     """Compare local Literal constants against values from the API options endpoint.
 
@@ -138,17 +174,7 @@ def validate(api_options: dict[str, dict[str, list | dict]]) -> ValidationResult
                 )
             )
 
-    unmapped_api_options: dict[str, list[str]] = {}
-    for category, options in api_options.items():
-        if not isinstance(options, dict):
-            continue
-        for option_name, option_values in options.items():
-            if option_name.startswith("_"):
-                continue
-            if not isinstance(option_values, list):
-                continue
-            if (category, option_name) not in mapped_api_options:
-                unmapped_api_options.setdefault(category, []).append(option_name)
+    unmapped_api_options = _find_unmapped_options(api_options, mapped_api_options)
 
     is_valid = len(mismatches) == 0 and len(unmapped_api_options) == 0
 

@@ -430,6 +430,22 @@ class TestValidate:
         assert result.is_valid is False
         assert result.unmapped_api_options == {"characters": ["NewOptionType"]}
 
+    def test_skips_ignored_api_options(self):
+        """Verify validate ignores informational options listed in IGNORED_API_OPTIONS."""
+        # Given: the autogen percentile table (an ignored option) alongside a real unmapped one
+        api_options = {
+            "character_autogeneration": {
+                "CharacterClassPercentileChance": ["MORTAL: 0-50", "VAMPIRE: 51-60"],
+                "NewOptionType": ["FOO", "BAR"],
+            },
+        }
+
+        # When: Validating
+        result = validate(api_options)
+
+        # Then: only the genuinely unmapped option is reported
+        assert result.unmapped_api_options == {"character_autogeneration": ["NewOptionType"]}
+
     def test_skips_related_keys(self):
         """Verify validate ignores _related keys in the API response."""
         # Given: API response includes _related metadata
