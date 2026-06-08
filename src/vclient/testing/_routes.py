@@ -149,6 +149,7 @@ class Routes:
     USERS_DENY = RouteSpec("POST", Endpoints.USER_DENY, NO_CONTENT, None)
     USERS_MERGE = RouteSpec("POST", Endpoints.USER_MERGE, SINGLE, User)
     USERS_IDENTITY_LINK = RouteSpec("POST", Endpoints.USER_IDENTITIES, SINGLE, User)
+    USERS_IDENTITY_UNLINK = RouteSpec("DELETE", Endpoints.USER_IDENTITY, SINGLE, User)
 
     USERS_STATISTICS = RouteSpec("GET", Endpoints.USER_STATISTICS, SINGLE, RollStatistics)
     # User lookup (cross-company)

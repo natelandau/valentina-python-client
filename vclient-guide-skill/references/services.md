@@ -74,12 +74,13 @@ Complete method signatures for every service class.
 | Method | Parameters | Returns |
 |--------|-----------|---------|
 | `link_identity(user_id, *, provider, token)` | `user_id: str, provider: IdentityProvider, token: str` | `User` |
+| `unlink_identity(user_id, *, provider)` | `user_id: str, provider: IdentityProvider` | `User` |
 
-**Auth:** `on_behalf_of` is required. Only the acting user themselves or a company ADMIN may call this.
-**Semantics:** Verifies the provider credential and attaches the identity. Re-linking the same identity is idempotent (refreshes stored profile).
-**Error codes:** `ConflictError` (409, code `IDENTITY_ALREADY_LINKED`) when the identity belongs to another user or the user already has a different identity from this provider. `UnprocessableEntityError` (422, code `TOKEN_VERIFICATION_FAILED`) when token verification fails.
+**Auth:** `on_behalf_of` is required. Only the acting user themselves or a company ADMIN may call these.
+**Semantics:** `link_identity` verifies the provider credential and attaches the identity (re-linking the same identity is idempotent and refreshes the stored profile). `unlink_identity` removes a single provider identity; the matching `*_profile` field on the returned `User` is cleared to `None`.
+**Error codes:** `link_identity` raises `ConflictError` (409, code `IDENTITY_ALREADY_LINKED`) when the identity belongs to another user or the user already has a different identity from this provider, and `UnprocessableEntityError` (422, code `TOKEN_VERIFICATION_FAILED`) when token verification fails. `unlink_identity` raises `NotFoundError` (404, code `IDENTITY_NOT_LINKED`) when the user has no identity from that provider, and `ConflictError` (409, code `LAST_IDENTITY`) when the provider is the user's only linked identity (the last one cannot be removed).
 
-**Testing:** Use `Routes.USERS_IDENTITY_LINK` with `FakeVClient.set_response()` or `set_error()` (e.g. `set_error(Routes.USERS_IDENTITY_LINK, status_code=409, code="IDENTITY_ALREADY_LINKED")` to test branching on `APIError.code`).
+**Testing:** Use `Routes.USERS_IDENTITY_LINK` and `Routes.USERS_IDENTITY_UNLINK` with `FakeVClient.set_response()` or `set_error()` (e.g. `set_error(Routes.USERS_IDENTITY_UNLINK, status_code=409, code="LAST_IDENTITY")` to test branching on `APIError.code`).
 
 ### Unapproved User Management
 

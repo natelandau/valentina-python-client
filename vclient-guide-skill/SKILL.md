@@ -83,7 +83,7 @@ Sync equivalents use the `sync_` prefix: `sync_campaigns_service(...)`, `sync_id
 
 ### Verified Identity Resolution
 
-Use `IdentityService.identify()` to resolve a third-party provider login (Apple, Google, Discord, GitHub) to a canonical Valentina user. The service handles three cases automatically: matching an existing provider identity, auto-linking by provider-verified email, and creating a new UNAPPROVED user. To connect an additional provider to an existing authenticated user, use `UsersService.link_identity()`. For Apple and Google, the token's audience must appear in the union of the server allowlists and the per-developer audiences registered via `client.developer.update_me(provider_audiences={...})`; see `references/services.md` for full parameter and error-code details.
+Use `IdentityService.identify()` to resolve a third-party provider login (Apple, Google, Discord, GitHub) to a canonical Valentina user. The service handles three cases automatically: matching an existing provider identity, auto-linking by provider-verified email, and creating a new UNAPPROVED user. To connect an additional provider to an existing authenticated user, use `UsersService.link_identity()`, and `UsersService.unlink_identity()` to disconnect one (the last remaining identity cannot be removed). For Apple and Google, the token's audience must appear in the union of the server allowlists and the per-developer audiences registered via `client.developer.update_me(provider_audiences={...})`; see `references/services.md` for full parameter and error-code details.
 
 ### Standard Service Methods
 

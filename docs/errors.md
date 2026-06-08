@@ -34,6 +34,8 @@ The identity endpoints set `code` on every error they return. Known codes:
 | `TOKEN_VERIFICATION_FAILED` | `UnprocessableEntityError` | The provider rejected the credential; ask the user to sign in again  |
 | `EMAIL_REQUIRED`            | `UnprocessableEntityError` | A new user cannot be created because the provider sent no email      |
 | `IDENTITY_ALREADY_LINKED`   | `ConflictError`            | The identity belongs to another user or the user already has one     |
+| `IDENTITY_NOT_LINKED`       | `NotFoundError`            | The user has no identity from the provider being unlinked            |
+| `LAST_IDENTITY`             | `ConflictError`            | Cannot unlink the user's only remaining identity                     |
 | `PROVIDER_UNAVAILABLE`      | `ServerError`              | The provider could not be reached                                    |
 
 ```python

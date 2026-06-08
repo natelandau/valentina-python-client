@@ -53,6 +53,8 @@ Some endpoints set a `code` extension member in the RFC 9457 body to let callers
 | `TOKEN_VERIFICATION_FAILED` | `UnprocessableEntityError` (422) | `IdentityService.identify()`, `UsersService.link_identity()` | The provider rejected or could not verify the credential |
 | `EMAIL_REQUIRED` | `UnprocessableEntityError` (422) | `IdentityService.identify()` | Creating a new user but provider supplied no email and none was passed in the request |
 | `IDENTITY_ALREADY_LINKED` | `ConflictError` (409) | `UsersService.link_identity()` | The provider identity belongs to a different user, or the target user already has a different identity from this provider |
+| `IDENTITY_NOT_LINKED` | `NotFoundError` (404) | `UsersService.unlink_identity()` | The user has no linked identity from the requested provider |
+| `LAST_IDENTITY` | `ConflictError` (409) | `UsersService.unlink_identity()` | The provider is the user's only linked identity; the last one cannot be removed or the account could not authenticate |
 | `PROVIDER_UNAVAILABLE` | `ServerError` (sent with HTTP 503; `ServerError` covers all 5xx) | `IdentityService.identify()` | The identity provider is unreachable |
 
 ### String formatting

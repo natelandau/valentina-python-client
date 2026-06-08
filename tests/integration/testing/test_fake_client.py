@@ -228,3 +228,34 @@ class TestIdentityRoutes:
                     token="fake-token",  # noqa: S106
                 )
             assert exc_info.value.code == "IDENTITY_ALREADY_LINKED"
+
+    async def test_unlink_identity_default_response(self):
+        """Verify the unlink route returns a factory-built User."""
+        async with FakeVClient():
+            # When unlinking an identity with no overrides
+            result = await users_service("user123", company_id="company123").unlink_identity(
+                "user123",
+                provider="discord",
+            )
+
+            # Then a valid User is returned
+            assert isinstance(result, User)
+
+    async def test_unlink_identity_set_error_last_identity(self):
+        """Verify set_error simulates removing the last remaining identity."""
+        async with FakeVClient() as client:
+            # Given the unlink route configured to conflict
+            client.set_error(
+                Routes.USERS_IDENTITY_UNLINK,
+                status_code=409,
+                detail="cannot remove last identity",
+                code="LAST_IDENTITY",
+            )
+
+            # When/Then unlinking raises ConflictError with the code
+            with pytest.raises(ConflictError) as exc_info:
+                await users_service("user123", company_id="company123").unlink_identity(
+                    "user123",
+                    provider="apple",
+                )
+            assert exc_info.value.code == "LAST_IDENTITY"

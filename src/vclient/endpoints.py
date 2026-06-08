@@ -49,6 +49,7 @@ class Endpoints:
     USER = f"{USERS}/{{user_id}}"
     USER_MERGE = f"{USERS}/merge"
     USER_IDENTITIES = f"{USER}/identities"
+    USER_IDENTITY = f"{USER_IDENTITIES}/{{provider}}"
     USER_APPROVE = f"{USER}/approve"
     USER_DENY = f"{USER}/deny"
     USER_STATISTICS = f"{USER}/statistics"

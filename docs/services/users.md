@@ -74,6 +74,7 @@ assert user.assets is None          # not requested
 | `deny_user(user_id)`                                    | `None`                    | Deny an unapproved user             |
 | `merge(primary_user_id, secondary_user_id)`             | `User`                    | Merge unapproved user into primary  |
 | `link_identity(user_id, provider=..., token=...)`       | `User`                    | Attach a verified provider identity |
+| `unlink_identity(user_id, provider=...)`                | `User`                    | Disconnect a provider identity      |
 
 ### Statistics
 
@@ -332,6 +333,19 @@ updated = await users.link_identity(
 If the provider identity already belongs to a different user, or the target user already has a different identity from the same provider, a `ConflictError` is raised with `code == "IDENTITY_ALREADY_LINKED"`.
 
 Linking prevents duplicate accounts before they exist. Use `merge()` to clean up duplicates that already exist, including accounts with Apple private-relay emails that can never be auto-linked by `IdentityService.identify()`.
+
+### Unlink a Provider Identity
+
+Disconnect a previously linked provider from a user account. This is the inverse of `link_identity()`: the user (or a company admin acting on their behalf) removes a Discord, Google, GitHub, or Apple identity so it can no longer be used to log in. The returned `User` has the matching profile field (for example `discord_profile`) cleared to `None`.
+
+```python
+updated = await users.unlink_identity(
+    "USER_ID",
+    provider="discord",
+)
+```
+
+The API refuses to remove a user's only remaining identity, since that would leave the account unable to authenticate. In that case a `ConflictError` is raised with `code == "LAST_IDENTITY"`, so disable or block the unlink control for the last connected provider. If the user has no identity from the requested provider, a `NotFoundError` is raised with `code == "IDENTITY_NOT_LINKED"`.
 
 ## Related Documentation
 
