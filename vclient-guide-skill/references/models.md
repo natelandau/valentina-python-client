@@ -281,6 +281,8 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 
 ### UserCreate
 
+Provider profile fields (`discord_profile`, `google_profile`, `github_profile`, `apple_profile`) are not accepted here; if passed they are silently ignored. Resolve provider identities through `IdentityService.identify()` or `UsersService.link_identity()` instead.
+
 | Field | Type | Constraints |
 |-------|------|------------|
 | name_first | str \| None | 3-50 chars |
@@ -288,27 +290,10 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | username | str | 3-50 chars, required |
 | email | str | required |
 | role | UserRole | required |
-| discord_profile | DiscordProfileUpdate \| None | — |
-| google_profile | GoogleProfile \| None | — |
-| github_profile | GitHubProfile \| None | — |
-| apple_profile | AppleProfile \| None | — |
 
 ### UserUpdate
 
-All fields optional. Same fields as UserCreate, with `role` becoming optional.
-
-### UserRegisterDTO
-
-| Field | Type | Required |
-|-------|------|----------|
-| name_first | str \| None | no |
-| name_last | str \| None | no |
-| username | str | yes |
-| email | str | yes |
-| discord_profile | DiscordProfileUpdate \| None | no |
-| google_profile | GoogleProfile \| None | no |
-| github_profile | GitHubProfile \| None | no |
-| apple_profile | AppleProfile \| None | no |
+All fields optional. Same fields as UserCreate, with `role` becoming optional. Provider profile fields are not accepted (see UserCreate).
 
 ### UserMergeDTO
 

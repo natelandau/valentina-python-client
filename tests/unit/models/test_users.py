@@ -455,40 +455,6 @@ class TestUserCreate:
         assert request.username == "testuser"
         assert request.email == "test@example.com"
         assert request.role == "PLAYER"
-        assert request.discord_profile is None
-        assert request.google_profile is None
-        assert request.github_profile is None
-        assert request.apple_profile is None
-
-    def test_full_request(self):
-        """Verify creating request with all fields."""
-        # Given: Profile objects
-        discord = DiscordProfileUpdate(id="discord123", username="testuser")
-        google = GoogleProfile(id="google123", email="user@gmail.com")
-        github = GitHubProfile(id="github123", login="testuser")
-        apple = AppleProfile(id="apple123")
-
-        # When: Creating request with all fields
-        request = UserCreate(
-            name_first="Full",
-            name_last="User",
-            username="fulluser",
-            email="full@example.com",
-            role="ADMIN",
-            discord_profile=discord,
-            google_profile=google,
-            github_profile=github,
-            apple_profile=apple,
-        )
-
-        # Then: All fields are set correctly
-        assert request.name_first == "Full"
-        assert request.name_last == "User"
-        assert request.username == "fulluser"
-        assert request.discord_profile.id == "discord123"
-        assert request.google_profile.id == "google123"
-        assert request.github_profile.id == "github123"
-        assert request.apple_profile.id == "apple123"
 
     def test_name_validation_min_length(self):
         """Verify name minimum length validation."""
@@ -565,10 +531,6 @@ class TestUserUpdate:
         assert request.name_last is None
         assert request.email is None
         assert request.role is None
-        assert request.discord_profile is None
-        assert request.google_profile is None
-        assert request.github_profile is None
-        assert request.apple_profile is None
 
     def test_partial_update(self):
         """Verify creating request with some fields."""
@@ -1066,6 +1028,29 @@ class TestAdminUserCreate:
             "role": "PLAYER",
         }
 
+    def test_admin_user_create_accepts_provider_profiles(self):
+        """Verify the global-admin create surface still accepts provider profile writes."""
+        # Given: a create request carrying all four provider profiles
+        body = AdminUserCreate(
+            company_id="c1",
+            username="bob",
+            email="bob@example.com",
+            role="PLAYER",
+            discord_profile=DiscordProfileUpdate(id="d1"),
+            google_profile=GoogleProfile(id="g1"),
+            github_profile=GitHubProfile(id="h1"),
+            apple_profile=AppleProfile(id="a1"),
+        )
+
+        # When: dumping for the wire
+        dumped = body.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: the profiles are serialized (tenant-scoped UserCreate drops them, admin keeps them)
+        assert dumped["discord_profile"] == {"id": "d1"}
+        assert dumped["google_profile"] == {"id": "g1"}
+        assert dumped["github_profile"] == {"id": "h1"}
+        assert dumped["apple_profile"] == {"id": "a1"}
+
 
 class TestAdminUserUpdate:
     """Tests for AdminUserUpdate model."""
@@ -1080,6 +1065,17 @@ class TestAdminUserUpdate:
 
         # Then: is_archived False is retained (not dropped as None)
         assert dumped == {"is_archived": False}
+
+    def test_admin_user_update_accepts_provider_profiles(self):
+        """Verify the global-admin update surface still accepts provider profile writes."""
+        # Given: an update carrying a provider profile
+        body = AdminUserUpdate(discord_profile=DiscordProfileUpdate(id="d1"))
+
+        # When: dumping for the wire
+        dumped = body.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: the profile is serialized (tenant-scoped UserUpdate drops it, admin keeps it)
+        assert dumped == {"discord_profile": {"id": "d1"}}
 
 
 class TestUserIdentifyDTO:

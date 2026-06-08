@@ -6,7 +6,6 @@ Complete method signatures for every service class.
 
 - [CompaniesService](#companiesservice)
 - [UsersService](#usersservice)
-- [UserSelfRegistrationService](#userselfregistrationservice)
 - [IdentityService](#identityservice)
 - [CampaignsService](#campaignsservice)
 - [CharactersService](#charactersservice)
@@ -117,22 +116,6 @@ Complete method signatures for every service class.
 ### Notes, Assets
 
 Same pattern as other services (see CampaignsService notes/assets for the method signatures — they follow the identical pattern with `user_id` as the parent resource ID).
-
----
-
-## UserSelfRegistrationService
-
-**Access:** `client.user_self_registration(company_id=)`
-**Factory:** `user_self_registration_service(company_id=)` / `sync_user_self_registration_service(...)`
-**Scoping:** company_id (no on_behalf_of — API key auth only)
-
-### Methods
-
-| Method | Parameters | Returns |
-|--------|-----------|---------|
-| `register(request=None, **kwargs)` | `request: UserRegisterDTO \| None, **kwargs` | `User` |
-
-**Register kwargs:** `username: str, email: str, name_first: str | None, name_last: str | None, discord_profile: DiscordProfileUpdate | None, google_profile: GoogleProfile | None, github_profile: GitHubProfile | None, apple_profile: AppleProfile | None`
 
 ---
 

@@ -47,7 +47,6 @@ class Endpoints:
     USERS = f"{COMPANY}/users"
     USERS_UNAPPROVED_LIST = f"{USERS}/unapproved"
     USER = f"{USERS}/{{user_id}}"
-    USER_REGISTER = f"{USERS}/register"
     USER_MERGE = f"{USERS}/merge"
     USER_IDENTITIES = f"{USER}/identities"
     USER_APPROVE = f"{USER}/approve"

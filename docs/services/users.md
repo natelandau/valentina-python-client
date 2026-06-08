@@ -6,9 +6,9 @@ icon: lucide/users
 
 Manage users within a company, including their experience points, assets, notes, and quickrolls. This service provides comprehensive user management for World of Darkness campaigns.
 
-!!! note "SSO registration"
+!!! note "Onboarding from a provider login"
 
-    For SSO user registration, see [UserSelfRegistrationService](user_self_registration.md).
+    To onboard a user from a provider login (Apple, Google, Discord, GitHub), use [IdentityService.identify()](identity.md). For users without a supported provider, create the account directly with `create()` below.
 
 ## Usage
 
@@ -337,4 +337,3 @@ Linking prevents duplicate accounts before they exist. Use `merge()` to clean up
 
 - [Response Models](../models/users.md) - View `User`, `UserMergeDTO`, `UserApproveDTO`, `UserIdentityLinkDTO`, `CampaignExperience`, `Asset`, `Note`, and `Quickroll` model schemas
 - [IdentityService](identity.md) - Verified provider login resolution (API-key-only, no `on_behalf_of` required)
-- [UserSelfRegistrationService](user_self_registration.md) - SSO user registration

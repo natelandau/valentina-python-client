@@ -17,7 +17,6 @@ from .identity import IdentityService
 from .options import OptionsService
 from .system import SystemService
 from .user_lookup import UserLookupService
-from .user_self_registration import UserSelfRegistrationService
 from .users import UsersService
 
 __all__ = [
@@ -38,6 +37,5 @@ __all__ = [
     "OptionsService",
     "SystemService",
     "UserLookupService",
-    "UserSelfRegistrationService",
     "UsersService",
 ]

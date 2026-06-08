@@ -13,9 +13,12 @@ from vclient.exceptions import (
     RequestValidationError,
 )
 from vclient.models import (
+    AppleProfile,
     Asset,
     CampaignExperience,
     DiscordProfileUpdate,
+    GitHubProfile,
+    GoogleProfile,
     Note,
     PaginatedResponse,
     Quickroll,
@@ -357,36 +360,42 @@ class TestUsersServiceCreate:
         assert body["role"] == "PLAYER"
 
     @respx.mock
-    async def test_create_user_with_discord_profile(self, vclient, base_url, user_response_data):
-        """Verify creating user with Discord profile."""
+    async def test_create_user_ignores_provider_profile(
+        self, vclient, base_url, user_response_data
+    ):
+        """Verify provider profile fields are dropped from the create request body."""
         # Given: A mocked create endpoint
         company_id = "company123"
         route = respx.post(f"{base_url}{Endpoints.USERS.format(company_id=company_id)}").respond(
             201, json=user_response_data
         )
 
-        # When: Creating a user with Discord profile
-        discord = DiscordProfileUpdate(id="discord123", username="testuser")
+        # When: Creating a user while passing all now-unsupported provider profiles
         result = await vclient.users("on-behalf-of-user", company_id=company_id).create(
             name_first="Test",
             name_last="User",
             username="testuser",
             email="test@example.com",
             role="PLAYER",
-            discord_profile=discord,
+            discord_profile=DiscordProfileUpdate(id="discord123", username="testuser"),
+            google_profile=GoogleProfile(id="google123"),
+            github_profile=GitHubProfile(id="github123"),
+            apple_profile=AppleProfile(id="apple123"),
         )
 
         # Then: Returns created User object
         assert route.called
         assert isinstance(result, User)
 
-        # Verify request body includes discord profile
+        # Then: The provider profile is not sent (writes flow through the identity endpoints)
         request = route.calls.last.request
         import json
 
         body = json.loads(request.content)
-        assert body["discord_profile"]["id"] == "discord123"
-        assert body["discord_profile"]["username"] == "testuser"
+        assert "discord_profile" not in body
+        assert "google_profile" not in body
+        assert "github_profile" not in body
+        assert "apple_profile" not in body
 
     async def test_create_user_validation_error(self, vclient):
         """Verify validation error on invalid data raises RequestValidationError."""

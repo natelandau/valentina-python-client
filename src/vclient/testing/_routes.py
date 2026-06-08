@@ -150,9 +150,6 @@ class Routes:
     USERS_MERGE = RouteSpec("POST", Endpoints.USER_MERGE, SINGLE, User)
     USERS_IDENTITY_LINK = RouteSpec("POST", Endpoints.USER_IDENTITIES, SINGLE, User)
 
-    # User self-registration (no On-Behalf-Of required)
-    USER_SELF_REGISTRATION_REGISTER = RouteSpec("POST", Endpoints.USER_REGISTER, SINGLE, User)
-
     USERS_STATISTICS = RouteSpec("GET", Endpoints.USER_STATISTICS, SINGLE, RollStatistics)
     # User lookup (cross-company)
     USERS_LOOKUP = RouteSpec("GET", Endpoints.USERS_LOOKUP, LIST, UserLookupResult)
