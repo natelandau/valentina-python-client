@@ -71,8 +71,6 @@ class TestConstantMap:
             "BookInclude",
             "ChapterInclude",
             "CharacterInclude",
-            "IdentityProvider",
-            "IdentityResolutionType",
             "LogLevel",
             "OIDCProvider",
             "UserInclude",
@@ -165,6 +163,8 @@ class TestValidate:
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
             "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
                 "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
             },
             "assets": {
@@ -244,7 +244,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -324,7 +328,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -405,7 +413,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -483,7 +495,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -561,7 +577,11 @@ class TestValidate:
                 "DiceSize": [4, 6, 8, 10, 20, 100],
                 "RollResultType": ["SUCCESS", "FAILURE", "BOTCH", "CRITICAL", "OTHER"],
             },
-            "users": {"UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"]},
+            "users": {
+                "IdentityProvider": ["apple", "google", "discord", "github"],
+                "IdentityResolution": ["matched", "linked", "created"],
+                "UserRole": ["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"],
+            },
             "assets": {
                 "AssetType": ["image", "text", "audio", "video", "document", "archive", "other"],
             },
@@ -588,7 +608,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "25/25 constants in sync" in captured.out
+        assert "27/27 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""

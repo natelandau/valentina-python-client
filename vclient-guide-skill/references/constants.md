@@ -65,11 +65,10 @@ PermissionLevel = Literal["USER", "ADMIN", "OWNER", "REVOKE"]
 
 ### Identity
 
-These constants are client-side only and are **not** validated against the `/options` endpoint.
-
 ```python
 IdentityProvider = Literal["apple", "google", "discord", "github"]
 IdentityResolutionType = Literal["matched", "linked", "created"]
+# OIDCProvider is client-side only and is NOT validated against /options
 OIDCProvider = Literal["apple", "google"]
 ```
 
