@@ -208,6 +208,37 @@ class SyncUsersService(SyncBaseService):
         )
         return User.model_validate(response.json())
 
+    def unlink_identity(self, user_id: str, *, provider: IdentityProvider) -> User:
+        """Disconnect a verified provider identity from a user.
+
+        The counterpart to link_identity for "disconnect your account" settings
+        flows: remove a single OAuth provider identity so it can no longer be
+        used to log in. Only the acting user themselves or a company ADMIN may
+        unlink identities. The provider's profile field on the returned User is
+        cleared to None.
+
+        The final remaining identity cannot be removed, since that would leave
+        the account unable to authenticate. Link another provider first.
+
+        Args:
+            user_id: The ID of the user losing the identity.
+            provider: The identity provider to disconnect.
+
+        Returns:
+            The updated User object with the provider's profile field cleared.
+
+        Raises:
+            AuthorizationError: If the acting user is neither the target user nor an admin.
+            NotFoundError: If the user has no identity from this provider
+                (code IDENTITY_NOT_LINKED).
+            ConflictError: If the provider is the user's only linked identity,
+                which cannot be removed (code LAST_IDENTITY).
+        """
+        response = self._delete(
+            self._format_endpoint(Endpoints.USER_IDENTITY, user_id=user_id, provider=provider)
+        )
+        return User.model_validate(response.json())
+
     def get_page(
         self,
         *,

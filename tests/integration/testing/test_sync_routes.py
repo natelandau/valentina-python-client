@@ -124,3 +124,15 @@ class TestSyncIdentityRoutes:
 
             # Then a valid User is returned
             assert isinstance(result, User)
+
+    def test_unlink_identity_default_response(self):
+        """Verify the unlink route returns a factory-built User."""
+        with SyncFakeVClient():
+            # When unlinking an identity with no overrides
+            result = sync_users_service("user123", company_id="company123").unlink_identity(
+                "user123",
+                provider="discord",
+            )
+
+            # Then a valid User is returned
+            assert isinstance(result, User)

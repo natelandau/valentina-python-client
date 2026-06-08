@@ -1357,3 +1357,94 @@ class TestUsersServiceLinkIdentity:
                 provider="apple",
                 token="",
             )
+
+
+class TestUsersServiceUnlinkIdentity:
+    """Tests for UsersService.unlink_identity method."""
+
+    @respx.mock
+    async def test_unlink_identity_success(self, vclient, base_url, user_response_data):
+        """Verify unlinking a provider identity returns the updated User."""
+        # Given: A mocked provider identity endpoint
+        company_id = "company123"
+        route = respx.delete(
+            f"{base_url}{Endpoints.USER_IDENTITY.format(company_id=company_id, user_id='user123', provider='discord')}"
+        ).respond(200, json=user_response_data)
+
+        # When: Disconnecting the discord identity from the user
+        result = await vclient.users("user123", company_id=company_id).unlink_identity(
+            "user123",
+            provider="discord",
+        )
+
+        # Then: The updated User is returned
+        assert route.called
+        assert isinstance(result, User)
+
+        # Then: The request acts on behalf of the user
+        assert route.calls.last.request.headers["On-Behalf-Of"] == "user123"
+
+    @respx.mock
+    async def test_unlink_identity_not_linked(self, vclient, base_url):
+        """Verify a 404 response raises NotFoundError with its code."""
+        # Given: The user has no identity from the requested provider
+        company_id = "company123"
+        respx.delete(
+            f"{base_url}{Endpoints.USER_IDENTITY.format(company_id=company_id, user_id='user123', provider='github')}"
+        ).respond(
+            404,
+            json={
+                "detail": "The user has no github identity linked.",
+                "code": "IDENTITY_NOT_LINKED",
+            },
+        )
+
+        # When/Then: The missing identity surfaces with its code
+        with pytest.raises(NotFoundError) as exc_info:
+            await vclient.users("user123", company_id=company_id).unlink_identity(
+                "user123",
+                provider="github",
+            )
+        assert exc_info.value.code == "IDENTITY_NOT_LINKED"
+
+    @respx.mock
+    async def test_unlink_identity_last_identity_conflict(self, vclient, base_url):
+        """Verify a 409 response raises ConflictError with its code."""
+        # Given: The provider is the user's only linked identity
+        company_id = "company123"
+        respx.delete(
+            f"{base_url}{Endpoints.USER_IDENTITY.format(company_id=company_id, user_id='user123', provider='google')}"
+        ).respond(
+            409,
+            json={
+                "detail": "Cannot remove the last remaining identity.",
+                "code": "LAST_IDENTITY",
+            },
+        )
+
+        # When/Then: The conflict surfaces with its code
+        with pytest.raises(ConflictError) as exc_info:
+            await vclient.users("user123", company_id=company_id).unlink_identity(
+                "user123",
+                provider="google",
+            )
+        assert exc_info.value.code == "LAST_IDENTITY"
+
+    @respx.mock
+    async def test_unlink_identity_forbidden(self, vclient, base_url):
+        """Verify a 403 response raises AuthorizationError."""
+        # Given: A non-admin acting on another user's account
+        company_id = "company123"
+        respx.delete(
+            f"{base_url}{Endpoints.USER_IDENTITY.format(company_id=company_id, user_id='other456', provider='apple')}"
+        ).respond(
+            403,
+            json={"detail": "Only the user themselves or an admin can unlink identities"},
+        )
+
+        # When/Then: The request is denied
+        with pytest.raises(AuthorizationError):
+            await vclient.users("user123", company_id=company_id).unlink_identity(
+                "other456",
+                provider="apple",
+            )
