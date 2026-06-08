@@ -51,7 +51,7 @@ async def main(api_url: str, api_key: str, company_id: str) -> int:
     logger.enable("vclient")
 
     async with VClient(api_key=api_key, base_url=api_url) as client:
-        options = client.options(company_id)
+        options = client.options(company_id=company_id)
         api_options = await options.get_options()
 
     result = validate(api_options)
