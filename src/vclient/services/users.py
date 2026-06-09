@@ -656,9 +656,17 @@ class UsersService(BaseService):
         content: bytes,
         content_type: str | None = None,
     ) -> Asset:
-        """Upload a new asset for a user.
+        """Upload a new image asset for a user.
 
-        Uploads a file to S3 storage and associates it with the user.
+        Uploads an image to S3 storage and associates it with the user.
+
+        Only image files are accepted: PNG, JPEG, GIF, and WEBP. Any other
+        upload (documents, audio, video, archives, SVG, or a non-image payload
+        mislabeled as an image) is rejected with 400 Bad Request, as are
+        oversized images that trip the decompression-bomb guard. The stored
+        ``mime_type`` is detected from the file's bytes; the ``content_type``
+        argument is ignored server-side and cannot change or bypass the stored
+        type. Uploaded assets therefore always have ``asset_type == "image"``.
 
         Args:
             user_id: The ID of the user to upload the asset for.
