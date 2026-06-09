@@ -583,6 +583,50 @@ class SyncUsersService(SyncBaseService):
         )
         return Asset.model_validate(response.json())
 
+    def upload_avatar(
+        self, user_id: str, filename: str, content: bytes, content_type: str | None = None
+    ) -> User:
+        """Upload a custom avatar for a user, replacing any existing one.
+
+        Accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB. The server
+        normalizes the image to a 512x512 WebP and it overrides any
+        identity-provider-derived avatar. Requires the ``On-Behalf-Of`` header
+        (permitted for the user themselves or an admin).
+
+        Args:
+            user_id: The ID of the user to set the avatar for.
+            filename: The original filename of the image.
+            content: The raw bytes of the image to upload.
+            content_type: The MIME type. If not provided, inferred from filename.
+
+        Returns:
+            The updated User object with the new ``avatar_url``.
+        """
+        if content_type is None:
+            content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+        response = self._put_file(
+            self._format_endpoint(Endpoints.USER_AVATAR, user_id=user_id),
+            file=(filename, content, content_type),
+        )
+        return User.model_validate(response.json())
+
+    def delete_avatar(self, user_id: str) -> User:
+        """Remove a user's custom avatar.
+
+        The avatar falls back to the identity-provider avatar, or ``None`` if
+        none exists. Requires the ``On-Behalf-Of`` header (permitted for the
+        user themselves or an admin). Responds 200 OK with the updated user
+        body (not 204).
+
+        Args:
+            user_id: The ID of the user whose custom avatar to remove.
+
+        Returns:
+            The updated User object with the resolved ``avatar_url``.
+        """
+        response = self._delete(self._format_endpoint(Endpoints.USER_AVATAR, user_id=user_id))
+        return User.model_validate(response.json())
+
     def get_experience(self, user_id: str, campaign_id: str) -> CampaignExperience:
         """Retrieve a user's experience points and cool points for a specific campaign.
 
