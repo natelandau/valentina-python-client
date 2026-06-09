@@ -23,6 +23,7 @@ Models for users, their linked auth provider profiles (Discord, Google, GitHub, 
 | `google_profile`       | `GoogleProfile \| None`    | Google account information                    |
 | `github_profile`       | `GitHubProfile \| None`    | GitHub account information                    |
 | `apple_profile`        | `AppleProfile \| None`     | Apple account information                     |
+| `avatar_url`           | `str \| None`              | Resolved avatar URL (see note below)          |
 | `campaign_experience`  | `list[CampaignExperience]` | XP per campaign                               |
 | `asset_ids`            | `list[str]`                | Owned asset IDs                               |
 | `lifetime_xp`          | `int`                      | Lifetime XP earned                            |
@@ -31,6 +32,9 @@ Models for users, their linked auth provider profiles (Discord, Google, GitHub, 
 | `num_notes`            | `int`                      | Active note count authored by the user        |
 | `num_assets`           | `int`                      | Active asset count owned by the user          |
 | `num_characters`       | `int`                      | Active character count played by the user     |
+
+!!! note "Resolving `avatar_url`"
+    `avatar_url` resolves with this precedence: the user's custom uploaded avatar (a CloudFront URL) if set, otherwise the identity-provider-derived avatar (currently Discord), otherwise `null`. Prefer it over `discord_profile.avatar_url` for displaying a user's avatar. Set it with [`upload_avatar`](../services/users.md#avatar-management) and clear it with `delete_avatar`.
 
 ## UserDetail
 
@@ -199,6 +203,7 @@ Returned by all `GlobalAdminService` user methods. Extends `User` with an `is_ar
 | `google_profile`       | `GoogleProfile \| None`    | Google account information                    |
 | `github_profile`       | `GitHubProfile \| None`    | GitHub account information                    |
 | `apple_profile`        | `AppleProfile \| None`     | Apple account information                     |
+| `avatar_url`           | `str \| None`              | Resolved avatar URL (see `User` note above)   |
 | `campaign_experience`  | `list[CampaignExperience]` | XP per campaign                               |
 | `asset_ids`            | `list[str]`                | Owned asset IDs                               |
 | `lifetime_xp`          | `int`                      | Lifetime XP earned                            |

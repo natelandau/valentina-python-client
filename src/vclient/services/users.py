@@ -656,9 +656,17 @@ class UsersService(BaseService):
         content: bytes,
         content_type: str | None = None,
     ) -> Asset:
-        """Upload a new asset for a user.
+        """Upload a new image asset for a user.
 
-        Uploads a file to S3 storage and associates it with the user.
+        Uploads an image to S3 storage and associates it with the user.
+
+        Only image files are accepted: PNG, JPEG, GIF, and WEBP. Any other
+        upload (documents, audio, video, archives, SVG, or a non-image payload
+        mislabeled as an image) is rejected with 400 Bad Request, as are
+        oversized images that trip the decompression-bomb guard. The stored
+        ``mime_type`` is detected from the file's bytes; the ``content_type``
+        argument is ignored server-side and cannot change or bypass the stored
+        type. Uploaded assets therefore always have ``asset_type == "image"``.
 
         Args:
             user_id: The ID of the user to upload the asset for.
@@ -682,6 +690,59 @@ class UsersService(BaseService):
             file=(filename, content, content_type),
         )
         return Asset.model_validate(response.json())
+
+    # Avatar Methods
+
+    async def upload_avatar(
+        self,
+        user_id: str,
+        filename: str,
+        content: bytes,
+        content_type: str | None = None,
+    ) -> User:
+        """Upload a custom avatar for a user, replacing any existing one.
+
+        Accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB. The server
+        normalizes the image to a 512x512 WebP and it overrides any
+        identity-provider-derived avatar. Requires the ``On-Behalf-Of`` header
+        (permitted for the user themselves or an admin).
+
+        Args:
+            user_id: The ID of the user to set the avatar for.
+            filename: The original filename of the image.
+            content: The raw bytes of the image to upload.
+            content_type: The MIME type. If not provided, inferred from filename.
+
+        Returns:
+            The updated User object with the new ``avatar_url``.
+        """
+        if content_type is None:
+            content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+
+        response = await self._put_file(
+            self._format_endpoint(Endpoints.USER_AVATAR, user_id=user_id),
+            file=(filename, content, content_type),
+        )
+        return User.model_validate(response.json())
+
+    async def delete_avatar(self, user_id: str) -> User:
+        """Remove a user's custom avatar.
+
+        The avatar falls back to the identity-provider avatar, or ``None`` if
+        none exists. Requires the ``On-Behalf-Of`` header (permitted for the
+        user themselves or an admin). Responds 200 OK with the updated user
+        body (not 204).
+
+        Args:
+            user_id: The ID of the user whose custom avatar to remove.
+
+        Returns:
+            The updated User object with the resolved ``avatar_url``.
+        """
+        response = await self._delete(
+            self._format_endpoint(Endpoints.USER_AVATAR, user_id=user_id),
+        )
+        return User.model_validate(response.json())
 
     # Experience Methods
 

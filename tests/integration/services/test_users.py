@@ -1448,3 +1448,90 @@ class TestUsersServiceUnlinkIdentity:
                 "other456",
                 provider="apple",
             )
+
+
+class TestUsersServiceAvatar:
+    """Tests for UsersService avatar methods."""
+
+    @respx.mock
+    async def test_upload_avatar_success(self, vclient, base_url, user_response_data):
+        """Verify uploading an avatar PUTs multipart data and returns the updated User."""
+        # Given: A mocked avatar endpoint returning a user with a new avatar_url
+        company_id = "company123"
+        user_id = "user123"
+        updated = {**user_response_data, "avatar_url": "https://cdn.example.com/a.webp"}
+        route = respx.put(
+            f"{base_url}{Endpoints.USER_AVATAR.format(company_id=company_id, user_id=user_id)}"
+        ).respond(200, json=updated)
+
+        # When: Uploading an avatar on the user's own behalf
+        result = await vclient.users("user123", company_id=company_id).upload_avatar(
+            user_id,
+            filename="pic.png",
+            content=b"fake image content",
+            content_type="image/png",
+        )
+
+        # Then: The updated User is returned with the new avatar_url
+        assert route.called
+        assert isinstance(result, User)
+        assert result.avatar_url == "https://cdn.example.com/a.webp"
+
+        # Then: The request is multipart and acts on behalf of the user
+        assert route.calls.last.request.headers["On-Behalf-Of"] == "user123"
+        assert "multipart/form-data" in route.calls.last.request.headers["content-type"]
+
+    @respx.mock
+    async def test_upload_avatar_guesses_content_type(self, vclient, base_url, user_response_data):
+        """Verify content_type is inferred from the filename when not provided."""
+        # Given: A mocked avatar endpoint
+        company_id = "company123"
+        user_id = "user123"
+        route = respx.put(
+            f"{base_url}{Endpoints.USER_AVATAR.format(company_id=company_id, user_id=user_id)}"
+        ).respond(200, json=user_response_data)
+
+        # When: Uploading without an explicit content_type
+        result = await vclient.users("user123", company_id=company_id).upload_avatar(
+            user_id,
+            filename="pic.png",
+            content=b"fake image content",
+        )
+
+        # Then: The request succeeds and returns a User
+        assert route.called
+        assert isinstance(result, User)
+
+    @respx.mock
+    async def test_delete_avatar_success(self, vclient, base_url, user_response_data):
+        """Verify deleting an avatar returns the updated User body (200, not 204)."""
+        # Given: A mocked avatar endpoint returning the user with avatar_url cleared
+        company_id = "company123"
+        user_id = "user123"
+        updated = {**user_response_data, "avatar_url": None}
+        route = respx.delete(
+            f"{base_url}{Endpoints.USER_AVATAR.format(company_id=company_id, user_id=user_id)}"
+        ).respond(200, json=updated)
+
+        # When: Removing the avatar
+        result = await vclient.users("user123", company_id=company_id).delete_avatar(user_id)
+
+        # Then: The updated User is returned and acts on behalf of the user
+        assert route.called
+        assert isinstance(result, User)
+        assert result.avatar_url is None
+        assert route.calls.last.request.headers["On-Behalf-Of"] == "user123"
+
+    @respx.mock
+    async def test_delete_avatar_not_found(self, vclient, base_url):
+        """Verify a 404 response raises NotFoundError."""
+        # Given: The avatar endpoint returns 404
+        company_id = "company123"
+        user_id = "user123"
+        respx.delete(
+            f"{base_url}{Endpoints.USER_AVATAR.format(company_id=company_id, user_id=user_id)}"
+        ).respond(404, json={"detail": "User not found"})
+
+        # When/Then: The error surfaces as NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.users("user123", company_id=company_id).delete_avatar(user_id)

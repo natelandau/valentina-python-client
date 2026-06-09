@@ -47,6 +47,8 @@ All Pydantic v2 models with fields, types, and validation constraints. Import fr
 | chapter_id | str \| None | no |
 | user_parent_id | str \| None | no |
 
+Uploads accept only images (PNG, JPEG, GIF, WEBP); `mime_type` is detected from the file's bytes, and newly uploaded assets always have `asset_type == "image"`. Other `AssetType` values may still appear on previously uploaded assets.
+
 ### Note / NoteCreate / NoteUpdate
 
 **Note** (response):
@@ -261,6 +263,7 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | google_profile | GoogleProfile \| None | no |
 | github_profile | GitHubProfile \| None | no |
 | apple_profile | AppleProfile \| None | no |
+| avatar_url | str \| None | no |
 | campaign_experience | list[CampaignExperience] | no (default=[]) |
 | asset_ids | list[str] | no (default=[]) |
 | lifetime_xp | int | no (default=0) |
@@ -269,6 +272,8 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | num_notes | int | no (default=0) |
 | num_assets | int | no (default=0) |
 | num_characters | int | no (default=0) |
+
+`avatar_url` resolves with precedence: custom uploaded avatar (CloudFront URL) → identity-provider-derived avatar (currently Discord) → `None`. Prefer it over `discord_profile.avatar_url` for display. Set/clear it with `UsersService.upload_avatar()` / `delete_avatar()`.
 
 ### UserDetail (extends User)
 

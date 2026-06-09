@@ -101,6 +101,10 @@ class User(BaseModel):
     google_profile: GoogleProfile | None = None
     github_profile: GitHubProfile | None = None
     apple_profile: AppleProfile | None = None
+    avatar_url: str | None = None
+    """Resolved avatar URL. Precedence: custom uploaded avatar (CloudFront URL),
+    then the identity-provider-derived avatar (currently Discord), else ``None``.
+    Prefer this over ``discord_profile.avatar_url`` for display."""
     campaign_experience: list[CampaignExperience] = Field(default_factory=list)
     asset_ids: list[str] = Field(default_factory=list)
     lifetime_xp: int = 0

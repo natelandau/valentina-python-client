@@ -434,6 +434,39 @@ class TestUser:
         assert populated.num_assets == 1
         assert populated.num_characters == 5
 
+    def test_avatar_url_defaults_to_none(self):
+        """Verify avatar_url is optional and defaults to None when absent."""
+        # Given: base required fields for a User
+        user = User(
+            id="user123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            username="testuser",
+            email="test@example.com",
+            role="PLAYER",
+            company_id="company123",
+        )
+
+        # Then: avatar_url defaults to None
+        assert user.avatar_url is None
+
+    def test_avatar_url_accepts_string(self):
+        """Verify avatar_url accepts a CloudFront-style URL string."""
+        # When: Creating a user with an avatar_url
+        user = User(
+            id="user123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            username="testuser",
+            email="test@example.com",
+            role="PLAYER",
+            company_id="company123",
+            avatar_url="https://cdn.example.com/a.webp",
+        )
+
+        # Then: avatar_url reflects the provided value
+        assert user.avatar_url == "https://cdn.example.com/a.webp"
+
 
 class TestUserCreate:
     """Tests for UserCreate model."""
