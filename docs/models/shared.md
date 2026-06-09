@@ -20,6 +20,9 @@ Represents a file stored in cloud storage. Use this model to manage uploaded fil
 | `public_url`        | `str`       | Public URL to access the file |
 | `uploaded_by_id`    | `str`       | ID of uploader                |
 
+!!! note "Image uploads only"
+    New asset uploads accept only image files: PNG, JPEG, GIF, and WEBP. The stored MIME type is detected from the file's bytes (the declared content type is ignored), and newly uploaded assets always have an `image` asset type. Other asset types may still appear on previously uploaded assets.
+
 ## Note
 
 Represents a markdown-formatted note. Store session notes, character backstories, and campaign information with full markdown support.
