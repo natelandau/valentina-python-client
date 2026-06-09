@@ -1,3 +1,9 @@
+## v2.9.0 (2026-06-09)
+
+### Feat
+
+- **users**: add user avatars and image-only asset uploads (#80)
+
 ## v2.8.0 (2026-06-08)
 
 ### Feat
