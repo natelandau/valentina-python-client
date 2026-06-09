@@ -164,6 +164,10 @@ class Routes:
     USERS_ASSETS_DELETE = RouteSpec("DELETE", Endpoints.USER_ASSET, NO_CONTENT, None)
     USERS_ASSETS_UPLOAD = RouteSpec("POST", Endpoints.USER_ASSET_UPLOAD, SINGLE, Asset)
 
+    # User avatar
+    USERS_AVATAR_UPLOAD = RouteSpec("PUT", Endpoints.USER_AVATAR, SINGLE, User)
+    USERS_AVATAR_DELETE = RouteSpec("DELETE", Endpoints.USER_AVATAR, SINGLE, User)
+
     # User experience
     USERS_EXPERIENCE_GET = RouteSpec(
         "GET", Endpoints.USER_EXPERIENCE_CAMPAIGN, SINGLE, CampaignExperience

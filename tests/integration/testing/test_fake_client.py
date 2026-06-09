@@ -2,7 +2,7 @@
 
 import pytest
 
-from vclient.exceptions import ConflictError, UnprocessableEntityError
+from vclient.exceptions import ConflictError, NotFoundError, UnprocessableEntityError
 from vclient.models import (
     Campaign,
     Company,
@@ -259,3 +259,45 @@ class TestIdentityRoutes:
                     provider="apple",
                 )
             assert exc_info.value.code == "LAST_IDENTITY"
+
+
+class TestFakeVClientAvatar:
+    """FakeVClient should serve the user avatar routes."""
+
+    async def test_upload_avatar_default_response(self):
+        """Verify the avatar upload route returns a factory-built User."""
+        async with FakeVClient():
+            # When uploading an avatar with no overrides
+            result = await users_service("user123", company_id="company123").upload_avatar(
+                "user123",
+                filename="pic.png",
+                content=b"img",
+            )
+
+            # Then a valid User is returned
+            assert isinstance(result, User)
+
+    async def test_delete_avatar_default_response(self):
+        """Verify the avatar delete route returns a factory-built User."""
+        async with FakeVClient():
+            # When removing an avatar with no overrides
+            result = await users_service("user123", company_id="company123").delete_avatar(
+                "user123",
+            )
+
+            # Then a valid User is returned
+            assert isinstance(result, User)
+
+    async def test_delete_avatar_set_error_not_found(self):
+        """Verify set_error simulates a missing user on avatar delete."""
+        async with FakeVClient() as client:
+            # Given the avatar delete route configured to 404
+            client.set_error(
+                Routes.USERS_AVATAR_DELETE,
+                status_code=404,
+                detail="User not found",
+            )
+
+            # When/Then deleting raises NotFoundError
+            with pytest.raises(NotFoundError):
+                await users_service("user123", company_id="company123").delete_avatar("user123")
