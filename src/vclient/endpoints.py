@@ -56,6 +56,7 @@ class Endpoints:
     USER_ASSETS = f"{USER}/assets"
     USER_ASSET = f"{USER_ASSETS}/{{asset_id}}"
     USER_ASSET_UPLOAD = f"{USER_ASSETS}/upload"
+    USER_AVATAR = f"{USER}/avatar"
     USER_EXPERIENCE_CAMPAIGN = f"{USER}/experience/{{campaign_id}}"
     USER_EXPERIENCE_XP_ADD = f"{USER}/experience/xp/add"
     USER_EXPERIENCE_XP_REMOVE = f"{USER}/experience/xp/remove"
