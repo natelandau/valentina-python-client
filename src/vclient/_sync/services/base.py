@@ -592,6 +592,26 @@ class SyncBaseService:
             headers=self._build_idempotency_headers(idempotency_key),
         )
 
+    def _put_file(self, path: str, *, file: tuple[str, bytes, str]) -> httpx.Response:
+        """Make a PUT request with a file upload (multipart/form-data).
+
+        PUT is idempotent, so this helper takes no idempotency key.
+
+        Args:
+            path: API endpoint path.
+            file: Tuple of (filename, content, content_type) for the file to upload.
+
+        Returns:
+            The HTTP response.
+
+        Raises:
+            ServerError: When server error occurs and max retries are exhausted.
+            RateLimitError: When rate limit is exceeded and max retries are exhausted.
+            APIError: For other API error responses.
+        """
+        filename, content, content_type = file
+        return self._request("PUT", path, files={"data": (filename, content, content_type)})
+
     def _get_paginated(
         self,
         path: str,
