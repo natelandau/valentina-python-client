@@ -82,6 +82,17 @@ Complete method signatures for every service class.
 
 **Testing:** Use `Routes.USERS_IDENTITY_LINK` and `Routes.USERS_IDENTITY_UNLINK` with `FakeVClient.set_response()` or `set_error()` (e.g. `set_error(Routes.USERS_IDENTITY_UNLINK, status_code=409, code="LAST_IDENTITY")` to test branching on `APIError.code`).
 
+### Avatars
+
+| Method | Parameters | Returns |
+|--------|-----------|---------|
+| `upload_avatar(user_id, filename, content)` | `user_id: str, filename: str, content: bytes, content_type: str \| None` | `User` |
+| `delete_avatar(user_id)` | `user_id: str` | `User` |
+
+**Auth:** `on_behalf_of` is required. Only the acting user themselves or a company ADMIN may call these. Both return the updated `User` (including the resolved `avatar_url`); `delete_avatar` responds `200 OK` with a body, not `204`.
+**Semantics:** `upload_avatar` accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB; the server normalizes it to a 512×512 WebP that overrides any identity-provider-derived avatar (a `PUT` multipart request). `delete_avatar` clears the custom avatar so `avatar_url` falls back to the identity-provider avatar, or `null` if none.
+**Testing:** Use `Routes.USERS_AVATAR_UPLOAD` and `Routes.USERS_AVATAR_DELETE` with `FakeVClient.set_response()` or `set_error()`.
+
 ### Unapproved User Management
 
 | Method | Parameters | Returns |
@@ -185,6 +196,8 @@ Resolves verified provider credentials to canonical users. Forward the credentia
 | `get_asset(campaign_id, asset_id)` | both `str` | `Asset` |
 | `delete_asset(campaign_id, asset_id)` | both `str` | `None` |
 | `upload_asset(campaign_id, filename, content)` | `campaign_id: str, filename: str, content: bytes, content_type: str \| None` | `Asset` |
+
+**Image uploads only:** `upload_asset` (on every service) accepts only PNG, JPEG, GIF, and WEBP. Other uploads (documents, audio, video, archives, SVG, or non-image payloads mislabeled as images) are rejected with `400 Bad Request`. The stored `mime_type` is detected from the file's bytes; the `content_type` argument is ignored server-side. Newly uploaded assets always have `asset_type == "image"`.
 
 ### Notes
 
