@@ -1,7 +1,7 @@
 # AUTO-GENERATED — do not edit. Run 'uv run duty generate_sync' to regenerate.
 """Fake async API client for testing downstream applications.
 
-FakeSyncVClient is a drop-in replacement for SyncVClient that uses httpx.MockTransport
+FakeSyncVClient is a drop-in replacement for SyncVClient that uses httpx2.MockTransport
 instead of real HTTP. All real service classes work unmodified.
 """
 
@@ -10,7 +10,7 @@ from __future__ import annotations
 import secrets
 from typing import TYPE_CHECKING, Any
 
-import httpx
+import httpx2
 from pydantic import BaseModel
 
 from vclient._sync.client import SyncVClient
@@ -65,10 +65,10 @@ class SyncFakeVClient(SyncVClient):
             **kwargs,
         )
 
-    def _create_http_client(self) -> httpx.Client:
+    def _create_http_client(self) -> httpx2.Client:
         """Create an HTTP client backed by the fake router."""
-        return httpx.Client(
-            transport=httpx.MockTransport(self._router.handle),
+        return httpx2.Client(
+            transport=httpx2.MockTransport(self._router.handle),
             base_url="https://fake.valentina-api.test",
         )
 

@@ -92,7 +92,7 @@ The following table summarizes which conditions trigger retries:
 | ------------------ | ----------------------- | ------------------------------------------------------------------- |
 | Rate limit (429)   | Always                  | Respects `Retry-After` / `RateLimit` headers                        |
 | Server error (5xx) | Idempotent methods only | GET, PUT, DELETE always retry; POST/PATCH only with idempotency key |
-| Network error      | Idempotent methods only | `ConnectError`, `TimeoutException` from httpx                       |
+| Network error      | Idempotent methods only | `ConnectError`, `TimeoutException` from httpx2                       |
 | Client error (4xx) | Never                   | 400, 401, 403, 404, 409 are not transient                           |
 
 Non-idempotent methods (POST, PATCH) are only retried on 5xx and network errors when an idempotency key is present — either explicitly provided or auto-generated via `auto_idempotency_keys=True`. This prevents duplicate side effects from retrying unsafe requests.

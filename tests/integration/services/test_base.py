@@ -1,6 +1,7 @@
 """Tests for vclient.services.base."""
 
 import httpx
+import httpx2
 import pytest
 import respx
 
@@ -1139,7 +1140,7 @@ class TestBaseServiceNetworkErrorRetry:
         # Given: An endpoint that raises ConnectError once then succeeds
         route = respx.get(f"{base_url}/test").mock(
             side_effect=[
-                httpx.ConnectError("Connection refused"),
+                httpx2.ConnectError("Connection refused"),
                 httpx.Response(200, json={"success": True}),
             ]
         )
@@ -1161,7 +1162,7 @@ class TestBaseServiceNetworkErrorRetry:
         # Given: An endpoint that raises ReadTimeout once then succeeds
         route = respx.get(f"{base_url}/test").mock(
             side_effect=[
-                httpx.ReadTimeout("Read timed out"),
+                httpx2.ReadTimeout("Read timed out"),
                 httpx.Response(200, json={"success": True}),
             ]
         )
@@ -1181,11 +1182,11 @@ class TestBaseServiceNetworkErrorRetry:
         mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: An endpoint that always raises ConnectError
-        respx.get(f"{base_url}/test").mock(side_effect=httpx.ConnectError("Connection refused"))
+        respx.get(f"{base_url}/test").mock(side_effect=httpx2.ConnectError("Connection refused"))
 
         # When/Then: Making a request raises ConnectError after max retries
         service = BaseService(vclient)
-        with pytest.raises(httpx.ConnectError):
+        with pytest.raises(httpx2.ConnectError):
             await service._get("/test")
 
     @respx.mock
@@ -1195,11 +1196,11 @@ class TestBaseServiceNetworkErrorRetry:
         mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: An endpoint that always raises ReadTimeout
-        respx.get(f"{base_url}/test").mock(side_effect=httpx.ReadTimeout("Read timed out"))
+        respx.get(f"{base_url}/test").mock(side_effect=httpx2.ReadTimeout("Read timed out"))
 
         # When/Then: Making a request raises TimeoutException after max retries
         service = BaseService(vclient)
-        with pytest.raises(httpx.TimeoutException):
+        with pytest.raises(httpx2.TimeoutException):
             await service._get("/test")
 
     @respx.mock
@@ -1211,11 +1212,11 @@ class TestBaseServiceNetworkErrorRetry:
         mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: An endpoint that raises ConnectError
-        respx.post(f"{base_url}/items").mock(side_effect=httpx.ConnectError("Connection refused"))
+        respx.post(f"{base_url}/items").mock(side_effect=httpx2.ConnectError("Connection refused"))
 
         # When/Then: Making a POST request without idempotency key raises immediately
         service = BaseService(vclient)
-        with pytest.raises(httpx.ConnectError):
+        with pytest.raises(httpx2.ConnectError):
             await service._post("/items", json={"name": "test"})
 
         # Then: No retries were attempted
@@ -1232,7 +1233,7 @@ class TestBaseServiceNetworkErrorRetry:
         # Given: An endpoint that raises ConnectError once then succeeds
         route = respx.post(f"{base_url}/items").mock(
             side_effect=[
-                httpx.ConnectError("Connection refused"),
+                httpx2.ConnectError("Connection refused"),
                 httpx.Response(201, json={"id": 1}),
             ]
         )
@@ -1254,14 +1255,14 @@ class TestBaseServiceNetworkErrorRetry:
         mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
 
         # Given: An endpoint that raises ConnectError
-        respx.get(f"{base_url}/test").mock(side_effect=httpx.ConnectError("Connection refused"))
+        respx.get(f"{base_url}/test").mock(side_effect=httpx2.ConnectError("Connection refused"))
 
         # When/Then: Making a request with retry disabled raises immediately
         async with VClient(
             base_url=base_url, api_key=api_key, auto_retry_rate_limit=False
         ) as client:
             service = BaseService(client)
-            with pytest.raises(httpx.ConnectError):
+            with pytest.raises(httpx2.ConnectError):
                 await service._get("/test")
 
         # Then: No retries were attempted
@@ -1276,9 +1277,9 @@ class TestBaseServiceNetworkErrorRetry:
         # Given: An endpoint that raises ConnectError three times then succeeds
         respx.get(f"{base_url}/test").mock(
             side_effect=[
-                httpx.ConnectError("Connection refused"),
-                httpx.ConnectError("Connection refused"),
-                httpx.ConnectError("Connection refused"),
+                httpx2.ConnectError("Connection refused"),
+                httpx2.ConnectError("Connection refused"),
+                httpx2.ConnectError("Connection refused"),
                 httpx.Response(200, json={"success": True}),
             ]
         )

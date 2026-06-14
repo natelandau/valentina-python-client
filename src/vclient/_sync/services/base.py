@@ -7,7 +7,7 @@ import uuid
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, TypeVar
 
-import httpx
+import httpx2
 from loguru import logger
 from pydantic import BaseModel, ValidationError as PydanticValidationError
 
@@ -57,7 +57,7 @@ class SyncBaseService:
         self._on_behalf_of: str | None = None
 
     @property
-    def _http(self) -> httpx.Client:
+    def _http(self) -> httpx2.Client:
         """Get the HTTP client from the parent SyncVClient."""
         return self._client._http
 
@@ -137,7 +137,7 @@ class SyncBaseService:
         data: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
         files: Any | None = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Make an HTTP request with automatic retry on transient errors.
 
         Retries on rate limits (429), server errors (5xx in retry_statuses),
@@ -153,7 +153,7 @@ class SyncBaseService:
             json: JSON body data.
             data: Form data.
             headers: Additional headers to include in the request.
-            files: Files to upload (passed through to httpx).
+            files: Files to upload (passed through to httpx2).
 
         Returns:
             The HTTP response.
@@ -161,8 +161,8 @@ class SyncBaseService:
         Raises:
             RateLimitError: When rate limit is exceeded and max retries are exhausted.
             ServerError: When server error occurs and max retries are exhausted.
-            httpx.ConnectError: When connection fails and max retries are exhausted.
-            httpx.TimeoutException: When request times out and max retries are exhausted.
+            httpx2.ConnectError: When connection fails and max retries are exhausted.
+            httpx2.TimeoutException: When request times out and max retries are exhausted.
             APIError: For other API error responses.
         """
         headers = self._merge_on_behalf_of_header(headers)
@@ -183,7 +183,7 @@ class SyncBaseService:
                     headers=headers,
                     files=files,
                 )
-            except (httpx.ConnectError, httpx.TimeoutException) as exc:
+            except (httpx2.ConnectError, httpx2.TimeoutException) as exc:
                 if not self._is_retryable_method(method, headers) or attempt >= max_attempts - 1:
                     raise
                 error_type = type(exc).__name__
@@ -232,7 +232,7 @@ class SyncBaseService:
         raise RuntimeError(msg)
 
     @staticmethod
-    def _log_success_response(response: httpx.Response, request_logger: Any) -> None:
+    def _log_success_response(response: httpx2.Response, request_logger: Any) -> None:
         """Log a successful HTTP response with elapsed time and optional request_id.
 
         Args:
@@ -248,7 +248,7 @@ class SyncBaseService:
 
     @staticmethod
     def _inject_request_id_fallback(
-        response_data: dict[str, Any], response: httpx.Response
+        response_data: dict[str, Any], response: httpx2.Response
     ) -> None:
         """Inject request_id from X-Request-Id header when the response body omits it.
 
@@ -262,7 +262,7 @@ class SyncBaseService:
                 response_data["request_id"] = header_id
 
     def _raise_for_status(
-        self, response: httpx.Response, method: str, url: str, params: dict[str, Any] | None = None
+        self, response: httpx2.Response, method: str, url: str, params: dict[str, Any] | None = None
     ) -> None:
         """Raise appropriate exception for error responses.
 
@@ -356,7 +356,7 @@ class SyncBaseService:
             return None
 
     @staticmethod
-    def _parse_retry_after(response: httpx.Response) -> int | None:
+    def _parse_retry_after(response: httpx2.Response) -> int | None:
         """Parse the retry time from response headers.
 
         First checks the RateLimit header for the "t" parameter (seconds until next token),
@@ -382,7 +382,7 @@ class SyncBaseService:
             return None
 
     @staticmethod
-    def _parse_remaining_tokens(response: httpx.Response) -> int | None:
+    def _parse_remaining_tokens(response: httpx2.Response) -> int | None:
         """Parse the remaining tokens from the RateLimit header.
 
         Args:
@@ -402,7 +402,7 @@ class SyncBaseService:
         *,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Make a GET request.
 
         Args:
@@ -466,7 +466,7 @@ class SyncBaseService:
         data: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         idempotency_key: str | None = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Make a POST request.
 
         Args:
@@ -498,7 +498,7 @@ class SyncBaseService:
         data: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         idempotency_key: str | None = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Make a PUT request.
 
         Args:
@@ -530,7 +530,7 @@ class SyncBaseService:
         data: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         idempotency_key: str | None = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Make a PATCH request.
 
         Args:
@@ -554,7 +554,7 @@ class SyncBaseService:
             headers=self._build_idempotency_headers(idempotency_key),
         )
 
-    def _delete(self, path: str, *, params: dict[str, Any] | None = None) -> httpx.Response:
+    def _delete(self, path: str, *, params: dict[str, Any] | None = None) -> httpx2.Response:
         """Make a DELETE request.
 
         Args:
@@ -568,7 +568,7 @@ class SyncBaseService:
 
     def _post_file(
         self, path: str, *, file: tuple[str, bytes, str], idempotency_key: str | None = None
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Make a POST request with a file upload (multipart/form-data).
 
         Args:
@@ -594,7 +594,7 @@ class SyncBaseService:
 
     def _put_file(
         self, path: str, *, file: tuple[str, bytes, str], idempotency_key: str | None = None
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Make a PUT request with a file upload (multipart/form-data).
 
         Mirrors ``_post_file``: an idempotency key is sent only when supplied.

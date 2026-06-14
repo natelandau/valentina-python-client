@@ -165,11 +165,11 @@ class TestAsyncToSyncTransformer:
         assert "__exit__" in result
 
     def test_httpx_async_client_becomes_client(self) -> None:
-        """Verify httpx.AsyncClient references are replaced with httpx.Client."""
-        # Given: Code referencing httpx.AsyncClient
+        """Verify httpx2.AsyncClient references are replaced with httpx2.Client."""
+        # Given: Code referencing httpx2.AsyncClient
         source = """
         def create_client():
-            return httpx.AsyncClient()
+            return httpx2.AsyncClient()
         """
 
         # When: The transformer processes the source
@@ -177,7 +177,7 @@ class TestAsyncToSyncTransformer:
 
         # Then: AsyncClient is replaced with Client
         assert "AsyncClient" not in result
-        assert "httpx.Client()" in result
+        assert "httpx2.Client()" in result
 
     def test_async_list_comprehension(self) -> None:
         """Verify async list comprehensions are converted to sync."""
@@ -325,7 +325,7 @@ class TestAsyncToSyncTransformer:
         # Given: A realistic async service method
         source = """
         async def fetch_all():
-            async with httpx.AsyncClient() as client:
+            async with httpx2.AsyncClient() as client:
                 result = await client.get("/data")
                 return result
         """
@@ -338,7 +338,7 @@ class TestAsyncToSyncTransformer:
         assert "await" not in result
         assert "AsyncClient" not in result
         assert "def fetch_all():" in result
-        assert "with httpx.Client() as client:" in result
+        assert "with httpx2.Client() as client:" in result
         assert "result = client.get('/data')" in result
 
     def test_async_set_comprehension(self) -> None:

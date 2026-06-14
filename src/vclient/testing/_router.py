@@ -7,7 +7,7 @@ import re
 import secrets
 from typing import TYPE_CHECKING, Any
 
-import httpx
+import httpx2
 
 if TYPE_CHECKING:
     from polyfactory.factories.pydantic_factory import ModelFactory
@@ -217,22 +217,22 @@ class _Route:
 
         return True
 
-    def respond(self) -> httpx.Response:  # noqa: PLR0911
-        """Generate an httpx.Response for this route."""
+    def respond(self) -> httpx2.Response:  # noqa: PLR0911
+        """Generate an httpx2.Response for this route."""
         if self.override_json is not None:
-            return httpx.Response(
+            return httpx2.Response(
                 status_code=self.override_status or 200,
                 json=self.override_json,
             )
 
         if self.style == NO_CONTENT:
-            return httpx.Response(status_code=204)
+            return httpx2.Response(status_code=204)
 
         if self.style == RAW_JSON:
-            return httpx.Response(status_code=200, json={})
+            return httpx2.Response(status_code=200, json={})
 
         if self.style == BYTES:
-            return httpx.Response(
+            return httpx2.Response(
                 status_code=200,
                 content=b"PK\x03\x04fake-log-archive",
                 headers={"Content-Disposition": 'attachment; filename="vapi-logs-fake.zip"'},
@@ -246,7 +246,7 @@ class _Route:
         instance_data = instance.model_dump(mode="json")
 
         if self.style == LIST:
-            return httpx.Response(status_code=200, json=[instance_data])
+            return httpx2.Response(status_code=200, json=[instance_data])
 
         if self.style == PAGINATED:
             body = {
@@ -255,9 +255,9 @@ class _Route:
                 "limit": 10,
                 "offset": 0,
             }
-            return httpx.Response(status_code=200, json=body)
+            return httpx2.Response(status_code=200, json=body)
 
-        return httpx.Response(status_code=200, json=instance_data)
+        return httpx2.Response(status_code=200, json=instance_data)
 
 
 class _FakeRouter:
@@ -311,17 +311,17 @@ class _FakeRouter:
             )
         )
 
-    def handle(self, request: httpx.Request) -> httpx.Response:
+    def handle(self, request: httpx2.Request) -> httpx2.Response:
         """Match a request against registered routes and return a response.
 
         Overrides are checked first, then defaults. Returns a 404 response if no
         route matches.
 
         Args:
-            request: The incoming httpx.Request to match.
+            request: The incoming httpx2.Request to match.
 
         Returns:
-            An httpx.Response from the matched route, or a 404 if unmatched.
+            An httpx2.Response from the matched route, or a 404 if unmatched.
         """
         method = request.method
         path = request.url.raw_path.decode("ascii").split("?")[0]
@@ -340,19 +340,19 @@ class _FakeRouter:
                 return self._finalize(route.respond())
 
         return self._finalize(
-            httpx.Response(
+            httpx2.Response(
                 status_code=404,
                 json={"detail": f"No route matched: {method} {path}"},
             )
         )
 
     @staticmethod
-    def _with_elapsed(response: httpx.Response) -> None:
+    def _with_elapsed(response: httpx2.Response) -> None:
         """Set the elapsed time on a response so BaseService._request can log it."""
         response.elapsed = datetime.timedelta(milliseconds=1)
 
     @staticmethod
-    def _with_request_id(response: httpx.Response) -> None:
+    def _with_request_id(response: httpx2.Response) -> None:
         """Inject an X-Request-Id header into the response.
 
         Reuse an existing request_id from the response body when present so that
@@ -367,7 +367,7 @@ class _FakeRouter:
         request_id = existing or f"req_{secrets.token_urlsafe(16)}"
         response.headers[REQUEST_ID_HEADER] = request_id
 
-    def _finalize(self, response: httpx.Response) -> httpx.Response:
+    def _finalize(self, response: httpx2.Response) -> httpx2.Response:
         """Apply elapsed time and request ID header to a response."""
         self._with_elapsed(response)
         self._with_request_id(response)

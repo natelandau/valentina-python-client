@@ -5,7 +5,7 @@ import platform
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-import httpx
+import httpx2
 from loguru import logger
 
 from vclient.config import _APIConfig
@@ -147,7 +147,7 @@ class VClient:
             headers=headers or {},
         )
 
-        self._http: httpx.AsyncClient = self._create_http_client()
+        self._http: httpx2.AsyncClient = self._create_http_client()
         self._companies: CompaniesService | None = None
         self._developer: DeveloperService | None = None
         self._global_admin: GlobalAdminService | None = None
@@ -165,7 +165,7 @@ class VClient:
             max_retries=self._config.max_retries,
         ).info("Initialize VClient")
 
-    def _create_http_client(self) -> httpx.AsyncClient:
+    def _create_http_client(self) -> httpx2.AsyncClient:
         """Create and configure the HTTP client."""
         from vclient import __version__
 
@@ -180,10 +180,10 @@ class VClient:
         if self._config.api_key:
             headers[API_KEY_HEADER] = self._config.api_key
 
-        return httpx.AsyncClient(
+        return httpx2.AsyncClient(
             base_url=self._config.base_url,
             headers=headers,
-            timeout=httpx.Timeout(self._config.timeout),
+            timeout=httpx2.Timeout(self._config.timeout),
         )
 
     async def __aenter__(self) -> Self:

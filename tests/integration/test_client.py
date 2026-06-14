@@ -109,7 +109,7 @@ class TestVClientHTTPClient:
         # And: HTTP client headers include the API key
         assert client._http.headers.get(API_KEY_HEADER) == "my-key"
 
-        # And: HTTP client has Accept header (Content-Type is set per-request by httpx)
+        # And: HTTP client has Accept header (Content-Type is set per-request by httpx2)
         assert client._http.headers.get("Accept") == "application/json"
 
     def test_http_client_includes_custom_headers(self):

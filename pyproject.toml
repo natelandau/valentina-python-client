@@ -6,7 +6,7 @@
     ]
     dependencies = [
         "anyio>=4.13.0, <5.0.0",
-        "httpx>=0.28.1",
+        "httpx2>=2.4.0",
         "loguru>=0.7.3",
         "polyfactory>=3.3.0, <4.0.0",
         "pydantic[email]>=2.13.4, <3.0.0",
@@ -37,11 +37,13 @@
         "commitizen>=4.16.3",
         "coverage>=7.14.1",
         "duty>=1.9.0",
+        "httpx>=0.28.1",
         "prek>=0.4.4",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.1.0",
         "pytest-devtools>=1.2.0",
+        "pytest-httpx2>=1.0.0",
         "pytest-mock>=3.15.1",
         "pytest-repeat>=0.9.4",
         "pytest-sugar>=1.1.1",

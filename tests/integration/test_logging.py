@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 import httpx
+import httpx2
 import pytest
 import respx
 from loguru import logger
@@ -265,7 +266,7 @@ class TestRequestLogging:
         # Given: An endpoint that raises ConnectError then succeeds
         respx.get(f"{base_url}/test").mock(
             side_effect=[
-                httpx.ConnectError("Connection refused"),
+                httpx2.ConnectError("Connection refused"),
                 httpx.Response(200, json={"ok": True}),
             ]
         )

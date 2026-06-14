@@ -1,6 +1,6 @@
 """Fake async API client for testing downstream applications.
 
-FakeVClient is a drop-in replacement for VClient that uses httpx.MockTransport
+FakeVClient is a drop-in replacement for VClient that uses httpx2.MockTransport
 instead of real HTTP. All real service classes work unmodified.
 """
 
@@ -9,7 +9,7 @@ from __future__ import annotations
 import secrets
 from typing import TYPE_CHECKING, Any
 
-import httpx
+import httpx2
 from pydantic import BaseModel
 
 from vclient.client import VClient
@@ -64,10 +64,10 @@ class FakeVClient(VClient):
             **kwargs,
         )
 
-    def _create_http_client(self) -> httpx.AsyncClient:
+    def _create_http_client(self) -> httpx2.AsyncClient:
         """Create an HTTP client backed by the fake router."""
-        return httpx.AsyncClient(
-            transport=httpx.MockTransport(self._router.handle),
+        return httpx2.AsyncClient(
+            transport=httpx2.MockTransport(self._router.handle),
             base_url="https://fake.valentina-api.test",
         )
 

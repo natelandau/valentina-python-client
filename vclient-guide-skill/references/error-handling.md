@@ -13,7 +13,7 @@ Complete reference for exceptions, retry behavior, and recovery patterns in vcli
 
 ## Exception Hierarchy
 
-All exceptions live in `vclient.exceptions` and inherit from `APIError`, which inherits from `Exception`. A broad `except APIError` catches every error the client raises — `httpx` transport failures surface as `httpx.HTTPError` subclasses and are **not** wrapped.
+All exceptions live in `vclient.exceptions` and inherit from `APIError`, which inherits from `Exception`. A broad `except APIError` catches every error the client raises — `httpx2` transport failures surface as `httpx2.HTTPError` subclasses and are **not** wrapped.
 
 ```
 Exception
@@ -187,7 +187,7 @@ Configuration (all constructor args):
 
 - Response status is in `retry_statuses` → retried with backoff.
 - 429 with `auto_retry_rate_limit=True` → retried using the server's `retry_after` value.
-- Network-level `httpx.TransportError` → retried.
+- Network-level `httpx2.TransportError` → retried.
 
 ### When they don't
 

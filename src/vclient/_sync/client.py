@@ -6,7 +6,7 @@ import platform
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-import httpx
+import httpx2
 from loguru import logger
 
 from vclient.config import _APIConfig
@@ -144,7 +144,7 @@ class SyncVClient:
             default_company_id=resolved_company_id,
             headers=headers or {},
         )
-        self._http: httpx.Client = self._create_http_client()
+        self._http: httpx2.Client = self._create_http_client()
         self._companies: SyncCompaniesService | None = None
         self._developer: SyncDeveloperService | None = None
         self._global_admin: SyncGlobalAdminService | None = None
@@ -160,7 +160,7 @@ class SyncVClient:
             max_retries=self._config.max_retries,
         ).info("Initialize SyncVClient")
 
-    def _create_http_client(self) -> httpx.Client:
+    def _create_http_client(self) -> httpx2.Client:
         """Create and configure the HTTP client."""
         from vclient import __version__
 
@@ -168,10 +168,10 @@ class SyncVClient:
         headers = {"Accept": "application/json", "User-Agent": user_agent, **self._config.headers}
         if self._config.api_key:
             headers[API_KEY_HEADER] = self._config.api_key
-        return httpx.Client(
+        return httpx2.Client(
             base_url=self._config.base_url,
             headers=headers,
-            timeout=httpx.Timeout(self._config.timeout),
+            timeout=httpx2.Timeout(self._config.timeout),
         )
 
     def __enter__(self) -> Self:
