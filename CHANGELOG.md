@@ -1,3 +1,19 @@
+## v3.0.0 (2026-06-14)
+
+### BREAKING CHANGE
+
+- vclient now depends on httpx2 instead of httpx. Code that
+relied on vclient to pull in httpx transitively must declare it directly.
+Unwrapped transport failures now surface as httpx2.* exceptions (e.g.
+httpx2.ConnectError, httpx2.TimeoutException) instead of httpx.*; update
+any `except httpx.*` around vclient calls. Downstream suites that mock the
+client with respx need pytest-httpx2 and respx.mocks.DEFAULT_MOCKER set to
+"httpcore2".
+
+### Feat
+
+- **deps**: migrate from httpx to httpx2
+
 ## v2.9.0 (2026-06-09)
 
 ### Feat
