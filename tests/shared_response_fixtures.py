@@ -145,6 +145,7 @@ def character_response_data() -> dict:
         "campaign_id": "campaign123",
         "asset_ids": ["asset1", "asset2"],
         "character_trait_ids": ["trait1", "trait2"],
+        "chapter_ids": ["chap1"],
         "specialties": [
             {
                 "id": "spec1",

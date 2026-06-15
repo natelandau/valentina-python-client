@@ -53,6 +53,7 @@ class TestCharacter:
         assert character.is_temporary is False
         assert character.asset_ids == []
         assert character.character_trait_ids == []
+        assert character.chapter_ids == []
         assert character.specialties == []
 
     def test_character_null_user_ids(self) -> None:
