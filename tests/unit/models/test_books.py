@@ -219,6 +219,7 @@ def test_campaign_book_detail_accepts_embedded_lists() -> None:
         "name": "Chapter 1",
         "description": None,
         "asset_ids": [],
+        "character_ids": [],
         "number": 1,
         "book_id": "book_1",
     }

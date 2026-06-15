@@ -132,7 +132,7 @@ class ChaptersService(BaseService):
         Args:
             request: A ChapterCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for ChapterCreate if request is not provided.
-                Accepts: name (str, required), description (str | None).
+                Accepts: name (str, required), description (str | None), character_ids (list[str] | None).
         """
         body = request if request is not None else ChapterCreate(**kwargs)
         response = await self._post(
@@ -153,7 +153,7 @@ class ChaptersService(BaseService):
             chapter_id: The ID of the chapter to update.
             request: A ChapterUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for ChapterUpdate if request is not provided.
-                Accepts: name (str | None), description (str | None).
+                Accepts: name (str | None), description (str | None), character_ids (list[str] | None).
         """
         body = request if request is not None else ChapterUpdate(**kwargs)
         response = await self._patch(
