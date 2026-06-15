@@ -21,6 +21,9 @@ class CampaignChapter(BaseModel):
     name: str = Field(..., description="Chapter name (3-50 characters).")
     description: str | None = Field(default=None, description="Chapter description.")
     asset_ids: list[str] = Field(default_factory=list, description="List of associated asset IDs.")
+    character_ids: list[str] = Field(
+        default_factory=list, description="List of associated character IDs."
+    )
     number: int = Field(..., description="Chapter number within the book.")
     book_id: str = Field(..., description="ID of the parent book.")
     num_notes: int = Field(default=0, description="Number of active notes on the chapter.")
@@ -48,6 +51,10 @@ class ChapterCreate(BaseModel):
 
     name: str = Field(..., description="Chapter name (3-50 characters).")
     description: str | None = Field(default=None, description="Chapter description.")
+    character_ids: list[str] | None = Field(
+        default=None,
+        description="Character IDs to associate. Each must be an active character in the same campaign.",
+    )
 
 
 class ChapterUpdate(BaseModel):
@@ -55,6 +62,10 @@ class ChapterUpdate(BaseModel):
 
     name: str | None = Field(default=None, description="Chapter name (3-50 characters).")
     description: str | None = Field(default=None, description="Chapter description.")
+    character_ids: list[str] | None = Field(
+        default=None,
+        description="Replacement character ID list. Omit to leave unchanged; send [] to clear.",
+    )
 
 
 class _ChapterRenumber(BaseModel):

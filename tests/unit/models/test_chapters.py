@@ -123,6 +123,35 @@ class TestCampaignChapter:
         assert populated.num_notes == 3
         assert populated.num_assets == 5
 
+    def test_character_ids_default_empty(self):
+        """Verify character_ids defaults to an empty list."""
+        # Given/When: a chapter built without character_ids
+        chapter = CampaignChapter(
+            id="chapter123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Chapter",
+            number=1,
+            book_id="book123",
+        )
+        # Then: character_ids is an empty list
+        assert chapter.character_ids == []
+
+    def test_character_ids_parsed(self):
+        """Verify character_ids is parsed from the payload."""
+        # Given/When: a chapter built with character_ids
+        chapter = CampaignChapter(
+            id="chapter123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Chapter",
+            number=1,
+            book_id="book123",
+            character_ids=["char1", "char2"],
+        )
+        # Then: the list round-trips
+        assert chapter.character_ids == ["char1", "char2"]
+
 
 class TestChapterCreate:
     """Tests for ChapterCreate model."""
@@ -148,6 +177,24 @@ class TestChapterCreate:
         """Verify name is required."""
         with pytest.raises(PydanticValidationError):
             ChapterCreate()
+
+    def test_character_ids_serialized_when_set(self):
+        """Verify character_ids is included in the request body when provided."""
+        # Given: a create request with character_ids
+        request = ChapterCreate(name="Test", character_ids=["char1"])
+        # When: serialized the way the service serializes it
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+        # Then: character_ids is present
+        assert data == {"name": "Test", "character_ids": ["char1"]}
+
+    def test_character_ids_omitted_when_unset(self):
+        """Verify character_ids is omitted from the body when not provided."""
+        # Given: a create request without character_ids
+        request = ChapterCreate(name="Test")
+        # When: serialized
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+        # Then: character_ids key is absent
+        assert "character_ids" not in data
 
 
 class TestChapterUpdate:
@@ -181,6 +228,24 @@ class TestChapterUpdate:
 
         assert request.name == "New Name"
         assert request.description == "New Description"
+
+    def test_character_ids_empty_list_clears(self):
+        """Verify an explicit empty list is sent (clears the association)."""
+        # Given: an update with character_ids=[]
+        request = ChapterUpdate(character_ids=[])
+        # When: serialized the way the service serializes it
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+        # Then: an empty list is sent
+        assert data == {"character_ids": []}
+
+    def test_character_ids_unset_omitted(self):
+        """Verify an unset character_ids leaves the field out (unchanged)."""
+        # Given: an update that does not touch character_ids
+        request = ChapterUpdate(name="New Name")
+        # When: serialized
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+        # Then: character_ids is absent
+        assert "character_ids" not in data
 
 
 class TestChapterRenumber:
