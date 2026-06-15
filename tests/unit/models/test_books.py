@@ -53,6 +53,7 @@ class TestCampaignBook:
 
         assert book.description is None
         assert book.asset_ids == []
+        assert book.character_ids == []
 
     def test_character_ids_default_empty(self):
         """Verify character_ids defaults to an empty list."""
