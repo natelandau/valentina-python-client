@@ -446,7 +446,7 @@ All fields optional. Same constraints as CampaignCreate.
 | campaign_id | str | yes |
 | asset_ids | list[str] | no (default=[]) |
 | character_trait_ids | list[str] | no (default=[]) |
-| chapter_ids | list[str] | no (default=[]) |
+| chapter_ids | list[str] | no (default=[], read-only) |
 | specialties | list[CharacterSpecialty] | no (default=[]) |
 | vampire_attributes | VampireAttributes \| None | no |
 | werewolf_attributes | WerewolfAttributes \| None | no |
@@ -774,7 +774,7 @@ For creating custom traits on a character.
 | name | str | yes |
 | description | str \| None | no |
 | asset_ids | list[str] | no (default=[]) |
-| character_ids | list[str] | no (default=[]) |
+| character_ids | list[str] | no (default=[], read-only) |
 | number | int | yes |
 | campaign_id | str | yes |
 | num_chapters | int | no (default=0) |
