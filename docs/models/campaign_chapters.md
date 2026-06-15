@@ -18,6 +18,7 @@ Models for campaign chapters, which organize content within a campaign book.
 | `number`        | `int`         | Position in book                       |
 | `book_id`       | `str`         | Parent book ID                         |
 | `asset_ids`     | `list[str]`   | Associated asset IDs                   |
+| `character_ids` | `list[str]`   | Associated character IDs (writable via chapter create/update) |
 | `num_notes`     | `int`         | Active note count (excludes archived)  |
 | `num_assets`    | `int`         | Active asset count (excludes archived) |
 

@@ -18,6 +18,7 @@ Models for campaign books, which organize campaign content into sequentially num
 | `number`        | `int`         | Position in campaign                     |
 | `campaign_id`   | `str`         | Parent campaign ID                       |
 | `asset_ids`     | `list[str]`   | Associated asset IDs                     |
+| `character_ids` | `list[str]`   | Read-only. Distinct union of character IDs across the book's chapters (archived characters excluded) |
 | `num_chapters`  | `int`         | Active chapter count (excludes archived) |
 | `num_notes`     | `int`         | Active note count (excludes archived)    |
 | `num_assets`    | `int`         | Active asset count (excludes archived)   |
