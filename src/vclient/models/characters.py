@@ -204,6 +204,10 @@ class Character(BaseModel):
     character_trait_ids: list[str] = Field(
         default_factory=list, description="List of character trait IDs."
     )
+    chapter_ids: list[str] = Field(
+        default_factory=list,
+        description="Read-only IDs of non-archived chapters this character is associated with.",
+    )
     specialties: list[CharacterSpecialty] = Field(
         default_factory=list, description="List of character specialties."
     )
