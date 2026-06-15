@@ -1,3 +1,9 @@
+## v3.1.0 (2026-06-15)
+
+### Feat
+
+- **chapters**: add character associations to chapters and books (#81)
+
 ## v3.0.0 (2026-06-14)
 
 ### BREAKING CHANGE
