@@ -54,6 +54,35 @@ class TestCampaignBook:
         assert book.description is None
         assert book.asset_ids == []
 
+    def test_character_ids_default_empty(self):
+        """Verify character_ids defaults to an empty list."""
+        # Given/When: a book built without character_ids
+        book = CampaignBook(
+            id="book123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Book",
+            number=1,
+            campaign_id="campaign123",
+        )
+        # Then: character_ids is an empty list
+        assert book.character_ids == []
+
+    def test_character_ids_parsed(self):
+        """Verify character_ids is parsed from the payload."""
+        # Given/When: a book built with character_ids
+        book = CampaignBook(
+            id="book123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            name="Test Book",
+            number=1,
+            campaign_id="campaign123",
+            character_ids=["char1", "char2"],
+        )
+        # Then: the list round-trips
+        assert book.character_ids == ["char1", "char2"]
+
     def test_child_resource_counts(self):
         """Verify child-resource count fields default to 0 and accept values."""
         defaults = CampaignBook(
@@ -164,6 +193,7 @@ def _book_payload() -> dict:
         "name": "Book One",
         "description": "A book.",
         "asset_ids": [],
+        "character_ids": [],
         "number": 1,
         "campaign_id": "camp_1",
     }
