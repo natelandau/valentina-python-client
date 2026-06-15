@@ -20,6 +20,10 @@ class CampaignBook(BaseModel):
     name: str = Field(..., description="Book name (3-50 characters).")
     description: str | None = Field(default=None, description="Book description.")
     asset_ids: list[str] = Field(default_factory=list, description="List of associated asset IDs.")
+    character_ids: list[str] = Field(
+        default_factory=list,
+        description="Read-only union of character IDs across the book's chapters.",
+    )
     number: int = Field(..., description="Book number within the campaign.")
     campaign_id: str = Field(..., description="ID of the parent campaign.")
     num_chapters: int = Field(default=0, description="Number of active chapters in the book.")

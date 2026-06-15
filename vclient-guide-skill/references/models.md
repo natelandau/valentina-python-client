@@ -446,6 +446,7 @@ All fields optional. Same constraints as CampaignCreate.
 | campaign_id | str | yes |
 | asset_ids | list[str] | no (default=[]) |
 | character_trait_ids | list[str] | no (default=[]) |
+| chapter_ids | list[str] | no (default=[], read-only) |
 | specialties | list[CharacterSpecialty] | no (default=[]) |
 | vampire_attributes | VampireAttributes \| None | no |
 | werewolf_attributes | WerewolfAttributes \| None | no |
@@ -773,6 +774,7 @@ For creating custom traits on a character.
 | name | str | yes |
 | description | str \| None | no |
 | asset_ids | list[str] | no (default=[]) |
+| character_ids | list[str] | no (default=[], read-only) |
 | number | int | yes |
 | campaign_id | str | yes |
 | num_chapters | int | no (default=0) |
@@ -800,6 +802,7 @@ For creating custom traits on a character.
 | name | str | yes (3-50 chars) |
 | description | str \| None | no |
 | asset_ids | list[str] | no (default=[]) |
+| character_ids | list[str] | no (default=[]) |
 | number | int | yes |
 | book_id | str | yes |
 | num_notes | int | no (default=0) |
@@ -812,8 +815,8 @@ For creating custom traits on a character.
 | notes | list[Note] \| None | no |
 | assets | list[Asset] \| None | no |
 
-**ChapterCreate:** `name` (str, 3-50 chars, required), `description` (str \| None).
-**ChapterUpdate:** All optional.
+**ChapterCreate:** `name` (str, 3-50 chars, required), `description` (str \| None), `character_ids` (list[str] \| None, optional).
+**ChapterUpdate:** All optional. `character_ids`: omit or `None` to leave unchanged; `[]` to clear all associations.
 
 ---
 

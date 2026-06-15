@@ -22,6 +22,7 @@ def chapter_response_data() -> dict:
         "asset_ids": ["asset1", "asset2"],
         "number": 1,
         "book_id": "book123",
+        "character_ids": ["char1", "char2"],
     }
 
 
@@ -373,6 +374,33 @@ class TestChaptersServiceCreate:
         assert body["name"] == "Test Chapter"
         assert body["description"] == "A test chapter description"
 
+    @respx.mock
+    async def test_create_chapter_with_character_ids(
+        self, vclient, base_url, chapter_response_data
+    ):
+        """Verify create sends character_ids in the request body."""
+        # Given: a mocked create endpoint
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        book_id = "book123"
+        route = respx.post(
+            f"{base_url}{Endpoints.BOOK_CHAPTERS.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, book_id=book_id)}"
+        ).respond(201, json=chapter_response_data)
+
+        # When: creating a chapter with character_ids
+        result = await vclient.chapters(
+            campaign_id, book_id, "on-behalf-of-user", company_id=company_id
+        ).create(name="Test Chapter", character_ids=["char1", "char2"])
+
+        # Then: the body carries character_ids and the response parses them
+        assert route.called
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body["character_ids"] == ["char1", "char2"]
+        assert result.character_ids == ["char1", "char2"]
+
 
 class TestChaptersServiceUpdate:
     """Tests for ChaptersService.update method."""
@@ -407,6 +435,35 @@ class TestChaptersServiceUpdate:
 
         body = json.loads(request.content)
         assert body["name"] == "Updated Name"
+
+    @respx.mock
+    async def test_update_chapter_clears_character_ids(
+        self, vclient, base_url, chapter_response_data
+    ):
+        """Verify update sends an explicit empty list to clear associations."""
+        # Given: a mocked update endpoint returning no characters
+        company_id = "company123"
+        user_id = "user123"
+        campaign_id = "campaign123"
+        book_id = "book123"
+        chapter_id = "507f1f77bcf86cd799439011"
+        cleared = {**chapter_response_data, "character_ids": []}
+        route = respx.patch(
+            f"{base_url}{Endpoints.BOOK_CHAPTER.format(company_id=company_id, user_id=user_id, campaign_id=campaign_id, book_id=book_id, chapter_id=chapter_id)}"
+        ).respond(200, json=cleared)
+
+        # When: updating with character_ids=[]
+        result = await vclient.chapters(
+            campaign_id, book_id, "on-behalf-of-user", company_id=company_id
+        ).update(chapter_id, character_ids=[])
+
+        # Then: an empty list is sent and parsed back
+        assert route.called
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body["character_ids"] == []
+        assert result.character_ids == []
 
     @respx.mock
     async def test_update_chapter_not_found(self, vclient, base_url):

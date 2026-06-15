@@ -53,6 +53,7 @@ class TestCharacter:
         assert character.is_temporary is False
         assert character.asset_ids == []
         assert character.character_trait_ids == []
+        assert character.chapter_ids == []
         assert character.specialties == []
 
     def test_character_null_user_ids(self) -> None:
@@ -252,6 +253,60 @@ class TestCharacter:
         assert populated.num_inventory_items == 3
         assert populated.num_notes == 2
         assert populated.num_assets == 4
+
+    def test_chapter_ids_defaults_to_empty_list(self) -> None:
+        """Verify chapter_ids defaults to an empty list when not provided."""
+        # When: Creating a character without chapter_ids
+        character = Character(
+            id="char123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            name="Johnny",
+            name_full="John Doe",
+            company_id="company123",
+            campaign_id="campaign123",
+        )
+
+        # Then: chapter_ids defaults to an empty list
+        assert character.chapter_ids == []
+
+    def test_chapter_ids_round_trip(self) -> None:
+        """Verify chapter_ids round-trips correctly when provided."""
+        # Given: A list of chapter IDs
+        chapter_ids = ["chap1", "chap2"]
+
+        # When: Creating a character with chapter_ids
+        character = Character(
+            id="char123",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            name="Johnny",
+            name_full="John Doe",
+            company_id="company123",
+            campaign_id="campaign123",
+            chapter_ids=chapter_ids,
+        )
+
+        # Then: chapter_ids is preserved
+        assert character.chapter_ids == ["chap1", "chap2"]
+
+    def test_chapter_ids_not_accepted_on_create(self) -> None:
+        """Verify chapter_ids is not a field on CharacterCreate."""
+        # When/Then: chapter_ids is absent from CharacterCreate.model_fields
+        assert "chapter_ids" not in CharacterCreate.model_fields
+
+    def test_chapter_ids_not_accepted_on_update(self) -> None:
+        """Verify chapter_ids is not a field on CharacterUpdate."""
+        # When/Then: chapter_ids is absent from CharacterUpdate.model_fields
+        assert "chapter_ids" not in CharacterUpdate.model_fields
 
 
 class TestCharacterCreate:

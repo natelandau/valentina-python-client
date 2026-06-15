@@ -37,6 +37,7 @@ Models for player and non-player characters, including class-specific attributes
 | `asset_ids`           | `list[str]`                  | Asset IDs                                       |
 | `specialties`         | `list[CharacterSpecialty]`   | Character specialties                           |
 | `character_trait_ids` | `list[str]`                  | Character trait IDs                             |
+| `chapter_ids`         | `list[str]`                  | Read-only. Non-archived chapters the character is associated with (managed from the chapter side) |
 | `vampire_attributes`  | `VampireAttributes \| None`  | Vampire-specific data                           |
 | `werewolf_attributes` | `WerewolfAttributes \| None` | Werewolf-specific data                          |
 | `hunter_attributes`   | `HunterAttributes \| None`   | Hunter-specific data                            |

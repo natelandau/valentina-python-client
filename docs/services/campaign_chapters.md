@@ -33,6 +33,29 @@ chapters = chapters_service(
 | `delete(chapter_id)`                             | `None`                  | Delete a chapter                                                        |
 | `renumber(chapter_id, number)`                   | `CampaignChapter`       | Change a chapter's position                                             |
 
+### Character Associations
+
+Both `create()` and `update()` accept an optional `character_ids: list[str] | None` field on the request model.
+
+- Each ID must reference an active character in the same campaign, or the API returns a `400 ValidationError`.
+- On `update()`: omit `character_ids` (or set it to `None`) to leave existing associations unchanged. Pass `[]` to clear all associations.
+
+```python
+from vclient.models import ChapterCreate, ChapterUpdate
+
+# Create a chapter with character associations
+chapter = await chapters.create(ChapterCreate(
+    name="The First Night",
+    character_ids=["char-123", "char-456"],
+))
+
+# Clear all character associations
+updated = await chapters.update(chapter.id, ChapterUpdate(character_ids=[]))
+
+# Leave associations unchanged (omit the field)
+updated = await chapters.update(chapter.id, ChapterUpdate(name="Renamed"))
+```
+
 ### Embedding Child Resources
 
 The `get()` method accepts an optional `include` parameter that embeds child resources directly in the response, eliminating the need for follow-up requests.

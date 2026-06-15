@@ -20,6 +20,7 @@ def book_response_data() -> dict:
         "name": "Test Book",
         "description": "A test book description",
         "asset_ids": ["asset1", "asset2"],
+        "character_ids": [],
         "number": 1,
         "campaign_id": "campaign123",
     }

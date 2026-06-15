@@ -400,6 +400,8 @@ Plus standard notes and assets sub-resource methods (same pattern as CampaignsSe
 
 **Include options for `get()`:** `"notes"`, `"assets"`
 
+**Character associations:** `create()` and `update()` accept an optional `character_ids: list[str] | None`. Each ID must reference an active character in the same campaign (400 ValidationError otherwise). On `update()`, omit or pass `None` to leave associations unchanged; pass `[]` to clear them.
+
 Plus standard notes and assets sub-resource methods.
 
 ---
