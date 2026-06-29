@@ -11,7 +11,6 @@ from vclient.models import (
     Asset,
     CampaignExperience,
     DiscordProfile,
-    DiscordProfileUpdate,
     GitHubProfile,
     GoogleProfile,
     IdentityResolution,
@@ -1061,15 +1060,15 @@ class TestAdminUserCreate:
             "role": "PLAYER",
         }
 
-    def test_admin_user_create_accepts_provider_profiles(self):
-        """Verify the global-admin create surface still accepts provider profile writes."""
-        # Given: a create request carrying all four provider profiles
+    def test_admin_user_create_drops_provider_profiles(self):
+        """Verify the global-admin create surface drops provider profile writes."""
+        # Given: a create request passing all four now-unsupported provider profiles
         body = AdminUserCreate(
             company_id="c1",
             username="bob",
             email="bob@example.com",
             role="PLAYER",
-            discord_profile=DiscordProfileUpdate(id="d1"),
+            discord_profile={"id": "d1"},
             google_profile=GoogleProfile(id="g1"),
             github_profile=GitHubProfile(id="h1"),
             apple_profile=AppleProfile(id="a1"),
@@ -1078,11 +1077,13 @@ class TestAdminUserCreate:
         # When: dumping for the wire
         dumped = body.model_dump(exclude_none=True, exclude_unset=True, mode="json")
 
-        # Then: the profiles are serialized (tenant-scoped UserCreate drops them, admin keeps them)
-        assert dumped["discord_profile"] == {"id": "d1"}
-        assert dumped["google_profile"] == {"id": "g1"}
-        assert dumped["github_profile"] == {"id": "h1"}
-        assert dumped["apple_profile"] == {"id": "a1"}
+        # Then: the profiles are dropped (written only through the identity endpoints)
+        assert dumped == {
+            "company_id": "c1",
+            "username": "bob",
+            "email": "bob@example.com",
+            "role": "PLAYER",
+        }
 
 
 class TestAdminUserUpdate:
@@ -1099,16 +1100,16 @@ class TestAdminUserUpdate:
         # Then: is_archived False is retained (not dropped as None)
         assert dumped == {"is_archived": False}
 
-    def test_admin_user_update_accepts_provider_profiles(self):
-        """Verify the global-admin update surface still accepts provider profile writes."""
-        # Given: an update carrying a provider profile
-        body = AdminUserUpdate(discord_profile=DiscordProfileUpdate(id="d1"))
+    def test_admin_user_update_drops_provider_profiles(self):
+        """Verify the global-admin update surface drops provider profile writes."""
+        # Given: an update passing a now-unsupported provider profile
+        body = AdminUserUpdate(email="new@example.com", discord_profile={"id": "d1"})
 
         # When: dumping for the wire
         dumped = body.model_dump(exclude_none=True, exclude_unset=True, mode="json")
 
-        # Then: the profile is serialized (tenant-scoped UserUpdate drops it, admin keeps it)
-        assert dumped == {"discord_profile": {"id": "d1"}}
+        # Then: the profile is dropped (written only through the identity endpoints)
+        assert dumped == {"email": "new@example.com"}
 
 
 class TestUserIdentifyDTO:

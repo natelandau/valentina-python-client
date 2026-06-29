@@ -218,32 +218,28 @@ Returned by all `GlobalAdminService` user methods. Extends `User` with an `is_ar
 
 Request body for creating a user via the global-admin service. Requires a `company_id` because the global-admin service operates across all companies.
 
-| Field             | Type                     | Description                                   |
-| ----------------- | ------------------------ | --------------------------------------------- |
-| `company_id`      | `str`                    | Company the user belongs to (required)        |
-| `username`        | `str`                    | Username (required)                           |
-| `email`           | `str`                    | Email address (required)                      |
-| `role`            | `UserRole`               | Role (ADMIN, STORYTELLER, PLAYER, UNAPPROVED) |
-| `name_first`      | `str \| None`            | First name                                    |
-| `name_last`       | `str \| None`            | Last name                                     |
-| `discord_profile` | `DiscordProfile \| None` | Discord information                           |
-| `google_profile`  | `GoogleProfile \| None`  | Google account information                    |
-| `github_profile`  | `GitHubProfile \| None`  | GitHub account information                    |
-| `apple_profile`   | `AppleProfile \| None`   | Apple account information                     |
+Provider-identity profiles cannot be written here. Associate a verified provider identity through [`identify`](../services/users.md) or the link endpoint instead.
+
+| Field        | Type          | Description                                   |
+| ------------ | ------------- | --------------------------------------------- |
+| `company_id` | `str`         | Company the user belongs to (required)        |
+| `username`   | `str`         | Username (required)                           |
+| `email`      | `str`         | Email address (required)                      |
+| `role`       | `UserRole`    | Role (ADMIN, STORYTELLER, PLAYER, UNAPPROVED) |
+| `name_first` | `str \| None` | First name                                    |
+| `name_last`  | `str \| None` | Last name                                     |
 
 ## AdminUserUpdate
 
 Request body for updating a user via the global-admin service. All fields are optional; include only the fields that need to change. Set `is_archived=False` to restore a soft-deleted user.
 
-| Field             | Type                     | Description                                          |
-| ----------------- | ------------------------ | ---------------------------------------------------- |
-| `name_first`      | `str \| None`            | Updated first name                                   |
-| `name_last`       | `str \| None`            | Updated last name                                    |
-| `username`        | `str \| None`            | Updated username                                     |
-| `email`           | `str \| None`            | Updated email address                                |
-| `role`            | `UserRole \| None`       | Updated role                                         |
-| `discord_profile` | `DiscordProfile \| None` | Updated Discord information                          |
-| `google_profile`  | `GoogleProfile \| None`  | Updated Google account information                   |
-| `github_profile`  | `GitHubProfile \| None`  | Updated GitHub account information                   |
-| `apple_profile`   | `AppleProfile \| None`   | Updated Apple account information                    |
-| `is_archived`     | `bool \| None`           | Set to `False` to restore a soft-deleted user        |
+Provider-identity profiles cannot be written here. Associate a verified provider identity through [`identify`](../services/users.md) or the link endpoint instead.
+
+| Field         | Type               | Description                                   |
+| ------------- | ------------------ | --------------------------------------------- |
+| `name_first`  | `str \| None`      | Updated first name                            |
+| `name_last`   | `str \| None`      | Updated last name                             |
+| `username`    | `str \| None`      | Updated username                              |
+| `email`       | `str \| None`      | Updated email address                         |
+| `role`        | `UserRole \| None` | Updated role                                  |
+| `is_archived` | `bool \| None`     | Set to `False` to restore a soft-deleted user |

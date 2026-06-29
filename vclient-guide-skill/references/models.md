@@ -372,7 +372,6 @@ Response model from `IdentityService.identify()`. Reports how the API resolved t
 **GoogleProfile:** `id`, `email`, `verified_email`, `username`, `name_first`, `name_last`, `avatar_url`, `locale` — all optional.
 **GitHubProfile:** `id`, `login`, `username`, `avatar_url`, `email`, `profile_url` — all optional.
 **AppleProfile:** `id`, `email`, `fullname` — all optional.
-**DiscordProfileUpdate:** Same fields as DiscordProfile minus `avatar_url`.
 
 ---
 
@@ -1036,7 +1035,7 @@ Returned by `GlobalAdminService` user methods. Adds archival state to the standa
 
 ### AdminUserCreate
 
-Request payload for `GlobalAdminService.create_user()`. Creates a user in any company regardless of role hierarchy.
+Request payload for `GlobalAdminService.create_user()`. Creates a user in any company regardless of role hierarchy. Provider-identity profiles cannot be written here; use the `identify` or link endpoints instead.
 
 | Field | Type | Constraints |
 |-------|------|------------|
@@ -1046,14 +1045,10 @@ Request payload for `GlobalAdminService.create_user()`. Creates a user in any co
 | role | UserRole | required |
 | name_first | str \| None | optional |
 | name_last | str \| None | optional |
-| discord_profile | DiscordProfileUpdate \| None | optional |
-| google_profile | GoogleProfile \| None | optional |
-| github_profile | GitHubProfile \| None | optional |
-| apple_profile | AppleProfile \| None | optional |
 
 ### AdminUserUpdate
 
-Request payload for `GlobalAdminService.update_user()`. All fields optional. Setting `is_archived=False` restores an archived user.
+Request payload for `GlobalAdminService.update_user()`. All fields optional. Setting `is_archived=False` restores an archived user. Provider-identity profiles cannot be written here; use the `identify` or link endpoints instead.
 
 | Field | Type | Constraints |
 |-------|------|------------|
@@ -1062,10 +1057,6 @@ Request payload for `GlobalAdminService.update_user()`. All fields optional. Set
 | username | str \| None | optional |
 | email | str \| None | optional |
 | role | UserRole \| None | optional |
-| discord_profile | DiscordProfileUpdate \| None | optional |
-| google_profile | GoogleProfile \| None | optional |
-| github_profile | GitHubProfile \| None | optional |
-| apple_profile | AppleProfile \| None | optional |
 | is_archived | bool \| None | optional |
 
 ### ServerLogEntry

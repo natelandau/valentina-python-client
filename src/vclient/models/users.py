@@ -168,22 +168,6 @@ class IdentityResolution(BaseModel):
 # -----------------------------------------------------------------------------
 
 
-class DiscordProfileUpdate(BaseModel):
-    """Request body for creating or updating a user's Discord profile.
-
-    Contains Discord account details for integration with Discord bots.
-    All fields are optional as not all users have Discord linked.
-    """
-
-    id: str | None = None
-    username: str | None = None
-    global_name: str | None = None
-    avatar_id: str | None = None
-    discriminator: str | None = None
-    email: str | None = None
-    verified: bool | None = None
-
-
 class UserMergeDTO(BaseModel):
     """Merge an UNAPPROVED user into an existing primary user."""
 
@@ -244,15 +228,11 @@ class AdminUserCreate(UserCreate):
     the target company. The server rejects ``UNAPPROVED``/``DEACTIVATED`` roles
     on create, so no client-side role restriction is applied here.
 
-    Unlike the tenant-scoped surface, the global-admin endpoints still accept
-    provider profile writes, so the four profile fields are declared here.
+    Provider-identity profiles cannot be written here; associate a verified
+    provider identity through the ``identify`` or link endpoints instead.
     """
 
     company_id: str
-    discord_profile: DiscordProfileUpdate | None = None
-    google_profile: GoogleProfile | None = None
-    github_profile: GitHubProfile | None = None
-    apple_profile: AppleProfile | None = None
 
 
 class AdminUserUpdate(UserUpdate):
@@ -261,15 +241,11 @@ class AdminUserUpdate(UserUpdate):
     Extends the tenant-scoped ``UserUpdate`` with ``is_archived``. Set it to
     ``False`` to restore a soft-deleted user.
 
-    Unlike the tenant-scoped surface, the global-admin endpoints still accept
-    provider profile writes, so the four profile fields are declared here.
+    Provider-identity profiles cannot be written here; associate a verified
+    provider identity through the ``identify`` or link endpoints instead.
     """
 
     is_archived: bool | None = None
-    discord_profile: DiscordProfileUpdate | None = None
-    google_profile: GoogleProfile | None = None
-    github_profile: GitHubProfile | None = None
-    apple_profile: AppleProfile | None = None
 
 
 class UserApproveDTO(BaseModel):

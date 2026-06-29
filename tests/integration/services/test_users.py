@@ -13,12 +13,8 @@ from vclient.exceptions import (
     RequestValidationError,
 )
 from vclient.models import (
-    AppleProfile,
     Asset,
     CampaignExperience,
-    DiscordProfileUpdate,
-    GitHubProfile,
-    GoogleProfile,
     Note,
     PaginatedResponse,
     Quickroll,
@@ -377,10 +373,10 @@ class TestUsersServiceCreate:
             username="testuser",
             email="test@example.com",
             role="PLAYER",
-            discord_profile=DiscordProfileUpdate(id="discord123", username="testuser"),
-            google_profile=GoogleProfile(id="google123"),
-            github_profile=GitHubProfile(id="github123"),
-            apple_profile=AppleProfile(id="apple123"),
+            discord_profile={"id": "discord123", "username": "testuser"},
+            google_profile={"id": "google123"},
+            github_profile={"id": "github123"},
+            apple_profile={"id": "apple123"},
         )
 
         # Then: Returns created User object
