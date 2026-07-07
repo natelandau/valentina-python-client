@@ -1,3 +1,9 @@
+## v3.1.1 (2026-07-06)
+
+### Refactor
+
+- **users**: drop provider-profile writes from admin user models
+
 ## v3.1.0 (2026-06-15)
 
 ### Feat
