@@ -556,12 +556,13 @@ Used for assigning traits to existing characters (single or bulk).
 
 ### TraitCreate
 
-For creating custom traits on a character.
+For creating custom traits on a character. The trait is always created at a value of `1`; the supplied `currency` pays for that first dot. `NPC` and `STORYTELLER` characters accept only `"NO_COST"`.
 
 | Field | Type | Required |
 |-------|------|----------|
 | name | str | yes |
 | category_id | str | yes |
+| currency | TraitModifyCurrency | yes |
 | description | str \| None | no |
 | max_value | int | no (default=5, 0-100) |
 | min_value | int | no (default=0, 0-100) |
@@ -569,7 +570,6 @@ For creating custom traits on a character.
 | initial_cost | int \| None | no |
 | upgrade_cost | int \| None | no |
 | count_based_cost_multiplier | int \| None | no |
-| value | int \| None | no |
 
 ### CharacterTraitValueOptionsResponse
 

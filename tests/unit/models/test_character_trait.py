@@ -2,6 +2,9 @@
 
 from datetime import UTC, datetime
 
+import pytest
+from pydantic import ValidationError as PydanticValidationError
+
 from vclient.models import (
     BulkAssignTraitFailure,
     BulkAssignTraitResponse,
@@ -208,18 +211,25 @@ class TestTraitCreate:
         request = TraitCreate(
             name="Custom Skill",
             category_id="cat123",
+            currency="XP",
         )
 
         # Then: Required fields are set, defaults applied
         assert request.name == "Custom Skill"
         assert request.category_id == "cat123"
+        assert request.currency == "XP"
         assert request.max_value == 5
         assert request.min_value == 0
         assert request.show_when_zero is True
         assert request.description is None
         assert request.initial_cost is None
         assert request.upgrade_cost is None
-        assert request.value is None
+
+    def test_create_request_missing_currency(self) -> None:
+        """Verify TraitCreate raises when currency is omitted."""
+        # When/Then: Omitting the required currency field raises
+        with pytest.raises(PydanticValidationError):
+            TraitCreate(name="Custom Skill", category_id="cat123")  # type: ignore[call-arg]
 
     def test_create_request_all_fields(self) -> None:
         """Verify TraitCreate with all fields."""
@@ -227,25 +237,25 @@ class TestTraitCreate:
         request = TraitCreate(
             name="Custom Background",
             category_id="backgrounds_cat",
+            currency="STARTING_POINTS",
             description="A custom background trait",
             max_value=10,
             min_value=1,
             show_when_zero=False,
             initial_cost=3,
             upgrade_cost=2,
-            value=5,
         )
 
         # Then: All fields are set correctly
         assert request.name == "Custom Background"
         assert request.category_id == "backgrounds_cat"
+        assert request.currency == "STARTING_POINTS"
         assert request.description == "A custom background trait"
         assert request.max_value == 10
         assert request.min_value == 1
         assert request.show_when_zero is False
         assert request.initial_cost == 3
         assert request.upgrade_cost == 2
-        assert request.value == 5
 
     def test_create_request_model_dump(self) -> None:
         """Verify model_dump produces correct JSON payload."""
@@ -253,6 +263,7 @@ class TestTraitCreate:
         request = TraitCreate(
             name="Stealth",
             category_id="skills_cat",
+            currency="NO_COST",
         )
 
         # When: Dumping to JSON with exclude_none and exclude_unset
@@ -261,10 +272,10 @@ class TestTraitCreate:
         # Then: Required fields and unset fields without defaults are in the output
         assert data["name"] == "Stealth"
         assert data["category_id"] == "skills_cat"
+        assert data["currency"] == "NO_COST"
         assert "description" not in data
         assert "initial_cost" not in data
         assert "upgrade_cost" not in data
-        assert "value" not in data
 
     def test_create_request_model_dump_with_optionals(self) -> None:
         """Verify model_dump includes optional fields when set."""
@@ -272,9 +283,9 @@ class TestTraitCreate:
         request = TraitCreate(
             name="Lore",
             category_id="knowledge_cat",
+            currency="XP",
             description="Knowledge of ancient texts",
             initial_cost=2,
-            value=3,
         )
 
         # When: Dumping to JSON
@@ -282,9 +293,9 @@ class TestTraitCreate:
 
         # Then: Optional fields are included
         assert data["name"] == "Lore"
+        assert data["currency"] == "XP"
         assert data["description"] == "Knowledge of ancient texts"
         assert data["initial_cost"] == 2
-        assert data["value"] == 3
 
     def test_create_request_max_value_validation(self) -> None:
         """Verify max_value has valid range constraint."""
@@ -292,6 +303,7 @@ class TestTraitCreate:
         request = TraitCreate(
             name="Test Trait",
             category_id="cat123",
+            currency="XP",
             max_value=100,
         )
 
@@ -304,6 +316,7 @@ class TestTraitCreate:
         request = TraitCreate(
             name="Test Trait",
             category_id="cat123",
+            currency="XP",
             min_value=0,
         )
 

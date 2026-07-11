@@ -34,21 +34,22 @@ class CharacterTraitAdd(BaseModel):
 
 
 class TraitCreate(BaseModel):
-    """Request model for creating a character trait.
+    """Request model for creating a custom character trait.
 
-    Used to construct the JSON payload for character trait creation.
+    Used to construct the JSON payload for character trait creation. The trait is
+    always created at a value of ``1``; the supplied ``currency`` pays for that first dot.
     """
 
     name: str
+    category_id: str
+    currency: TraitModifyCurrency
     description: str | None = None
     max_value: Annotated[int, Field(ge=0, le=100, default=5)] = 5
     min_value: Annotated[int, Field(ge=0, le=100, default=0)] = 0
     show_when_zero: bool | None = True
-    category_id: str
     initial_cost: int | None = None
     upgrade_cost: int | None = None
     count_based_cost_multiplier: int | None = None
-    value: int | None = None
 
 
 class _TraitModify(BaseModel):
