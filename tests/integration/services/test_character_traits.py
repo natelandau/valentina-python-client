@@ -495,6 +495,7 @@ class TestCharacterTraitsServiceCreate:
         ).create(
             name="Custom Skill",
             category_id="cat123",
+            currency="XP",
         )
 
         # Then: The route was called and character trait is returned
@@ -508,6 +509,7 @@ class TestCharacterTraitsServiceCreate:
         body = json.loads(route.calls[0].request.content)
         assert body["name"] == "Custom Skill"
         assert body["category_id"] == "cat123"
+        assert body["currency"] == "XP"
         # max_value and min_value have defaults but are not sent when not explicitly set
 
     @respx.mock
@@ -518,7 +520,7 @@ class TestCharacterTraitsServiceCreate:
         # Given: A mocked create endpoint
         response_data = {
             **character_trait_response_data,
-            "value": 3,
+            "value": 1,
             "trait": {
                 **character_trait_response_data["trait"],
                 "name": "Custom Background",
@@ -541,20 +543,19 @@ class TestCharacterTraitsServiceCreate:
         ).create(
             name="Custom Background",
             category_id="backgrounds_cat",
+            currency="STARTING_POINTS",
             description="A custom background trait",
             max_value=10,
             min_value=1,
             show_when_zero=False,
             initial_cost=3,
             upgrade_cost=2,
-            value=3,
         )
 
         # Then: The route was called and character trait is returned
         assert route.called
         assert isinstance(result, CharacterTrait)
         assert result.trait.name == "Custom Background"
-        assert result.value == 3
 
         # Verify request body contains all fields
         import json
@@ -562,37 +563,44 @@ class TestCharacterTraitsServiceCreate:
         body = json.loads(route.calls[0].request.content)
         assert body["name"] == "Custom Background"
         assert body["category_id"] == "backgrounds_cat"
+        assert body["currency"] == "STARTING_POINTS"
         assert body["description"] == "A custom background trait"
         assert body["max_value"] == 10
         assert body["min_value"] == 1
         assert body["show_when_zero"] is False
         assert body["initial_cost"] == 3
         assert body["upgrade_cost"] == 2
-        assert body["value"] == 3
+        assert "value" not in body
 
     @respx.mock
-    async def test_create_trait_with_value(
+    async def test_create_trait_no_cost_currency(
         self, vclient, base_url, character_trait_response_data
     ) -> None:
-        """Verify creating a custom trait with an initial value."""
+        """Verify creating a custom trait with NO_COST currency."""
         # Given: A mocked create endpoint
-        response_data = {**character_trait_response_data, "value": 2}
+        response_data = {**character_trait_response_data, "value": 1}
         route = respx.post(
             f"{base_url}{Endpoints.CHARACTER_TRAIT_CREATE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
         ).mock(return_value=Response(201, json=response_data))
 
-        # When: Creating a custom trait with initial value
+        # When: Creating a custom trait paid for with NO_COST
         result = await vclient.character_traits(
             "char123", "on-behalf-of-user", company_id="company123"
         ).create(
             name="Custom Trait",
             category_id="cat123",
-            value=2,
+            currency="NO_COST",
         )
 
-        # Then: The character trait is returned with the value
+        # Then: The trait is created at a value of 1 and currency is sent
         assert route.called
-        assert result.value == 2
+        assert result.value == 1
+
+        import json
+
+        body = json.loads(route.calls[0].request.content)
+        assert body["currency"] == "NO_COST"
+        assert "value" not in body
 
     @respx.mock
     async def test_create_trait_not_found_category(self, vclient, base_url) -> None:
@@ -613,6 +621,7 @@ class TestCharacterTraitsServiceCreate:
             ).create(
                 name="Custom Trait",
                 category_id="nonexistent_cat",
+                currency="XP",
             )
 
         assert route.called

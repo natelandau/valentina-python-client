@@ -243,15 +243,19 @@ class CharacterTraitsService(BaseService):
         request: TraitCreate | None = None,
         **kwargs,
     ) -> CharacterTrait:
-        """Create a new character trait.
+        """Create a new custom character trait.
+
+        The trait is always created at a value of ``1``; the supplied ``currency`` pays
+        for that first dot. ``NPC`` and ``STORYTELLER`` characters accept only
+        ``"NO_COST"``.
 
         Args:
             request: A TraitCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for TraitCreate if request is not provided.
-                Required: name (str), category_id (str).
+                Required: name (str), category_id (str), currency (TraitModifyCurrency).
                 Optional: description (str | None), max_value (int), min_value (int),
                 show_when_zero (bool), initial_cost (int | None),
-                upgrade_cost (int | None), value (int | None).
+                upgrade_cost (int | None).
         """
         body = request if request is not None else self._validate_request(TraitCreate, **kwargs)
         response = await self._post(

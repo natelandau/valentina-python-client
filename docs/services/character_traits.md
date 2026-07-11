@@ -61,12 +61,13 @@ from vclient.models import TraitCreate
 # Assign an existing trait from the blueprint
 trait = await traits.assign(trait_id="strength_trait_id", value=3, currency="XP")
 
-# Create a custom trait (preferred method: use model object)
+# Create a custom trait (preferred method: use model object).
+# The trait is always created at a value of 1; the currency pays for that first dot.
 request = TraitCreate(
     name="Street Smarts",
     category_id="skills_category_id",
+    currency="XP",
     max_value=5,
-    value=2
 )
 custom = await traits.create(request)
 
@@ -74,8 +75,8 @@ custom = await traits.create(request)
 custom = await traits.create(
     name="Street Smarts",
     category_id="skills_category_id",
+    currency="XP",
     max_value=5,
-    value=2
 )
 
 # Check available value change options

@@ -25,6 +25,23 @@ Request model for assigning a trait to an already-created character. Used by the
 | `value`    | `int`                 | Value to set for the trait           |
 | `currency` | `TraitModifyCurrency` | Currency to use to pay for the trait |
 
+## TraitCreate
+
+Request model for creating a custom trait on a character. Used by the `create()` method on the character traits service. The trait is always created at a value of `1`; the supplied `currency` pays for that first dot. `NPC` and `STORYTELLER` characters accept only `"NO_COST"`.
+
+| Field                         | Type                  | Description                                     |
+| ----------------------------- | --------------------- | ----------------------------------------------- |
+| `name`                        | `str`                 | Trait name                                      |
+| `category_id`                 | `str`                 | Parent category ID                              |
+| `currency`                    | `TraitModifyCurrency` | Currency used to pay for the initial dot        |
+| `description`                 | `str \| None`         | Trait description                               |
+| `max_value`                   | `int`                 | Maximum value (default `5`, range 0-100)        |
+| `min_value`                   | `int`                 | Minimum value (default `0`, range 0-100)        |
+| `show_when_zero`              | `bool \| None`        | Show the trait when its value is zero           |
+| `initial_cost`                | `int \| None`         | XP cost to acquire                              |
+| `upgrade_cost`                | `int \| None`         | XP cost per upgrade                             |
+| `count_based_cost_multiplier` | `int \| None`         | Count-based cost multiplier                     |
+
 ## BulkAssignTraitResponse
 
 Response from `bulk_assign()`. Contains results grouped by outcome.
