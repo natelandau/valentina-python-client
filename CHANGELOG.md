@@ -1,3 +1,9 @@
+## v3.2.0 (2026-07-11)
+
+### Feat
+
+- **traits**: require currency for custom trait creation (#84)
+
 ## v3.1.1 (2026-07-06)
 
 ### Refactor
