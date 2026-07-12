@@ -63,6 +63,7 @@ trait = await traits.assign(trait_id="strength_trait_id", value=3, currency="XP"
 
 # Create a custom trait (preferred method: use model object).
 # The trait is always created at a value of 1; the currency pays for that first dot.
+# Custom traits are rollable by default; pass is_rollable=False for a non-rollable trait.
 request = TraitCreate(
     name="Street Smarts",
     category_id="skills_category_id",

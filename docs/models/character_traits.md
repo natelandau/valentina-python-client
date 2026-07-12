@@ -38,6 +38,7 @@ Request model for creating a custom trait on a character. Used by the `create()`
 | `max_value`                   | `int`                 | Maximum value (default `5`, range 0-100)        |
 | `min_value`                   | `int`                 | Minimum value (default `0`, range 0-100)        |
 | `show_when_zero`              | `bool \| None`        | Show the trait when its value is zero           |
+| `is_rollable`                 | `bool`                | Whether the trait is rollable (default `True`)  |
 | `initial_cost`                | `int \| None`         | XP cost to acquire                              |
 | `upgrade_cost`                | `int \| None`         | XP cost per upgrade                             |
 | `count_based_cost_multiplier` | `int \| None`         | Count-based cost multiplier                     |

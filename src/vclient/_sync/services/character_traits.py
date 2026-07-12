@@ -222,8 +222,9 @@ class SyncCharacterTraitsService(SyncBaseService):
             **kwargs: Fields for TraitCreate if request is not provided.
                 Required: name (str), category_id (str), currency (TraitModifyCurrency).
                 Optional: description (str | None), max_value (int), min_value (int),
-                show_when_zero (bool), initial_cost (int | None),
-                upgrade_cost (int | None).
+                show_when_zero (bool), is_rollable (bool, default True),
+                initial_cost (int | None), upgrade_cost (int | None),
+                count_based_cost_multiplier (int | None).
         """
         body = request if request is not None else self._validate_request(TraitCreate, **kwargs)
         response = self._post(

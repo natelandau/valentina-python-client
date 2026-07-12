@@ -567,6 +567,7 @@ For creating custom traits on a character. The trait is always created at a valu
 | max_value | int | no (default=5, 0-100) |
 | min_value | int | no (default=0, 0-100) |
 | show_when_zero | bool \| None | no (default=True) |
+| is_rollable | bool | no (default=True) |
 | initial_cost | int \| None | no |
 | upgrade_cost | int \| None | no |
 | count_based_cost_multiplier | int \| None | no |

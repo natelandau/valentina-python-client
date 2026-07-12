@@ -221,6 +221,7 @@ class TestTraitCreate:
         assert request.max_value == 5
         assert request.min_value == 0
         assert request.show_when_zero is True
+        assert request.is_rollable is True
         assert request.description is None
         assert request.initial_cost is None
         assert request.upgrade_cost is None
@@ -242,8 +243,10 @@ class TestTraitCreate:
             max_value=10,
             min_value=1,
             show_when_zero=False,
+            is_rollable=False,
             initial_cost=3,
             upgrade_cost=2,
+            count_based_cost_multiplier=4,
         )
 
         # Then: All fields are set correctly
@@ -254,8 +257,10 @@ class TestTraitCreate:
         assert request.max_value == 10
         assert request.min_value == 1
         assert request.show_when_zero is False
+        assert request.is_rollable is False
         assert request.initial_cost == 3
         assert request.upgrade_cost == 2
+        assert request.count_based_cost_multiplier == 4
 
     def test_create_request_model_dump(self) -> None:
         """Verify model_dump produces correct JSON payload."""
@@ -296,6 +301,30 @@ class TestTraitCreate:
         assert data["currency"] == "XP"
         assert data["description"] == "Knowledge of ancient texts"
         assert data["initial_cost"] == 2
+
+    def test_create_request_is_rollable_omitted_when_default(self) -> None:
+        """Verify is_rollable is not sent when left at its default."""
+        # Given: A create request that does not set is_rollable
+        request = TraitCreate(name="Stealth", category_id="skills_cat", currency="NO_COST")
+
+        # When: Dumping to JSON with exclude_unset
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: is_rollable is omitted so the server default (rollable) applies
+        assert "is_rollable" not in data
+
+    def test_create_request_is_rollable_sent_when_false(self) -> None:
+        """Verify is_rollable=False is transmitted to create a non-rollable trait."""
+        # Given: A create request that opts out of rollability
+        request = TraitCreate(
+            name="Stealth", category_id="skills_cat", currency="NO_COST", is_rollable=False
+        )
+
+        # When: Dumping to JSON
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: is_rollable is included with the explicit value
+        assert data["is_rollable"] is False
 
     def test_create_request_max_value_validation(self) -> None:
         """Verify max_value has valid range constraint."""

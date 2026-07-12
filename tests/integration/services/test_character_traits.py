@@ -510,7 +510,9 @@ class TestCharacterTraitsServiceCreate:
         assert body["name"] == "Custom Skill"
         assert body["category_id"] == "cat123"
         assert body["currency"] == "XP"
-        # max_value and min_value have defaults but are not sent when not explicitly set
+        # Defaults (max_value, min_value, is_rollable) are not sent unless explicitly set;
+        # the server defaults custom traits to rollable.
+        assert "is_rollable" not in body
 
     @respx.mock
     async def test_create_trait_all_options(
@@ -548,8 +550,10 @@ class TestCharacterTraitsServiceCreate:
             max_value=10,
             min_value=1,
             show_when_zero=False,
+            is_rollable=False,
             initial_cost=3,
             upgrade_cost=2,
+            count_based_cost_multiplier=4,
         )
 
         # Then: The route was called and character trait is returned
@@ -568,8 +572,10 @@ class TestCharacterTraitsServiceCreate:
         assert body["max_value"] == 10
         assert body["min_value"] == 1
         assert body["show_when_zero"] is False
+        assert body["is_rollable"] is False
         assert body["initial_cost"] == 3
         assert body["upgrade_cost"] == 2
+        assert body["count_based_cost_multiplier"] == 4
         assert "value" not in body
 
     @respx.mock
