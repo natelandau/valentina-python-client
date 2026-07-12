@@ -22,6 +22,7 @@ class Campaign(BaseModel):
     date_modified: datetime
     name: str
     description: str | None = None
+    year: str | None = None
     asset_ids: list[str] = Field(default_factory=list)
     desperation: int = 0
     danger: int = 0
@@ -47,6 +48,7 @@ class CampaignCreate(BaseModel):
 
     name: str = Field(min_length=3, max_length=50)
     description: Annotated[str, Field(min_length=3)] | None = None
+    year: Annotated[str, Field(max_length=50)] | None = None
     desperation: int = Field(default=0, ge=0, le=5)
     danger: int = Field(default=0, ge=0, le=5)
 
@@ -59,6 +61,7 @@ class CampaignUpdate(BaseModel):
 
     name: Annotated[str, Field(min_length=3, max_length=50)] | None = None
     description: Annotated[str, Field(min_length=3)] | None = None
+    year: Annotated[str, Field(max_length=50)] | None = None
     desperation: Annotated[int, Field(ge=0, le=5)] | None = None
     danger: Annotated[int, Field(ge=0, le=5)] | None = None
 

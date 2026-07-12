@@ -386,6 +386,7 @@ Response model from `IdentityService.identify()`. Reports how the API resolved t
 | date_modified | datetime | yes |
 | name | str | yes |
 | description | str \| None | no |
+| year | str \| None | no |
 | asset_ids | list[str] | no (default=[]) |
 | desperation | int | no (default=0) |
 | danger | int | no (default=0) |
@@ -403,12 +404,13 @@ Response model from `IdentityService.identify()`. Reports how the API resolved t
 |-------|------|------------|
 | name | str | 3-50 chars, required |
 | description | str \| None | min 3 chars |
+| year | str \| None | max 50 chars, free-form text |
 | desperation | int | 0-5, default=0 |
 | danger | int | 0-5, default=0 |
 
 ### CampaignUpdate
 
-All fields optional. Same constraints as CampaignCreate.
+All fields optional. Same constraints as CampaignCreate. Send `year=""` to clear the year (passing `None` leaves it unchanged).
 
 ---
 

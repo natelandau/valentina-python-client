@@ -75,6 +75,7 @@ from vclient.models import CampaignCreate, CampaignUpdate
 request = CampaignCreate(
     name="Dark Metropolis",
     description="A noir vampire chronicle",
+    year="1924",  # free-form text, not a date (max 50 chars)
     desperation=2,
     danger=3
 )
@@ -90,6 +91,9 @@ campaign = await campaigns.create(
 # Update a campaign
 update = CampaignUpdate(danger=4)
 updated = await campaigns.update(campaign.id, update)
+
+# Clear the year by sending an empty string (passing None leaves it unchanged)
+cleared = await campaigns.update(campaign.id, CampaignUpdate(year=""))
 ```
 
 ### View Statistics

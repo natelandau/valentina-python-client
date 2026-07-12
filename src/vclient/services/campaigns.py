@@ -152,7 +152,8 @@ class CampaignsService(BaseService):
             request: A CampaignCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for CampaignCreate if request is not provided.
                 Accepts: name (str, required), description (str | None),
-                desperation (int, default 0), danger (int, default 0).
+                year (str | None, max 50 chars), desperation (int, default 0),
+                danger (int, default 0).
 
         Returns:
             The newly created Campaign object.
@@ -184,6 +185,7 @@ class CampaignsService(BaseService):
             request: A CampaignUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for CampaignUpdate if request is not provided.
                 Accepts: name (str | None), description (str | None),
+                year (str | None, max 50 chars; send "" to clear),
                 desperation (int | None), danger (int | None).
 
         Returns:
