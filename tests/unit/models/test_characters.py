@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from typing import get_args
 
 import pytest
@@ -51,6 +52,7 @@ class TestCharacter:
         assert character.status == "ALIVE"
         assert character.starting_points == 0
         assert character.is_temporary is False
+        assert character.date_of_birth is None
         assert character.asset_ids == []
         assert character.character_trait_ids == []
         assert character.chapter_ids == []
@@ -96,6 +98,7 @@ class TestCharacter:
             "name": "Wolf",
             "name_full": "Jane Smith",
             "age": 28,
+            "date_of_birth": "1888-06-15",
             "biography": "A fierce warrior of the pack.",
             "demeanor": "Aggressive",
             "nature": "Protector",
@@ -137,6 +140,7 @@ class TestCharacter:
         assert character.game_version == "V4"
         assert character.name_first == "Jane"
         assert character.age == 28
+        assert character.date_of_birth == date(1888, 6, 15)
         assert character.is_temporary is True
         assert character.werewolf_attributes is not None
         assert character.werewolf_attributes.tribe_name == "Glass Walkers"
@@ -350,6 +354,7 @@ class TestCharacterCreate:
             type="NPC",
             name_nick="Wolf",
             age=28,
+            date_of_birth=date(1888, 6, 15),
             biography="A fierce warrior.",
             demeanor="Aggressive",
             nature="Protector",
@@ -365,6 +370,7 @@ class TestCharacterCreate:
         assert request.type == "NPC"
         assert request.name_nick == "Wolf"
         assert request.age == 28
+        assert request.date_of_birth == date(1888, 6, 15)
         assert request.traits == traits
 
     def test_create_request_name_first_min_length(self) -> None:
@@ -417,6 +423,34 @@ class TestCharacterCreate:
             "name_first": "John",
             "name_last": "Doe",
         }
+
+    def test_create_date_of_birth_accepts_iso_string(self) -> None:
+        """Verify date_of_birth parses an ISO 8601 calendar date string."""
+        # When: Creating a request with an ISO date string
+        request = CharacterCreate(
+            campaign_id="campaign123",
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            date_of_birth="1888-06-15",  # type: ignore[arg-type]
+        )
+
+        # Then: The value is parsed as a date
+        assert request.date_of_birth == date(1888, 6, 15)
+
+    def test_create_date_of_birth_rejects_non_date(self) -> None:
+        """Verify date_of_birth rejects a value that is not a calendar date."""
+        # When/Then: A non-date value is rejected
+        with pytest.raises(PydanticValidationError):
+            CharacterCreate(
+                campaign_id="campaign123",
+                character_class="VAMPIRE",
+                game_version="V5",
+                name_first="John",
+                name_last="Doe",
+                date_of_birth="not-a-date",  # type: ignore[arg-type]
+            )
 
 
 class TestCharacterUpdate:
@@ -507,6 +541,34 @@ class TestCharacterUpdate:
 
         with pytest.raises(PydanticValidationError):
             CharacterUpdate(nature="ab")
+
+    def test_update_date_of_birth_serializes_to_iso_string(self) -> None:
+        """Verify date_of_birth serializes to an ISO 8601 date string in JSON mode."""
+        # Given: An update request setting date_of_birth
+        request = CharacterUpdate(date_of_birth=date(1888, 6, 15))
+
+        # When: Dumping in JSON mode
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+
+        # Then: The date is serialized as an ISO string
+        assert data == {"date_of_birth": "1888-06-15"}
+
+    def test_update_date_of_birth_none_tracked_as_set(self) -> None:
+        """Verify an explicit None date_of_birth is recorded so the service can clear it."""
+        # Given: An update request explicitly clearing date_of_birth
+        # exclude_none drops the None, but model_fields_set lets the service re-add an explicit
+        # null to the payload to clear the field. See CharactersService.update.
+        request = CharacterUpdate(date_of_birth=None)
+
+        # Then: The field is tracked as set even though its value is None
+        assert "date_of_birth" in request.model_fields_set
+        assert request.date_of_birth is None
+
+    def test_update_date_of_birth_rejects_non_date_when_provided(self) -> None:
+        """Verify date_of_birth validation still applies on update."""
+        # When/Then: A non-date value is rejected
+        with pytest.raises(PydanticValidationError):
+            CharacterUpdate(date_of_birth="not-a-date")  # type: ignore[arg-type]
 
 
 class TestCharacterCreateConstraints:

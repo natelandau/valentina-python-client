@@ -1,7 +1,7 @@
 """Integration tests for CharactersService."""
 
 import copy
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 import pytest
 import respx
@@ -486,6 +486,7 @@ class TestCharactersServiceCreate:
             type="NPC",
             name_nick="Johnny",
             age=35,
+            date_of_birth=date(1888, 6, 15),
             biography="A mysterious vampire.",
             demeanor="Friendly",
             nature="Warrior",
@@ -504,6 +505,7 @@ class TestCharactersServiceCreate:
         assert body["type"] == "NPC"  # explicitly set
         assert body["name_nick"] == "Johnny"
         assert body["age"] == 35
+        assert body["date_of_birth"] == "1888-06-15"
         assert body["biography"] == "A mysterious vampire."
 
     @respx.mock
@@ -734,6 +736,50 @@ class TestCharactersServiceUpdate:
         # Then: The route was called and updated character is returned
         assert route.called
         assert result.status == "DEAD"
+
+    @respx.mock
+    async def test_update_character_date_of_birth(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify setting date_of_birth sends an ISO 8601 date string."""
+        # Given: A mocked update endpoint
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=character_response_data))
+
+        # When: Updating the date_of_birth
+        await vclient.characters("on-behalf-of-user", company_id="company123").update(
+            "char123", date_of_birth=date(1888, 6, 15)
+        )
+
+        # Then: The request body carries the ISO date string
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"date_of_birth": "1888-06-15"}
+
+    @respx.mock
+    async def test_update_character_clears_date_of_birth(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify passing date_of_birth=None sends an explicit null to clear it."""
+        # Given: A mocked update endpoint returning a cleared date_of_birth
+        cleared_data = {**character_response_data, "date_of_birth": None}
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=cleared_data))
+
+        # When: Clearing the date_of_birth with an explicit None
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").update(
+            "char123", date_of_birth=None
+        )
+
+        # Then: The explicit null survives exclude_none and reaches the server
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"date_of_birth": None}
+        assert result.date_of_birth is None
 
     @respx.mock
     async def test_update_character_not_found(self, vclient, base_url) -> None:

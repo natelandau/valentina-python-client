@@ -139,6 +139,8 @@ Assignment rules are enforced server-side and surface as `ValidationError` (400)
 ## Example
 
 ```python
+from datetime import date
+
 from vclient.models import CharacterCreate, CharacterUpdate, InventoryItemCreate, NoteCreate
 
 # Create a vampire character (preferred method: use model object)
@@ -148,6 +150,7 @@ request = CharacterCreate(
     game_version="V5",
     name_first="Marcus",
     name_last="Blackwood",
+    date_of_birth=date(1888, 6, 15),  # optional ISO 8601 calendar date
     user_player_id="player_user_id"
 )
 character = await characters.create(request)
@@ -165,6 +168,9 @@ character = await characters.create(
 # Update character details
 update = CharacterUpdate(name_first="Marcus", name_last="Black")
 updated = await characters.update(character.id, update)
+
+# Clear the date of birth by passing None (omitting the field leaves it unchanged)
+cleared = await characters.update(character.id, CharacterUpdate(date_of_birth=None))
 
 # Retrieve roll statistics
 stats = await characters.get_statistics(character.id)

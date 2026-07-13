@@ -436,6 +436,7 @@ All fields optional. Same constraints as CampaignCreate. Pass `in_game_date=None
 | name | str | yes |
 | name_full | str | yes |
 | age | int \| None | no |
+| date_of_birth | date \| None | no (ISO 8601 `YYYY-MM-DD`) |
 | biography | str \| None | no (min 3) |
 | demeanor | str \| None | no (3-50 chars) |
 | nature | str \| None | no (3-50 chars) |
@@ -479,6 +480,7 @@ All fields optional. Same constraints as CampaignCreate. Pass `in_game_date=None
 | is_temporary | bool | default=False |
 | name_nick | str \| None | 3-50 chars |
 | age | int \| None | — |
+| date_of_birth | date \| None | ISO 8601 calendar date (`YYYY-MM-DD`) |
 | biography | str \| None | min 3 |
 | demeanor | str \| None | 3-50 chars |
 | nature | str \| None | 3-50 chars |
@@ -492,7 +494,7 @@ All fields optional. Same constraints as CampaignCreate. Pass `in_game_date=None
 
 ### CharacterUpdate
 
-All fields optional. Same field set as CharacterCreate plus `status`, `date_killed`.
+All fields optional. Same field set as CharacterCreate plus `status`, `date_killed`. Pass `date_of_birth=None` to clear the date of birth (omitting the field leaves it unchanged).
 
 ### Class-Specific Attributes
 

@@ -135,6 +135,7 @@ def character_response_data() -> dict:
         "name": "Johnny",
         "name_full": "John Doe",
         "age": 35,
+        "date_of_birth": "1888-06-15",
         "biography": "A mysterious vampire.",
         "demeanor": "Friendly",
         "nature": "Warrior",

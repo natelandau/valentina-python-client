@@ -24,6 +24,7 @@ Models for player and non-player characters, including class-specific attributes
 | `name`                | `str`                        | First and last name                             |
 | `name_full`           | `str`                        | First, last, and nickname                       |
 | `age`                 | `int \| None`                | Age                                             |
+| `date_of_birth`       | `date \| None`               | Date of birth (ISO 8601 `YYYY-MM-DD`)           |
 | `biography`           | `str \| None`                | Biography                                       |
 | `user_creator_id`     | `str \| None`                | Creator user ID                                 |
 | `user_player_id`      | `str \| None`                | Player user ID                                  |

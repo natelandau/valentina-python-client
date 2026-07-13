@@ -1,6 +1,6 @@
 """Pydantic models for Character API responses and requests."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated
 
 from pydantic import BaseModel, Field
@@ -177,6 +177,9 @@ class Character(BaseModel):
 
     # Biography
     age: int | None = Field(default=None, description="Character's age.")
+    date_of_birth: date | None = Field(
+        default=None, description="Character's date of birth (ISO 8601 calendar date)."
+    )
     biography: Annotated[str, Field(min_length=3)] | None = Field(
         default=None, description="Character biography."
     )
@@ -280,6 +283,9 @@ class CharacterCreate(BaseModel):
         default=None, description="Character's nickname."
     )
     age: int | None = Field(default=None, description="Character's age.")
+    date_of_birth: date | None = Field(
+        default=None, description="Character's date of birth (ISO 8601 calendar date)."
+    )
     biography: Annotated[str, Field(min_length=3)] | None = Field(
         default=None, description="Character biography."
     )
@@ -333,6 +339,7 @@ class CharacterUpdate(BaseModel):
     )
 
     age: int | None = None
+    date_of_birth: date | None = None
     biography: Annotated[str, Field(min_length=3)] | None = Field(
         default=None, description="Character biography."
     )
