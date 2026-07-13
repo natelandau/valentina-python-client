@@ -1,5 +1,7 @@
 """Tests for vclient.models.campaigns."""
 
+from datetime import date
+
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
@@ -46,23 +48,23 @@ class TestCampaign:
         )
 
         assert campaign.description is None
-        assert campaign.year is None
+        assert campaign.in_game_date is None
         assert campaign.asset_ids == []
         assert campaign.desperation == 0
         assert campaign.danger == 0
 
-    def test_year_field(self):
-        """Verify the year field accepts free-form text."""
+    def test_in_game_date_field(self):
+        """Verify the in_game_date field parses an ISO 8601 calendar date."""
         campaign = Campaign(
             id="campaign123",
             date_created="2024-01-15T10:30:00Z",
             date_modified="2024-01-15T10:30:00Z",
             name="Test Campaign",
             company_id="company123",
-            year="Third Age, 2941",
+            in_game_date="1924-03-15",
         )
 
-        assert campaign.year == "Third Age, 2941"
+        assert campaign.in_game_date == date(1924, 3, 15)
 
     def test_child_resource_counts(self):
         """Verify child-resource count fields default to 0 and accept values."""
@@ -124,20 +126,20 @@ class TestCampaignCreate:
 
         assert request.name == "Test"
         assert request.description is None
-        assert request.year is None
+        assert request.in_game_date is None
         assert request.desperation == 0
         assert request.danger == 0
 
-    def test_year_accepts_text(self):
-        """Verify year accepts free-form text up to 50 chars."""
-        request = CampaignCreate(name="Valid", year="1924")
+    def test_in_game_date_accepts_iso_string(self):
+        """Verify in_game_date parses an ISO 8601 calendar date string."""
+        request = CampaignCreate(name="Valid", in_game_date="1924-03-15")
 
-        assert request.year == "1924"
+        assert request.in_game_date == date(1924, 3, 15)
 
-    def test_year_max_length(self):
-        """Verify year maximum length validation."""
+    def test_in_game_date_rejects_non_date(self):
+        """Verify in_game_date rejects a value that is not a calendar date."""
         with pytest.raises(PydanticValidationError):
-            CampaignCreate(name="Valid", year="a" * 51)
+            CampaignCreate(name="Valid", in_game_date="not-a-date")
 
     def test_name_min_length(self):
         """Verify name minimum length validation."""
@@ -204,19 +206,27 @@ class TestCampaignUpdate:
 
         assert data == {"name": "New Name", "danger": 4}
 
-    def test_year_clear_via_empty_string(self):
-        """Verify an empty-string year survives exclude_none so the server can clear it."""
-        # Empty string (not None) must reach the API to clear the year; None is dropped by exclude_none.
-        request = CampaignUpdate(year="")
+    def test_in_game_date_serializes_to_iso_string(self):
+        """Verify in_game_date serializes to an ISO 8601 date string in JSON mode."""
+        request = CampaignUpdate(in_game_date=date(1924, 3, 15))
 
-        data = request.model_dump(exclude_none=True, exclude_unset=True)
+        data = request.model_dump(exclude_none=True, exclude_unset=True, mode="json")
 
-        assert data == {"year": ""}
+        assert data == {"in_game_date": "1924-03-15"}
 
-    def test_year_max_length_when_provided(self):
-        """Verify year maximum length validation still applies on update."""
+    def test_in_game_date_none_tracked_as_set(self):
+        """Verify an explicit None in_game_date is recorded so the service can clear it."""
+        # exclude_none drops the None, but model_fields_set lets the service re-add an explicit
+        # null to the payload to clear the field. See CampaignsService.update.
+        request = CampaignUpdate(in_game_date=None)
+
+        assert "in_game_date" in request.model_fields_set
+        assert request.in_game_date is None
+
+    def test_in_game_date_rejects_non_date_when_provided(self):
+        """Verify in_game_date validation still applies on update."""
         with pytest.raises(PydanticValidationError):
-            CampaignUpdate(year="a" * 51)
+            CampaignUpdate(in_game_date="not-a-date")
 
     def test_name_validation_when_provided(self):
         """Verify name validation still applies when value is provided."""

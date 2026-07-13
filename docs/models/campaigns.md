@@ -15,7 +15,7 @@ Models for campaigns, which organize gameplay sessions within a company.
 | `date_modified`                | `datetime`    | Last modified timestamp                          |
 | `name`                         | `str`         | Campaign name                                    |
 | `description`                  | `str \| None` | Campaign description                             |
-| `year`                         | `str \| None` | Free-form campaign year (max 50 chars)           |
+| `in_game_date`                 | `date \| None`| In-game calendar date (ISO 8601 `YYYY-MM-DD`)    |
 | `desperation`                  | `int`         | Desperation level (0-5)                          |
 | `danger`                       | `int`         | Danger level (0-5)                               |
 | `company_id`                   | `str`         | Company ID                                       |

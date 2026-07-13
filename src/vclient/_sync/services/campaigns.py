@@ -127,8 +127,8 @@ class SyncCampaignsService(SyncBaseService):
             request: A CampaignCreate model, OR pass fields as keyword arguments.
             **kwargs: Fields for CampaignCreate if request is not provided.
                 Accepts: name (str, required), description (str | None),
-                year (str | None, max 50 chars), desperation (int, default 0),
-                danger (int, default 0).
+                in_game_date (datetime.date | None, ISO 8601 calendar date),
+                desperation (int, default 0), danger (int, default 0).
 
         Returns:
             The newly created Campaign object.
@@ -155,8 +155,8 @@ class SyncCampaignsService(SyncBaseService):
             request: A CampaignUpdate model, OR pass fields as keyword arguments.
             **kwargs: Fields for CampaignUpdate if request is not provided.
                 Accepts: name (str | None), description (str | None),
-                year (str | None, max 50 chars; send "" to clear),
-                desperation (int | None), danger (int | None).
+                in_game_date (datetime.date | None, ISO 8601 calendar date;
+                pass None to clear it), desperation (int | None), danger (int | None).
 
         Returns:
             The updated Campaign object.
@@ -168,9 +168,11 @@ class SyncCampaignsService(SyncBaseService):
             ValidationError: If the request data is invalid.
         """
         body = request if request is not None else self._validate_request(CampaignUpdate, **kwargs)
+        payload = body.model_dump(exclude_none=True, exclude_unset=True, mode="json")
+        if "in_game_date" in body.model_fields_set and body.in_game_date is None:
+            payload["in_game_date"] = None
         response = self._patch(
-            self._format_endpoint(Endpoints.CAMPAIGN, campaign_id=campaign_id),
-            json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
+            self._format_endpoint(Endpoints.CAMPAIGN, campaign_id=campaign_id), json=payload
         )
         return Campaign.model_validate(response.json())
 

@@ -69,13 +69,15 @@ campaigns = campaigns_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ### Create and Manage Campaigns
 
 ```python
+from datetime import date
+
 from vclient.models import CampaignCreate, CampaignUpdate
 
 # Create a campaign (preferred: use model object)
 request = CampaignCreate(
     name="Dark Metropolis",
     description="A noir vampire chronicle",
-    year="1924",  # free-form text, not a date (max 50 chars)
+    in_game_date=date(1924, 1, 1),  # ISO 8601 calendar date the campaign is set in
     desperation=2,
     danger=3
 )
@@ -92,8 +94,8 @@ campaign = await campaigns.create(
 update = CampaignUpdate(danger=4)
 updated = await campaigns.update(campaign.id, update)
 
-# Clear the year by sending an empty string (passing None leaves it unchanged)
-cleared = await campaigns.update(campaign.id, CampaignUpdate(year=""))
+# Clear the in-game date by passing None (omitting the field leaves it unchanged)
+cleared = await campaigns.update(campaign.id, CampaignUpdate(in_game_date=None))
 ```
 
 ### View Statistics

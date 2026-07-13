@@ -1,5 +1,7 @@
 """Tests for vclient.services.campaigns."""
 
+from datetime import date
+
 import pytest
 import respx
 
@@ -19,6 +21,7 @@ def campaign_response_data() -> dict:
         "date_modified": "2024-01-15T10:30:00Z",
         "name": "Test Campaign",
         "description": "A test campaign description",
+        "in_game_date": "1924-03-15",
         "asset_ids": ["asset1", "asset2"],
         "desperation": 2,
         "danger": 3,
@@ -274,6 +277,7 @@ class TestCampaignsServiceCreate:
         result = await vclient.campaigns("on-behalf-of-user", company_id=company_id).create(
             name="Test Campaign",
             description="A test campaign description",
+            in_game_date=date(1924, 3, 15),
             desperation=2,
             danger=3,
         )
@@ -289,6 +293,7 @@ class TestCampaignsServiceCreate:
         body = json.loads(request.content)
         assert body["name"] == "Test Campaign"
         assert body["description"] == "A test campaign description"
+        assert body["in_game_date"] == "1924-03-15"
         assert body["desperation"] == 2
         assert body["danger"] == 3
 
@@ -330,6 +335,52 @@ class TestCampaignsServiceUpdate:
 
         body = json.loads(request.content)
         assert body == {"name": "Updated Name"}
+
+    @respx.mock
+    async def test_update_campaign_in_game_date(self, vclient, base_url, campaign_response_data):
+        """Verify setting in_game_date sends an ISO 8601 date string."""
+        # Given: A mocked update endpoint
+        company_id = "company123"
+        campaign_id = "507f1f77bcf86cd799439011"
+        route = respx.patch(
+            f"{base_url}{Endpoints.CAMPAIGN.format(company_id=company_id, campaign_id=campaign_id)}"
+        ).respond(200, json=campaign_response_data)
+
+        # When: Updating the in_game_date
+        await vclient.campaigns("on-behalf-of-user", company_id=company_id).update(
+            campaign_id, in_game_date=date(1924, 3, 15)
+        )
+
+        # Then: The request body carries the ISO date string
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"in_game_date": "1924-03-15"}
+
+    @respx.mock
+    async def test_update_campaign_clears_in_game_date(
+        self, vclient, base_url, campaign_response_data
+    ):
+        """Verify passing in_game_date=None sends an explicit null to clear it."""
+        # Given: A mocked update endpoint returning a cleared in_game_date
+        company_id = "company123"
+        campaign_id = "507f1f77bcf86cd799439011"
+        cleared_data = {**campaign_response_data, "in_game_date": None}
+        route = respx.patch(
+            f"{base_url}{Endpoints.CAMPAIGN.format(company_id=company_id, campaign_id=campaign_id)}"
+        ).respond(200, json=cleared_data)
+
+        # When: Clearing the in_game_date with an explicit None
+        result = await vclient.campaigns("on-behalf-of-user", company_id=company_id).update(
+            campaign_id, in_game_date=None
+        )
+
+        # Then: The explicit null survives exclude_none and reaches the server
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"in_game_date": None}
+        assert result.in_game_date is None
 
     @respx.mock
     async def test_update_campaign_not_found(self, vclient, base_url):
