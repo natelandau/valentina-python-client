@@ -92,6 +92,24 @@ Response from `bulk_assign()`. Contains results grouped by outcome.
 | `game_versions`               | `list[GameVersion]`      | Available game versions                |
 | `character_classes`           | `list[CharacterClass]`   | Applicable classes                     |
 | `gift_attributes`             | `GiftAttributes \| None` | Werewolf gift attributes               |
+| `powers`                      | `list[TraitPower]`       | Powers granted at each dot level       |
+
+## TraitPower
+
+A power the trait grants at a specific dot level. Ordered by `level` ascending, then by `name`. A single level may grant several powers, since Disciplines offer a choice per dot.
+
+Entries come in two shapes. Named powers (Disciplines and Thaumaturgy/Necromancy paths) have a `name` and usually a `system`. Nameless per-dot descriptors on Attributes and Skills are a plain sentence describing what each dot rating means, and have `name` set to `None`.
+
+Empty list when the trait has no powers.
+
+| Field         | Type          | Description                            |
+| ------------- | ------------- | -------------------------------------- |
+| `id`          | `str`         | Unique identifier                      |
+| `level`       | `int`         | Dot level at which the power is gained |
+| `name`        | `str \| None` | Power name, `None` for dot descriptors |
+| `description` | `str \| None` | What the power does                    |
+| `system`      | `str \| None` | System rules for using the power       |
+| `link`        | `str \| None` | Link to the power's reference page     |
 
 ## CharacterTraitValueOptionsResponse
 

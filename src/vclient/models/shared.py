@@ -146,6 +146,22 @@ class GiftAttributes(BaseModel):
     auspice_name: str | None = None
 
 
+class TraitPower(BaseModel):
+    """A power a trait grants at a specific dot level.
+
+    Named powers (Disciplines and Thaumaturgy/Necromancy paths) carry a name and usually a
+    system. Nameless per-dot descriptors on Attributes and Skills describe what each dot
+    rating means and have `name` set to None.
+    """
+
+    id: str
+    level: int
+    name: str | None = None
+    description: str | None = None
+    system: str | None = None
+    link: str | None = None
+
+
 class Trait(BaseModel):
     """Response model for a trait.
 
@@ -179,6 +195,9 @@ class Trait(BaseModel):
     system: str | None = None
     gift_attributes: GiftAttributes | None = None
 
+    # Ordered by level ascending, then name. A single level may grant several powers.
+    powers: list[TraitPower] = Field(default_factory=list)
+
     character_classes: list[CharacterClass] = Field(default_factory=list)
     game_versions: list[GameVersion] = Field(default_factory=list)
 
@@ -202,4 +221,5 @@ __all__ = [
     "ProviderAudiences",
     "RollStatistics",
     "Trait",
+    "TraitPower",
 ]

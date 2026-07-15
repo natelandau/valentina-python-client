@@ -11,6 +11,7 @@ from vclient.models.shared import (
     NoteUpdate,
     RollStatistics,
     Trait,
+    TraitPower,
 )
 
 
@@ -253,6 +254,73 @@ class TestGiftAttributes:
         assert attrs.is_native_gift is False
         assert attrs.tribe_id is None
         assert attrs.auspice_id is None
+
+
+class TestTraitPower:
+    """Tests for TraitPower model."""
+
+    def test_valid_named_power(self):
+        """Verify TraitPower creation with all fields."""
+        power = TraitPower(
+            id="power123",
+            level=2,
+            name="Feral Whispers",
+            description="Communicate with animals.",
+            system="Roll Manipulation + Animal Ken.",
+            link="https://example.com/feral-whispers",
+        )
+
+        assert power.id == "power123"
+        assert power.level == 2
+        assert power.name == "Feral Whispers"
+        assert power.description == "Communicate with animals."
+        assert power.system == "Roll Manipulation + Animal Ken."
+        assert power.link == "https://example.com/feral-whispers"
+
+    def test_nameless_dot_descriptor(self):
+        """Verify TraitPower optional fields default to None for nameless dot descriptors."""
+        power = TraitPower(id="power123", level=3)
+
+        assert power.level == 3
+        assert power.name is None
+        assert power.description is None
+        assert power.system is None
+        assert power.link is None
+
+
+class TestTraitPowers:
+    """Tests for Trait.powers field."""
+
+    def test_trait_powers_empty_by_default(self):
+        """Verify Trait.powers defaults to an empty list."""
+        trait = Trait(
+            id="trait123",
+            name="Strength",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            sheet_section_id="section123",
+            category_id="category123",
+        )
+        assert trait.powers == []
+
+    def test_trait_with_multiple_powers_at_same_level(self):
+        """Verify Trait accepts several powers sharing a level."""
+        trait = Trait(
+            id="trait123",
+            name="Thaumaturgy",
+            date_created="2024-01-15T10:30:00Z",
+            date_modified="2024-01-15T10:30:00Z",
+            sheet_section_id="section123",
+            category_id="category123",
+            powers=[
+                {"id": "power1", "level": 1, "name": "A Taste for Blood"},
+                {"id": "power2", "level": 1, "name": "Rebel's Spark"},
+            ],
+        )
+
+        assert len(trait.powers) == 2
+        assert [p.name for p in trait.powers] == ["A Taste for Blood", "Rebel's Spark"]
+        assert all(p.level == 1 for p in trait.powers)
 
 
 class TestTraitGiftAttributes:

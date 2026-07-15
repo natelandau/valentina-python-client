@@ -117,8 +117,22 @@ Uploads accept only images (PNG, JPEG, GIF, WEBP); `mime_type` is detected from 
 | opposing_pool | str \| None | no |
 | system | str \| None | no |
 | gift_attributes | GiftAttributes \| None | no |
+| powers | list[TraitPower] | no (default=[]) |
 | character_classes | list[CharacterClass] | no (default=[]) |
 | game_versions | list[GameVersion] | no (default=[]) |
+
+### TraitPower
+
+Powers a trait grants at each dot level, ordered by `level` ascending then `name`. A level may grant several powers. Named powers (Disciplines, Thaumaturgy/Necromancy paths) have a `name` and usually a `system`; nameless per-dot descriptors on Attributes and Skills have `name=None`.
+
+| Field | Type | Required |
+|-------|------|----------|
+| id | str | yes |
+| level | int | yes |
+| name | str \| None | no |
+| description | str \| None | no |
+| system | str \| None | no |
+| link | str \| None | no |
 
 ### GiftAttributes
 
@@ -893,6 +907,9 @@ For creating custom traits on a character. The trait is always created at a valu
 | company_id | str \| None | no |
 | source_type | str \| None | no |
 | source_id | str \| None | no |
+| powers | list[TraitPower] | no (default=[]) |
+
+`powers` is populated only for terms with `source_type="trait"`, resolved from that trait's powers. Empty for all other terms, including company-created ones.
 
 **DictionaryTermCreate:** `term` (str, required), `definition` (str \| None), `link` (str \| None), `synonyms` (list[str], default=[]).
 **DictionaryTermUpdate:** All optional.

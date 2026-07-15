@@ -139,6 +139,24 @@ def trait_response_data() -> dict:
         "subcategory_name": None,
         "pool": None,
         "system": None,
+        "powers": [
+            {
+                "id": "power1",
+                "level": 1,
+                "name": None,
+                "description": "Barely able to lift a chair.",
+                "system": None,
+                "link": None,
+            },
+            {
+                "id": "power2",
+                "level": 2,
+                "name": None,
+                "description": "Average human strength.",
+                "system": None,
+                "link": None,
+            },
+        ],
         "character_classes": ["VAMPIRE", "WEREWOLF"],
         "game_versions": ["V5"],
     }
@@ -1041,6 +1059,9 @@ class TestCharacterBlueprintServiceTraits:
         assert result.name == "Strength"
         assert result.max_value == 5
         assert result.category_id == "category123"
+        assert [p.level for p in result.powers] == [1, 2]
+        assert result.powers[0].name is None
+        assert result.powers[0].description == "Barely able to lift a chair."
 
     @respx.mock
     async def test_get_trait_not_found(self, vclient, base_url) -> None:
