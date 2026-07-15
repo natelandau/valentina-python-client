@@ -100,6 +100,24 @@ def trait_response_data() -> dict:
         "pool": None,
         "system": None,
         "is_rollable": True,
+        "powers": [
+            {
+                "id": "power1",
+                "level": 1,
+                "name": None,
+                "description": "Barely able to lift a chair.",
+                "system": None,
+                "link": None,
+            },
+            {
+                "id": "power2",
+                "level": 2,
+                "name": None,
+                "description": "Average human strength.",
+                "system": None,
+                "link": None,
+            },
+        ],
         "character_classes": ["VAMPIRE", "WEREWOLF"],
         "game_versions": ["V5"],
     }

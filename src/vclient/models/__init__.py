@@ -122,6 +122,7 @@ from .shared import (
     ProviderAudiences,
     RollStatistics,
     Trait,
+    TraitPower,
 )
 from .system import SystemHealth
 from .user_lookup import (
@@ -242,6 +243,7 @@ __all__ = [
     "Trait",
     "TraitCategory",
     "TraitCreate",
+    "TraitPower",
     "TraitSubcategory",
     "User",
     "UserApproveDTO",

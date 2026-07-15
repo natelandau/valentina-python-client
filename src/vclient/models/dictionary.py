@@ -4,6 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from .shared import TraitPower
+
 
 class DictionaryTerm(BaseModel):
     """Response model for a dictionary term."""
@@ -18,6 +20,9 @@ class DictionaryTerm(BaseModel):
     company_id: str | None = None
     source_type: str | None = None
     source_id: str | None = None
+
+    # Populated only for terms with source_type "trait", resolved from that trait's powers.
+    powers: list[TraitPower] = Field(default_factory=list)
 
 
 class DictionaryTermCreate(BaseModel):

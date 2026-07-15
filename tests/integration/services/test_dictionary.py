@@ -225,6 +225,66 @@ class TestDictionaryServiceGet:
         assert result.term == "Test Term"
 
     @respx.mock
+    async def test_get_term_without_powers(self, vclient, base_url, dictionary_term_response_data):
+        """Verify a term with no powers key parses to an empty powers list."""
+        # Given: A mocked dictionary endpoint returning a company-created term
+        company_id = "company123"
+        term_id = "term123"
+        respx.get(
+            f"{base_url}{Endpoints.DICTIONARY_TERM.format(company_id=company_id, term_id=term_id)}",
+        ).respond(200, json=dictionary_term_response_data)
+
+        # When: Getting the dictionary term
+        result = await vclient.dictionary("on-behalf-of-user", company_id=company_id).get(term_id)
+
+        # Then: powers defaults to an empty list
+        assert result.powers == []
+
+    @respx.mock
+    async def test_get_trait_sourced_term_with_powers(
+        self, vclient, base_url, dictionary_term_response_data
+    ):
+        """Verify a trait-sourced term parses its embedded powers."""
+        # Given: A mocked dictionary endpoint returning a trait-sourced term with powers
+        company_id = "company123"
+        term_id = "term123"
+        dictionary_term_response_data |= {
+            "source_type": "trait",
+            "source_id": "trait123",
+            "powers": [
+                {
+                    "id": "power1",
+                    "level": 1,
+                    "name": "A Taste for Blood",
+                    "description": "Discern a vampire's generation.",
+                    "system": "Roll Perception + Occult.",
+                    "link": None,
+                },
+                {
+                    "id": "power2",
+                    "level": 1,
+                    "name": "Rebel's Spark",
+                    "description": "Provoke defiance.",
+                    "system": None,
+                    "link": None,
+                },
+            ],
+        }
+        respx.get(
+            f"{base_url}{Endpoints.DICTIONARY_TERM.format(company_id=company_id, term_id=term_id)}",
+        ).respond(200, json=dictionary_term_response_data)
+
+        # When: Getting the dictionary term
+        result = await vclient.dictionary("on-behalf-of-user", company_id=company_id).get(term_id)
+
+        # Then: Powers are parsed, including several sharing a level
+        assert result.source_type == "trait"
+        assert len(result.powers) == 2
+        assert result.powers[0].name == "A Taste for Blood"
+        assert result.powers[0].system == "Roll Perception + Occult."
+        assert [p.level for p in result.powers] == [1, 1]
+
+    @respx.mock
     async def test_get_not_found(self, vclient, base_url):
         """Verify getting a non-existent dictionary term raises NotFoundError."""
         # Given: A mocked endpoint returning 404
