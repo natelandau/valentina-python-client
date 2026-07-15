@@ -101,7 +101,6 @@ Uploads accept only images (PNG, JPEG, GIF, WEBP); `mime_type` is detected from 
 | show_when_zero | bool | no (default=True) |
 | max_value | int | no (default=5) |
 | min_value | int | no (default=0) |
-| is_custom | bool | no (default=False) |
 | initial_cost | int | no (default=1) |
 | upgrade_cost | int | no (default=2) |
 | count_based_cost_multiplier | int \| None | no |

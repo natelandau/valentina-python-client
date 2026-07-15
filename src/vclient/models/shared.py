@@ -177,7 +177,6 @@ class Trait(BaseModel):
     show_when_zero: bool = True
     max_value: int = 5
     min_value: int = 0
-    is_custom: bool = False
     initial_cost: int = 1
     upgrade_cost: int = 2
     count_based_cost_multiplier: int | None = None
@@ -187,6 +186,7 @@ class Trait(BaseModel):
     sheet_section_id: str
     category_name: str | None = None
     category_id: str
+    # Non-null marks a custom trait owned by that character, which is deleted along with it.
     custom_for_character_id: str | None = None
     subcategory_id: str | None = None
     subcategory_name: str | None = None

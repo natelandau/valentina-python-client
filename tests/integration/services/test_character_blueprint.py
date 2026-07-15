@@ -127,7 +127,6 @@ def trait_response_data() -> dict:
         "show_when_zero": True,
         "max_value": 5,
         "min_value": 0,
-        "is_custom": False,
         "initial_cost": 1,
         "upgrade_cost": 5,
         "sheet_section_name": "Attributes",

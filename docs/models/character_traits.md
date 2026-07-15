@@ -75,12 +75,12 @@ Response from `bulk_assign()`. Contains results grouped by outcome.
 | `description`                 | `str \| None`            | Trait description                      |
 | `max_value`                   | `int`                    | Maximum value                          |
 | `min_value`                   | `int`                    | Minimum value                          |
-| `is_custom`                   | `bool`                   | Whether custom trait                   |
 | `initial_cost`                | `int`                    | XP cost to acquire                     |
 | `upgrade_cost`                | `int`                    | XP cost per upgrade                    |
 | `count_based_cost_multiplier` | `int \| None`            | Count-based cost multiplier for traits |
 | `category_id`                 | `str`                    | Category ID                            |
 | `category_name`               | `str \| None`            | Category name                          |
+| `custom_for_character_id`     | `str \| None`            | Owning character if custom, else None  |
 | `subcategory_id`              | `str \| None`            | Subcategory ID                         |
 | `subcategory_name`            | `str \| None`            | Subcategory name                       |
 | `pool`                        | `str \| None`            | Traits that contribute to the pool     |

@@ -737,7 +737,6 @@ class TestCharacterDetail:
                         "date_modified": "2024-01-15T10:30:00Z",
                         "max_value": 5,
                         "min_value": 0,
-                        "is_custom": False,
                         "show_when_zero": True,
                         "sheet_section_id": "sec1",
                         "category_id": "cat1",

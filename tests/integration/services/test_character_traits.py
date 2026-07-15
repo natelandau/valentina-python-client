@@ -482,7 +482,7 @@ class TestCharacterTraitsServiceCreate:
             "trait": {
                 **character_trait_response_data["trait"],
                 "name": "Custom Skill",
-                "is_custom": True,
+                "custom_for_character_id": "char123",
             },
         }
         route = respx.post(
@@ -532,7 +532,7 @@ class TestCharacterTraitsServiceCreate:
                 "show_when_zero": False,
                 "initial_cost": 3,
                 "upgrade_cost": 2,
-                "is_custom": True,
+                "custom_for_character_id": "char123",
             },
         }
         route = respx.post(
