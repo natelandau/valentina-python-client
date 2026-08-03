@@ -1,3 +1,17 @@
+## v3.3.0 (2026-08-03)
+
+### Feat
+
+- **traits**: expose dot-level powers on traits and dictionary terms (#85)
+- **characters**: add optional date_of_birth field
+- **campaigns**: add in_game_date field for the in-world date
+
+### Fix
+
+- **traits**: remove is_custom from trait responses
+- **campaigns**: add optional year field
+- **traits**: add is_rollable field to custom trait creation
+
 ## v3.2.0 (2026-07-11)
 
 ### Feat
