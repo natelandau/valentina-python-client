@@ -5,8 +5,8 @@
         "Programming Language :: Python :: 3.14",
     ]
     dependencies = [
-        "anyio>=4.14.1,<5.0.0",
-        "httpx2>=2.5.0",
+        "anyio>=4.14.2,<5.0.0",
+        "httpx2>=2.9.1",
         "loguru>=0.7.3",
         "polyfactory>=3.3.0, <4.0.0",
         "pydantic[email]>=2.13.4, <3.0.0",
@@ -27,22 +27,22 @@
 
 [build-system]
     build-backend = "uv_build"
-    requires      = ["uv_build>=0.11.15,<0.12.0"]
+    requires      = ["uv_build>=0.11.15,<0.13.0"]
 
 [tool.uv.build-backend]
     module-name = "vclient"
 
 [dependency-groups]
     dev = [
-        "commitizen>=4.16.4",
-        "coverage>=7.15.0",
+        "commitizen>=4.17.0",
+        "coverage>=7.15.3",
         "duty>=1.9.0",
         "httpx>=0.28.1",
-        "prek>=0.4.8",
+        "prek>=0.4.12",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.1.0",
-        "pytest-devtools>=1.2.0",
+        "pytest-devtools>=1.3.0",
         "pytest-httpx2>=1.0.0",
         "pytest-mock>=3.15.1",
         "pytest-repeat>=0.9.4",
@@ -50,14 +50,14 @@
         "pytest-xdist>=3.8.0",
         "pytest>=9.1.1",
         "respx>=0.23.1",
-        "ruff>=0.15.20",
+        "ruff>=0.16.1",
         "shellcheck-py>=0.11.0.1",
-        "ty>=0.0.56",
+        "ty>=0.0.65",
         "typos>=1.48.0",
         "vulture>=2.16",
         "yamllint>=1.38.0",
     ]
-    docs = ["zensical>=0.0.47"]
+    docs = ["zensical>=0.0.52"]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"
@@ -168,7 +168,8 @@
             "FBT001",  # Boolean-typed positional argument in function definition
             "PGH003",  # Use specific rule codes when ignoring type issues
             "PLC0415", # Imports should be at top of file
-            "PLR0913",
+            "PLR0913", # Too many positional arguments
+            "PLR0917", # Too many positional arguments
             "PLR2004",
             "PT011",   # set the `match` parameter or use a more specific exception
             "S101",

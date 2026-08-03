@@ -31,7 +31,7 @@ _logger.add(
     # Forward TRACE too (e.g. the "Send request" line) and let the consumer's
     # stdlib logging level decide what to show; the sink must not pre-filter it.
     level="TRACE",
-    filter=lambda record: record["name"].startswith("vclient"),
+    filter=lambda record: record["name"].startswith("vclient"),  # ty: ignore[unresolved-attribute]
 )
 
 _logger.disable("vclient")
