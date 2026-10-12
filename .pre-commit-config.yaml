@@ -62,20 +62,13 @@ repos:
         files: ^.*\.(yaml|yml)$
         entry: yamllint --strict --config-file .yamllint.yml
 
-  - repo: "https://github.com/astral-sh/ruff-pre-commit"
-    rev: v0.17.0
-    hooks:
-      - id: ruff-check
-      - id: ruff-format
-        args: [--check]
-        exclude: ^src/vclient/_sync/
-
+    # Pre-commit stage typos runs through `duty typos`; this hook only checks commit messages
   - repo: "https://github.com/adhtruong/mirrors-typos"
     rev: v1.51.1
     hooks:
       - id: typos
         args: ["--force-exclude"]
-        stages: [commit-msg, pre-commit]
+        stages: [commit-msg]
 
   - repo: "https://github.com/gitleaks/gitleaks"
     rev: v8.30.1
@@ -117,11 +110,33 @@ repos:
         language: system
         types: [shell]
 
+      # Gates below run through duty so hooks, agents, and the terminal share gate-cache markers
+      - id: ruff-check
+        name: ruff check
+        entry: uv run duty ruff
+        language: system
+        pass_filenames: false
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format
+        entry: uv run duty format
+        language: system
+        pass_filenames: false
+        types_or: [python, markdown]
+
+      - id: typos
+        name: typos
+        entry: uv run duty typos
+        language: system
+        pass_filenames: false
+
       - id: ty
         name: ty
-        entry: uv run ty check src/
+        entry: uv run duty ty
         exclude: "tests/|duties.py|scripts/|src/vclient/_sync/"
         language: system
+        pass_filenames: false
         types: [python]
 
       - id: pytest
