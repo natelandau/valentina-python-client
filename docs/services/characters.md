@@ -11,10 +11,7 @@ Manage characters within a campaign, including their statistics, assets, notes, 
 ```python
 from vclient import characters_service
 
-characters = characters_service(
-    on_behalf_of="USER_ID",
-    company_id="COMPANY_ID"
-)
+characters = characters_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 The `on_behalf_of` user ID is required and is sent on every request, including reads. The acting user's role determines what is visible.
@@ -151,7 +148,7 @@ request = CharacterCreate(
     name_first="Marcus",
     name_last="Blackwood",
     date_of_birth=date(1888, 6, 15),  # optional ISO 8601 calendar date
-    user_player_id="player_user_id"
+    user_player_id="player_user_id",
 )
 character = await characters.create(request)
 
@@ -162,7 +159,7 @@ character = await characters.create(
     game_version="V5",
     name_first="Marcus",
     name_last="Blackwood",
-    user_player_id="player_user_id"
+    user_player_id="player_user_id",
 )
 
 # Update character details
@@ -179,9 +176,7 @@ print(f"Success rate: {stats.success_percentage}%")
 
 # Add an inventory item
 item_request = InventoryItemCreate(
-    name="Silver Dagger",
-    type="weapon",
-    description="An ornate blade"
+    name="Silver Dagger", type="weapon", description="An ornate blade"
 )
 item = await characters.create_inventory_item(character.id, item_request)
 

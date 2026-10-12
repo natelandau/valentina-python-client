@@ -79,16 +79,13 @@ request = CampaignCreate(
     description="A noir vampire chronicle",
     in_game_date=date(1924, 1, 1),  # ISO 8601 calendar date the campaign is set in
     desperation=2,
-    danger=3
+    danger=3,
 )
 campaign = await campaigns.create(request)
 print(f"Created campaign: {campaign.name}")
 
 # Alternative: pass fields as kwargs
-campaign = await campaigns.create(
-    name="Dark Metropolis",
-    description="A noir vampire chronicle"
-)
+campaign = await campaigns.create(name="Dark Metropolis", description="A noir vampire chronicle")
 
 # Update a campaign
 update = CampaignUpdate(danger=4)

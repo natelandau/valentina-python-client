@@ -112,10 +112,21 @@ UserInclude = Literal["quickrolls", "notes", "assets", "characters"]
 
 ```python
 AuditEntityType = Literal[
-    "ASSET", "BOOK", "CAMPAIGN", "CHAPTER", "CHARACTER",
-    "CHARACTER_INVENTORY", "CHARACTER_TRAIT", "CHARGEN_SESSION",
-    "COMPANY", "DEVELOPER", "DICTIONARY_TERM", "EXPERIENCE",
-    "NOTE", "QUICKROLL", "USER",
+    "ASSET",
+    "BOOK",
+    "CAMPAIGN",
+    "CHAPTER",
+    "CHARACTER",
+    "CHARACTER_INVENTORY",
+    "CHARACTER_TRAIT",
+    "CHARGEN_SESSION",
+    "COMPANY",
+    "DEVELOPER",
+    "DICTIONARY_TERM",
+    "EXPERIENCE",
+    "NOTE",
+    "QUICKROLL",
+    "USER",
 ]
 AuditOperation = Literal["CREATE", "UPDATE", "DELETE"]
 AuditLogInclude = Literal["request_details"]
@@ -131,11 +142,11 @@ LogLevel = Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 ```python
 # Defaults
-DEFAULT_TIMEOUT = 30.0          # seconds
+DEFAULT_TIMEOUT = 30.0  # seconds
 DEFAULT_MAX_RETRIES = 3
-DEFAULT_RETRY_DELAY = 1.0       # seconds
+DEFAULT_RETRY_DELAY = 1.0  # seconds
 DEFAULT_PAGE_LIMIT = 10
-MAX_PAGE_LIMIT = 100             # cap for most list endpoints
+MAX_PAGE_LIMIT = 100  # cap for most list endpoints
 MAX_REFERENCE_PAGE_LIMIT = 1000  # cap for reference/catalog endpoints (blueprint, dictionary)
 DEFAULT_LOG_TAIL_LIMIT = 100
 MIN_LOG_TAIL_LIMIT = 1

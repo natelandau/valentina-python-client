@@ -14,10 +14,7 @@ Campaign chapters organize content within books. Each chapter can contain notes 
 from vclient import chapters_service
 
 chapters = chapters_service(
-    campaign_id="CAMPAIGN_ID",
-    book_id="BOOK_ID",
-    on_behalf_of="USER_ID",
-    company_id="COMPANY_ID"
+    campaign_id="CAMPAIGN_ID", book_id="BOOK_ID", on_behalf_of="USER_ID", company_id="COMPANY_ID"
 )
 ```
 
@@ -44,10 +41,12 @@ Both `create()` and `update()` accept an optional `character_ids: list[str] | No
 from vclient.models import ChapterCreate, ChapterUpdate
 
 # Create a chapter with character associations
-chapter = await chapters.create(ChapterCreate(
-    name="The First Night",
-    character_ids=["char-123", "char-456"],
-))
+chapter = await chapters.create(
+    ChapterCreate(
+        name="The First Night",
+        character_ids=["char-123", "char-456"],
+    )
+)
 
 # Clear all character associations
 updated = await chapters.update(chapter.id, ChapterUpdate(character_ids=[]))
@@ -67,13 +66,11 @@ When a value is not included in the request, the corresponding field on `Campaig
 ```python
 from vclient import chapters_service
 
-chapters = chapters_service(
-    campaign_id="...", book_id="...", on_behalf_of="...", company_id="..."
-)
+chapters = chapters_service(campaign_id="...", book_id="...", on_behalf_of="...", company_id="...")
 
 # Embed notes and assets in a single request
 chapter = await chapters.get("chapter_id", include=["notes", "assets"])
-assert chapter.notes is not None   # list[Note]
+assert chapter.notes is not None  # list[Note]
 assert chapter.assets is not None  # list[Asset]
 ```
 
@@ -116,17 +113,13 @@ assert chapter.assets is not None  # list[Asset]
 from vclient.models import ChapterCreate, ChapterUpdate
 
 # Create a chapter (preferred: use model object)
-request = ChapterCreate(
-    name="The First Night",
-    description="Characters meet for the first time"
-)
+request = ChapterCreate(name="The First Night", description="Characters meet for the first time")
 chapter = await chapters.create(request)
 print(f"Created chapter #{chapter.number}: {chapter.name}")
 
 # Alternative: pass fields as kwargs
 chapter = await chapters.create(
-    name="The First Night",
-    description="Characters meet for the first time"
+    name="The First Night", description="Characters meet for the first time"
 )
 
 # Update a chapter

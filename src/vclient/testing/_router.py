@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import re
 import secrets
 from typing import TYPE_CHECKING, Any
@@ -349,7 +349,7 @@ class _FakeRouter:
     @staticmethod
     def _with_elapsed(response: httpx2.Response) -> None:
         """Set the elapsed time on a response so BaseService._request can log it."""
-        response.elapsed = datetime.timedelta(milliseconds=1)
+        response.elapsed = dt.timedelta(milliseconds=1)
 
     @staticmethod
     def _with_request_id(response: httpx2.Response) -> None:

@@ -64,19 +64,13 @@ companies = companies_service()
 from vclient.models import CompanyCreate, CompanyUpdate
 
 # Create a company (preferred method: use model object)
-request = CompanyCreate(
-    name="Dark Haven Games",
-    email="contact@darkhaven.com"
-)
+request = CompanyCreate(name="Dark Haven Games", email="contact@darkhaven.com")
 result = await companies.create(request)
 company = result.company
 admin_user = result.admin_user
 
 # Alternative: pass fields as keyword arguments
-result = await companies.create(
-    name="Dark Haven Games",
-    email="contact@darkhaven.com"
-)
+result = await companies.create(name="Dark Haven Games", email="contact@darkhaven.com")
 
 # Update company details
 update = CompanyUpdate(name="Dark Haven Gaming")
@@ -84,9 +78,7 @@ updated = await companies.update(company.id, update)
 
 # Grant admin access to another developer
 permissions = await companies.grant_access(
-    company_id=company.id,
-    developer_id="507f1f77bcf86cd799439012",
-    permission="ADMIN"
+    company_id=company.id, developer_id="507f1f77bcf86cd799439012", permission="ADMIN"
 )
 print(f"Granted {permissions.permission} access")
 ```

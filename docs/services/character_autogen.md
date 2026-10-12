@@ -11,10 +11,7 @@ Generate characters for a campaign using AI-assisted character creation.
 ```python
 from vclient import character_autogen_service
 
-autogen = character_autogen_service(
-    on_behalf_of="USER_ID",
-    company_id="COMPANY_ID"
-)
+autogen = character_autogen_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
 ## Methods
@@ -65,7 +62,7 @@ character = await autogen.generate_character(
     campaign_id="campaign_id",
     character_type="PLAYER",
     character_class="VAMPIRE",
-    experience_level="NEONATE"
+    experience_level="NEONATE",
 )
 
 # Use an interactive session for multiple character options
@@ -75,8 +72,7 @@ print(f"Characters available: {len(session.characters)}")
 
 # Finalize by selecting one of the generated characters
 final_character = await autogen.finalize_chargen_session(
-    session_id=session.id,
-    selected_character_id=session.characters[0].id
+    session_id=session.id, selected_character_id=session.characters[0].id
 )
 ```
 

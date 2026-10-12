@@ -44,8 +44,8 @@ books = books_service(campaign_id="...", on_behalf_of="...", company_id="...")
 # Embed chapters and notes in a single request
 book = await books.get("book_id", include=["chapters", "notes"])
 assert book.chapters is not None  # list[CampaignChapter]
-assert book.notes is not None     # list[Note]
-assert book.assets is None        # not requested
+assert book.notes is not None  # list[Note]
+assert book.assets is None  # not requested
 ```
 
 ### Pagination
@@ -87,18 +87,12 @@ assert book.assets is None        # not requested
 from vclient.models import BookCreate, BookUpdate
 
 # Create a book (preferred: use model object)
-request = BookCreate(
-    name="Act One",
-    description="The beginning of the story"
-)
+request = BookCreate(name="Act One", description="The beginning of the story")
 book = await books.create(request)
 print(f"Created book #{book.number}: {book.name}")
 
 # Alternative: pass fields as kwargs
-book = await books.create(
-    name="Act One",
-    description="The beginning of the story"
-)
+book = await books.create(name="Act One", description="The beginning of the story")
 
 # Update a book
 update = BookUpdate(name="Act One: Origins")

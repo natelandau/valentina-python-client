@@ -53,6 +53,7 @@ Integrate health checks into your monitoring infrastructure.
 import asyncio
 from vclient import system_service
 
+
 async def monitor_health():
     """Poll API health every 60 seconds."""
     system = system_service()

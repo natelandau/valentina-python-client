@@ -29,6 +29,7 @@ import asyncio
 from vclient import campaigns_service
 from vclient.testing import FakeVClient
 
+
 async def main():
     async with FakeVClient() as client:
         # Factory functions work without configuration
@@ -38,6 +39,7 @@ async def main():
         # Each item is a real Campaign model instance
         for campaign in result:
             print(f"Campaign: {campaign.name}")
+
 
 asyncio.run(main())
 ```
@@ -135,8 +137,8 @@ async with FakeVClient() as client:
     )
 
     svc = campaigns_service("user-123")
-    await svc.get("target-id")   # returns specific
-    await svc.get("anything")    # returns generic
+    await svc.get("target-id")  # returns specific
+    await svc.get("anything")  # returns generic
 ```
 
 The `params` kwarg works with `set_error()` too:
@@ -152,7 +154,7 @@ async with FakeVClient() as client:
 
     svc = campaigns_service("user-123")
     await svc.get("missing-id")  # raises NotFoundError
-    await svc.get("other-id")    # returns auto-generated data
+    await svc.get("other-id")  # returns auto-generated data
 ```
 
 The parameter names in `params` correspond to the `{placeholders}` in the endpoint URL patterns. For example, `Routes.CAMPAIGNS_GET` matches the pattern `/api/v1/companies/{company_id}/campaigns/{campaign_id}`, so valid keys are `company_id` and `campaign_id`.
@@ -217,9 +219,9 @@ Instead of writing JSON by hand, use the included model factories to generate va
 from vclient.testing import CampaignFactory, FakeVClient
 
 campaign = CampaignFactory.build(name="Test Campaign")
-print(campaign.name)       # "Test Campaign"
-print(campaign.id)         # auto-generated valid string
-print(campaign.game_system) # auto-generated valid Literal value
+print(campaign.name)  # "Test Campaign"
+print(campaign.id)  # auto-generated valid string
+print(campaign.game_system)  # auto-generated valid Literal value
 ```
 
 Factories support batch creation:
@@ -306,10 +308,12 @@ In pytest, this means your fake client fixture must be created _after_ any appli
 import pytest
 from vclient.testing import FakeVClient
 
+
 @pytest.fixture
 def app():
     # Your application creates a real VClient internally
     return create_app()
+
 
 @pytest.fixture
 async def fake_client(app):

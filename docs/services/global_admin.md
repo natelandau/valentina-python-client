@@ -103,18 +103,11 @@ Add a new developer to the system.
 from vclient.models import DeveloperCreate
 
 # Option 1: Use a model object (preferred)
-request = DeveloperCreate(
-    username="newdev",
-    email="dev@example.com",
-    is_global_admin=False
-)
+request = DeveloperCreate(username="newdev", email="dev@example.com", is_global_admin=False)
 dev = await admins.create_developer(request)
 
 # Option 2: Pass fields as keyword arguments
-dev = await admins.create_developer(
-    username="newdev",
-    email="dev@example.com"
-)
+dev = await admins.create_developer(username="newdev", email="dev@example.com")
 ```
 
 ### Update Developer Settings
@@ -124,10 +117,7 @@ Modify a developer account's properties.
 ```python
 from vclient.models import DeveloperUpdate
 
-update = DeveloperUpdate(
-    email="newemail@example.com",
-    is_global_admin=True
-)
+update = DeveloperUpdate(email="newemail@example.com", is_global_admin=True)
 updated = await admins.update_developer(dev.id, update)
 
 # Register per-developer OIDC audiences so the developer's own apps

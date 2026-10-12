@@ -3,13 +3,14 @@
     classifiers = [
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
     ]
     dependencies = [
-        "anyio>=4.14.2,<5.0.0",
-        "httpx2>=2.9.1",
+        "anyio>=4.15.1,<5.0.0",
+        "httpx2>=2.13.1",
         "loguru>=0.7.3",
         "polyfactory>=3.3.0, <4.0.0",
-        "pydantic[email]>=2.13.4, <3.0.0",
+        "pydantic[email]>=2.14.1,<3.0.0",
     ]
     description = "Async Python client library for the Valentina Noir API"
     license = { file = "LICENSE" }
@@ -27,37 +28,37 @@
 
 [build-system]
     build-backend = "uv_build"
-    requires      = ["uv_build>=0.11.15,<0.13.0"]
+    requires      = ["uv_build>=0.13.0,<0.14"]
 
 [tool.uv.build-backend]
     module-name = "vclient"
 
 [dependency-groups]
     dev = [
-        "commitizen>=4.17.0",
-        "coverage>=7.15.3",
-        "duty>=1.9.0",
+        "commitizen>=4.19.2",
+        "coverage>=7.16.2",
+        "duty>=1.10.1",
         "httpx>=0.28.1",
-        "prek>=0.4.12",
+        "prek>=0.5.5",
         "pytest-anyio>=0.0.0",
         "pytest-clarity>=1.0.1",
         "pytest-cov>=7.1.0",
         "pytest-devtools>=1.3.0",
         "pytest-httpx2>=1.0.0",
-        "pytest-mock>=3.15.1",
+        "pytest-mock>=3.16.0",
         "pytest-repeat>=0.9.4",
         "pytest-sugar>=1.1.1",
         "pytest-xdist>=3.8.0",
         "pytest>=9.1.1",
         "respx>=0.23.1",
-        "ruff>=0.16.1",
+        "ruff>=0.17.0",
         "shellcheck-py>=0.11.0.1",
-        "ty>=0.0.65",
-        "typos>=1.48.0",
+        "ty>=0.0.86",
+        "typos>=1.51.1",
         "vulture>=2.16",
         "yamllint>=1.38.0",
     ]
-    docs = ["zensical>=0.0.52"]
+    docs = ["zensical>=0.0.70"]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"

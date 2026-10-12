@@ -209,6 +209,7 @@ from vclient.exceptions import APIError
 
 logger = logging.getLogger(__name__)
 
+
 async def call_api(coro):
     try:
         return await coro
@@ -238,6 +239,7 @@ from vclient.exceptions import (
     APIError,
 )
 
+
 def translate(exc: APIError) -> HTTPException:
     if isinstance(exc, NotFoundError):
         return HTTPException(status_code=404, detail=exc.detail)
@@ -262,6 +264,7 @@ import asyncio
 import random
 from vclient.exceptions import ConflictError
 
+
 async def with_conflict_retry(fn, *, attempts: int = 5):
     for attempt in range(attempts):
         try:
@@ -269,7 +272,7 @@ async def with_conflict_retry(fn, *, attempts: int = 5):
         except ConflictError:
             if attempt == attempts - 1:
                 raise
-            await asyncio.sleep((2 ** attempt) * 0.1 + random.random() * 0.1)
+            await asyncio.sleep((2**attempt) * 0.1 + random.random() * 0.1)
 ```
 
 ### Separating recoverable from fatal errors
@@ -287,9 +290,9 @@ FATAL = (AuthenticationError, AuthorizationError)
 try:
     result = await svc.do_something()
 except FATAL:
-    raise                     # caller cannot recover — bubble up
+    raise  # caller cannot recover — bubble up
 except NotFoundError:
-    result = default_value    # absent is fine
+    result = default_value  # absent is fine
 except APIError as e:
     logger.warning("transient failure, skipping", request_id=e.request_id)
     result = None
@@ -305,11 +308,13 @@ from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError, RateLimitError, ValidationError
 from vclient.testing import FakeVClient, Routes
 
+
 async def test_handles_missing_user():
     async with FakeVClient() as client:
         client.set_error(Routes.USERS_GET, status_code=404, detail="no such user")
         with pytest.raises(NotFoundError):
             await client.users(on_behalf_of="u", company_id="c").get("missing")
+
 
 async def test_surfaces_invalid_parameters():
     async with FakeVClient() as client:
@@ -329,6 +334,7 @@ async def test_surfaces_invalid_parameters():
             await client.campaigns(on_behalf_of="u", company_id="c").create(name="abc")
         assert exc_info.value.invalid_parameters[0]["field"] == "name"
 
+
 async def test_handles_rate_limit():
     async with FakeVClient(auto_retry_rate_limit=False) as client:
         client.set_error(Routes.USERS_LIST, status_code=429, detail="slow down")
@@ -344,6 +350,7 @@ For client-side validation (`RequestValidationError`), no HTTP mock is needed �
 import pytest
 from vclient.exceptions import RequestValidationError
 from vclient.testing import FakeVClient
+
 
 async def test_rejects_bad_email_before_request():
     async with FakeVClient() as client:

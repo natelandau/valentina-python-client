@@ -46,6 +46,7 @@ Create a client once at application startup, then access API services from anywh
 import asyncio
 from vclient import VClient, companies_service, campaigns_service
 
+
 async def main():
     async with VClient(
         base_url="https://api.valentina-noir.com",
@@ -63,6 +64,7 @@ async def main():
         )
         for campaign in await campaigns.list_all():
             print(f"Campaign: {campaign.name}")
+
 
 asyncio.run(main())
 ```

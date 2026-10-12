@@ -51,8 +51,8 @@ users = users_service(on_behalf_of="...", company_id="...")
 user = await users.get("user_id", include=["quickrolls", "characters"])
 assert user.quickrolls is not None  # list[Quickroll]
 assert user.characters is not None  # list[Character] — only characters the user plays
-assert user.notes is None           # not requested
-assert user.assets is None          # not requested
+assert user.notes is None  # not requested
+assert user.assets is None  # not requested
 ```
 
 ### Pagination Methods
@@ -118,7 +118,9 @@ Both methods require the `On-Behalf-Of` header (permitted for the user themselve
 
 ```python
 user = await client.users("user-123", company_id="company-456").upload_avatar(
-    "user-123", "pic.png", image_bytes,
+    "user-123",
+    "pic.png",
+    image_bytes,
 )
 print(user.avatar_url)
 
@@ -217,8 +219,7 @@ from vclient.models import NoteCreate, NoteUpdate
 
 # Create a note with markdown content
 note_request = NoteCreate(
-    title="Session 12 Notes",
-    content="## Key Events\n\n- Met the Prince\n- Discovered betrayal"
+    title="Session 12 Notes", content="## Key Events\n\n- Met the Prince\n- Discovered betrayal"
 )
 note = await users.create_note(user.id, note_request)
 
@@ -243,7 +244,7 @@ from vclient.models import QuickrollCreate
 quickroll_request = QuickrollCreate(
     name="Strength + Brawl",
     description="Melee combat attack",
-    trait_ids=["trait_strength_id", "trait_brawl_id"]
+    trait_ids=["trait_strength_id", "trait_brawl_id"],
 )
 quickroll = await users.create_quickroll(user.id, quickroll_request)
 

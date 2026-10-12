@@ -54,7 +54,7 @@ request = DicerollCreate(
     comment="Strength + Brawl",
     trait_ids=["strength_id", "brawl_id"],
     character_id="character_id",
-    campaign_id="campaign_id"
+    campaign_id="campaign_id",
 )
 roll = await dicerolls.create(request)
 print(f"Rolled {roll.successes} successes")
@@ -66,7 +66,7 @@ roll = await dicerolls.create(
     difficulty=6,
     comment="Strength + Brawl",
     character_id="character_id",
-    campaign_id="campaign_id"
+    campaign_id="campaign_id",
 )
 ```
 
@@ -75,10 +75,7 @@ roll = await dicerolls.create(
 ```python
 # Create a roll from a saved quickroll template
 roll = await dicerolls.create_from_quickroll(
-    quickroll_id="quickroll_id",
-    character_id="character_id",
-    comment="Combat roll",
-    difficulty=6
+    quickroll_id="quickroll_id", character_id="character_id", comment="Combat roll", difficulty=6
 )
 ```
 

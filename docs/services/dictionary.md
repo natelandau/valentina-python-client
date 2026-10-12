@@ -50,7 +50,7 @@ from vclient.models import DictionaryTermCreate
 request = DictionaryTermCreate(
     term="Embrace",
     definition="The act of turning a mortal into a vampire",
-    synonyms=["Turn", "Siring"]
+    synonyms=["Turn", "Siring"],
 )
 term = await dictionary.create(request)
 
@@ -58,7 +58,7 @@ term = await dictionary.create(request)
 term = await dictionary.create(
     term="Embrace",
     definition="The act of turning a mortal into a vampire",
-    synonyms=["Turn", "Siring"]
+    synonyms=["Turn", "Siring"],
 )
 ```
 
@@ -69,9 +69,7 @@ Modify an existing dictionary term's definition or synonyms.
 ```python
 from vclient.models import DictionaryTermUpdate
 
-update = DictionaryTermUpdate(
-    definition="The transformation of a mortal into an immortal vampire"
-)
+update = DictionaryTermUpdate(definition="The transformation of a mortal into an immortal vampire")
 updated = await dictionary.update(term.id, update)
 ```
 

@@ -99,7 +99,9 @@ except UnprocessableEntityError as e:
     if e.code == "TOKEN_VERIFICATION_FAILED":
         ...  # ask the user to sign in again
     elif e.code == "EMAIL_REQUIRED":
-        result = await svc.identify(provider="apple", token=token, email=collected_email)  # prompt the user for an email address, then retry
+        result = await svc.identify(
+            provider="apple", token=token, email=collected_email
+        )  # prompt the user for an email address, then retry
 ```
 
 ## Related Documentation

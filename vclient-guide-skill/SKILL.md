@@ -206,11 +206,11 @@ See `references/error-handling.md` for deeper patterns (correlation IDs, retry-a
 VClient(
     base_url="...",
     api_key="...",
-    timeout=30.0,              # Request timeout (seconds)
-    max_retries=3,             # Retry attempts for transient errors
-    retry_delay=1.0,           # Base delay between retries
+    timeout=30.0,  # Request timeout (seconds)
+    max_retries=3,  # Retry attempts for transient errors
+    retry_delay=1.0,  # Base delay between retries
     auto_retry_rate_limit=True,  # Auto-retry on 429
-    auto_idempotency_keys=False, # Auto-generate idempotency keys for POST/PUT/PATCH
+    auto_idempotency_keys=False,  # Auto-generate idempotency keys for POST/PUT/PATCH
     retry_statuses={429, 500, 502, 503, 504},
     default_company_id="...",
     headers={"X-Custom": "value"},
