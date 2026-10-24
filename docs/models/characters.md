@@ -43,9 +43,32 @@ Models for player and non-player characters, including class-specific attributes
 | `werewolf_attributes` | `WerewolfAttributes \| None` | Werewolf-specific data                          |
 | `hunter_attributes`   | `HunterAttributes \| None`   | Hunter-specific data                            |
 | `mage_attributes`     | `MageAttributes \| None`     | Mage-specific data                              |
+| `health`              | `Health \| None`             | Health track. `None` only from an API that does not support health |
 | `num_inventory_items` | `int`                        | Active inventory item count (excludes archived) |
 | `num_notes`           | `int`                        | Active note count (excludes archived)           |
 | `num_assets`          | `int`                        | Active asset count (excludes archived)          |
+
+## Health
+
+A character's health track. `Health` has every field of [`DamageTracker`](character_traits.md#damagetracker), plus one field:
+
+| Field          | Type  | Description                                 |
+| -------------- | ----- | ------------------------------------------- |
+| `extra_levels` | `int` | Health levels added to the base track       |
+
+## HealthStateSet
+
+Request body for `set_health()`, and the `health` field of `CharacterCreate`. All fields default to 0, and the client sends every field. V4 uses `bashing`, `lethal`, and `aggravated`. V5 uses `superficial` and `aggravated`. Both use `extra_levels`. A nonzero value in a field that the game version does not use causes a `ValidationError`.
+
+| Field          | Type  | Description                    |
+| -------------- | ----- | ------------------------------ |
+| `extra_levels` | `int` | Extra health levels            |
+| `superficial`  | `int` | V5 superficial damage          |
+| `aggravated`   | `int` | Aggravated damage              |
+| `bashing`      | `int` | V4 bashing damage              |
+| `lethal`       | `int` | V4 lethal damage               |
+
+All values must be 0 or more.
 
 ## VampireAttributes
 

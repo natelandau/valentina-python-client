@@ -11,11 +11,17 @@ from vclient.models import (
     BulkAssignTraitSuccess,
 )
 from vclient.models.character_trait import (
+    _TRACKER_ADAPTER,
     CharacterTrait,
     CharacterTraitAdd,
     CharacterTraitSpecialtyCreate,
     CharacterTraitSpecialtyUpdate,
+    CounterTracker,
+    DamageTracker,
+    StainsTracker,
+    TrackerStateSet,
     TraitCreate,
+    _TrackerAction,
 )
 from vclient.models.shared import Trait
 
@@ -463,3 +469,132 @@ class TestCharacterTraitSpecialtyUpdate:
         # When/Then: Constructing raises
         with pytest.raises(PydanticValidationError):
             CharacterTraitSpecialtyUpdate(name=name)
+
+
+def _character_trait_data(**overrides: object) -> dict:
+    """Return a minimal valid CharacterTrait payload, without tracker fields."""
+    data: dict = {
+        "id": "ct123",
+        "character_id": "char123",
+        "value": 3,
+        "trait": {
+            "id": "trait123",
+            "name": "Willpower",
+            "date_created": "2024-01-15T10:30:00Z",
+            "date_modified": "2024-01-15T10:30:00Z",
+            "category_id": "cat123",
+            "sheet_section_id": "section123",
+        },
+    }
+    data.update(overrides)
+    return data
+
+
+class TestTrackerModels:
+    """Tests for trait tracker response and request models."""
+
+    def test_counter_tracker_dispatch(self) -> None:
+        """Verify a COUNTER tracker parses as CounterTracker."""
+        # When: Parsing a trait with a counter tracker
+        ct = CharacterTrait.model_validate(
+            _character_trait_data(tracker={"type": "COUNTER", "size": 5, "current": 3})
+        )
+
+        # Then: The counter variant is chosen
+        assert isinstance(ct.tracker, CounterTracker)
+        assert ct.tracker.current == 3
+
+    def test_damage_tracker_dispatch(self) -> None:
+        """Verify a DAMAGE tracker parses as DamageTracker with V4 fields unset."""
+        # When: Parsing a trait with a damage tracker
+        ct = CharacterTrait.model_validate(
+            _character_trait_data(
+                tracker={
+                    "type": "DAMAGE",
+                    "size": 5,
+                    "superficial": 1,
+                    "aggravated": 1,
+                    "boxes": ["AGGRAVATED", "SUPERFICIAL", None, None, None],
+                    "is_impaired": False,
+                }
+            )
+        )
+
+        # Then: The damage variant is chosen with empty boxes as None
+        assert isinstance(ct.tracker, DamageTracker)
+        assert ct.tracker.boxes[2] is None
+        assert ct.tracker.levels is None
+
+    def test_stains_tracker_dispatch(self) -> None:
+        """Verify a STAINS tracker parses as StainsTracker."""
+        # When: Parsing a trait with a stains tracker
+        ct = CharacterTrait.model_validate(
+            _character_trait_data(
+                tracker={
+                    "type": "STAINS",
+                    "humanity": 7,
+                    "stain_capacity": 3,
+                    "stains": 4,
+                    "is_impaired": True,
+                    "willpower_damage_applied": 1,
+                }
+            )
+        )
+
+        # Then: The stains variant is chosen
+        assert isinstance(ct.tracker, StainsTracker)
+        assert ct.tracker.willpower_damage_applied == 1
+
+    def test_unknown_tracker_type_rejected(self) -> None:
+        """Verify an unknown tracker type fails validation."""
+        # When/Then: Parsing an unknown tracker type raises
+        with pytest.raises(PydanticValidationError):
+            CharacterTrait.model_validate(
+                _character_trait_data(tracker={"type": "BOGUS", "size": 1, "current": 1})
+            )
+
+    def test_tracker_absent_defaults_none(self) -> None:
+        """Verify payloads from an API without trackers still parse."""
+        # When: Parsing a trait with no tracker fields
+        ct = CharacterTrait.model_validate(_character_trait_data())
+
+        # Then: Tracker fields default to None
+        assert ct.tracker is None
+        assert ct.trait.tracker_type_v4 is None
+        assert ct.trait.tracker_type_v5 is None
+
+    def test_tracker_adapter_validates(self) -> None:
+        """Verify the shared adapter dispatches on type."""
+        # When: Validating a raw counter payload
+        tracker = _TRACKER_ADAPTER.validate_python({"type": "COUNTER", "size": 2, "current": 2})
+
+        # Then: A CounterTracker is returned
+        assert isinstance(tracker, CounterTracker)
+
+    def test_tracker_state_set_rejects_negative(self) -> None:
+        """Verify negative tracker values fail client-side."""
+        # When/Then: A negative value raises
+        with pytest.raises(PydanticValidationError):
+            TrackerStateSet(current=-1)
+
+    def test_tracker_state_set_dump_keeps_zero(self) -> None:
+        """Verify a zero value is sent and unset fields are not."""
+        # When: Dumping a state with current=0
+        body = TrackerStateSet(current=0).model_dump(exclude_none=True)
+
+        # Then: Only current is present, with its zero kept
+        assert body == {"current": 0}
+
+    def test_tracker_action_rejects_zero_amount(self) -> None:
+        """Verify an amount below 1 fails client-side."""
+        # When/Then: amount=0 raises
+        with pytest.raises(PydanticValidationError):
+            _TrackerAction(action="spend", amount=0)
+
+    def test_tracker_action_dump_omits_damage_type(self) -> None:
+        """Verify an action without a damage type does not send the key."""
+        # When: Dumping a spend action
+        body = _TrackerAction(action="spend").model_dump(exclude_none=True)
+
+        # Then: damage_type is absent
+        assert body == {"action": "spend", "amount": 1}
