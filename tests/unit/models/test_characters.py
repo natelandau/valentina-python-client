@@ -13,12 +13,15 @@ from vclient.models import (
     CharacterCreate,
     CharacterDetail,
     CharacterUpdate,
+    Health,
+    HealthStateSet,
     HunterAttributes,
     MageAttributes,
     NameDescriptionSubDocument,
     VampireAttributes,
     WerewolfAttributes,
 )
+from vclient.models.character_trait import CharacterCreateTraitAssign, TrackerStateSet
 
 
 class TestCharacter:
@@ -834,3 +837,120 @@ class TestCharacterInclude:
 
         # Then: They match exactly
         assert actual == expected
+
+
+def _character_data(**overrides: object) -> dict:
+    """Return a minimal valid Character payload, without health."""
+    data: dict = {
+        "id": "char123",
+        "date_created": "2024-01-15T10:30:00Z",
+        "date_modified": "2024-01-15T10:30:00Z",
+        "character_class": "VAMPIRE",
+        "game_version": "V5",
+        "name_first": "John",
+        "name_last": "Doe",
+        "name": "Johnny",
+        "name_full": "John Doe",
+        "company_id": "company123",
+        "campaign_id": "campaign123",
+    }
+    data.update(overrides)
+    return data
+
+
+class TestCharacterHealth:
+    """Tests for character health response and request models."""
+
+    def test_v4_health_parses_levels(self) -> None:
+        """Verify V4 health parses its levels and penalty."""
+        # When: Parsing a character with V4 health
+        character = Character.model_validate(
+            _character_data(
+                game_version="V4",
+                health={
+                    "type": "DAMAGE",
+                    "size": 7,
+                    "superficial": 0,
+                    "aggravated": 0,
+                    "boxes": ["LETHAL", None, None, None, None, None, None],
+                    "is_impaired": False,
+                    "bashing": 0,
+                    "lethal": 1,
+                    "levels": [{"name": "Bruised", "penalty": 0, "mark": "LETHAL"}],
+                    "current_penalty": 0,
+                    "extra_levels": 0,
+                },
+            )
+        )
+
+        # Then: Health and its levels are typed
+        assert isinstance(character.health, Health)
+        assert character.health.levels[0].mark == "LETHAL"
+
+    def test_v5_health_v4_fields_none(self) -> None:
+        """Verify V5 health leaves V4-only fields as None."""
+        # When: Parsing a character with V5 health
+        character = Character.model_validate(
+            _character_data(
+                health={
+                    "type": "DAMAGE",
+                    "size": 5,
+                    "superficial": 1,
+                    "aggravated": 0,
+                    "boxes": ["SUPERFICIAL", None, None, None, None],
+                    "is_impaired": False,
+                    "extra_levels": 0,
+                }
+            )
+        )
+
+        # Then: V4 fields are None
+        assert character.health.bashing is None
+        assert character.health.lethal is None
+        assert character.health.levels is None
+        assert character.health.current_penalty is None
+        assert character.health.extra_levels == 0
+
+    def test_character_without_health_parses(self) -> None:
+        """Verify a payload from an API without health still parses."""
+        # When: Parsing a character with no health field
+        character = Character.model_validate(_character_data())
+
+        # Then: Health is None
+        assert character.health is None
+
+    def test_health_state_set_defaults_zero(self) -> None:
+        """Verify unset health fields dump as zero."""
+        # When: Dumping a health state with only superficial set
+        body = HealthStateSet(superficial=2).model_dump()
+
+        # Then: Every field is present
+        assert body == {
+            "extra_levels": 0,
+            "superficial": 2,
+            "aggravated": 0,
+            "bashing": 0,
+            "lethal": 0,
+        }
+
+    def test_character_create_accepts_health_and_tracker(self) -> None:
+        """Verify CharacterCreate carries health and per-trait tracker state."""
+        # When: Building a create request with health and a trait tracker
+        request = CharacterCreate(
+            campaign_id="campaign123",
+            character_class="VAMPIRE",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            health=HealthStateSet(superficial=2),
+            traits=[
+                CharacterCreateTraitAssign(
+                    trait_id="t1", value=3, tracker=TrackerStateSet(current=1)
+                )
+            ],
+        )
+        body = request.model_dump(exclude_none=True)
+
+        # Then: Both are serialized
+        assert body["health"]["superficial"] == 2
+        assert body["traits"][0]["tracker"] == {"current": 1}

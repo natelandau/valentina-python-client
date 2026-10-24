@@ -50,6 +50,7 @@ AuditEntityType = Literal[
     "CAMPAIGN",
     "CHAPTER",
     "CHARACTER",
+    "CHARACTER_HEALTH",
     "CHARACTER_INVENTORY",
     "CHARACTER_TRAIT",
     "CHARACTER_TRAIT_SPECIALTY",
@@ -103,3 +104,6 @@ UserRole = Literal["ADMIN", "STORYTELLER", "PLAYER", "UNAPPROVED", "DEACTIVATED"
 WerewolfRenown = Literal["HONOR", "GLORY", "WISDOM"]
 BlueprintTraitOrderBy = Literal["NAME", "SHEET"]
 TraitModifyCurrency = Literal["XP", "STARTING_POINTS", "NO_COST"]
+TrackerType = Literal["COUNTER", "DAMAGE", "STAINS"]
+TrackerAction = Literal["spend", "gain", "damage", "heal", "add_stain", "remove_stain", "reset"]
+DamageType = Literal["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"]

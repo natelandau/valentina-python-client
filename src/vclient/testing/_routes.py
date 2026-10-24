@@ -23,11 +23,13 @@ from vclient.models import (
     CharacterTraitValueOptionsResponse,
     Company,
     CompanyPermissions,
+    DamageTracker,
     Developer,
     DeveloperWithApiKey,
     Diceroll,
     DictionaryTerm,
     FullSheetTraitCategory,
+    Health,
     IdentityResolution,
     InventoryItem,
     MeDeveloper,
@@ -303,6 +305,11 @@ class Routes:
         "DELETE", Endpoints.CHARACTER_INVENTORY_ITEM, NO_CONTENT, None
     )
 
+    # Character health
+    CHARACTERS_HEALTH_GET = RouteSpec("GET", Endpoints.CHARACTER_HEALTH, SINGLE, Health)
+    CHARACTERS_HEALTH_SET = RouteSpec("PUT", Endpoints.CHARACTER_HEALTH, SINGLE, Health)
+    CHARACTERS_HEALTH_ACTION = RouteSpec("POST", Endpoints.CHARACTER_HEALTH_ACTIONS, SINGLE, Health)
+
     # Character generation
     CHARACTERS_AUTOGENERATE = RouteSpec("POST", Endpoints.AUTOGENERATE, SINGLE, Character)
     CHARACTERS_CHARGEN_START = RouteSpec(
@@ -343,6 +350,16 @@ class Routes:
     )
     CHARACTER_TRAITS_SPECIALTY_DELETE = RouteSpec(
         "DELETE", Endpoints.CHARACTER_TRAIT_SPECIALTY, NO_CONTENT, None
+    )
+    # Tracker routes return any tracker variant; the default response is a DamageTracker.
+    CHARACTER_TRAITS_TRACKER_GET = RouteSpec(
+        "GET", Endpoints.CHARACTER_TRAIT_TRACKER, SINGLE, DamageTracker
+    )
+    CHARACTER_TRAITS_TRACKER_SET = RouteSpec(
+        "PUT", Endpoints.CHARACTER_TRAIT_TRACKER, SINGLE, DamageTracker
+    )
+    CHARACTER_TRAITS_TRACKER_ACTION = RouteSpec(
+        "POST", Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS, SINGLE, DamageTracker
     )
 
     # Blueprint sections

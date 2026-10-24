@@ -11,6 +11,7 @@ from vclient.constants import (
     GameVersion,
     OIDCProvider,
     SpecialtyType,
+    TrackerType,
     WerewolfRenown,
 )
 
@@ -200,6 +201,13 @@ class Trait(BaseModel):
 
     character_classes: list[CharacterClass] = Field(default_factory=list)
     game_versions: list[GameVersion] = Field(default_factory=list)
+
+    tracker_type_v4: TrackerType | None = Field(
+        default=None, description="Tracker this trait has on V4 characters, or None."
+    )
+    tracker_type_v5: TrackerType | None = Field(
+        default=None, description="Tracker this trait has on V5 characters, or None."
+    )
 
 
 class CharacterSpecialty(BaseModel):

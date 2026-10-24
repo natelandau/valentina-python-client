@@ -195,6 +195,8 @@ assert exc_info.value.code == "TOKEN_VERIFICATION_FAILED"
 
 Every API endpoint has a named constant on the `Routes` class, exported from `vclient.testing`. Constants follow the naming convention `{SERVICE}_{OPERATION}` -- for example, `USERS_LIST`, `BOOKS_RENUMBER`, `CHAPTERS_NOTES_CREATE`. Nested resources include the parent in the name (e.g., `CHARACTERS_INVENTORY_LIST`, `CHAPTERS_ASSETS_UPLOAD`).
 
+The trait tracker routes (`CHARACTER_TRAITS_TRACKER_GET`, `CHARACTER_TRAITS_TRACKER_SET`, `CHARACTER_TRAITS_TRACKER_ACTION`) return a `DamageTracker` by default. To test a counter or stains tracker, override the route with a model from `CounterTrackerFactory` or `StainsTrackerFactory`.
+
 ### Advanced: Low-Level Route Overrides
 
 For cases that `set_response()` and `set_error()` don't cover, use `add_route()` to register a raw override. Pass an HTTP method, an endpoint pattern from `vclient.endpoints.Endpoints`, and a JSON body:
@@ -260,6 +262,8 @@ Every public response model (and the nested models they contain, such as the aut
 | `ChargenSessionResponseFactory`             | `ChargenSessionResponse`             |
 | `CompanyFactory`                            | `Company`                            |
 | `CompanyPermissionsFactory`                 | `CompanyPermissions`                 |
+| `CounterTrackerFactory`                     | `CounterTracker`                     |
+| `DamageTrackerFactory`                      | `DamageTracker`                      |
 | `DeveloperFactory`                          | `Developer`                          |
 | `DeveloperWithApiKeyFactory`                | `DeveloperWithApiKey`                |
 | `DicerollFactory`                           | `Diceroll`                           |
@@ -269,6 +273,8 @@ Every public response model (and the nested models they contain, such as the aut
 | `FullSheetTraitSubcategoryFactory`          | `FullSheetTraitSubcategory`          |
 | `GitHubProfileFactory`                      | `GitHubProfile`                      |
 | `GoogleProfileFactory`                      | `GoogleProfile`                      |
+| `HealthFactory`                             | `Health`                             |
+| `HealthLevelFactory`                        | `HealthLevel`                        |
 | `IdentityResolutionFactory`                 | `IdentityResolution`                 |
 | `InventoryItemFactory`                      | `InventoryItem`                      |
 | `MeDeveloperFactory`                        | `MeDeveloper`                        |
@@ -279,6 +285,7 @@ Every public response model (and the nested models they contain, such as the aut
 | `RollStatisticsFactory`                     | `RollStatistics`                     |
 | `ServerLogEntryFactory`                     | `ServerLogEntry`                     |
 | `SheetSectionFactory`                       | `SheetSection`                       |
+| `StainsTrackerFactory`                      | `StainsTracker`                      |
 | `SystemHealthFactory`                       | `SystemHealth`                       |
 | `TraitCategoryFactory`                      | `TraitCategory`                      |
 | `TraitFactory`                              | `Trait`                              |

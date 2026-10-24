@@ -1,6 +1,12 @@
 """Polyfactory model factories for all vclient response models."""
 
+import random
+from typing import Any
+
+from polyfactory import Use
 from polyfactory.factories.pydantic_factory import ModelFactory
+from polyfactory.field_meta import FieldMeta
+from pydantic import BaseModel
 
 from vclient.models import (
     AdminUser,
@@ -24,6 +30,8 @@ from vclient.models import (
     CharacterTraitValueOptionsResponse,
     Company,
     CompanyPermissions,
+    CounterTracker,
+    DamageTracker,
     Developer,
     DeveloperWithApiKey,
     Diceroll,
@@ -33,6 +41,8 @@ from vclient.models import (
     FullSheetTraitSubcategory,
     GitHubProfile,
     GoogleProfile,
+    Health,
+    HealthLevel,
     IdentityResolution,
     InventoryItem,
     MeDeveloper,
@@ -43,6 +53,7 @@ from vclient.models import (
     RollStatistics,
     ServerLogEntry,
     SheetSection,
+    StainsTracker,
     SystemHealth,
     Trait,
     TraitCategory,
@@ -56,6 +67,25 @@ from vclient.models import (
 )
 from vclient.models.character_autogen import ChargenSessionResponse
 from vclient.models.users import CampaignExperience
+
+
+class _GeneratedFieldsFactory[T: BaseModel](ModelFactory[T]):
+    """Factory that uses model defaults except for the fields named in ``__generated_fields__``.
+
+    ``__use_defaults__`` otherwise wins over a declared ``Use`` or ``PostGenerated`` for any
+    field that has a default.
+    """
+
+    __is_base_factory__ = True
+    __use_defaults__ = True
+    __generated_fields__: frozenset[str] = frozenset()
+
+    @classmethod
+    def should_use_default_value(cls, field_meta: FieldMeta) -> bool:
+        """Use the model default unless the field is listed in ``__generated_fields__``."""
+        if field_meta.name in cls.__generated_fields__:
+            return False
+        return super().should_use_default_value(field_meta)
 
 
 class AuditLogFactory(ModelFactory[AuditLog]):
@@ -123,14 +153,22 @@ class CampaignExperienceFactory(ModelFactory[CampaignExperience]):
     __use_defaults__ = True
 
 
-class CharacterFactory(ModelFactory[Character]):
+def _build_health() -> Health:
+    """Return a fake health track."""
+    return HealthFactory.build()
+
+
+class CharacterFactory(_GeneratedFieldsFactory[Character]):
     __model__ = Character
-    __use_defaults__ = True
+    __generated_fields__ = frozenset({"health"})
+    # The API always sends health; the model default of None only covers older APIs.
+    health = Use(_build_health)
 
 
-class CharacterDetailFactory(ModelFactory[CharacterDetail]):
+class CharacterDetailFactory(_GeneratedFieldsFactory[CharacterDetail]):
     __model__ = CharacterDetail
-    __use_defaults__ = True
+    __generated_fields__ = frozenset({"health"})
+    health = Use(_build_health)
 
 
 class CharacterConceptFactory(ModelFactory[CharacterConcept]):
@@ -143,9 +181,17 @@ class CharacterFullSheetFactory(ModelFactory[CharacterFullSheet]):
     __use_defaults__ = True
 
 
-class CharacterTraitFactory(ModelFactory[CharacterTrait]):
+class CharacterTraitFactory(_GeneratedFieldsFactory[CharacterTrait]):
     __model__ = CharacterTrait
-    __use_defaults__ = True
+    __generated_fields__ = frozenset({"tracker"})
+
+    @classmethod
+    def tracker(cls) -> CounterTracker | DamageTracker | StainsTracker | None:
+        """Return a random tracker variant, or None for a trait without a tracker."""
+        factory = cls.__random__.choice(
+            [CounterTrackerFactory, DamageTrackerFactory, StainsTrackerFactory, None]
+        )
+        return factory.build() if factory is not None else None
 
 
 class CharacterTraitValueOptionsResponseFactory(
@@ -324,6 +370,81 @@ class WerewolfTribeFactory(ModelFactory[WerewolfTribe]):
     __use_defaults__ = True
 
 
+def _damage_track_values(rng: random.Random, overrides: dict[str, Any]) -> dict[str, Any]:
+    """Return damage track fields whose counts, boxes, and impairment agree with each other.
+
+    Fields passed in ``overrides`` are kept and the rest are derived from them.
+    """
+    size: int = overrides.get("size", rng.randint(1, 10))
+    aggravated: int = overrides.get("aggravated", rng.randint(0, size))
+    superficial: int = overrides.get("superficial", rng.randint(0, max(size - aggravated, 0)))
+    marks: list[str | None] = ["AGGRAVATED"] * aggravated + ["SUPERFICIAL"] * superficial
+    return {
+        "size": size,
+        "aggravated": aggravated,
+        "superficial": superficial,
+        "boxes": overrides.get("boxes", (marks + [None] * size)[:size]),
+        "is_impaired": overrides.get("is_impaired", aggravated + superficial >= size),
+    }
+
+
+class CounterTrackerFactory(ModelFactory[CounterTracker]):
+    __model__ = CounterTracker
+    __use_defaults__ = True
+
+    @classmethod
+    def build(cls, factory_use_construct: bool = False, **kwargs: Any) -> CounterTracker:  # noqa: FBT001, FBT002
+        """Build a counter whose ``current`` never exceeds its ``size``."""
+        size: int = kwargs.get("size", cls.__random__.randint(1, 10))
+        kwargs = {"size": size, "current": cls.__random__.randint(0, size), **kwargs}
+        return super().build(factory_use_construct, **kwargs)
+
+
+class DamageTrackerFactory(ModelFactory[DamageTracker]):
+    __model__ = DamageTracker
+    __use_defaults__ = True
+
+    @classmethod
+    def build(cls, factory_use_construct: bool = False, **kwargs: Any) -> DamageTracker:  # noqa: FBT001, FBT002
+        """Build a damage track whose boxes match its superficial and aggravated counts."""
+        kwargs = {**kwargs, **_damage_track_values(cls.__random__, kwargs)}
+        return super().build(factory_use_construct, **kwargs)
+
+
+class HealthFactory(ModelFactory[Health]):
+    __model__ = Health
+    __use_defaults__ = True
+
+    @classmethod
+    def build(cls, factory_use_construct: bool = False, **kwargs: Any) -> Health:  # noqa: FBT001, FBT002
+        """Build a health track whose boxes match its superficial and aggravated counts."""
+        kwargs = {**kwargs, **_damage_track_values(cls.__random__, kwargs)}
+        return super().build(factory_use_construct, **kwargs)
+
+
+class HealthLevelFactory(ModelFactory[HealthLevel]):
+    __model__ = HealthLevel
+    __use_defaults__ = True
+
+
+class StainsTrackerFactory(ModelFactory[StainsTracker]):
+    __model__ = StainsTracker
+    __use_defaults__ = True
+
+    @classmethod
+    def build(cls, factory_use_construct: bool = False, **kwargs: Any) -> StainsTracker:  # noqa: FBT001, FBT002
+        """Build a stains tracker whose capacity is 10 minus Humanity and holds its stains."""
+        humanity: int = kwargs.get("humanity", cls.__random__.randint(0, 10))
+        capacity: int = kwargs.get("stain_capacity", 10 - humanity)
+        kwargs = {
+            "humanity": humanity,
+            "stain_capacity": capacity,
+            "stains": cls.__random__.randint(0, capacity),
+            **kwargs,
+        }
+        return super().build(factory_use_construct, **kwargs)
+
+
 __all__ = [
     "AdminUserFactory",
     "AppleProfileFactory",
@@ -348,6 +469,8 @@ __all__ = [
     "ChargenSessionResponseFactory",
     "CompanyFactory",
     "CompanyPermissionsFactory",
+    "CounterTrackerFactory",
+    "DamageTrackerFactory",
     "DeveloperFactory",
     "DeveloperWithApiKeyFactory",
     "DicerollFactory",
@@ -357,6 +480,8 @@ __all__ = [
     "FullSheetTraitSubcategoryFactory",
     "GitHubProfileFactory",
     "GoogleProfileFactory",
+    "HealthFactory",
+    "HealthLevelFactory",
     "IdentityResolutionFactory",
     "InventoryItemFactory",
     "MeDeveloperFactory",
@@ -367,6 +492,7 @@ __all__ = [
     "RollStatisticsFactory",
     "ServerLogEntryFactory",
     "SheetSectionFactory",
+    "StainsTrackerFactory",
     "SystemHealthFactory",
     "TraitCategoryFactory",
     "TraitFactory",

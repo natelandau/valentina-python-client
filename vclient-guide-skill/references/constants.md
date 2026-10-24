@@ -36,6 +36,16 @@ BlueprintTraitOrderBy = Literal["NAME", "SHEET"]
 SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
 ```
 
+### Trackers
+
+```python
+TrackerType = Literal["COUNTER", "DAMAGE", "STAINS"]
+TrackerAction = Literal["spend", "gain", "damage", "heal", "add_stain", "remove_stain", "reset"]
+DamageType = Literal["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"]
+```
+
+V4 health uses `BASHING`, `LETHAL`, `AGGRAVATED`; V5 uses `SUPERFICIAL`, `AGGRAVATED`. The valid action and damage type pairs per tracker come from `options.get_options()["characters"]["TrackerRules"]`.
+
 ### Werewolf
 
 ```python
@@ -117,6 +127,7 @@ AuditEntityType = Literal[
     "CAMPAIGN",
     "CHAPTER",
     "CHARACTER",
+    "CHARACTER_HEALTH",
     "CHARACTER_INVENTORY",
     "CHARACTER_TRAIT",
     "CHARACTER_TRAIT_SPECIALTY",

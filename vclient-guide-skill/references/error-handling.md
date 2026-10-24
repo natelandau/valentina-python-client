@@ -92,6 +92,8 @@ except NotFoundError:
 
 Most commonly raised when an idempotency key is reused with a different request body. If you see this, regenerate your idempotency key; don't retry with the same key.
 
+Character trait methods also raise it in two cases. A concurrent change to the trait's value: refetch the trait and retry. An `assign()` or `bulk_assign()` item for a trait the character already has, including V5 Willpower, which every V5 character has: do not retry, use the value methods instead.
+
 ### `UnprocessableEntityError` (422)
 
 Raised by the identity endpoints when a request is well-formed but cannot be processed. Always check `.code` to determine the specific failure:

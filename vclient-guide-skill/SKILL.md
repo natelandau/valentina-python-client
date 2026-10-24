@@ -129,7 +129,7 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details. Impo
 | `NotFoundError` | 404 | Resource not found |
 | `ValidationError` | 400 | Server validation failed (check `.invalid_parameters`) |
 | `RequestValidationError` | - | Client-side Pydantic validation (pre-request) |
-| `ConflictError` | 409 | Idempotency key conflict, or a concurrent trait value change (refetch and retry) |
+| `ConflictError` | 409 | Idempotency key conflict, a concurrent trait value change (refetch and retry), or assigning a trait the character already has |
 | `UnprocessableEntityError` | 422 | Well-formed request that cannot be processed (identity endpoints; check `.code`) |
 | `RateLimitError` | 429 | Rate limited (check `.retry_after`, `.remaining`) |
 | `ServerError` | 5xx | Server error |

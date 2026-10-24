@@ -57,6 +57,8 @@ Lowering an ability to `0` with `change_value()`, or deleting the trait with `de
 
     `change_value()` with any currency, and `delete()`, `assign()`, and `create()` with `"XP"` or `"STARTING_POINTS"`, raise `ConflictError` (409) when another request changed the trait's value first. Nothing is spent or refunded. Fetch the trait again and retry.
 
+    `assign()` also raises `ConflictError` when the character already has the trait. This check runs before the value range check, so a duplicate with an out-of-range value also returns 409. Do not retry it. Use the value methods on the existing trait instead.
+
     ```python
     from vclient.exceptions import ConflictError
 
@@ -92,6 +94,72 @@ knives = melee.specialties[0]
 
 melee = await traits.update_specialty(trait.id, knives.id, name="Throwing Knives")
 await traits.delete_specialty(trait.id, knives.id)
+```
+
+### V5 Willpower
+
+On V5 characters, Willpower always equals Composure + Resolve. The server keeps it in sync, so you cannot change it directly:
+
+- `change_value()` and `delete()` raise `ValidationError` (400).
+- `get_value_options()` returns an empty `options` dictionary.
+- `assign()` raises `ConflictError` (409), and `bulk_assign()` puts the item in `failed`, because every V5 character already has Willpower.
+
+To change V5 Willpower, change Composure or Resolve. Then fetch the Willpower trait again, because `change_value()` returns only the trait that you changed. For the same reason, fetch health again with `characters.get_health()` after you change V5 Stamina, because Stamina sets the size of the health track. V4 Willpower has none of these limits.
+
+### Trackers
+
+| Method                                                                       | Returns   | Description                          |
+| ---------------------------------------------------------------------------- | --------- | ------------------------------------ |
+| `get_tracker(character_trait_id)`                                            | `Tracker` | Get the in-play state of a trait     |
+| `set_tracker(character_trait_id, TrackerStateSet, **kwargs)`                 | `Tracker` | Replace the full tracker state       |
+| `apply_tracker_action(character_trait_id, action, amount?, damage_type?)`    | `Tracker` | Apply one in-play action             |
+
+A tracker holds the in-play state of a trait that is spent, damaged, or stained during a session. The server applies the game rules for the character's game version. `Tracker` is one of three models. Read its `type` field to know which one you have:
+
+| `type`    | Model            | Used for                                 | Fields for `set_tracker()`    |
+| --------- | ---------------- | ---------------------------------------- | ----------------------------- |
+| `COUNTER` | `CounterTracker` | V4 Willpower, Blood Pool, Rage, Gnosis, and Conviction | `current` (required) |
+| `DAMAGE`  | `DamageTracker`  | V5 Willpower                             | `superficial`, `aggravated`   |
+| `STAINS`  | `StainsTracker`  | V5 Humanity stains                       | `stains`                      |
+
+The same tracker object is on `CharacterTrait.tracker`. It is `None` when the trait has no tracker for the character's game version. Custom traits never have a tracker. `Trait.tracker_type_v4` and `Trait.tracker_type_v5` tell you which traits have one before you assign them.
+
+Use `apply_tracker_action()` for changes during play, and `set_tracker()` to correct the full state. `set_tracker()` replaces the whole state, so a field that you omit resets to 0. An empty request clears a damage or stains tracker. Each method returns the updated tracker, so you do not need to fetch it again. The actions are `spend`, `gain`, `damage`, `heal`, `add_stain`, `remove_stain`, and `reset`. The valid actions and damage types for each tracker type and game version are in `characters.TrackerRules` from the [Options Service](options.md). A `STAINS` response from `add_stain` reports any overflow into Willpower damage in `willpower_damage_applied`.
+
+The methods raise these errors:
+
+- `NotFoundError` (404): the trait has no tracker for the character's game version.
+- `ValidationError` (400): a field or action does not fit the tracker type or game version, a damage type is missing or not allowed, a spend is more than `current`, or a value is more than the tracker size.
+- `AuthorizationError` (403): you are not the character's player or a storyteller.
+- `RequestValidationError`: a value is negative, or `amount` is less than 1. The client raises this before it sends the request.
+
+!!! note "API version"
+
+    The tracker endpoints need a Valentina API release later than `v0.28.0`. An older API returns 404, and `CharacterTrait.tracker` is always `None`.
+
+```python
+from vclient.models import CounterTracker, DamageTracker, StainsTracker
+
+tracker = await traits.get_tracker(willpower.id)
+
+match tracker:
+    case CounterTracker():
+        print(f"{tracker.current}/{tracker.size} Willpower")
+    case DamageTracker():
+        print(f"{tracker.superficial} superficial, {tracker.aggravated} aggravated")
+    case StainsTracker():
+        print(f"{tracker.stains} stains, impaired: {tracker.is_impaired}")
+
+# Spend one point of V4 Willpower
+tracker = await traits.apply_tracker_action(willpower.id, "spend")
+
+# Take two superficial Willpower damage on V5
+tracker = await traits.apply_tracker_action(
+    willpower.id, "damage", amount=2, damage_type="SUPERFICIAL"
+)
+
+# Correct the full state
+tracker = await traits.set_tracker(willpower.id, current=3)
 ```
 
 ## Example

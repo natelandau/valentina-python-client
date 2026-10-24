@@ -6,8 +6,11 @@ from vclient.exceptions import ConflictError, NotFoundError, UnprocessableEntity
 from vclient.models import (
     Campaign,
     Company,
+    DamageTracker,
+    Health,
     IdentityResolution,
     PaginatedResponse,
+    StainsTracker,
     SystemHealth,
     User,
 )
@@ -18,7 +21,7 @@ from vclient.registry import (
     system_service,
     users_service,
 )
-from vclient.testing import FakeVClient, Routes, UserFactory
+from vclient.testing import FakeVClient, Routes, StainsTrackerFactory, UserFactory
 
 pytestmark = pytest.mark.anyio
 
@@ -301,3 +304,53 @@ class TestFakeVClientAvatar:
             # When/Then deleting raises NotFoundError
             with pytest.raises(NotFoundError):
                 await users_service("user123", company_id="company123").delete_avatar("user123")
+
+
+class TestTrackerAndHealthRoutes:
+    """FakeVClient should serve tracker and health routes."""
+
+    async def test_tracker_default_route(self):
+        """Verify the default tracker route returns a DamageTracker."""
+        async with FakeVClient() as client:
+            # When getting a tracker with no override
+            result = await client.character_traits("ch1", "user1", company_id="co1").get_tracker(
+                "ct1"
+            )
+
+            # Then a DamageTracker is returned
+            assert isinstance(result, DamageTracker)
+
+    async def test_tracker_override_with_other_variant(self):
+        """Verify any tracker variant can override a tracker route."""
+        async with FakeVClient() as client:
+            # Given the action route returns a stains tracker
+            stains = StainsTrackerFactory.build()
+            client.set_response(Routes.CHARACTER_TRAITS_TRACKER_ACTION, model=stains)
+
+            # When adding a stain
+            result = await client.character_traits(
+                "ch1", "user1", company_id="co1"
+            ).apply_tracker_action("ct1", "add_stain")
+
+            # Then the stains tracker is returned
+            assert isinstance(result, StainsTracker)
+            assert result.stains == stains.stains
+
+    async def test_health_default_route(self):
+        """Verify the default health route returns Health."""
+        async with FakeVClient() as client:
+            # When getting health with no override
+            result = await client.characters("user1", company_id="co1").get_health("ch1")
+
+            # Then Health is returned
+            assert isinstance(result, Health)
+
+    async def test_health_error(self):
+        """Verify set_error on a health route raises the mapped exception."""
+        async with FakeVClient() as client:
+            # Given the health route returns 404
+            client.set_error(Routes.CHARACTERS_HEALTH_GET, status_code=404)
+
+            # When/Then getting health raises NotFoundError
+            with pytest.raises(NotFoundError):
+                await client.characters("user1", company_id="co1").get_health("ch1")

@@ -13,7 +13,7 @@ from vclient.constants import (
     GameVersion,
 )
 
-from .character_trait import CharacterCreateTraitAssign, CharacterTrait
+from .character_trait import CharacterCreateTraitAssign, CharacterTrait, Health, HealthStateSet
 from .shared import Asset, CharacterSpecialty, NameDescriptionSubDocument, Note
 
 # -----------------------------------------------------------------------------
@@ -229,6 +229,11 @@ class Character(BaseModel):
         default=None, description="Hunter-specific attributes."
     )
 
+    health: Health | None = Field(
+        default=None,
+        description="Health track. Always set by API versions that support health.",
+    )
+
     # Child-resource counts
     num_inventory_items: int = Field(
         default=0, description="Number of active inventory items on the character."
@@ -301,6 +306,10 @@ class CharacterCreate(BaseModel):
     )
     traits: list[CharacterCreateTraitAssign] | None = Field(
         default=None, description="List of traits to assign to the character."
+    )
+    health: HealthStateSet | None = Field(
+        default=None,
+        description="Starting health marks. Omit for an unhurt character.",
     )
     vampire_attributes: VampireAttributesCreate | None = Field(
         default=None, description="Vampire-specific attributes."
