@@ -121,3 +121,6 @@ from vclient.constants import CharacterClass, UserRole, GameVersion
 | `SpecialtyType`         | `ACTION`, `OTHER`, `PASSIVE`, `RITUAL`, `SPELL` |
 | `BlueprintTraitOrderBy` | `NAME`, `SHEET`                                 |
 | `TraitModifyCurrency`   | `XP`, `STARTING_POINTS`, `NO_COST`              |
+| `TrackerType`           | `COUNTER`, `DAMAGE`, `STAINS`                   |
+| `TrackerAction`         | `spend`, `gain`, `damage`, `heal`, `add_stain`, `remove_stain`, `reset` |
+| `DamageType`            | `SUPERFICIAL`, `AGGRAVATED`, `BASHING`, `LETHAL` |

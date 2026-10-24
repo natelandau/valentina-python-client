@@ -109,6 +109,7 @@ class TestValidate:
                     "CAMPAIGN",
                     "CHAPTER",
                     "CHARACTER",
+                    "CHARACTER_HEALTH",
                     "CHARACTER_INVENTORY",
                     "CHARACTER_TRAIT",
                     "CHARACTER_TRAIT_SPECIALTY",
@@ -149,6 +150,17 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
+                "TrackerAction": [
+                    "spend",
+                    "gain",
+                    "damage",
+                    "heal",
+                    "add_stain",
+                    "remove_stain",
+                    "reset",
+                ],
+                "TrackerType": ["COUNTER", "DAMAGE", "STAINS"],
                 "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
             },
             "companies": {
@@ -192,6 +204,7 @@ class TestValidate:
                     "CAMPAIGN",
                     "CHAPTER",
                     "CHARACTER",
+                    "CHARACTER_HEALTH",
                     "CHARACTER_INVENTORY",
                     "CHARACTER_TRAIT",
                     "CHARACTER_TRAIT_SPECIALTY",
@@ -232,6 +245,17 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
+                "TrackerAction": [
+                    "spend",
+                    "gain",
+                    "damage",
+                    "heal",
+                    "add_stain",
+                    "remove_stain",
+                    "reset",
+                ],
+                "TrackerType": ["COUNTER", "DAMAGE", "STAINS"],
                 "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
             },
             "companies": {
@@ -277,6 +301,7 @@ class TestValidate:
                     "CAMPAIGN",
                     "CHAPTER",
                     "CHARACTER",
+                    "CHARACTER_HEALTH",
                     "CHARACTER_INVENTORY",
                     "CHARACTER_TRAIT",
                     "CHARACTER_TRAIT_SPECIALTY",
@@ -317,6 +342,17 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
+                "TrackerAction": [
+                    "spend",
+                    "gain",
+                    "damage",
+                    "heal",
+                    "add_stain",
+                    "remove_stain",
+                    "reset",
+                ],
+                "TrackerType": ["COUNTER", "DAMAGE", "STAINS"],
                 "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
             },
             "companies": {
@@ -362,6 +398,7 @@ class TestValidate:
                     "CAMPAIGN",
                     "CHAPTER",
                     "CHARACTER",
+                    "CHARACTER_HEALTH",
                     "CHARACTER_INVENTORY",
                     "CHARACTER_TRAIT",
                     "CHARACTER_TRAIT_SPECIALTY",
@@ -403,6 +440,17 @@ class TestValidate:
                 "NewOptionType": ["FOO", "BAR"],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
+                "TrackerAction": [
+                    "spend",
+                    "gain",
+                    "damage",
+                    "heal",
+                    "add_stain",
+                    "remove_stain",
+                    "reset",
+                ],
+                "TrackerType": ["COUNTER", "DAMAGE", "STAINS"],
                 "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
             },
             "companies": {
@@ -461,6 +509,7 @@ class TestValidate:
                     "CAMPAIGN",
                     "CHAPTER",
                     "CHARACTER",
+                    "CHARACTER_HEALTH",
                     "CHARACTER_INVENTORY",
                     "CHARACTER_TRAIT",
                     "CHARACTER_TRAIT_SPECIALTY",
@@ -501,6 +550,17 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
+                "TrackerAction": [
+                    "spend",
+                    "gain",
+                    "damage",
+                    "heal",
+                    "add_stain",
+                    "remove_stain",
+                    "reset",
+                ],
+                "TrackerType": ["COUNTER", "DAMAGE", "STAINS"],
                 "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
                 "_related": {"concepts": "https://example.com/concepts"},
             },
@@ -544,6 +604,7 @@ class TestValidate:
                     "CAMPAIGN",
                     "CHAPTER",
                     "CHARACTER",
+                    "CHARACTER_HEALTH",
                     "CHARACTER_INVENTORY",
                     "CHARACTER_TRAIT",
                     "CHARACTER_TRAIT_SPECIALTY",
@@ -584,6 +645,17 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
+                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
+                "TrackerAction": [
+                    "spend",
+                    "gain",
+                    "damage",
+                    "heal",
+                    "add_stain",
+                    "remove_stain",
+                    "reset",
+                ],
+                "TrackerType": ["COUNTER", "DAMAGE", "STAINS"],
                 "WerewolfRenown": ["GLORY", "HONOR", "WISDOM"],
                 "SomeMetadata": {"key": "value"},
             },
@@ -630,7 +702,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "27/27 constants in sync" in captured.out
+        assert "30/30 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""
@@ -673,3 +745,21 @@ class TestPrintReport:
         captured = capsys.readouterr()
         assert "NewOptionType" in captured.out
         assert "characters" in captured.out
+
+
+class TestTrackerConstants:
+    """Tests for the tracker constants added with trait trackers and health."""
+
+    @pytest.mark.parametrize("name", ["TrackerType", "TrackerAction", "DamageType"])
+    def test_tracker_constants_mapped(self, name: str) -> None:
+        """Verify tracker constants map to the characters options category."""
+        assert CONSTANT_MAP[name] == ConstantMapping("characters", name)
+
+    def test_tracker_rules_not_reported_unmapped(self) -> None:
+        """Verify the nested TrackerRules dict is not flagged as an unmapped option."""
+        options = {
+            "characters": {
+                "TrackerRules": {"V5": {"DAMAGE": {"actions": ["damage"], "damage_types": []}}}
+            }
+        }
+        assert "characters" not in validate(options).unmapped_api_options

@@ -1,7 +1,7 @@
 """Options and enumerations service."""
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from vclient.endpoints import Endpoints
 from vclient.services.base import BaseService
@@ -33,8 +33,13 @@ class OptionsService(BaseService):
     # Options and Enumerations Methods
     # -------------------------------------------------------------------------
 
-    async def get_options(self) -> dict[str, dict[str, list[str] | dict[str, str]]]:
+    async def get_options(self) -> dict[str, dict[str, Any]]:
         """Retrieve all options and enumerations for the api.
+
+        Most values are lists of enum values. ``characters.TrackerRules`` is a nested map
+        ``{game_version: {tracker_key: {"actions": [...], "damage_types": [...]}}}`` where
+        ``tracker_key`` is a tracker type or ``HEALTH``. Use it to choose which tracker
+        actions and damage types to offer instead of hardcoding them.
 
         Returns:
             A dictionary of options and enumerations for the api.
