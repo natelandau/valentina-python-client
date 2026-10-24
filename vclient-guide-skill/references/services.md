@@ -257,6 +257,18 @@ Resolves verified provider credentials to canonical users. Forward the credentia
 | `update_inventory_item(character_id, item_id)` | both `str`, `request: InventoryItemUpdate \| None, **kwargs` | `InventoryItem` |
 | `delete_inventory_item(character_id, item_id)` | both `str` | `None` |
 
+### Health
+
+| Method | Parameters | Returns |
+|--------|-----------|---------|
+| `get_health(character_id)` | `character_id: str` | `Health` |
+| `set_health(character_id)` | `character_id: str, request: HealthStateSet \| None, **kwargs` | `Health` |
+| `apply_health_action(character_id, action)` | `character_id: str, action: TrackerAction, *, amount: int = 1, damage_type: DamageType \| None = None` | `Health` |
+
+`Character.health` carries the same object (`None` only from an API older than the tracker release). V4: 7 levels + `extra_levels`, damage types `BASHING`, `LETHAL`, `AGGRAVATED`, and `levels`/`current_penalty` are filled. V5: Stamina + 3 + `extra_levels`, damage types `SUPERFICIAL`, `AGGRAVATED`, and the V4 fields are `None`. Health actions: `damage`, `heal`, `reset`. `set_health` sends every field, so omitted fields reset to 0; a nonzero field the game version does not use raises `ValidationError`. Errors: `NotFoundError` (no character or no health track), `ValidationError` (bad action/damage type, marks over size), `AuthorizationError` (not the player or a storyteller), `RequestValidationError` (negative values, `amount < 1`). Writes return the new state, no refetch needed. Re-fetch health after `change_value` on V5 Stamina.
+
+**Create with starting state:** `CharacterCreate.health: HealthStateSet` and `CharacterCreateTraitAssign.tracker: TrackerStateSet` set marks at creation. Creation is atomic (any 400 creates nothing). `ValidationError` for a `tracker` on a trait with no tracker for the game version, a field that does not fit, or a duplicate `trait_id` in `traits`. On V5 a Willpower `value` in `traits` is ignored (it equals Composure + Resolve).
+
 ### Assets & Notes
 
 Same pattern as CampaignsService (with `character_id` as parent resource ID).
@@ -286,6 +298,9 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 | `add_specialty(character_trait_id, name, currency=)` | `character_trait_id: str, name: str, currency: TraitModifyCurrency = "NO_COST"` | `CharacterTrait` |
 | `update_specialty(character_trait_id, specialty_id, name)` | `character_trait_id: str, specialty_id: str, name: str` | `CharacterTrait` |
 | `delete_specialty(character_trait_id, specialty_id)` | `character_trait_id: str, specialty_id: str` | `None` |
+| `get_tracker(character_trait_id)` | `character_trait_id: str` | `Tracker` |
+| `set_tracker(character_trait_id)` | `character_trait_id: str, request: TrackerStateSet \| None, **kwargs` | `Tracker` |
+| `apply_tracker_action(character_trait_id, action)` | `character_trait_id: str, action: TrackerAction, *, amount: int = 1, damage_type: DamageType \| None = None` | `Tracker` |
 
 **TraitModifyCurrency values:** `"XP"`, `"STARTING_POINTS"`, `"NO_COST"`
 
@@ -294,6 +309,12 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 **Specialties:** Only abilities with a value of 1 or higher accept specialties (`ValidationError` otherwise, and for duplicate names or an unaffordable cost). When the company's `specialty_xp_cost_enabled` is on, a specialty bought with `XP` or `STARTING_POINTS` costs 3; otherwise it is free. `delete_specialty` refunds the cost (an `XP` refund follows `permission_recoup_xp`). Lowering an ability to 0 with `change_value`, or deleting the trait, removes its specialties and refunds them; the `"0"` and `"DELETE"` value options include those refunds in `xp_after` and `starting_points_after`. An unknown specialty, or one on a different trait, raises `NotFoundError`.
 
 **Concurrent changes:** `change_value` (any currency), and `delete`, `assign`, and `create` with `XP` or `STARTING_POINTS`, raise `ConflictError` (409) when another request changed the trait's value first. Nothing is spent or refunded. Refetch the trait and retry.
+
+**Duplicate assign:** `assign` raises `ConflictError` (409) when the character already has the trait, checked before the value range. Do not retry; use the value methods instead.
+
+**Trackers:** `Tracker` is `CounterTracker | DamageTracker | StainsTracker`, picked by `type` (`COUNTER`: V4 Willpower, Blood Pool, Rage, Gnosis, Conviction; `DAMAGE`: V5 Willpower; `STAINS`: V5 Humanity). `CharacterTrait.tracker` carries it, `None` when the trait has none for the game version (custom traits never do). `set_tracker` sends only non-`None` fields: `current` (COUNTER, required), `superficial`/`aggravated` (DAMAGE), `stains` (STAINS); a field that does not fit raises `ValidationError` even when 0, and an omitted field of the type resets to 0 (an empty request clears DAMAGE/STAINS). Actions: `spend`, `gain`, `damage`, `heal`, `add_stain`, `remove_stain`, `reset`; valid pairs per tracker and game version come from `options.get_options()["characters"]["TrackerRules"]`. `StainsTracker.willpower_damage_applied` reports overflow on action responses. Errors: `NotFoundError` (no tracker), `ValidationError` (bad field/action/damage type, spend over `current`, value over size), `AuthorizationError` (not the player or a storyteller), `RequestValidationError` (negative values, `amount < 1`). Needs an API newer than `v0.28.0`.
+
+**V5 Willpower:** always Composure + Resolve. `change_value` and `delete` raise `ValidationError` (400), `get_value_options` returns empty `options`, `assign` raises `ConflictError` (409) and `bulk_assign` puts it in `failed` (it always exists). Change Composure or Resolve, then re-fetch Willpower (`change_value` returns only the changed trait).
 
 ---
 
@@ -551,7 +572,9 @@ Requires global admin. Raises `AuthorizationError` (403) for non-admins and `Con
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|
-| `get_options()` | — | `dict[str, dict[str, list[str] \| dict[str, str]]]` |
+| `get_options()` | — | `dict[str, dict[str, Any]]` |
+
+Most values are lists of enum values. `characters.TrackerRules` is a nested map `{game_version: {tracker_key: {"actions": [...], "damage_types": [...]}}}` where `tracker_key` is a tracker type or `HEALTH`. Use it to pick which tracker controls to show.
 
 ---
 
