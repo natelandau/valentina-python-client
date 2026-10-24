@@ -1,8 +1,11 @@
 """Integration tests for SyncFakeVClient."""
 
+import pytest
+
 from vclient._sync.registry import sync_campaigns_service, sync_companies_service
-from vclient.models import Campaign, Company
-from vclient.testing import SyncFakeVClient
+from vclient.exceptions import NotFoundError
+from vclient.models import Campaign, Company, DamageTracker, Health, StainsTracker
+from vclient.testing import Routes, StainsTrackerFactory, SyncFakeVClient
 
 
 class TestSyncFakeVClient:
@@ -48,3 +51,51 @@ class TestSyncFakeVClient:
             # Then the result contains Campaign instances
             assert isinstance(result, list)
             assert isinstance(result[0], Campaign)
+
+
+class TestSyncTrackerAndHealthRoutes:
+    """SyncFakeVClient should serve tracker and health routes."""
+
+    def test_tracker_default_route(self):
+        """Verify the default tracker route returns a DamageTracker."""
+        with SyncFakeVClient() as client:
+            # When getting a tracker with no override
+            result = client.character_traits("ch1", "user1", company_id="co1").get_tracker("ct1")
+
+            # Then a DamageTracker is returned
+            assert isinstance(result, DamageTracker)
+
+    def test_tracker_override_with_other_variant(self):
+        """Verify any tracker variant can override a tracker route."""
+        with SyncFakeVClient() as client:
+            # Given the action route returns a stains tracker
+            client.set_response(
+                Routes.CHARACTER_TRAITS_TRACKER_ACTION, model=StainsTrackerFactory.build()
+            )
+
+            # When adding a stain
+            result = client.character_traits("ch1", "user1", company_id="co1").apply_tracker_action(
+                "ct1", "add_stain"
+            )
+
+            # Then the stains tracker is returned
+            assert isinstance(result, StainsTracker)
+
+    def test_health_default_route(self):
+        """Verify the default health route returns Health."""
+        with SyncFakeVClient() as client:
+            # When getting health with no override
+            result = client.characters("user1", company_id="co1").get_health("ch1")
+
+            # Then Health is returned
+            assert isinstance(result, Health)
+
+    def test_health_error(self):
+        """Verify set_error on a health route raises the mapped exception."""
+        with SyncFakeVClient() as client:
+            # Given the health route returns 404
+            client.set_error(Routes.CHARACTERS_HEALTH_GET, status_code=404)
+
+            # When/Then getting health raises NotFoundError
+            with pytest.raises(NotFoundError):
+                client.characters("user1", company_id="co1").get_health("ch1")
