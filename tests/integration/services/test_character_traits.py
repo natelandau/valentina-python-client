@@ -7,7 +7,12 @@ import respx
 from httpx import Response
 
 from vclient.endpoints import Endpoints
-from vclient.exceptions import NotFoundError, ValidationError
+from vclient.exceptions import (
+    ConflictError,
+    NotFoundError,
+    RequestValidationError,
+    ValidationError,
+)
 from vclient.models import (
     BulkAssignTraitResponse,
     CharacterTrait,
@@ -792,6 +797,148 @@ class TestCharacterTraitsServiceChangeValue:
         assert route.called
         assert isinstance(result, CharacterTrait)
         assert result.trait.name == "Strength"
+        assert result.specialties[0].name == "Knives"
+
+    @respx.mock
+    async def test_change_value_conflict(self, vclient, base_url) -> None:
+        """Verify a 409 from a concurrent value change raises ConflictError."""
+        # Given: A change value endpoint that reports a concurrent change
+        respx.put(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_VALUE.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123', character_trait_id='ct123')}",
+        ).mock(
+            return_value=Response(
+                409, json={"status": 409, "title": "Conflict", "detail": "Trait value changed"}
+            )
+        )
+
+        # When/Then: Changing the value raises ConflictError
+        with pytest.raises(ConflictError):
+            await vclient.character_traits(
+                "char123", "on-behalf-of-user", company_id="company123"
+            ).change_value("ct123", new_value=4, currency="XP")
+
+
+class TestCharacterTraitsServiceSpecialties:
+    """Tests for CharacterTraitsService specialty methods."""
+
+    @respx.mock
+    async def test_add_specialty(self, vclient, base_url, character_trait_response_data) -> None:
+        """Verify adding a specialty posts the name and currency."""
+        # Given: A mocked add specialty endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_SPECIALTIES.format(company_id='company123', character_id='char123', character_trait_id='ct123')}",
+        ).mock(return_value=Response(201, json=character_trait_response_data))
+
+        # When: Adding a specialty paid with XP
+        result = await vclient.character_traits(
+            "char123", "on-behalf-of-user", company_id="company123"
+        ).add_specialty("ct123", name="Knives", currency="XP")
+
+        # Then: The request body carries the name and currency
+        assert route.called
+        assert json.loads(route.calls.last.request.content) == {"name": "Knives", "currency": "XP"}
+        assert isinstance(result, CharacterTrait)
+        assert result.specialties[0].id == "spec123"
+
+    @respx.mock
+    async def test_add_specialty_default_currency(
+        self, vclient, base_url, character_trait_response_data
+    ) -> None:
+        """Verify add_specialty sends NO_COST when no currency is given."""
+        # Given: A mocked add specialty endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_SPECIALTIES.format(company_id='company123', character_id='char123', character_trait_id='ct123')}",
+        ).mock(return_value=Response(201, json=character_trait_response_data))
+
+        # When: Adding a specialty without a currency
+        await vclient.character_traits(
+            "char123", "on-behalf-of-user", company_id="company123"
+        ).add_specialty("ct123", name="Knives")
+
+        # Then: The request body uses NO_COST
+        assert json.loads(route.calls.last.request.content) == {
+            "name": "Knives",
+            "currency": "NO_COST",
+        }
+
+    async def test_add_specialty_name_too_short(self, vclient) -> None:
+        """Verify a short name fails client-side before any request."""
+        # When/Then: Adding a two-character specialty raises
+        with pytest.raises(RequestValidationError):
+            await vclient.character_traits(
+                "char123", "on-behalf-of-user", company_id="company123"
+            ).add_specialty("ct123", name="ab")
+
+    @respx.mock
+    async def test_add_specialty_validation_error(self, vclient, base_url) -> None:
+        """Verify a 400 from the server raises ValidationError."""
+        # Given: An endpoint rejecting the specialty
+        respx.post(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_SPECIALTIES.format(company_id='company123', character_id='char123', character_trait_id='ct123')}",
+        ).mock(
+            return_value=Response(
+                400, json={"status": 400, "title": "Bad Request", "detail": "Not an ability"}
+            )
+        )
+
+        # When/Then: Adding the specialty raises ValidationError
+        with pytest.raises(ValidationError):
+            await vclient.character_traits(
+                "char123", "on-behalf-of-user", company_id="company123"
+            ).add_specialty("ct123", name="Knives")
+
+    @respx.mock
+    async def test_update_specialty(self, vclient, base_url, character_trait_response_data) -> None:
+        """Verify renaming a specialty patches the new name."""
+        # Given: A mocked update specialty endpoint
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_SPECIALTY.format(company_id='company123', character_id='char123', character_trait_id='ct123', specialty_id='spec123')}",
+        ).mock(return_value=Response(200, json=character_trait_response_data))
+
+        # When: Renaming the specialty
+        result = await vclient.character_traits(
+            "char123", "on-behalf-of-user", company_id="company123"
+        ).update_specialty("ct123", "spec123", name="Knives")
+
+        # Then: The request body carries only the name
+        assert route.called
+        assert json.loads(route.calls.last.request.content) == {"name": "Knives"}
+        assert isinstance(result, CharacterTrait)
+
+    @respx.mock
+    async def test_delete_specialty(self, vclient, base_url) -> None:
+        """Verify deleting a specialty calls the delete endpoint."""
+        # Given: A mocked delete specialty endpoint
+        route = respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_SPECIALTY.format(company_id='company123', character_id='char123', character_trait_id='ct123', specialty_id='spec123')}",
+        ).mock(return_value=Response(204))
+
+        # When: Deleting the specialty
+        result = await vclient.character_traits(
+            "char123", "on-behalf-of-user", company_id="company123"
+        ).delete_specialty("ct123", "spec123")
+
+        # Then: The route was called and nothing is returned
+        assert route.called
+        assert result is None
+
+    @respx.mock
+    async def test_delete_specialty_not_found(self, vclient, base_url) -> None:
+        """Verify a 404 for an unknown specialty raises NotFoundError."""
+        # Given: An endpoint that cannot find the specialty
+        respx.delete(
+            f"{base_url}{Endpoints.CHARACTER_TRAIT_SPECIALTY.format(company_id='company123', character_id='char123', character_trait_id='ct123', specialty_id='missing')}",
+        ).mock(
+            return_value=Response(
+                404, json={"status": 404, "title": "Not Found", "detail": "Specialty not found"}
+            )
+        )
+
+        # When/Then: Deleting the specialty raises NotFoundError
+        with pytest.raises(NotFoundError):
+            await vclient.character_traits(
+                "char123", "on-behalf-of-user", company_id="company123"
+            ).delete_specialty("ct123", "missing")
 
 
 @pytest.fixture

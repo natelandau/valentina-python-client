@@ -18,7 +18,7 @@ Every API error maps to a specific exception class based on the HTTP status code
 | `NotFoundError`            | 404         | Resource not found                                               |
 | `ValidationError`          | 400         | Server-side validation failed                                    |
 | `RequestValidationError`   | -           | Client-side validation failed                                    |
-| `ConflictError`            | 409         | Resource conflict (e.g., duplicate ID)                           |
+| `ConflictError`            | 409         | Resource conflict (e.g., duplicate ID, concurrent trait value change) |
 | `UnprocessableEntityError` | 422         | Well-formed request that cannot be processed (has `.code`)       |
 | `RateLimitError`           | 429         | Rate limit exceeded                                              |
 | `ServerError`              | 5xx         | Server-side error                                                |
@@ -87,7 +87,7 @@ except ValidationError as e:
 except RequestValidationError as e:
     print(f"Client validation failed: {e}")
 except ConflictError:
-    print("Resource conflict (check idempotency key)")
+    print("Conflict: reused idempotency key, or trait changed (refetch and retry)")
 except UnprocessableEntityError as e:
     print(f"Cannot process request: {e.code}")
 except RateLimitError as e:

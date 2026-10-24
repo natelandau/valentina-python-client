@@ -335,6 +335,15 @@ class Routes:
     CHARACTER_TRAITS_VALUE_UPDATE = RouteSpec(
         "PUT", Endpoints.CHARACTER_TRAIT_VALUE, SINGLE, CharacterTrait
     )
+    CHARACTER_TRAITS_SPECIALTY_ADD = RouteSpec(
+        "POST", Endpoints.CHARACTER_TRAIT_SPECIALTIES, SINGLE, CharacterTrait
+    )
+    CHARACTER_TRAITS_SPECIALTY_UPDATE = RouteSpec(
+        "PATCH", Endpoints.CHARACTER_TRAIT_SPECIALTY, SINGLE, CharacterTrait
+    )
+    CHARACTER_TRAITS_SPECIALTY_DELETE = RouteSpec(
+        "DELETE", Endpoints.CHARACTER_TRAIT_SPECIALTY, NO_CONTENT, None
+    )
 
     # Blueprint sections
     BLUEPRINT_SECTIONS_LIST = RouteSpec(

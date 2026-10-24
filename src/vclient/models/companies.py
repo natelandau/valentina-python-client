@@ -32,6 +32,7 @@ class CompanySettings(BaseModel):
     permission_grant_xp: GrantXPPermission
     permission_free_trait_changes: FreeTraitChangesPermission
     permission_recoup_xp: RecoupXPPermission
+    specialty_xp_cost_enabled: bool = False
 
 
 class CompanySettingsCreate(BaseModel):
@@ -48,6 +49,7 @@ class CompanySettingsCreate(BaseModel):
     permission_grant_xp: GrantXPPermission | None = None
     permission_free_trait_changes: FreeTraitChangesPermission | None = None
     permission_recoup_xp: RecoupXPPermission | None = None
+    specialty_xp_cost_enabled: bool | None = None
 
 
 class CompanySettingsUpdate(BaseModel):
@@ -64,6 +66,7 @@ class CompanySettingsUpdate(BaseModel):
     permission_grant_xp: GrantXPPermission | None = None
     permission_free_trait_changes: FreeTraitChangesPermission | None = None
     permission_recoup_xp: RecoupXPPermission | None = None
+    specialty_xp_cost_enabled: bool | None = None
 
 
 class Company(BaseModel):

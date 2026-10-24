@@ -14,6 +14,35 @@ Models for character traits, trait definitions, and trait value modification opt
 | `character_id` | `str`   | Parent character ID |
 | `value`        | `int`   | Current trait value |
 | `trait`        | `Trait` | Trait definition    |
+| `specialties`  | `list[CharacterTraitSpecialty]` | Active specialties, oldest first. Only abilities have specialties |
+
+## CharacterTraitSpecialty
+
+A free-text specialty on an ability trait. Archived specialties are never returned.
+
+| Field           | Type       | Description            |
+| --------------- | ---------- | ---------------------- |
+| `id`            | `str`      | Unique identifier      |
+| `name`          | `str`      | Specialty name         |
+| `date_created`  | `datetime` | Creation timestamp     |
+| `date_modified` | `datetime` | Last modification time |
+
+## CharacterTraitSpecialtyCreate
+
+Request model for `add_specialty()`.
+
+| Field      | Type                  | Description                                                    |
+| ---------- | --------------------- | -------------------------------------------------------------- |
+| `name`     | `str`                 | Specialty name, 3-50 characters, unique on the trait ignoring case |
+| `currency` | `TraitModifyCurrency` | Currency to pay with (default `"NO_COST"`)                     |
+
+## CharacterTraitSpecialtyUpdate
+
+Request model for `update_specialty()`.
+
+| Field  | Type  | Description                                                        |
+| ------ | ----- | ------------------------------------------------------------------ |
+| `name` | `str` | New specialty name, 3-50 characters, unique on the trait ignoring case |
 
 ## CharacterTraitAdd
 

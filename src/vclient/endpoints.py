@@ -127,6 +127,8 @@ class Endpoints:
     CHARACTER_TRAIT = f"{CHARACTER_TRAITS}/{{character_trait_id}}"
     CHARACTER_TRAIT_VALUE_OPTIONS = f"{CHARACTER_TRAIT}/value-options"
     CHARACTER_TRAIT_VALUE = f"{CHARACTER_TRAIT}/value"
+    CHARACTER_TRAIT_SPECIALTIES = f"{CHARACTER_TRAIT}/specialties"
+    CHARACTER_TRAIT_SPECIALTY = f"{CHARACTER_TRAIT_SPECIALTIES}/{{specialty_id}}"
 
     # Character Blueprint endpoints
     BLUEPRINT_BASE = f"{COMPANY}/characterblueprint"

@@ -57,6 +57,7 @@ Response model for company configuration. All fields are always populated by the
 | `permission_grant_xp`             | `GrantXPPermission`           | Who may grant XP                                        |
 | `permission_free_trait_changes`   | `FreeTraitChangesPermission`  | When trait changes are free                             |
 | `permission_recoup_xp`            | `RecoupXPPermission`          | When XP may be recouped                                 |
+| `specialty_xp_cost_enabled`       | `bool`                        | Charge 3 points per ability specialty bought with `XP` or `STARTING_POINTS` (default `False`) |
 
 ## CompanySettingsCreate
 
@@ -72,6 +73,7 @@ Request payload for `POST /companies`. All fields optional — the server applie
 | `permission_grant_xp`             | `GrantXPPermission \| None`             | Override default                         |
 | `permission_free_trait_changes`   | `FreeTraitChangesPermission \| None`    | Override default                         |
 | `permission_recoup_xp`            | `RecoupXPPermission \| None`            | Override default                         |
+| `specialty_xp_cost_enabled`       | `bool \| None`                          | Override default (`False`)               |
 
 ## CompanySettingsUpdate
 
@@ -87,3 +89,4 @@ Request payload for `PATCH /companies/{id}`. All fields optional — omitted fie
 | `permission_grant_xp`             | `GrantXPPermission \| None`             | New value                                |
 | `permission_free_trait_changes`   | `FreeTraitChangesPermission \| None`    | New value                                |
 | `permission_recoup_xp`            | `RecoupXPPermission \| None`            | New value                                |
+| `specialty_xp_cost_enabled`       | `bool \| None`                          | New value                                |
