@@ -5,9 +5,10 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT, TraitModifyCurrency
+from vclient.constants import DEFAULT_PAGE_LIMIT, DamageType, TrackerAction, TraitModifyCurrency
 from vclient.endpoints import Endpoints
 from vclient.models import (
+    _TRACKER_ADAPTER,
     BulkAssignTraitResponse,
     CharacterTrait,
     CharacterTraitAdd,
@@ -15,7 +16,10 @@ from vclient.models import (
     CharacterTraitSpecialtyUpdate,
     CharacterTraitValueOptionsResponse,
     PaginatedResponse,
+    Tracker,
+    TrackerStateSet,
     TraitCreate,
+    _TrackerAction,
     _TraitModify,
 )
 
@@ -392,3 +396,103 @@ class SyncCharacterTraitsService(SyncBaseService):
                 specialty_id=specialty_id,
             )
         )
+
+    def get_tracker(self, character_trait_id: str) -> Tracker:
+        """Get the in-play tracker state of a character trait.
+
+        The same object appears as ``CharacterTrait.tracker``. Use this to refresh one
+        tracker without fetching the whole trait.
+
+        Args:
+            character_trait_id: The ID of the character trait.
+
+        Returns:
+            A CounterTracker, DamageTracker, or StainsTracker. Switch on ``type``.
+
+        Raises:
+            NotFoundError: If the trait has no tracker for the character's game version.
+            AuthorizationError: If you don't have access to the character.
+        """
+        response = self._get(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_TRACKER, character_trait_id=character_trait_id
+            )
+        )
+        return _TRACKER_ADAPTER.validate_python(response.json())
+
+    def set_tracker(
+        self, character_trait_id: str, request: TrackerStateSet | None = None, **kwargs
+    ) -> Tracker:
+        """Replace the full state of a trait tracker, such as to correct a mistake.
+
+        Send only the fields for the tracker's type: ``current`` for counters (required),
+        ``superficial`` and ``aggravated`` for damage tracks, ``stains`` for stains. Omitted
+        fields reset to 0, so an empty request clears a damage or stains tracker. Use
+        ``apply_tracker_action`` for in-play changes instead.
+
+        Args:
+            character_trait_id: The ID of the character trait.
+            request: A TrackerStateSet model, OR pass fields as keyword arguments.
+            **kwargs: Fields for TrackerStateSet if request is not provided.
+                Accepts: current, superficial, aggravated, stains (int >= 0).
+
+        Returns:
+            The updated tracker.
+
+        Raises:
+            NotFoundError: If the trait has no tracker for the character's game version.
+            AuthorizationError: If you are not the character's player or a storyteller.
+            RequestValidationError: If a value is negative.
+            ValidationError: If a field does not fit the tracker type, a counter has no
+                ``current``, or a value exceeds the tracker size.
+        """
+        body = request if request is not None else self._validate_request(TrackerStateSet, **kwargs)
+        response = self._put(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_TRACKER, character_trait_id=character_trait_id
+            ),
+            json=body.model_dump(exclude_none=True, mode="json"),
+        )
+        return _TRACKER_ADAPTER.validate_python(response.json())
+
+    def apply_tracker_action(
+        self,
+        character_trait_id: str,
+        action: TrackerAction,
+        *,
+        amount: int = 1,
+        damage_type: DamageType | None = None,
+    ) -> Tracker:
+        """Apply one in-play action to a trait tracker, such as spending Willpower.
+
+        The server applies the game rules for the character's game version. Which actions
+        and damage types fit each tracker is listed in ``characters.TrackerRules`` from
+        ``options.get_options()``. A STAINS response reports overflow into Willpower in
+        ``willpower_damage_applied``.
+
+        Args:
+            character_trait_id: The ID of the character trait.
+            action: The action to apply.
+            amount: How many points to apply. Must be at least 1.
+            damage_type: The damage type for ``damage`` and ``heal`` on damage tracks.
+
+        Returns:
+            The updated tracker.
+
+        Raises:
+            NotFoundError: If the trait has no tracker for the character's game version.
+            AuthorizationError: If you are not the character's player or a storyteller.
+            RequestValidationError: If ``amount`` is less than 1.
+            ValidationError: If the action or damage type does not fit the tracker, a
+                damage type is missing or not allowed, or a spend exceeds the current value.
+        """
+        body = self._validate_request(
+            _TrackerAction, action=action, amount=amount, damage_type=damage_type
+        )
+        response = self._post(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS, character_trait_id=character_trait_id
+            ),
+            json=body.model_dump(exclude_none=True, mode="json"),
+        )
+        return _TRACKER_ADAPTER.validate_python(response.json())

@@ -18,7 +18,11 @@ from vclient.models import (
     CharacterTrait,
     CharacterTraitAdd,
     CharacterTraitValueOptionsResponse,
+    CounterTracker,
+    DamageTracker,
     PaginatedResponse,
+    StainsTracker,
+    TrackerStateSet,
 )
 
 pytestmark = pytest.mark.anyio
@@ -1072,3 +1076,167 @@ class TestCharacterTraitsServiceBulkAssign:
             ).bulk_assign(items)
 
         assert route.called
+
+
+def _tracker_url(base_url: str, endpoint: str) -> str:
+    """Build a tracker endpoint URL for the standard test ids."""
+    return f"{base_url}{endpoint.format(company_id='company123', character_id='char123', character_trait_id='ct123')}"
+
+
+COUNTER_TRACKER = {"type": "COUNTER", "size": 5, "current": 3}
+DAMAGE_TRACKER = {
+    "type": "DAMAGE",
+    "size": 5,
+    "superficial": 1,
+    "aggravated": 2,
+    "boxes": ["AGGRAVATED", "AGGRAVATED", "SUPERFICIAL", None, None],
+    "is_impaired": False,
+}
+STAINS_TRACKER = {
+    "type": "STAINS",
+    "humanity": 7,
+    "stain_capacity": 3,
+    "stains": 4,
+    "is_impaired": True,
+    "willpower_damage_applied": 1,
+}
+
+
+class TestCharacterTraitsServiceTracker:
+    """Tests for CharacterTraitsService tracker methods."""
+
+    @pytest.fixture
+    def service(self, vclient):
+        """Return a character traits service for the standard test ids."""
+        return vclient.character_traits("char123", "on-behalf-of-user", company_id="company123")
+
+    @respx.mock
+    async def test_get_tracker(self, service, base_url) -> None:
+        """Verify get_tracker returns the typed tracker variant."""
+        # Given: A mocked tracker endpoint returning a counter
+        respx.get(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER)).mock(
+            return_value=Response(200, json=COUNTER_TRACKER)
+        )
+
+        # When: Getting the tracker
+        result = await service.get_tracker("ct123")
+
+        # Then: A CounterTracker is returned
+        assert isinstance(result, CounterTracker)
+        assert result.current == 3
+
+    @respx.mock
+    async def test_get_tracker_not_found(self, service, base_url) -> None:
+        """Verify a trait without a tracker raises NotFoundError."""
+        # Given: The endpoint returns 404
+        respx.get(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER)).mock(
+            return_value=Response(
+                404, json={"status": 404, "title": "Not Found", "detail": "Trait has no tracker"}
+            )
+        )
+
+        # When/Then: Getting the tracker raises
+        with pytest.raises(NotFoundError):
+            await service.get_tracker("ct123")
+
+    @respx.mock
+    async def test_set_tracker_kwargs(self, service, base_url) -> None:
+        """Verify set_tracker sends a zero value and nothing else."""
+        # Given: A mocked set tracker endpoint
+        route = respx.put(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER)).mock(
+            return_value=Response(200, json=DAMAGE_TRACKER)
+        )
+
+        # When: Setting current to zero
+        result = await service.set_tracker("ct123", current=0)
+
+        # Then: Only current is sent and the response is typed
+        assert json.loads(route.calls.last.request.content) == {"current": 0}
+        assert isinstance(result, DamageTracker)
+
+    @respx.mock
+    async def test_set_tracker_request_model(self, service, base_url) -> None:
+        """Verify set_tracker accepts a TrackerStateSet."""
+        # Given: A mocked set tracker endpoint
+        route = respx.put(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER)).mock(
+            return_value=Response(200, json=DAMAGE_TRACKER)
+        )
+
+        # When: Setting damage marks with a request model
+        await service.set_tracker("ct123", TrackerStateSet(superficial=1, aggravated=2))
+
+        # Then: Only the damage fields are sent
+        assert json.loads(route.calls.last.request.content) == {"superficial": 1, "aggravated": 2}
+
+    async def test_set_tracker_negative_rejected(self, service) -> None:
+        """Verify a negative value fails before any request."""
+        # When/Then: Setting a negative value raises
+        with pytest.raises(RequestValidationError):
+            await service.set_tracker("ct123", current=-1)
+
+    @respx.mock
+    async def test_apply_tracker_action_defaults(self, service, base_url) -> None:
+        """Verify an action without a damage type sends only action and amount."""
+        # Given: A mocked action endpoint
+        route = respx.post(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS)).mock(
+            return_value=Response(200, json=COUNTER_TRACKER)
+        )
+
+        # When: Spending one point
+        await service.apply_tracker_action("ct123", "spend")
+
+        # Then: damage_type is not sent
+        assert json.loads(route.calls.last.request.content) == {"action": "spend", "amount": 1}
+
+    @respx.mock
+    async def test_apply_tracker_action_damage(self, service, base_url) -> None:
+        """Verify a damage action sends amount and damage type."""
+        # Given: A mocked action endpoint
+        route = respx.post(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS)).mock(
+            return_value=Response(200, json=DAMAGE_TRACKER)
+        )
+
+        # When: Applying two superficial damage
+        await service.apply_tracker_action("ct123", "damage", amount=2, damage_type="SUPERFICIAL")
+
+        # Then: The full action body is sent
+        assert json.loads(route.calls.last.request.content) == {
+            "action": "damage",
+            "amount": 2,
+            "damage_type": "SUPERFICIAL",
+        }
+
+    @respx.mock
+    async def test_apply_tracker_action_stains_overflow(self, service, base_url) -> None:
+        """Verify stain overflow is reported on the response."""
+        # Given: An action endpoint returning a stains tracker with overflow
+        respx.post(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS)).mock(
+            return_value=Response(200, json=STAINS_TRACKER)
+        )
+
+        # When: Adding a stain
+        result = await service.apply_tracker_action("ct123", "add_stain")
+
+        # Then: The overflow is available
+        assert isinstance(result, StainsTracker)
+        assert result.willpower_damage_applied == 1
+
+    @respx.mock
+    async def test_apply_tracker_action_validation_error(self, service, base_url) -> None:
+        """Verify a 400 from the server raises ValidationError."""
+        # Given: The endpoint rejects the action
+        respx.post(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS)).mock(
+            return_value=Response(
+                400, json={"status": 400, "title": "Bad Request", "detail": "Invalid action"}
+            )
+        )
+
+        # When/Then: Applying the action raises
+        with pytest.raises(ValidationError):
+            await service.apply_tracker_action("ct123", "heal", damage_type="SUPERFICIAL")
+
+    async def test_apply_tracker_action_zero_amount(self, service) -> None:
+        """Verify amount below 1 fails before any request."""
+        # When/Then: amount=0 raises
+        with pytest.raises(RequestValidationError):
+            await service.apply_tracker_action("ct123", "spend", amount=0)
