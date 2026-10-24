@@ -32,6 +32,7 @@ class TestCompanySettings:
             "permission_grant_xp": "UNRESTRICTED",
             "permission_free_trait_changes": "UNRESTRICTED",
             "permission_recoup_xp": "DENIED",
+            "specialty_xp_cost_enabled": True,
         }
 
     def test_all_fields_required(self):
@@ -48,6 +49,19 @@ class TestCompanySettings:
         assert settings.permission_grant_xp == "UNRESTRICTED"
         assert settings.permission_free_trait_changes == "UNRESTRICTED"
         assert settings.permission_recoup_xp == "DENIED"
+        assert settings.specialty_xp_cost_enabled is True
+
+    def test_specialty_xp_cost_enabled_defaults_false(self):
+        """Verify specialty_xp_cost_enabled defaults to False when the server omits it."""
+        # Given: Full kwargs without specialty_xp_cost_enabled
+        kwargs = self._full_settings_kwargs()
+        del kwargs["specialty_xp_cost_enabled"]
+
+        # When: Constructing
+        settings = CompanySettings(**kwargs)
+
+        # Then: The setting matches the server default
+        assert settings.specialty_xp_cost_enabled is False
 
     @pytest.mark.parametrize(
         "missing_field",
@@ -125,6 +139,7 @@ class TestCompanySettingsCreate:
         assert settings.permission_grant_xp is None
         assert settings.permission_free_trait_changes is None
         assert settings.permission_recoup_xp is None
+        assert settings.specialty_xp_cost_enabled is None
 
     def test_partial_construction(self):
         """Verify construction with only some fields set."""
@@ -180,6 +195,7 @@ class TestCompanySettingsUpdate:
         assert settings.permission_grant_xp is None
         assert settings.permission_free_trait_changes is None
         assert settings.permission_recoup_xp is None
+        assert settings.specialty_xp_cost_enabled is None
 
     def test_partial_construction(self):
         """Verify construction with only some fields set."""
@@ -204,6 +220,17 @@ class TestCompanySettingsUpdate:
 
         # Then: Only the set field appears
         assert data == {"character_autogen_starting_points": 25}
+
+    def test_model_dump_false_specialty_xp_cost_enabled(self):
+        """Verify an explicit False for specialty_xp_cost_enabled is sent, not dropped."""
+        # Given: Settings disabling the specialty XP cost
+        settings = CompanySettingsUpdate(specialty_xp_cost_enabled=False)
+
+        # When: Dumping with exclude_unset and exclude_none
+        data = settings.model_dump(exclude_unset=True, exclude_none=True, mode="json")
+
+        # Then: The False value is kept
+        assert data == {"specialty_xp_cost_enabled": False}
 
     def test_invalid_permission_rejected(self):
         """Verify invalid enum values are rejected."""

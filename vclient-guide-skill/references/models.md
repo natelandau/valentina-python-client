@@ -191,6 +191,7 @@ Strict response model — all fields always populated by the server.
 | permission_grant_xp | GrantXPPermission | yes |
 | permission_free_trait_changes | FreeTraitChangesPermission | yes |
 | permission_recoup_xp | RecoupXPPermission | yes |
+| specialty_xp_cost_enabled | bool | no (default False) |
 
 ### CompanySettingsCreate
 
@@ -206,6 +207,7 @@ Request payload for `POST /companies`. All fields optional.
 | permission_grant_xp | GrantXPPermission \| None | no |
 | permission_free_trait_changes | FreeTraitChangesPermission \| None | no |
 | permission_recoup_xp | RecoupXPPermission \| None | no |
+| specialty_xp_cost_enabled | bool \| None | no |
 
 ### CompanySettingsUpdate
 
@@ -221,6 +223,7 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | permission_grant_xp | GrantXPPermission \| None | no |
 | permission_free_trait_changes | FreeTraitChangesPermission \| None | no |
 | permission_recoup_xp | RecoupXPPermission \| None | no |
+| specialty_xp_cost_enabled | bool \| None | no |
 
 ### CompanyCreate
 
@@ -551,6 +554,31 @@ All fields optional. Same field set as CharacterCreate plus `status`, `date_kill
 | character_id | str | yes |
 | value | int | yes |
 | trait | Trait | yes |
+| specialties | list[CharacterTraitSpecialty] | no (default []) |
+
+### CharacterTraitSpecialty
+
+Specialty on an ability trait. Returned oldest first; archived specialties are never returned.
+
+| Field | Type | Required |
+|-------|------|----------|
+| id | str | yes |
+| name | str | yes |
+| date_created | datetime | yes |
+| date_modified | datetime | yes |
+
+### CharacterTraitSpecialtyCreate
+
+| Field | Type | Constraints |
+|-------|------|------------|
+| name | str | 3-50 chars, unique on the trait ignoring case, required |
+| currency | TraitModifyCurrency | default "NO_COST" |
+
+### CharacterTraitSpecialtyUpdate
+
+| Field | Type | Constraints |
+|-------|------|------------|
+| name | str | 3-50 chars, unique on the trait ignoring case, required |
 
 ### CharacterCreateTraitAssign
 

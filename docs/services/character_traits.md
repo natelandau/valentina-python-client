@@ -30,7 +30,7 @@ traits = character_traits_service(
 
 !!! warning "NPC and Storyteller characters require `NO_COST`"
 
-    On `NPC` and `STORYTELLER` characters, every trait operation that takes a `currency` (`assign`, `bulk_assign`, `create`, `change_value`, and `delete`) accepts only `currency="NO_COST"`. Passing `"XP"` or `"STARTING_POINTS"` raises `ValidationError` (400). `PLAYER` characters accept all three currencies.
+    On `NPC` and `STORYTELLER` characters, every trait operation that takes a `currency` (`assign`, `bulk_assign`, `create`, `change_value`, `delete`, and `add_specialty`) accepts only `currency="NO_COST"`. Passing `"XP"` or `"STARTING_POINTS"` raises `ValidationError` (400). `PLAYER` characters accept all three currencies.
 
 ### Pagination
 
@@ -50,6 +50,49 @@ traits = character_traits_service(
 !!! warning "Check Options First"
 
     Always call `get_value_options()` before changing a trait value to ensure the change is valid and to understand the cost implications.
+
+Lowering an ability to `0` with `change_value()`, or deleting the trait with `delete()`, also removes its specialties and refunds what each cost. For the `"0"` and `"DELETE"` options, `xp_after` and `starting_points_after` include those refunds. `point_change` counts dots only.
+
+!!! note "Concurrent changes raise `ConflictError`"
+
+    `change_value()` with any currency, and `delete()`, `assign()`, and `create()` with `"XP"` or `"STARTING_POINTS"`, raise `ConflictError` (409) when another request changed the trait's value first. Nothing is spent or refunded. Fetch the trait again and retry.
+
+    ```python
+    from vclient.exceptions import ConflictError
+
+    try:
+        await traits.change_value(trait.id, new_value=4, currency="XP")
+    except ConflictError:
+        trait = await traits.get(trait.id)
+        # Decide again with the current value, then retry
+    ```
+
+### Specialties
+
+| Method                                                   | Returns          | Description                             |
+| -------------------------------------------------------- | ---------------- | --------------------------------------- |
+| `add_specialty(character_trait_id, name, currency?)`     | `CharacterTrait` | Add a specialty to an ability           |
+| `update_specialty(character_trait_id, specialty_id, name)` | `CharacterTrait` | Rename a specialty                    |
+| `delete_specialty(character_trait_id, specialty_id)`     | `None`           | Remove a specialty and refund its cost  |
+
+Specialties are free-text focuses on ability traits, such as "Knives" on Melee. Only abilities with a value of 1 or higher accept them. The name must be 3 to 50 characters and unique on the trait, ignoring case.
+
+The cost depends on the company's `specialty_xp_cost_enabled` setting:
+
+- **Off** (default): specialties are free, whatever the `currency`.
+- **On**: a specialty paid with `"XP"` or `"STARTING_POINTS"` costs 3 points. `"NO_COST"` follows the company's free trait changes setting.
+
+`delete_specialty()` refunds the cost in the currency used to buy it. An `XP` refund follows the company's `permission_recoup_xp` setting. Starting points are always refunded.
+
+`add_specialty()` raises `ValidationError` when the trait is not an ability, has a value of 0, already has a specialty with that name, or the character cannot afford the cost. `update_specialty()` and `delete_specialty()` raise `NotFoundError` for an unknown specialty or one that belongs to a different trait.
+
+```python
+melee = await traits.add_specialty(trait.id, name="Knives", currency="XP")
+knives = melee.specialties[0]
+
+melee = await traits.update_specialty(trait.id, knives.id, name="Throwing Knives")
+await traits.delete_specialty(trait.id, knives.id)
+```
 
 ## Example
 

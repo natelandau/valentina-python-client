@@ -1,5 +1,6 @@
 """Pydantic models for Character Trait API responses and requests."""
 
+from datetime import datetime
 from typing import Annotated
 
 from pydantic import BaseModel, Field
@@ -9,6 +10,15 @@ from vclient.constants import TraitModifyCurrency
 from .shared import Trait
 
 
+class CharacterTraitSpecialty(BaseModel):
+    """Response model for a specialty on an ability trait."""
+
+    id: str
+    name: str
+    date_created: datetime
+    date_modified: datetime
+
+
 class CharacterTrait(BaseModel):
     """Response model for a character trait."""
 
@@ -16,6 +26,10 @@ class CharacterTrait(BaseModel):
     character_id: str
     value: int
     trait: Trait
+    specialties: list[CharacterTraitSpecialty] = Field(
+        default_factory=list,
+        description="Active specialties on the trait, oldest first. Only abilities have specialties.",
+    )
 
 
 class CharacterCreateTraitAssign(BaseModel):
@@ -51,6 +65,29 @@ class TraitCreate(BaseModel):
     initial_cost: int | None = None
     upgrade_cost: int | None = None
     count_based_cost_multiplier: int | None = None
+
+
+class CharacterTraitSpecialtyCreate(BaseModel):
+    """Request model for adding a specialty to an ability trait."""
+
+    name: str = Field(
+        ...,
+        min_length=3,
+        max_length=50,
+        description="Specialty name (3-50 characters), unique on the trait ignoring case.",
+    )
+    currency: TraitModifyCurrency = "NO_COST"
+
+
+class CharacterTraitSpecialtyUpdate(BaseModel):
+    """Request model for renaming a specialty."""
+
+    name: str = Field(
+        ...,
+        min_length=3,
+        max_length=50,
+        description="New specialty name (3-50 characters), unique on the trait ignoring case.",
+    )
 
 
 class _TraitModify(BaseModel):
@@ -110,6 +147,9 @@ __all__ = [
     "CharacterCreateTraitAssign",
     "CharacterTrait",
     "CharacterTraitAdd",
+    "CharacterTraitSpecialty",
+    "CharacterTraitSpecialtyCreate",
+    "CharacterTraitSpecialtyUpdate",
     "CharacterTraitValueOption",
     "CharacterTraitValueOptionsResponse",
     "TraitCreate",

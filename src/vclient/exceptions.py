@@ -131,7 +131,9 @@ class NotFoundError(APIError):
 class ConflictError(APIError):
     """Raised when there is a conflict (409 Conflict).
 
-    Common cause is reusing an idempotency key with a different request body.
+    Common causes are reusing an idempotency key with a different request body, or
+    another request changing a character trait's value first. For the latter, refetch
+    the trait and retry.
     """
 
 

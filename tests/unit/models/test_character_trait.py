@@ -13,6 +13,8 @@ from vclient.models import (
 from vclient.models.character_trait import (
     CharacterTrait,
     CharacterTraitAdd,
+    CharacterTraitSpecialtyCreate,
+    CharacterTraitSpecialtyUpdate,
     TraitCreate,
 )
 from vclient.models.shared import Trait
@@ -112,6 +114,47 @@ class TestCharacterTrait:
         assert character_trait.trait.name == "Dexterity"
         assert character_trait.trait.description == "Physical agility and coordination"
         assert character_trait.trait.max_value == 5
+        assert character_trait.specialties == []
+
+    def test_character_trait_with_specialties(self) -> None:
+        """Verify CharacterTrait parses specialties in server order."""
+        # Given: API response data with two specialties
+        data = {
+            "id": "ct456",
+            "character_id": "char789",
+            "value": 2,
+            "trait": {
+                "id": "trait456",
+                "name": "Melee",
+                "date_created": "2024-01-15T10:30:00Z",
+                "date_modified": "2024-01-15T10:30:00Z",
+                "category_id": "cat456",
+                "sheet_section_id": "section123",
+            },
+            "specialties": [
+                {
+                    "id": "spec1",
+                    "name": "Knives",
+                    "date_created": "2024-01-15T10:30:00Z",
+                    "date_modified": "2024-01-15T10:30:00Z",
+                },
+                {
+                    "id": "spec2",
+                    "name": "Swords",
+                    "date_created": "2024-01-16T10:30:00Z",
+                    "date_modified": "2024-01-16T10:30:00Z",
+                },
+            ],
+        }
+
+        # When: Validating the response
+        character_trait = CharacterTrait.model_validate(data)
+
+        # Then: Specialties are parsed with datetimes, oldest first
+        assert [s.name for s in character_trait.specialties] == ["Knives", "Swords"]
+        assert character_trait.specialties[0].date_created == datetime(
+            2024, 1, 15, 10, 30, 0, tzinfo=UTC
+        )
 
     def test_character_trait_with_full_trait_data(self) -> None:
         """Verify CharacterTrait with complete trait information."""
@@ -384,3 +427,39 @@ class TestBulkAssignTraitModels:
         result = BulkAssignTraitResponse.model_validate(data)
         assert result.succeeded == []
         assert result.failed == []
+
+
+class TestCharacterTraitSpecialtyCreate:
+    """Tests for CharacterTraitSpecialtyCreate request model."""
+
+    def test_currency_defaults_to_no_cost(self) -> None:
+        """Verify currency defaults to NO_COST."""
+        # When: Constructing with only a name
+        request = CharacterTraitSpecialtyCreate(name="Knives")
+
+        # Then: Currency is NO_COST
+        assert request.currency == "NO_COST"
+
+    @pytest.mark.parametrize("name", ["ab", "x" * 51])
+    def test_name_length_enforced(self, name: str) -> None:
+        """Verify names outside 3-50 characters are rejected."""
+        # When/Then: Constructing raises
+        with pytest.raises(PydanticValidationError):
+            CharacterTraitSpecialtyCreate(name=name)
+
+    def test_invalid_currency_rejected(self) -> None:
+        """Verify an unknown currency is rejected."""
+        # When/Then: Constructing raises
+        with pytest.raises(PydanticValidationError):
+            CharacterTraitSpecialtyCreate(name="Knives", currency="GOLD")
+
+
+class TestCharacterTraitSpecialtyUpdate:
+    """Tests for CharacterTraitSpecialtyUpdate request model."""
+
+    @pytest.mark.parametrize("name", ["ab", "x" * 51])
+    def test_name_length_enforced(self, name: str) -> None:
+        """Verify names outside 3-50 characters are rejected."""
+        # When/Then: Constructing raises
+        with pytest.raises(PydanticValidationError):
+            CharacterTraitSpecialtyUpdate(name=name)

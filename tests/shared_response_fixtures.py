@@ -130,6 +130,14 @@ def character_trait_response_data(trait_response_data: dict) -> dict:
         "character_id": "char123",
         "value": 3,
         "trait": trait_response_data,
+        "specialties": [
+            {
+                "id": "spec123",
+                "name": "Knives",
+                "date_created": "2024-01-15T10:30:00Z",
+                "date_modified": "2024-01-15T10:30:00Z",
+            }
+        ],
     }
 
 
@@ -248,6 +256,7 @@ def company_response_data() -> dict:
             "permission_grant_xp": "UNRESTRICTED",
             "permission_free_trait_changes": "UNRESTRICTED",
             "permission_recoup_xp": "UNRESTRICTED",
+            "specialty_xp_cost_enabled": False,
         },
     }
 

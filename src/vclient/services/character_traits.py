@@ -9,6 +9,8 @@ from vclient.models import (
     BulkAssignTraitResponse,
     CharacterTrait,
     CharacterTraitAdd,
+    CharacterTraitSpecialtyCreate,
+    CharacterTraitSpecialtyUpdate,
     CharacterTraitValueOptionsResponse,
     PaginatedResponse,
     TraitCreate,
@@ -162,6 +164,8 @@ class CharacterTraitsService(BaseService):
     ) -> None:
         """Delete a character trait.
 
+        Any specialties on the trait are removed with it and the cost of each is refunded.
+
         Args:
             character_trait_id: The ID of the trait to delete.
             currency: The currency to use to recoup the cost of the trait.
@@ -174,6 +178,8 @@ class CharacterTraitsService(BaseService):
             AuthorizationError: If you don't have access to the character.
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
+            ConflictError: If recouping ``XP`` or ``STARTING_POINTS`` and another request
+                changed the trait's value first. Refetch the trait and retry.
         """
         params: dict[str, str | int] = {}
         if currency is not None:
@@ -202,6 +208,8 @@ class CharacterTraitsService(BaseService):
             AuthorizationError: If you don't have access to the character.
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
+            ConflictError: If paying with ``XP`` or ``STARTING_POINTS`` and another request
+                changed the trait's value first. Refetch the trait and retry.
         """
         body = self._validate_request(
             CharacterTraitAdd,
@@ -257,6 +265,13 @@ class CharacterTraitsService(BaseService):
                 show_when_zero (bool), is_rollable (bool, default True),
                 initial_cost (int | None), upgrade_cost (int | None),
                 count_based_cost_multiplier (int | None).
+
+        Returns:
+            The newly created CharacterTrait object.
+
+        Raises:
+            ConflictError: If paying with ``XP`` or ``STARTING_POINTS`` and another request
+                changed the trait's value first. Refetch the trait and retry.
         """
         body = request if request is not None else self._validate_request(TraitCreate, **kwargs)
         response = await self._post(
@@ -298,10 +313,20 @@ class CharacterTraitsService(BaseService):
     ) -> CharacterTrait:
         """Change the value of a character trait.
 
+        Lowering an ability to ``0`` also removes its specialties and refunds the cost of
+        each. The value change and the refunds are applied together or not at all.
+
         Args:
             character_trait_id: The ID of the trait to change the value of.
             new_value: The new value of the trait.
             currency: The currency to use for the modification.
+
+        Returns:
+            The updated CharacterTrait object.
+
+        Raises:
+            ConflictError: If another request changed the trait's value after this request
+                read it. Nothing is spent or refunded. Refetch the trait and retry.
         """
         body = self._validate_request(
             _TraitModify,
@@ -315,3 +340,109 @@ class CharacterTraitsService(BaseService):
             json=body.model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return CharacterTrait.model_validate(response.json())
+
+    # Specialty Methods
+
+    async def add_specialty(
+        self,
+        character_trait_id: str,
+        name: str,
+        currency: TraitModifyCurrency = "NO_COST",
+    ) -> CharacterTrait:
+        """Add a specialty to an ability trait.
+
+        Specialties are only available on abilities with a value of 1 or higher. When the
+        company's ``specialty_xp_cost_enabled`` setting is on, a specialty paid with ``XP``
+        or ``STARTING_POINTS`` costs 3 points, and ``NO_COST`` follows the company's
+        ``permission_free_trait_changes`` setting. When the setting is off, specialties are free.
+
+        Args:
+            character_trait_id: The ID of the ability trait.
+            name: The specialty name (3-50 characters), unique on the trait ignoring case.
+            currency: The currency to use to pay for the specialty.
+
+        Returns:
+            The updated CharacterTrait object, including its specialties.
+
+        Raises:
+            NotFoundError: If the trait does not exist.
+            AuthorizationError: If you don't have access to the character.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the trait is not an ability, has a value of 0, already has a
+                specialty with this name, the character cannot afford the cost, or an
+                ``NPC`` or ``STORYTELLER`` character pays with anything but ``NO_COST``.
+        """
+        body = self._validate_request(
+            CharacterTraitSpecialtyCreate,
+            name=name,
+            currency=currency,
+        )
+        response = await self._post(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_SPECIALTIES, character_trait_id=character_trait_id
+            ),
+            json=body.model_dump(exclude_none=True, mode="json"),
+        )
+        return CharacterTrait.model_validate(response.json())
+
+    async def update_specialty(
+        self,
+        character_trait_id: str,
+        specialty_id: str,
+        name: str,
+    ) -> CharacterTrait:
+        """Rename a specialty on an ability trait.
+
+        Renaming never changes the cost paid or the currency used.
+
+        Args:
+            character_trait_id: The ID of the ability trait.
+            specialty_id: The ID of the specialty to rename.
+            name: The new specialty name (3-50 characters), unique on the trait ignoring case.
+
+        Returns:
+            The updated CharacterTrait object, including its specialties.
+
+        Raises:
+            NotFoundError: If the trait or specialty does not exist, or the specialty
+                belongs to a different trait.
+            AuthorizationError: If you don't have access to the character.
+            RequestValidationError: If the input parameters fail client-side validation.
+            ValidationError: If the trait already has a specialty with this name.
+        """
+        body = self._validate_request(CharacterTraitSpecialtyUpdate, name=name)
+        response = await self._patch(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_SPECIALTY,
+                character_trait_id=character_trait_id,
+                specialty_id=specialty_id,
+            ),
+            json=body.model_dump(exclude_none=True, mode="json"),
+        )
+        return CharacterTrait.model_validate(response.json())
+
+    async def delete_specialty(self, character_trait_id: str, specialty_id: str) -> None:
+        """Remove a specialty from an ability trait.
+
+        The cost paid is refunded in the currency used to buy it. An ``XP`` refund follows
+        the company's ``permission_recoup_xp`` setting; starting points are always refunded.
+
+        Args:
+            character_trait_id: The ID of the ability trait.
+            specialty_id: The ID of the specialty to remove.
+
+        Returns:
+            None
+
+        Raises:
+            NotFoundError: If the trait or specialty does not exist, or the specialty
+                belongs to a different trait.
+            AuthorizationError: If you don't have access to the character.
+        """
+        await self._delete(
+            self._format_endpoint(
+                Endpoints.CHARACTER_TRAIT_SPECIALTY,
+                character_trait_id=character_trait_id,
+                specialty_id=specialty_id,
+            ),
+        )

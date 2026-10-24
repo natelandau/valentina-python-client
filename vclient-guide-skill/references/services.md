@@ -283,10 +283,17 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 | `bulk_assign(items)` | `items: list[CharacterTraitAdd]` | `BulkAssignTraitResponse` |
 | `get_value_options(character_trait_id)` | `character_trait_id: str` | `CharacterTraitValueOptionsResponse` |
 | `change_value(character_trait_id, new_value, currency)` | `character_trait_id: str, new_value: int, currency: TraitModifyCurrency` | `CharacterTrait` |
+| `add_specialty(character_trait_id, name, currency=)` | `character_trait_id: str, name: str, currency: TraitModifyCurrency = "NO_COST"` | `CharacterTrait` |
+| `update_specialty(character_trait_id, specialty_id, name)` | `character_trait_id: str, specialty_id: str, name: str` | `CharacterTrait` |
+| `delete_specialty(character_trait_id, specialty_id)` | `character_trait_id: str, specialty_id: str` | `None` |
 
 **TraitModifyCurrency values:** `"XP"`, `"STARTING_POINTS"`, `"NO_COST"`
 
-**NPC/STORYTELLER currency restriction:** On `NPC` and `STORYTELLER` characters, every method taking a `currency` (`assign`, `bulk_assign`, `create`, `change_value`, `delete`) accepts only `"NO_COST"`. Passing `"XP"` or `"STARTING_POINTS"` raises `ValidationError` (400). `PLAYER` characters accept all three.
+**NPC/STORYTELLER currency restriction:** On `NPC` and `STORYTELLER` characters, every method taking a `currency` (`assign`, `bulk_assign`, `create`, `change_value`, `delete`, `add_specialty`) accepts only `"NO_COST"`. Passing `"XP"` or `"STARTING_POINTS"` raises `ValidationError` (400). `PLAYER` characters accept all three.
+
+**Specialties:** Only abilities with a value of 1 or higher accept specialties (`ValidationError` otherwise, and for duplicate names or an unaffordable cost). When the company's `specialty_xp_cost_enabled` is on, a specialty bought with `XP` or `STARTING_POINTS` costs 3; otherwise it is free. `delete_specialty` refunds the cost (an `XP` refund follows `permission_recoup_xp`). Lowering an ability to 0 with `change_value`, or deleting the trait, removes its specialties and refunds them; the `"0"` and `"DELETE"` value options include those refunds in `xp_after` and `starting_points_after`. An unknown specialty, or one on a different trait, raises `NotFoundError`.
+
+**Concurrent changes:** `change_value` (any currency), and `delete`, `assign`, and `create` with `XP` or `STARTING_POINTS`, raise `ConflictError` (409) when another request changed the trait's value first. Nothing is spent or refunded. Refetch the trait and retry.
 
 ---
 
