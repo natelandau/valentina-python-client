@@ -12,6 +12,8 @@ from vclient.constants import (
     CharacterInclude,
     CharacterStatus,
     CharacterType,
+    DamageType,
+    TrackerAction,
 )
 from vclient.endpoints import Endpoints
 from vclient.models import (
@@ -22,6 +24,8 @@ from vclient.models import (
     CharacterFullSheet,
     CharacterUpdate,
     FullSheetTraitCategory,
+    Health,
+    HealthStateSet,
     InventoryItem,
     InventoryItemCreate,
     InventoryItemUpdate,
@@ -30,6 +34,7 @@ from vclient.models import (
     NoteUpdate,
     PaginatedResponse,
     RollStatistics,
+    _TrackerAction,
 )
 
 if TYPE_CHECKING:
@@ -873,3 +878,94 @@ class SyncCharactersService(SyncBaseService):
                 Endpoints.CHARACTER_INVENTORY_ITEM, character_id=character_id, item_id=item_id
             )
         )
+
+    def get_health(self, character_id: str) -> Health:
+        """Get a character's health track.
+
+        The same object appears as ``Character.health``. Re-fetch it after changing V5
+        Stamina, which sets the track size.
+
+        Args:
+            character_id: The ID of the character.
+
+        Returns:
+            The character's Health.
+
+        Raises:
+            NotFoundError: If the character does not exist or has no health track.
+            AuthorizationError: If you don't have access to the character.
+        """
+        response = self._get(
+            self._format_endpoint(Endpoints.CHARACTER_HEALTH, character_id=character_id)
+        )
+        return Health.model_validate(response.json())
+
+    def set_health(
+        self, character_id: str, request: HealthStateSet | None = None, **kwargs
+    ) -> Health:
+        """Replace a character's full health state, such as to correct a mistake.
+
+        Every field is sent, so omitted fields reset to 0. V4 uses ``bashing``,
+        ``lethal``, and ``aggravated``; V5 uses ``superficial`` and ``aggravated``.
+        ``extra_levels`` applies to both. Use ``apply_health_action`` for in-play changes.
+
+        Args:
+            character_id: The ID of the character.
+            request: A HealthStateSet model, OR pass fields as keyword arguments.
+            **kwargs: Fields for HealthStateSet if request is not provided.
+                Accepts: extra_levels, superficial, aggravated, bashing, lethal (int >= 0).
+
+        Returns:
+            The updated Health.
+
+        Raises:
+            NotFoundError: If the character does not exist or has no health track.
+            AuthorizationError: If you are not the character's player or a storyteller.
+            RequestValidationError: If a value is negative.
+            ValidationError: If a nonzero field is not used by the game version, or the
+                marks exceed the track size.
+        """
+        body = request if request is not None else self._validate_request(HealthStateSet, **kwargs)
+        response = self._put(
+            self._format_endpoint(Endpoints.CHARACTER_HEALTH, character_id=character_id),
+            json=body.model_dump(mode="json"),
+        )
+        return Health.model_validate(response.json())
+
+    def apply_health_action(
+        self,
+        character_id: str,
+        action: TrackerAction,
+        *,
+        amount: int = 1,
+        damage_type: DamageType | None = None,
+    ) -> Health:
+        """Apply one in-play action to a character's health, such as taking damage.
+
+        Health accepts ``damage``, ``heal``, and ``reset``. V4 damage types are
+        ``BASHING``, ``LETHAL``, and ``AGGRAVATED``; V5 damage types are ``SUPERFICIAL``
+        and ``AGGRAVATED``. The server applies overflow and upgrade rules.
+
+        Args:
+            character_id: The ID of the character.
+            action: The action to apply.
+            amount: How many points to apply. Must be at least 1.
+            damage_type: The damage type for ``damage`` and ``heal``.
+
+        Returns:
+            The updated Health.
+
+        Raises:
+            NotFoundError: If the character does not exist or has no health track.
+            AuthorizationError: If you are not the character's player or a storyteller.
+            RequestValidationError: If ``amount`` is less than 1.
+            ValidationError: If the action or damage type does not fit the game version.
+        """
+        body = self._validate_request(
+            _TrackerAction, action=action, amount=amount, damage_type=damage_type
+        )
+        response = self._post(
+            self._format_endpoint(Endpoints.CHARACTER_HEALTH_ACTIONS, character_id=character_id),
+            json=body.model_dump(exclude_none=True, mode="json"),
+        )
+        return Health.model_validate(response.json())
