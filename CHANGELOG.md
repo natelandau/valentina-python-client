@@ -1,3 +1,10 @@
+## v3.4.0 (2026-10-24)
+
+### Feat
+
+- **trackers**: add trait trackers and character health (#90)
+- **traits**: add ability specialties and concurrent change conflicts (#89)
+
 ## v3.3.0 (2026-08-03)
 
 ### Feat
