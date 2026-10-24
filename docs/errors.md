@@ -87,7 +87,7 @@ except ValidationError as e:
 except RequestValidationError as e:
     print(f"Client validation failed: {e}")
 except ConflictError:
-    print("Resource conflict (check idempotency key)")
+    print("Conflict: reused idempotency key, or trait changed (refetch and retry)")
 except UnprocessableEntityError as e:
     print(f"Cannot process request: {e.code}")
 except RateLimitError as e:
