@@ -17,7 +17,6 @@ from vclient.models.character_trait import (
     CharacterTraitSpecialtyCreate,
     CharacterTraitSpecialtyUpdate,
     CounterTracker,
-    DamageTracker,
     StainsTracker,
     TrackerStateSet,
     TraitCreate,
@@ -504,46 +503,36 @@ class TestTrackerModels:
         assert isinstance(ct.tracker, CounterTracker)
         assert ct.tracker.current == 3
 
-    def test_damage_tracker_dispatch(self) -> None:
-        """Verify a DAMAGE tracker parses as DamageTracker with V4 fields unset."""
-        # When: Parsing a trait with a damage tracker
-        ct = CharacterTrait.model_validate(
-            _character_trait_data(
-                tracker={
-                    "type": "DAMAGE",
-                    "size": 5,
-                    "superficial": 1,
-                    "aggravated": 1,
-                    "boxes": ["AGGRAVATED", "SUPERFICIAL", None, None, None],
-                    "is_impaired": False,
-                }
+    def test_damage_tracker_type_rejected(self) -> None:
+        """Verify a trait tracker no longer accepts the DAMAGE type."""
+        # When/Then: Parsing a trait with a DAMAGE tracker raises
+        with pytest.raises(PydanticValidationError):
+            CharacterTrait.model_validate(
+                _character_trait_data(
+                    tracker={
+                        "type": "DAMAGE",
+                        "size": 5,
+                        "superficial": 1,
+                        "aggravated": 0,
+                        "boxes": ["SUPERFICIAL", None, None, None, None],
+                        "is_impaired": False,
+                    }
+                )
             )
-        )
-
-        # Then: The damage variant is chosen with empty boxes as None
-        assert isinstance(ct.tracker, DamageTracker)
-        assert ct.tracker.boxes[2] is None
-        assert ct.tracker.levels is None
 
     def test_stains_tracker_dispatch(self) -> None:
-        """Verify a STAINS tracker parses as StainsTracker."""
+        """Verify a STAINS tracker parses as StainsTracker with only its stain fields."""
         # When: Parsing a trait with a stains tracker
         ct = CharacterTrait.model_validate(
             _character_trait_data(
-                tracker={
-                    "type": "STAINS",
-                    "humanity": 7,
-                    "stain_capacity": 3,
-                    "stains": 4,
-                    "is_impaired": True,
-                    "willpower_damage_applied": 1,
-                }
+                tracker={"type": "STAINS", "humanity": 7, "stain_capacity": 3, "stains": 4}
             )
         )
 
-        # Then: The stains variant is chosen
+        # Then: The stains variant is chosen without impairment or overflow fields
         assert isinstance(ct.tracker, StainsTracker)
-        assert ct.tracker.willpower_damage_applied == 1
+        assert ct.tracker.stains == 4
+        assert set(StainsTracker.model_fields) == {"type", "humanity", "stain_capacity", "stains"}
 
     def test_unknown_tracker_type_rejected(self) -> None:
         """Verify an unknown tracker type fails validation."""
@@ -591,10 +580,17 @@ class TestTrackerModels:
         with pytest.raises(PydanticValidationError):
             _TrackerAction(action="spend", amount=0)
 
-    def test_tracker_action_dump_omits_damage_type(self) -> None:
-        """Verify an action without a damage type does not send the key."""
-        # When: Dumping a spend action
-        body = _TrackerAction(action="spend").model_dump(exclude_none=True)
+    def test_tracker_action_dump_sends_action_and_amount(self) -> None:
+        """Verify an action sends only its action and amount."""
+        # When: Dumping a damage action
+        body = _TrackerAction(action="damage", amount=2).model_dump(exclude_none=True)
 
-        # Then: damage_type is absent
-        assert body == {"action": "spend", "amount": 1}
+        # Then: Only action and amount are sent
+        assert body == {"action": "damage", "amount": 2}
+
+    @pytest.mark.parametrize("field", ["superficial", "aggravated", "bogus"])
+    def test_tracker_state_set_rejects_unknown_field(self, field: str) -> None:
+        """Verify a field other than current or stains fails client-side."""
+        # When/Then: Passing a removed or unknown field raises
+        with pytest.raises(PydanticValidationError):
+            TrackerStateSet(**{field: 1})

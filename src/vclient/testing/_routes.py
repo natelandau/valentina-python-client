@@ -23,7 +23,7 @@ from vclient.models import (
     CharacterTraitValueOptionsResponse,
     Company,
     CompanyPermissions,
-    DamageTracker,
+    CounterTracker,
     Developer,
     DeveloperWithApiKey,
     Diceroll,
@@ -351,15 +351,15 @@ class Routes:
     CHARACTER_TRAITS_SPECIALTY_DELETE = RouteSpec(
         "DELETE", Endpoints.CHARACTER_TRAIT_SPECIALTY, NO_CONTENT, None
     )
-    # Tracker routes return any tracker variant; the default response is a DamageTracker.
+    # Tracker routes return any tracker variant; the default response is a CounterTracker.
     CHARACTER_TRAITS_TRACKER_GET = RouteSpec(
-        "GET", Endpoints.CHARACTER_TRAIT_TRACKER, SINGLE, DamageTracker
+        "GET", Endpoints.CHARACTER_TRAIT_TRACKER, SINGLE, CounterTracker
     )
     CHARACTER_TRAITS_TRACKER_SET = RouteSpec(
-        "PUT", Endpoints.CHARACTER_TRAIT_TRACKER, SINGLE, DamageTracker
+        "PUT", Endpoints.CHARACTER_TRAIT_TRACKER, SINGLE, CounterTracker
     )
     CHARACTER_TRAITS_TRACKER_ACTION = RouteSpec(
-        "POST", Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS, SINGLE, DamageTracker
+        "POST", Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS, SINGLE, CounterTracker
     )
 
     # Blueprint sections

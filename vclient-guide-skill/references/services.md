@@ -263,11 +263,11 @@ Resolves verified provider credentials to canonical users. Forward the credentia
 |--------|-----------|---------|
 | `get_health(character_id)` | `character_id: str` | `Health` |
 | `set_health(character_id)` | `character_id: str, request: HealthStateSet \| None, **kwargs` | `Health` |
-| `apply_health_action(character_id, action)` | `character_id: str, action: TrackerAction, *, amount: int = 1, damage_type: DamageType \| None = None` | `Health` |
+| `apply_health_action(character_id, action)` | `character_id: str, action: TrackerAction, *, amount: int = 1` | `Health` |
 
-`Character.health` carries the same object (`None` only from an API older than the tracker release). V4: 7 levels + `extra_levels`, damage types `BASHING`, `LETHAL`, `AGGRAVATED`, and `levels`/`current_penalty` are filled. V5: Stamina + 3 + `extra_levels`, damage types `SUPERFICIAL`, `AGGRAVATED`, and the V4 fields are `None`. Health actions: `damage`, `heal`, `reset`. `set_health` sends every field, so omitted fields reset to 0; a nonzero field the game version does not use raises `ValidationError`. Errors: `NotFoundError` (no character or no health track), `ValidationError` (bad action/damage type, marks over size), `AuthorizationError` (not the player or a storyteller), `RequestValidationError` (negative values, `amount < 1`). Writes return the new state, no refetch needed. Re-fetch health after `change_value` on V5 Stamina.
+`Character.health` carries the same object (`None` only from an API older than the tracker release). Health is one count, `damage` (0 to `size`); there are no damage types, penalties, impairment, or health state (record death with the character `status`). V4: 7 levels + `extra_levels`, `levels` lists `{name, marked}` per box. V5: Stamina + 3 + `extra_levels`, `levels` is `None`. Health actions: `damage`, `heal`, `reset` with `amount` only; damage past a full track and healing past 0 are dropped. `set_health` sends `extra_levels` and `damage`, so omitted fields reset to 0. Errors: `NotFoundError` (no character or no health track), `ValidationError` (bad action, damage over size), `AuthorizationError` (not the player or a storyteller), `RequestValidationError` (negative values, `amount < 1`, unknown field such as `superficial`). Writes return the new state, no refetch needed. Re-fetch health after `change_value` on V5 Stamina. Against API `v0.29.0` or older, `damage` and `HealthLevel.marked` are `None`.
 
-**Create with starting state:** `CharacterCreate.health: HealthStateSet` and `CharacterCreateTraitAssign.tracker: TrackerStateSet` set marks at creation. Creation is atomic (any 400 creates nothing). `ValidationError` for a `tracker` on a trait with no tracker for the game version, a field that does not fit, or a duplicate `trait_id` in `traits`. On V5 a Willpower `value` in `traits` is ignored (it equals Composure + Resolve).
+**Create with starting state:** `CharacterCreate.health: HealthStateSet` and `CharacterCreateTraitAssign.tracker: TrackerStateSet` set starting state at creation. Creation is atomic (any 400 creates nothing). `ValidationError` for a `tracker` on a trait with no tracker for the game version, a field that does not fit, or a duplicate `trait_id` in `traits`. On V5 a Willpower `value` in `traits` is ignored (it equals Composure + Resolve).
 
 ### Assets & Notes
 
@@ -300,7 +300,7 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 | `delete_specialty(character_trait_id, specialty_id)` | `character_trait_id: str, specialty_id: str` | `None` |
 | `get_tracker(character_trait_id)` | `character_trait_id: str` | `Tracker` |
 | `set_tracker(character_trait_id)` | `character_trait_id: str, request: TrackerStateSet \| None, **kwargs` | `Tracker` |
-| `apply_tracker_action(character_trait_id, action)` | `character_trait_id: str, action: TrackerAction, *, amount: int = 1, damage_type: DamageType \| None = None` | `Tracker` |
+| `apply_tracker_action(character_trait_id, action)` | `character_trait_id: str, action: TrackerAction, *, amount: int = 1` | `Tracker` |
 
 **TraitModifyCurrency values:** `"XP"`, `"STARTING_POINTS"`, `"NO_COST"`
 
@@ -312,7 +312,7 @@ Same pattern as CampaignsService (with `character_id` as parent resource ID).
 
 **Duplicate assign:** `assign` raises `ConflictError` (409) when the character already has the trait, checked before the value range. Do not retry; use the value methods instead.
 
-**Trackers:** `Tracker` is `CounterTracker | DamageTracker | StainsTracker`, picked by `type` (`COUNTER`: V4 Willpower, Blood Pool, Rage, Gnosis, Conviction; `DAMAGE`: V5 Willpower; `STAINS`: V5 Humanity). `CharacterTrait.tracker` carries it, `None` when the trait has none for the game version (custom traits never do). `set_tracker` sends only non-`None` fields: `current` (COUNTER, required), `superficial`/`aggravated` (DAMAGE), `stains` (STAINS); a field that does not fit raises `ValidationError` even when 0, and an omitted field of the type resets to 0 (an empty request clears DAMAGE/STAINS). Actions: `spend`, `gain`, `damage`, `heal`, `add_stain`, `remove_stain`, `reset`; valid pairs per tracker and game version come from `options.get_options()["characters"]["TrackerRules"]`. `StainsTracker.willpower_damage_applied` reports overflow on action responses. Errors: `NotFoundError` (no tracker), `ValidationError` (bad field/action/damage type, spend over `current`, value over size), `AuthorizationError` (not the player or a storyteller), `RequestValidationError` (negative values, `amount < 1`). Needs an API newer than `v0.28.0`.
+**Trackers:** `Tracker` is `CounterTracker | StainsTracker`, picked by `type` (`COUNTER`: Willpower in V4 and V5, Blood Pool, Rage, Gnosis, Conviction, and Humanity for every character except a V5 vampire; `STAINS`: V5 vampire Humanity). Pick the Humanity control from `CharacterTrait.tracker.type`, never from `Trait.tracker_type_v5` (it says `STAINS` for every class). `CharacterTrait.tracker` carries it, `None` when the trait has none for the game version (custom traits never do). `set_tracker` sends only non-`None` fields: `current` (COUNTER, required) or `stains` (STAINS); a field that does not fit raises `ValidationError` even when 0, an unknown field raises `RequestValidationError`, and an empty request clears STAINS. Actions: COUNTER `spend`, `gain`, `reset`; STAINS `add_stain`, `remove_stain`, `reset`; read them from `options.get_options()["characters"]["TrackerRules"][game_version][tracker.type]`. Stains past `stain_capacity` are kept and have no effect. Errors: `NotFoundError` (no tracker), `ValidationError` (bad field/action, spend over `current`, value over size), `AuthorizationError` (not the player or a storyteller), `RequestValidationError` (negative values, `amount < 1`, unknown field). Needs an API newer than `v0.29.0`: `v0.29.0` sends V5 Willpower as a `DAMAGE` tracker, which fails to parse.
 
 **V5 Willpower:** always Composure + Resolve. `change_value` and `delete` raise `ValidationError` (400), `get_value_options` returns empty `options`, `assign` raises `ConflictError` (409) and `bulk_assign` puts it in `failed` (it always exists). Change Composure or Resolve, then re-fetch Willpower (`change_value` returns only the changed trait).
 
@@ -574,7 +574,7 @@ Requires global admin. Raises `AuthorizationError` (403) for non-admins and `Con
 |--------|-----------|---------|
 | `get_options()` | — | `dict[str, dict[str, Any]]` |
 
-Most values are lists of enum values. `characters.TrackerRules` is a nested map `{game_version: {tracker_key: {"actions": [...], "damage_types": [...]}}}` where `tracker_key` is a tracker type or `HEALTH`. Use it to pick which tracker controls to show.
+Most values are lists of enum values. `characters.TrackerRules` is a nested map `{game_version: {tracker_type: {"actions": [...]}}}`. V4 keys: `COUNTER`, `DAMAGE`; V5 keys: `COUNTER`, `STAINS`, `DAMAGE`. Health uses `DAMAGE`, its `type`. Look up any tracker or health with `TrackerRules[game_version][x.type]` to pick which controls to show.
 
 ---
 

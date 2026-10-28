@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from vclient._sync.services.base import SyncBaseService
-from vclient.constants import DEFAULT_PAGE_LIMIT, DamageType, TrackerAction, TraitModifyCurrency
+from vclient.constants import DEFAULT_PAGE_LIMIT, TrackerAction, TraitModifyCurrency
 from vclient.endpoints import Endpoints
 from vclient.models import (
     _TRACKER_ADAPTER,
@@ -407,7 +407,7 @@ class SyncCharacterTraitsService(SyncBaseService):
             character_trait_id: The ID of the character trait.
 
         Returns:
-            A CounterTracker, DamageTracker, or StainsTracker. Switch on ``type``.
+            A CounterTracker or StainsTracker. Switch on ``type``.
 
         Raises:
             NotFoundError: If the trait has no tracker for the character's game version.
@@ -425,16 +425,15 @@ class SyncCharacterTraitsService(SyncBaseService):
     ) -> Tracker:
         """Replace the full state of a trait tracker, such as to correct a mistake.
 
-        Send only the fields for the tracker's type: ``current`` for counters (required),
-        ``superficial`` and ``aggravated`` for damage tracks, ``stains`` for stains. Omitted
-        fields reset to 0, so an empty request clears a damage or stains tracker. Use
+        Send only the field for the tracker's type: ``current`` for counters (required) or
+        ``stains`` for stains. An empty request clears a stains tracker. Use
         ``apply_tracker_action`` for in-play changes instead.
 
         Args:
             character_trait_id: The ID of the character trait.
             request: A TrackerStateSet model, OR pass fields as keyword arguments.
             **kwargs: Fields for TrackerStateSet if request is not provided.
-                Accepts: current, superficial, aggravated, stains (int >= 0).
+                Accepts: current, stains (int >= 0).
 
         Returns:
             The updated tracker.
@@ -442,7 +441,7 @@ class SyncCharacterTraitsService(SyncBaseService):
         Raises:
             NotFoundError: If the trait has no tracker for the character's game version.
             AuthorizationError: If you are not the character's player or a storyteller.
-            RequestValidationError: If a value is negative.
+            RequestValidationError: If a value is negative or a field is unknown.
             ValidationError: If a field does not fit the tracker type, a counter has no
                 ``current``, or a value exceeds the tracker size.
         """
@@ -456,25 +455,17 @@ class SyncCharacterTraitsService(SyncBaseService):
         return _TRACKER_ADAPTER.validate_python(response.json())
 
     def apply_tracker_action(
-        self,
-        character_trait_id: str,
-        action: TrackerAction,
-        *,
-        amount: int = 1,
-        damage_type: DamageType | None = None,
+        self, character_trait_id: str, action: TrackerAction, *, amount: int = 1
     ) -> Tracker:
         """Apply one in-play action to a trait tracker, such as spending Willpower.
 
-        The server applies the game rules for the character's game version. Which actions
-        and damage types fit each tracker is listed in ``characters.TrackerRules`` from
-        ``options.get_options()``. A STAINS response reports overflow into Willpower in
-        ``willpower_damage_applied``.
+        The actions each tracker accepts are listed in
+        ``characters.TrackerRules[game_version][tracker.type]`` from ``options.get_options()``.
 
         Args:
             character_trait_id: The ID of the character trait.
             action: The action to apply.
             amount: How many points to apply. Must be at least 1.
-            damage_type: The damage type for ``damage`` and ``heal`` on damage tracks.
 
         Returns:
             The updated tracker.
@@ -483,12 +474,10 @@ class SyncCharacterTraitsService(SyncBaseService):
             NotFoundError: If the trait has no tracker for the character's game version.
             AuthorizationError: If you are not the character's player or a storyteller.
             RequestValidationError: If ``amount`` is less than 1.
-            ValidationError: If the action or damage type does not fit the tracker, a
-                damage type is missing or not allowed, or a spend exceeds the current value.
+            ValidationError: If the action does not fit the tracker or a spend exceeds the
+                current value.
         """
-        body = self._validate_request(
-            _TrackerAction, action=action, amount=amount, damage_type=damage_type
-        )
+        body = self._validate_request(_TrackerAction, action=action, amount=amount)
         response = self._post(
             self._format_endpoint(
                 Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS, character_trait_id=character_trait_id

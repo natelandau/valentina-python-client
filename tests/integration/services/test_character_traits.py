@@ -19,7 +19,6 @@ from vclient.models import (
     CharacterTraitAdd,
     CharacterTraitValueOptionsResponse,
     CounterTracker,
-    DamageTracker,
     PaginatedResponse,
     StainsTracker,
     TrackerStateSet,
@@ -1084,22 +1083,7 @@ def _tracker_url(base_url: str, endpoint: str) -> str:
 
 
 COUNTER_TRACKER = {"type": "COUNTER", "size": 5, "current": 3}
-DAMAGE_TRACKER = {
-    "type": "DAMAGE",
-    "size": 5,
-    "superficial": 1,
-    "aggravated": 2,
-    "boxes": ["AGGRAVATED", "AGGRAVATED", "SUPERFICIAL", None, None],
-    "is_impaired": False,
-}
-STAINS_TRACKER = {
-    "type": "STAINS",
-    "humanity": 7,
-    "stain_capacity": 3,
-    "stains": 4,
-    "is_impaired": True,
-    "willpower_damage_applied": 1,
-}
+STAINS_TRACKER = {"type": "STAINS", "humanity": 7, "stain_capacity": 3, "stains": 4}
 
 
 class TestCharacterTraitsServiceTracker:
@@ -1144,7 +1128,7 @@ class TestCharacterTraitsServiceTracker:
         """Verify set_tracker sends a zero value and nothing else."""
         # Given: A mocked set tracker endpoint
         route = respx.put(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER)).mock(
-            return_value=Response(200, json=DAMAGE_TRACKER)
+            return_value=Response(200, json=COUNTER_TRACKER)
         )
 
         # When: Setting current to zero
@@ -1152,21 +1136,28 @@ class TestCharacterTraitsServiceTracker:
 
         # Then: Only current is sent and the response is typed
         assert json.loads(route.calls.last.request.content) == {"current": 0}
-        assert isinstance(result, DamageTracker)
+        assert isinstance(result, CounterTracker)
 
     @respx.mock
     async def test_set_tracker_request_model(self, service, base_url) -> None:
         """Verify set_tracker accepts a TrackerStateSet."""
         # Given: A mocked set tracker endpoint
         route = respx.put(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER)).mock(
-            return_value=Response(200, json=DAMAGE_TRACKER)
+            return_value=Response(200, json=STAINS_TRACKER)
         )
 
-        # When: Setting damage marks with a request model
-        await service.set_tracker("ct123", TrackerStateSet(superficial=1, aggravated=2))
+        # When: Setting stains with a request model
+        result = await service.set_tracker("ct123", TrackerStateSet(stains=2))
 
-        # Then: Only the damage fields are sent
-        assert json.loads(route.calls.last.request.content) == {"superficial": 1, "aggravated": 2}
+        # Then: Only stains is sent and the response is typed
+        assert json.loads(route.calls.last.request.content) == {"stains": 2}
+        assert isinstance(result, StainsTracker)
+
+    async def test_set_tracker_removed_field_rejected(self, service) -> None:
+        """Verify a removed damage field fails before any request."""
+        # When/Then: Setting superficial damage raises
+        with pytest.raises(RequestValidationError):
+            await service.set_tracker("ct123", superficial=1)
 
     async def test_set_tracker_negative_rejected(self, service) -> None:
         """Verify a negative value fails before any request."""
@@ -1176,40 +1167,23 @@ class TestCharacterTraitsServiceTracker:
 
     @respx.mock
     async def test_apply_tracker_action_defaults(self, service, base_url) -> None:
-        """Verify an action without a damage type sends only action and amount."""
+        """Verify an action sends only action and amount."""
         # Given: A mocked action endpoint
         route = respx.post(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS)).mock(
             return_value=Response(200, json=COUNTER_TRACKER)
         )
 
-        # When: Spending one point
-        await service.apply_tracker_action("ct123", "spend")
+        # When: Spending two points
+        result = await service.apply_tracker_action("ct123", "spend", amount=2)
 
-        # Then: damage_type is not sent
-        assert json.loads(route.calls.last.request.content) == {"action": "spend", "amount": 1}
-
-    @respx.mock
-    async def test_apply_tracker_action_damage(self, service, base_url) -> None:
-        """Verify a damage action sends amount and damage type."""
-        # Given: A mocked action endpoint
-        route = respx.post(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS)).mock(
-            return_value=Response(200, json=DAMAGE_TRACKER)
-        )
-
-        # When: Applying two superficial damage
-        await service.apply_tracker_action("ct123", "damage", amount=2, damage_type="SUPERFICIAL")
-
-        # Then: The full action body is sent
-        assert json.loads(route.calls.last.request.content) == {
-            "action": "damage",
-            "amount": 2,
-            "damage_type": "SUPERFICIAL",
-        }
+        # Then: Only action and amount are sent
+        assert json.loads(route.calls.last.request.content) == {"action": "spend", "amount": 2}
+        assert isinstance(result, CounterTracker)
 
     @respx.mock
-    async def test_apply_tracker_action_stains_overflow(self, service, base_url) -> None:
-        """Verify stain overflow is reported on the response."""
-        # Given: An action endpoint returning a stains tracker with overflow
+    async def test_apply_tracker_action_stains(self, service, base_url) -> None:
+        """Verify a stain action returns a StainsTracker."""
+        # Given: An action endpoint returning a stains tracker
         respx.post(_tracker_url(base_url, Endpoints.CHARACTER_TRAIT_TRACKER_ACTIONS)).mock(
             return_value=Response(200, json=STAINS_TRACKER)
         )
@@ -1217,9 +1191,15 @@ class TestCharacterTraitsServiceTracker:
         # When: Adding a stain
         result = await service.apply_tracker_action("ct123", "add_stain")
 
-        # Then: The overflow is available
+        # Then: The stains tracker is returned
         assert isinstance(result, StainsTracker)
-        assert result.willpower_damage_applied == 1
+        assert result.stains == 4
+
+    async def test_apply_tracker_action_no_damage_type(self, service) -> None:
+        """Verify apply_tracker_action no longer accepts a damage type."""
+        # When/Then: Passing damage_type raises
+        with pytest.raises(TypeError):
+            await service.apply_tracker_action("ct123", "spend", damage_type="SUPERFICIAL")
 
     @respx.mock
     async def test_apply_tracker_action_validation_error(self, service, base_url) -> None:
@@ -1233,7 +1213,7 @@ class TestCharacterTraitsServiceTracker:
 
         # When/Then: Applying the action raises
         with pytest.raises(ValidationError):
-            await service.apply_tracker_action("ct123", "heal", damage_type="SUPERFICIAL")
+            await service.apply_tracker_action("ct123", "add_stain")
 
     async def test_apply_tracker_action_zero_amount(self, service) -> None:
         """Verify amount below 1 fails before any request."""

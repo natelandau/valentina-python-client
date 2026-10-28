@@ -309,7 +309,7 @@ class CharacterCreate(BaseModel):
     )
     health: HealthStateSet | None = Field(
         default=None,
-        description="Starting health marks. Omit for an unhurt character.",
+        description="Starting health damage. Omit for an unhurt character.",
     )
     vampire_attributes: VampireAttributesCreate | None = Field(
         default=None, description="Vampire-specific attributes."

@@ -1,6 +1,5 @@
 """Polyfactory model factories for all vclient response models."""
 
-import random
 from typing import Any
 
 from polyfactory import Use
@@ -31,7 +30,6 @@ from vclient.models import (
     Company,
     CompanyPermissions,
     CounterTracker,
-    DamageTracker,
     Developer,
     DeveloperWithApiKey,
     Diceroll,
@@ -186,11 +184,9 @@ class CharacterTraitFactory(_GeneratedFieldsFactory[CharacterTrait]):
     __generated_fields__ = frozenset({"tracker"})
 
     @classmethod
-    def tracker(cls) -> CounterTracker | DamageTracker | StainsTracker | None:
+    def tracker(cls) -> CounterTracker | StainsTracker | None:
         """Return a random tracker variant, or None for a trait without a tracker."""
-        factory = cls.__random__.choice(
-            [CounterTrackerFactory, DamageTrackerFactory, StainsTrackerFactory, None]
-        )
+        factory = cls.__random__.choice([CounterTrackerFactory, StainsTrackerFactory, None])
         return factory.build() if factory is not None else None
 
 
@@ -370,24 +366,6 @@ class WerewolfTribeFactory(ModelFactory[WerewolfTribe]):
     __use_defaults__ = True
 
 
-def _damage_track_values(rng: random.Random, overrides: dict[str, Any]) -> dict[str, Any]:
-    """Return damage track fields whose counts, boxes, and impairment agree with each other.
-
-    Fields passed in ``overrides`` are kept and the rest are derived from them.
-    """
-    size: int = overrides.get("size", rng.randint(1, 10))
-    aggravated: int = overrides.get("aggravated", rng.randint(0, size))
-    superficial: int = overrides.get("superficial", rng.randint(0, max(size - aggravated, 0)))
-    marks: list[str | None] = ["AGGRAVATED"] * aggravated + ["SUPERFICIAL"] * superficial
-    return {
-        "size": size,
-        "aggravated": aggravated,
-        "superficial": superficial,
-        "boxes": overrides.get("boxes", (marks + [None] * size)[:size]),
-        "is_impaired": overrides.get("is_impaired", aggravated + superficial >= size),
-    }
-
-
 class CounterTrackerFactory(ModelFactory[CounterTracker]):
     __model__ = CounterTracker
     __use_defaults__ = True
@@ -400,31 +378,34 @@ class CounterTrackerFactory(ModelFactory[CounterTracker]):
         return super().build(factory_use_construct, **kwargs)
 
 
-class DamageTrackerFactory(ModelFactory[DamageTracker]):
-    __model__ = DamageTracker
-    __use_defaults__ = True
-
-    @classmethod
-    def build(cls, factory_use_construct: bool = False, **kwargs: Any) -> DamageTracker:  # noqa: FBT001, FBT002
-        """Build a damage track whose boxes match its superficial and aggravated counts."""
-        kwargs = {**kwargs, **_damage_track_values(cls.__random__, kwargs)}
-        return super().build(factory_use_construct, **kwargs)
-
-
 class HealthFactory(ModelFactory[Health]):
     __model__ = Health
     __use_defaults__ = True
 
     @classmethod
     def build(cls, factory_use_construct: bool = False, **kwargs: Any) -> Health:  # noqa: FBT001, FBT002
-        """Build a health track whose boxes match its superficial and aggravated counts."""
-        kwargs = {**kwargs, **_damage_track_values(cls.__random__, kwargs)}
+        """Build a V4 or V5 health track whose damage fits it and whose V4 levels match it."""
+        size: int = kwargs.get("size", cls.__random__.randint(1, 10))
+        damage: int | None = kwargs.get("damage", cls.__random__.randint(0, size))
+        levels: list[HealthLevel] | None = kwargs.get("levels")
+        if "levels" not in kwargs and cls.__random__.choice((True, False)):
+            levels = [
+                HealthLevel(name=f"Level {i + 1}", marked=None if damage is None else i < damage)
+                for i in range(size)
+            ]
+        kwargs = {"size": size, "damage": damage, "levels": levels, **kwargs}
         return super().build(factory_use_construct, **kwargs)
 
 
 class HealthLevelFactory(ModelFactory[HealthLevel]):
     __model__ = HealthLevel
     __use_defaults__ = True
+
+    @classmethod
+    def build(cls, factory_use_construct: bool = False, **kwargs: Any) -> HealthLevel:  # noqa: FBT001, FBT002
+        """Build a health level in the current API shape, with ``marked`` set."""
+        kwargs = {"marked": cls.__random__.choice((True, False)), **kwargs}
+        return super().build(factory_use_construct, **kwargs)
 
 
 class StainsTrackerFactory(ModelFactory[StainsTracker]):
@@ -470,7 +451,6 @@ __all__ = [
     "CompanyFactory",
     "CompanyPermissionsFactory",
     "CounterTrackerFactory",
-    "DamageTrackerFactory",
     "DeveloperFactory",
     "DeveloperWithApiKeyFactory",
     "DicerollFactory",

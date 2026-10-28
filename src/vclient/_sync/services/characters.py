@@ -12,7 +12,6 @@ from vclient.constants import (
     CharacterInclude,
     CharacterStatus,
     CharacterType,
-    DamageType,
     TrackerAction,
 )
 from vclient.endpoints import Endpoints
@@ -905,15 +904,14 @@ class SyncCharactersService(SyncBaseService):
     ) -> Health:
         """Replace a character's full health state, such as to correct a mistake.
 
-        Every field is sent, so omitted fields reset to 0. V4 uses ``bashing``,
-        ``lethal``, and ``aggravated``; V5 uses ``superficial`` and ``aggravated``.
-        ``extra_levels`` applies to both. Use ``apply_health_action`` for in-play changes.
+        Every field is sent, so omitted fields reset to 0. Use ``apply_health_action`` for
+        in-play changes.
 
         Args:
             character_id: The ID of the character.
             request: A HealthStateSet model, OR pass fields as keyword arguments.
             **kwargs: Fields for HealthStateSet if request is not provided.
-                Accepts: extra_levels, superficial, aggravated, bashing, lethal (int >= 0).
+                Accepts: extra_levels, damage (int >= 0).
 
         Returns:
             The updated Health.
@@ -921,9 +919,8 @@ class SyncCharactersService(SyncBaseService):
         Raises:
             NotFoundError: If the character does not exist or has no health track.
             AuthorizationError: If you are not the character's player or a storyteller.
-            RequestValidationError: If a value is negative.
-            ValidationError: If a nonzero field is not used by the game version, or the
-                marks exceed the track size.
+            RequestValidationError: If a value is negative or a field is unknown.
+            ValidationError: If the damage exceeds the track size.
         """
         body = request if request is not None else self._validate_request(HealthStateSet, **kwargs)
         response = self._put(
@@ -933,24 +930,17 @@ class SyncCharactersService(SyncBaseService):
         return Health.model_validate(response.json())
 
     def apply_health_action(
-        self,
-        character_id: str,
-        action: TrackerAction,
-        *,
-        amount: int = 1,
-        damage_type: DamageType | None = None,
+        self, character_id: str, action: TrackerAction, *, amount: int = 1
     ) -> Health:
         """Apply one in-play action to a character's health, such as taking damage.
 
-        Health accepts ``damage``, ``heal``, and ``reset``. V4 damage types are
-        ``BASHING``, ``LETHAL``, and ``AGGRAVATED``; V5 damage types are ``SUPERFICIAL``
-        and ``AGGRAVATED``. The server applies overflow and upgrade rules.
+        Health accepts ``damage``, ``heal``, and ``reset``. Damage past a full track and
+        healing past 0 are dropped.
 
         Args:
             character_id: The ID of the character.
             action: The action to apply.
             amount: How many points to apply. Must be at least 1.
-            damage_type: The damage type for ``damage`` and ``heal``.
 
         Returns:
             The updated Health.
@@ -959,11 +949,9 @@ class SyncCharactersService(SyncBaseService):
             NotFoundError: If the character does not exist or has no health track.
             AuthorizationError: If you are not the character's player or a storyteller.
             RequestValidationError: If ``amount`` is less than 1.
-            ValidationError: If the action or damage type does not fit the game version.
+            ValidationError: If the action does not apply to health.
         """
-        body = self._validate_request(
-            _TrackerAction, action=action, amount=amount, damage_type=damage_type
-        )
+        body = self._validate_request(_TrackerAction, action=action, amount=amount)
         response = self._post(
             self._format_endpoint(Endpoints.CHARACTER_HEALTH_ACTIONS, character_id=character_id),
             json=body.model_dump(exclude_none=True, mode="json"),

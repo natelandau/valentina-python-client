@@ -112,51 +112,47 @@ To change V5 Willpower, change Composure or Resolve. Then fetch the Willpower tr
 | ---------------------------------------------------------------------------- | --------- | ------------------------------------ |
 | `get_tracker(character_trait_id)`                                            | `Tracker` | Get the in-play state of a trait     |
 | `set_tracker(character_trait_id, TrackerStateSet, **kwargs)`                 | `Tracker` | Replace the full tracker state       |
-| `apply_tracker_action(character_trait_id, action, amount?, damage_type?)`    | `Tracker` | Apply one in-play action             |
+| `apply_tracker_action(character_trait_id, action, amount?)`                  | `Tracker` | Apply one in-play action             |
 
-A tracker holds the in-play state of a trait that is spent, damaged, or stained during a session. The server applies the game rules for the character's game version. `Tracker` is one of three models. Read its `type` field to know which one you have:
+A tracker holds the in-play state of a trait that is spent or stained during a session. `Tracker` is one of two models. Read its `type` field to know which one you have:
 
-| `type`    | Model            | Used for                                 | Fields for `set_tracker()`    |
-| --------- | ---------------- | ---------------------------------------- | ----------------------------- |
-| `COUNTER` | `CounterTracker` | V4 Willpower, Blood Pool, Rage, Gnosis, and Conviction | `current` (required) |
-| `DAMAGE`  | `DamageTracker`  | V5 Willpower                             | `superficial`, `aggravated`   |
-| `STAINS`  | `StainsTracker`  | V5 Humanity stains                       | `stains`                      |
+| `type`    | Model            | Used for                                                                                 | Field for `set_tracker()` | Actions                              |
+| --------- | ---------------- | ---------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------ |
+| `COUNTER` | `CounterTracker` | Willpower in V4 and V5, Blood Pool, Rage, Gnosis, Conviction, and Humanity for every character except a V5 vampire | `current` (required) | `spend`, `gain`, `reset`             |
+| `STAINS`  | `StainsTracker`  | Humanity on a V5 vampire                                                                  | `stains`                  | `add_stain`, `remove_stain`, `reset` |
 
-The same tracker object is on `CharacterTrait.tracker`. It is `None` when the trait has no tracker for the character's game version. Custom traits never have a tracker. `Trait.tracker_type_v4` and `Trait.tracker_type_v5` tell you which traits have one before you assign them.
+The same tracker object is on `CharacterTrait.tracker`. It is `None` when the trait has no tracker for the character's game version. Custom traits never have a tracker. `Trait.tracker_type_v4` and `Trait.tracker_type_v5` tell you which traits have a tracker before you assign them.
 
-Use `apply_tracker_action()` for changes during play, and `set_tracker()` to correct the full state. `set_tracker()` replaces the whole state, so a field that you omit resets to 0. An empty request clears a damage or stains tracker. Each method returns the updated tracker, so you do not need to fetch it again. The actions are `spend`, `gain`, `damage`, `heal`, `add_stain`, `remove_stain`, and `reset`. The valid actions and damage types for each tracker type and game version are in `characters.TrackerRules` from the [Options Service](options.md). A `STAINS` response from `add_stain` reports any overflow into Willpower damage in `willpower_damage_applied`.
+!!! warning "Humanity"
+
+    Choose the Humanity control from `CharacterTrait.tracker.type`, not from the blueprint. `Trait.tracker_type_v5` for Humanity is `STAINS`, but only a V5 vampire gets a `STAINS` tracker. Every other character gets a `COUNTER`.
+
+Use `apply_tracker_action()` for changes during play, and `set_tracker()` to correct the full state. An empty `set_tracker()` request clears a stains tracker. Each method returns the updated tracker, so you do not need to fetch it again. The actions for each tracker type and game version are in `characters.TrackerRules` from the [Options Service](options.md). Stains past `stain_capacity` stay on the tracker and have no other effect.
 
 The methods raise these errors:
 
 - `NotFoundError` (404): the trait has no tracker for the character's game version.
-- `ValidationError` (400): a field or action does not fit the tracker type or game version, a damage type is missing or not allowed, a spend is more than `current`, or a value is more than the tracker size.
+- `ValidationError` (400): the field or action does not fit the tracker type, a spend is more than `current`, or a value is more than the tracker size.
 - `AuthorizationError` (403): you are not the character's player or a storyteller.
-- `RequestValidationError`: a value is negative, or `amount` is less than 1. The client raises this before it sends the request.
+- `RequestValidationError`: a value is negative, `amount` is less than 1, or `set_tracker()` receives a field other than `current` and `stains`. The client raises this error before it sends the request.
 
 !!! note "API version"
 
-    The tracker endpoints need a Valentina API release later than `v0.28.0`. An older API returns 404, and `CharacterTrait.tracker` is always `None`.
+    The tracker endpoints need a Valentina API release later than `v0.28.0`. An older API returns 404, and `CharacterTrait.tracker` is always `None`. API `v0.29.0` sends V5 Willpower as a `DAMAGE` tracker, which this client rejects, so parsing any V5 character's traits from that release raises a `pydantic.ValidationError`. Use an API release later than `v0.29.0`.
 
 ```python
-from vclient.models import CounterTracker, DamageTracker, StainsTracker
+from vclient.models import CounterTracker, StainsTracker
 
 tracker = await traits.get_tracker(willpower.id)
 
 match tracker:
     case CounterTracker():
         print(f"{tracker.current}/{tracker.size} Willpower")
-    case DamageTracker():
-        print(f"{tracker.superficial} superficial, {tracker.aggravated} aggravated")
     case StainsTracker():
-        print(f"{tracker.stains} stains, impaired: {tracker.is_impaired}")
+        print(f"{tracker.stains} stains, {tracker.stain_capacity} free boxes")
 
-# Spend one point of V4 Willpower
-tracker = await traits.apply_tracker_action(willpower.id, "spend")
-
-# Take two superficial Willpower damage on V5
-tracker = await traits.apply_tracker_action(
-    willpower.id, "damage", amount=2, damage_type="SUPERFICIAL"
-)
+# Spend two points of Willpower
+tracker = await traits.apply_tracker_action(willpower.id, "spend", amount=2)
 
 # Correct the full state
 tracker = await traits.set_tracker(willpower.id, current=3)

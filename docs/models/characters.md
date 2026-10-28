@@ -50,23 +50,33 @@ Models for player and non-player characters, including class-specific attributes
 
 ## Health
 
-A character's health track. `Health` has every field of [`DamageTracker`](character_traits.md#damagetracker), plus one field:
+A character's health track. Health is one damage count. It has no damage types, dice penalties, or health state.
 
-| Field          | Type  | Description                                 |
-| -------------- | ----- | ------------------------------------------- |
-| `extra_levels` | `int` | Health levels added to the base track       |
+| Field          | Type                        | Description                                                              |
+| -------------- | --------------------------- | ------------------------------------------------------------------------ |
+| `type`         | `Literal["DAMAGE"]`         | Always `DAMAGE`. Use it as the health key in `TrackerRules`              |
+| `size`         | `int`                       | Number of boxes on the track                                             |
+| `damage`       | `int \| None`               | Marked boxes, from 0 to `size`. `None` only from API `v0.29.0` and older |
+| `extra_levels` | `int`                       | Health levels added to the base track                                    |
+| `levels`       | `list[HealthLevel] \| None` | V4 health levels in track order. `None` on V5                            |
+
+## HealthLevel
+
+One V4 health level.
+
+| Field    | Type           | Description                                                        |
+| -------- | -------------- | ------------------------------------------------------------------ |
+| `name`   | `str`          | Level name, such as "Bruised"                                      |
+| `marked` | `bool \| None` | `True` when the level is marked. `None` only from API `v0.29.0` and older |
 
 ## HealthStateSet
 
-Request body for `set_health()`, and the `health` field of `CharacterCreate`. All fields default to 0, and the client sends every field. V4 uses `bashing`, `lethal`, and `aggravated`. V5 uses `superficial` and `aggravated`. Both use `extra_levels`. A nonzero value in a field that the game version does not use causes a `ValidationError`.
+Request body for `set_health()`, and the `health` field of `CharacterCreate`. All fields default to 0, and the client sends every field. Any other field causes a `RequestValidationError` before the client sends the request.
 
-| Field          | Type  | Description                    |
-| -------------- | ----- | ------------------------------ |
-| `extra_levels` | `int` | Extra health levels            |
-| `superficial`  | `int` | V5 superficial damage          |
-| `aggravated`   | `int` | Aggravated damage              |
-| `bashing`      | `int` | V4 bashing damage              |
-| `lethal`       | `int` | V4 lethal damage               |
+| Field          | Type  | Description          |
+| -------------- | ----- | -------------------- |
+| `extra_levels` | `int` | Extra health levels  |
+| `damage`       | `int` | Marked boxes         |
 
 All values must be 0 or more.
 

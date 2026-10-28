@@ -139,49 +139,47 @@ Assignment rules are enforced server-side and surface as `ValidationError` (400)
 | -------------------------------------------------------------------- | -------- | --------------------------------- |
 | `get_health(character_id)`                                           | `Health` | Get the character's health track  |
 | `set_health(character_id, HealthStateSet, **kwargs)`                 | `Health` | Replace the full health state     |
-| `apply_health_action(character_id, action, amount?, damage_type?)`   | `Health` | Apply one in-play action          |
+| `apply_health_action(character_id, action, amount?)`                | `Health` | Apply one in-play action          |
 
-Every character has a health track. The same object is on `Character.health`. The server applies the damage rules for the character's game version:
+Every character has a health track. The same object is on `Character.health`. Health is one damage count, `Health.damage`, from 0 to `Health.size`. There are no damage types, no dice penalties, and no health state. Players apply penalties to their own dice, and the Storyteller decides incapacitation and death. To record a death, set the character `status`.
 
-| Game version | Track size                       | Damage types                       |
-| ------------ | -------------------------------- | ---------------------------------- |
-| V4           | 7 levels plus `extra_levels`     | `BASHING`, `LETHAL`, `AGGRAVATED`  |
-| V5           | Stamina + 3, plus `extra_levels` | `SUPERFICIAL`, `AGGRAVATED`        |
+| Game version | Track size                       | `Health.levels`                                 |
+| ------------ | -------------------------------- | ----------------------------------------------- |
+| V4           | 7 levels plus `extra_levels`     | One `HealthLevel` per box, with `name` and `marked` |
+| V5           | Stamina + 3, plus `extra_levels` | `None`                                          |
 
-On V4, `Health.levels` lists each health level with its dice penalty and mark, and `current_penalty` gives the penalty that applies now. `current_penalty` is also `None` when the Incapacitated level is marked. These fields are `None` on V5.
-
-Use `apply_health_action()` with `damage`, `heal`, or `reset` during play. Use `set_health()` to correct the full state. `set_health()` sends every field, so a field that you omit resets to 0. Each method returns the updated health, so you do not need to fetch it again.
+Use `apply_health_action()` with `damage`, `heal`, or `reset` during play. The server drops damage past a full track and healing past 0. Use `set_health()` to correct the full state. `set_health()` sends `extra_levels` and `damage`, so a field that you omit resets to 0. Each method returns the updated health, so you do not need to fetch it again.
 
 The methods raise these errors:
 
 - `NotFoundError` (404): the character does not exist or has no health track.
-- `ValidationError` (400): the action or damage type does not fit the game version, a nonzero field is not used by the game version, or the marks are more than the track size.
+- `ValidationError` (400): the action does not apply to health, or `damage` is more than the track size.
 - `AuthorizationError` (403): you are not the character's player or a storyteller.
-- `RequestValidationError`: a value is negative, or `amount` is less than 1.
+- `RequestValidationError`: a value is negative, `amount` is less than 1, or `set_health()` receives a field other than `extra_levels` and `damage`.
 
 !!! note "API version"
 
-    The health endpoints need a Valentina API release later than `v0.28.0`. An older API returns 404, and `Character.health` is `None`.
+    The health endpoints need a Valentina API release later than `v0.28.0`. An older API returns 404, and `Character.health` is `None`. API `v0.29.0` reports typed damage marks instead of one count, so `Health.damage` and `HealthLevel.marked` are `None` when the API is `v0.29.0` or older.
 
 ```python
 from vclient.models import HealthStateSet
 
 health = await characters.get_health(character.id)
 
-# Take one aggravated damage
-health = await characters.apply_health_action(character.id, "damage", damage_type="AGGRAVATED")
+# Take two damage
+health = await characters.apply_health_action(character.id, "damage", amount=2)
+print(f"{health.damage}/{health.size} damage")
 
-# Correct a V4 character to two bashing and one lethal, keeping its extra levels
+# Correct the track to one damage, keeping its extra levels
 health = await characters.set_health(
     character.id,
-    HealthStateSet(bashing=2, lethal=1, extra_levels=health.extra_levels),
+    HealthStateSet(damage=1, extra_levels=health.extra_levels),
 )
-print(health.current_penalty)
 ```
 
 ### Creating a character with starting state
 
-`CharacterCreate` accepts the starting health marks and per-trait tracker state, so you can create a character who is already hurt:
+`CharacterCreate` accepts the starting health damage and per-trait tracker state, so you can create a character who is already hurt:
 
 ```python
 from vclient.models import (
@@ -197,7 +195,7 @@ request = CharacterCreate(
     game_version="V4",
     name_first="Marcus",
     name_last="Blackwood",
-    health=HealthStateSet(bashing=2),
+    health=HealthStateSet(damage=2),
     traits=[
         CharacterCreateTraitAssign(
             trait_id=willpower_trait_id, value=6, tracker=TrackerStateSet(current=4)
