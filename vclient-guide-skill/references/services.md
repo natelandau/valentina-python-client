@@ -113,6 +113,8 @@ Complete method signatures for every service class.
 | `get_experience(user_id, campaign_id)` | `user_id: str, campaign_id: str` | `CampaignExperience` |
 | `get_statistics(user_id)` | `user_id: str, *, num_top_traits: int = 5` | `RollStatistics` |
 
+**Amounts:** `amount` on `add_xp`, `remove_xp`, and `add_cool_points` must be 1 or more; a lower value raises `RequestValidationError` client-side.
+
 ### Quickrolls
 
 | Method | Parameters | Returns |

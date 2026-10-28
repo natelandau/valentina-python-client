@@ -787,7 +787,7 @@ class UsersService(BaseService):
         Args:
             user_id: The ID of the user to award XP to.
             campaign_id: The ID of the campaign to add XP for.
-            amount: The amount of XP to add.
+            amount: The amount of XP to add. Must be at least 1.
 
         Returns:
             Updated CampaignExperience object.
@@ -821,7 +821,7 @@ class UsersService(BaseService):
         Args:
             user_id: The ID of the user to remove XP from.
             campaign_id: The ID of the campaign to remove XP for.
-            amount: The amount of XP to remove.
+            amount: The amount of XP to remove. Must be at least 1.
 
         Returns:
             Updated CampaignExperience object.
@@ -857,7 +857,7 @@ class UsersService(BaseService):
         Args:
             user_id: The ID of the user to award cool points to.
             campaign_id: The ID of the campaign to add cool points for.
-            amount: The amount of cool points to add.
+            amount: The amount of cool points to add. Must be at least 1.
 
         Returns:
             Updated CampaignExperience object.

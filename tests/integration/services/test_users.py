@@ -998,6 +998,21 @@ class TestUsersServiceExperience:
         assert isinstance(result, CampaignExperience)
         assert result.cool_points == 10
 
+    @respx.mock
+    @pytest.mark.parametrize("method", ["add_xp", "remove_xp", "add_cool_points"])
+    @pytest.mark.parametrize("amount", [0, -5])
+    async def test_non_positive_amount_rejected(self, vclient, method, amount):
+        """Verify an amount below 1 raises RequestValidationError before any request."""
+        # Given: A users service
+        users = vclient.users("on-behalf-of-user", company_id="company123")
+
+        # When/Then: A non-positive amount fails client-side validation
+        with pytest.raises(RequestValidationError):
+            await getattr(users, method)("user123", "campaign123", amount=amount)
+
+        # Then: No request was sent
+        assert not respx.calls
+
 
 class TestUsersServiceNotes:
     """Tests for UsersService note methods."""

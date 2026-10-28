@@ -91,6 +91,8 @@ assert user.assets is None  # not requested
 | `remove_xp(user_id, campaign_id, amount)`       | `CampaignExperience` | Deduct experience points    |
 | `add_cool_points(user_id, campaign_id, amount)` | `CampaignExperience` | Award cool points           |
 
+`amount` must be 1 or more. A lower value raises `RequestValidationError` before the request is sent.
+
 ### Asset Management
 
 | Method                                         | Returns                    | Description             |

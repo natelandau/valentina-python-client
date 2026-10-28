@@ -311,7 +311,7 @@ class _ExperienceAddRemove(BaseModel):
     Used to construct the JSON payload for XP/CP modifications.
     """
 
-    amount: int
+    amount: int = Field(ge=1)
     campaign_id: str
 
 
