@@ -32,6 +32,9 @@ class CampaignsService(BaseService):
     Provides methods to create, retrieve, update, and delete campaigns,
     as well as access campaign statistics, assets, and notes.
 
+    Requests return 403 (``AuthorizationError``) when the ``on_behalf_of`` user is
+    UNAPPROVED or DEACTIVATED.
+
     Example:
         >>> async with VClient() as client:
         ...     campaigns = client.campaigns("company_id")
@@ -371,7 +374,7 @@ class CampaignsService(BaseService):
             asset_id: The ID of the asset to delete.
 
         Raises:
-            NotFoundError: If the asset does not exist.
+            NotFoundError: If the asset does not exist or belongs to a different campaign.
             AuthorizationError: If you don't have appropriate access.
         """
         await self._delete(
@@ -394,7 +397,7 @@ class CampaignsService(BaseService):
         Only image files are accepted: PNG, JPEG, GIF, and WEBP. Any other
         upload (documents, audio, video, archives, SVG, or a non-image payload
         mislabeled as an image) is rejected with 400 Bad Request, as are
-        oversized images that trip the decompression-bomb guard. The stored
+        images over 24 megapixels (width x height). The stored
         ``mime_type`` is detected from the file's bytes; the ``content_type``
         argument is ignored server-side and cannot change or bypass the stored
         type. Uploaded assets therefore always have ``asset_type == "image"``.

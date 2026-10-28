@@ -90,7 +90,7 @@ Complete method signatures for every service class.
 | `delete_avatar(user_id)` | `user_id: str` | `User` |
 
 **Auth:** `on_behalf_of` is required. Only the acting user themselves or a company ADMIN may call these. Both return the updated `User` (including the resolved `avatar_url`); `delete_avatar` responds `200 OK` with a body, not `204`.
-**Semantics:** `upload_avatar` accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB; the server normalizes it to a 512×512 WebP that overrides any identity-provider-derived avatar (a `PUT` multipart request). `delete_avatar` clears the custom avatar so `avatar_url` falls back to the identity-provider avatar, or `null` if none.
+**Semantics:** `upload_avatar` accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB and 24 megapixels; the server normalizes it to a 512×512 WebP that overrides any identity-provider-derived avatar (a `PUT` multipart request). `delete_avatar` clears the custom avatar so `avatar_url` falls back to the identity-provider avatar, or `null` if none.
 **Testing:** Use `Routes.USERS_AVATAR_UPLOAD` and `Routes.USERS_AVATAR_DELETE` with `FakeVClient.set_response()` or `set_error()`.
 
 ### Unapproved User Management
@@ -127,9 +127,11 @@ Complete method signatures for every service class.
 | `update_quickroll(user_id, quickroll_id)` | `user_id: str, quickroll_id: str, request: QuickrollUpdate \| None, **kwargs` | `Quickroll` |
 | `delete_quickroll(user_id, quickroll_id)` | both `str` | `None` |
 
+**Quickroll owner:** `get_quickroll`, `update_quickroll`, and `delete_quickroll` raise `NotFoundError` when `user_id` is not the quickroll's owner.
+
 ### Notes, Assets
 
-Same pattern as other services (see CampaignsService notes/assets for the method signatures — they follow the identical pattern with `user_id` as the parent resource ID).
+Same pattern as other services (see CampaignsService notes/assets for the method signatures — they follow the identical pattern with `user_id` as the parent resource ID). `upload_asset` and `delete_asset` require the `on_behalf_of` user to be `user_id` or a company ADMIN; otherwise `AuthorizationError` (403).
 
 ---
 
@@ -142,7 +144,7 @@ Same pattern as other services (see CampaignsService notes/assets for the method
 Resolves verified provider credentials to canonical users. Forward the credential obtained from a provider's own login flow: an OIDC ID token for `apple`/`google`, or an OAuth access token for `discord`/`github`. The API verifies the credential with the provider, then resolves the user through:
 
 1. **matched** - an existing user already holds this provider identity
-2. **linked** - the identity was auto-linked to an existing user by provider-verified email
+2. **linked** - the identity was auto-linked to an existing user by provider-verified email. If that user already holds a different identity from the same provider, the API creates a new user instead (resolution `created`)
 3. **created** - a new UNAPPROVED user was registered (username/email in the request body apply only on this path)
 
 ### Methods
@@ -159,7 +161,7 @@ Resolves verified provider credentials to canonical users. Forward the credentia
 
 | Exception | HTTP | Code | Cause |
 |-----------|------|------|-------|
-| `UnprocessableEntityError` | 422 | `TOKEN_VERIFICATION_FAILED` | Provider rejected the credential |
+| `UnprocessableEntityError` | 422 | `TOKEN_VERIFICATION_FAILED` | Provider rejected the credential, or an OIDC token lacks `exp` or `iat` |
 | `UnprocessableEntityError` | 422 | `EMAIL_REQUIRED` | Creating a user but provider supplied no email and none was passed |
 | `ServerError` | 503 | `PROVIDER_UNAVAILABLE` | Provider is unreachable (HTTP 503; `ServerError` covers all 5xx) |
 
@@ -174,6 +176,8 @@ Resolves verified provider credentials to canonical users. Forward the credentia
 **Access:** `client.campaigns(on_behalf_of, company_id=)`
 **Factory:** `campaigns_service(on_behalf_of, company_id=)` / `sync_campaigns_service(...)`
 **Scoping:** on_behalf_of, company_id
+
+**Acting user:** campaign, book, and chapter requests raise `AuthorizationError` (403) when the `on_behalf_of` user is `UNAPPROVED` or `DEACTIVATED`.
 
 ### Methods
 
@@ -199,7 +203,9 @@ Resolves verified provider credentials to canonical users. Forward the credentia
 | `delete_asset(campaign_id, asset_id)` | both `str` | `None` |
 | `upload_asset(campaign_id, filename, content)` | `campaign_id: str, filename: str, content: bytes, content_type: str \| None` | `Asset` |
 
-**Image uploads only:** `upload_asset` (on every service) accepts only PNG, JPEG, GIF, and WEBP. Other uploads (documents, audio, video, archives, SVG, or non-image payloads mislabeled as images) are rejected with `400 Bad Request`. The stored `mime_type` is detected from the file's bytes; the `content_type` argument is ignored server-side. Newly uploaded assets always have `asset_type == "image"`.
+**Image uploads only:** `upload_asset` (on every service) accepts only PNG, JPEG, GIF, and WEBP. Other uploads (documents, audio, video, archives, SVG, or non-image payloads mislabeled as images) are rejected with `400 Bad Request`. The stored `mime_type` is detected from the file's bytes; the `content_type` argument is ignored server-side. Newly uploaded assets always have `asset_type == "image"`. Images over 24 megapixels (width × height) are rejected with `400`.
+
+**Asset parent binding:** `delete_asset` (on every service) raises `NotFoundError` when the asset belongs to a different parent. Delete each asset through its own parent.
 
 ### Notes
 

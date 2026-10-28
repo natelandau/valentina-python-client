@@ -18,6 +18,8 @@ chapters = chapters_service(
 )
 ```
 
+Requests acting on behalf of an `UNAPPROVED` or `DEACTIVATED` user raise `AuthorizationError` (403).
+
 ## Methods
 
 ### CRUD Operations
@@ -92,6 +94,8 @@ assert chapter.assets is not None  # list[Asset]
 | `get_asset(chapter_id, asset_id)`                | `Asset`                    | Get an asset           |
 | `upload_asset(chapter_id, filename, content)`    | `Asset`                    | Upload an asset        |
 | `delete_asset(chapter_id, asset_id)`             | `None`                     | Delete an asset        |
+
+`delete_asset` raises `NotFoundError` when the asset belongs to a different chapter. Delete each asset through its own parent.
 
 ### Notes
 

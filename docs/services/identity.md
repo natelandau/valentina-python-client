@@ -39,14 +39,14 @@ svc = identity_service(company_id="COMPANY_ID")
 The API tries the following steps in order and reports which one succeeded in the `resolution` field:
 
 1. `matched`: an existing user already holds this provider identity.
-2. `linked`: the provider supplied a verified email that matches an existing user, so the identity was attached to that user.
+2. `linked`: the provider supplied a verified email that matches an existing user, so the identity was attached to that user. If that user already holds a different identity from the same provider, the API skips this step and creates a new user instead, so an existing identity is never replaced.
 3. `created`: a new `UNAPPROVED` user was registered.
 
 ### Errors
 
 | Error                      | Status | `code`                      | Meaning                                            |
 | -------------------------- | ------ | --------------------------- | -------------------------------------------------- |
-| `UnprocessableEntityError` | 422    | `TOKEN_VERIFICATION_FAILED` | The provider rejected the credential               |
+| `UnprocessableEntityError` | 422    | `TOKEN_VERIFICATION_FAILED` | The provider rejected the credential, or an OIDC token lacks `exp` or `iat` |
 | `UnprocessableEntityError` | 422    | `EMAIL_REQUIRED`            | Creation needs an `email` the provider didn't send |
 | `ServerError`              | 503    | `PROVIDER_UNAVAILABLE`      | The provider could not be reached                  |
 

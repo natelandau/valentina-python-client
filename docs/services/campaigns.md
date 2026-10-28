@@ -16,6 +16,8 @@ from vclient import campaigns_service
 campaigns = campaigns_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
+Requests acting on behalf of an `UNAPPROVED` or `DEACTIVATED` user raise `AuthorizationError` (403).
+
 ## Methods
 
 ### CRUD Operations
@@ -51,6 +53,8 @@ campaigns = campaigns_service(on_behalf_of="USER_ID", company_id="COMPANY_ID")
 | `get_asset(campaign_id, asset_id)`                | `Asset`                    | Get an asset           |
 | `upload_asset(campaign_id, filename, content)`    | `Asset`                    | Upload an asset        |
 | `delete_asset(campaign_id, asset_id)`             | `None`                     | Delete an asset        |
+
+`delete_asset` raises `NotFoundError` when the asset belongs to a different campaign. Delete each asset through its own parent.
 
 ### Notes
 

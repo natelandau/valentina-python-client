@@ -547,8 +547,9 @@ class SyncUsersService(SyncBaseService):
             asset_id: The ID of the asset to delete.
 
         Raises:
-            NotFoundError: If the asset does not exist.
-            AuthorizationError: If you don't have appropriate access.
+            NotFoundError: If the asset does not exist or belongs to a different user.
+            AuthorizationError: If the acting user is neither ``user_id`` nor a
+                company admin.
         """
         self._delete(
             self._format_endpoint(Endpoints.USER_ASSET, user_id=user_id, asset_id=asset_id)
@@ -564,7 +565,7 @@ class SyncUsersService(SyncBaseService):
         Only image files are accepted: PNG, JPEG, GIF, and WEBP. Any other
         upload (documents, audio, video, archives, SVG, or a non-image payload
         mislabeled as an image) is rejected with 400 Bad Request, as are
-        oversized images that trip the decompression-bomb guard. The stored
+        images over 24 megapixels (width x height). The stored
         ``mime_type`` is detected from the file's bytes; the ``content_type``
         argument is ignored server-side and cannot change or bypass the stored
         type. Uploaded assets therefore always have ``asset_type == "image"``.
@@ -580,7 +581,8 @@ class SyncUsersService(SyncBaseService):
 
         Raises:
             NotFoundError: If the user does not exist.
-            AuthorizationError: If you don't have appropriate access.
+            AuthorizationError: If the acting user is neither ``user_id`` nor a
+                company admin.
             ValidationError: If the file is invalid or exceeds size limits.
         """
         if content_type is None:
@@ -596,10 +598,10 @@ class SyncUsersService(SyncBaseService):
     ) -> User:
         """Upload a custom avatar for a user, replacing any existing one.
 
-        Accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB. The server
-        normalizes the image to a 512x512 WebP and it overrides any
-        identity-provider-derived avatar. Requires the ``On-Behalf-Of`` header
-        (permitted for the user themselves or an admin).
+        Accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB and 24
+        megapixels. The server normalizes the image to a 512x512 WebP and it
+        overrides any identity-provider-derived avatar. Requires the
+        ``On-Behalf-Of`` header (permitted for the user themselves or an admin).
 
         Args:
             user_id: The ID of the user to set the avatar for.
@@ -969,7 +971,8 @@ class SyncUsersService(SyncBaseService):
             The Quickroll object with full details.
 
         Raises:
-            NotFoundError: If the quickroll does not exist.
+            NotFoundError: If the quickroll does not exist or does not belong to
+                ``user_id``.
             AuthorizationError: If you don't have access to the company.
         """
         response = self._get(
@@ -1029,7 +1032,8 @@ class SyncUsersService(SyncBaseService):
             The updated Quickroll object.
 
         Raises:
-            NotFoundError: If the quickroll does not exist.
+            NotFoundError: If the quickroll does not exist or does not belong to
+                ``user_id``.
             AuthorizationError: If you don't have appropriate access.
             RequestValidationError: If the input parameters fail client-side validation.
             ValidationError: If the request data is invalid.
@@ -1053,7 +1057,8 @@ class SyncUsersService(SyncBaseService):
             quickroll_id: The ID of the quickroll to delete.
 
         Raises:
-            NotFoundError: If the quickroll does not exist.
+            NotFoundError: If the quickroll does not exist or does not belong to
+                ``user_id``.
             AuthorizationError: If you don't have appropriate access.
         """
         self._delete(
