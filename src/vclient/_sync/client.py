@@ -200,6 +200,15 @@ class SyncVClient:
         """Check if the client has been closed."""
         return self._http.is_closed
 
+    def _set_api_key(self, api_key: str) -> None:
+        """Send a new API key on every later request from this client and its services.
+
+        Args:
+            api_key: The API key to authenticate with from now on.
+        """
+        self._config.api_key = api_key
+        self._http.headers[API_KEY_HEADER] = api_key
+
     @property
     def default_company_id(self) -> str | None:
         """Return the default company ID from config."""

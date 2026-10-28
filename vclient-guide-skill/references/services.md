@@ -511,6 +511,8 @@ Plus standard notes and assets sub-resource methods.
 | `update_me()` | `request: MeDeveloperUpdate \| None, **kwargs` | `MeDeveloper` |
 | `regenerate_api_key()` | — | `MeDeveloperWithApiKey` |
 
+**Key rotation:** the API invalidates the old key at once. `regenerate_api_key()` switches the calling client to the new key, so its later requests keep working. Store `result.api_key`; it is shown only once, and any other client still on the old key gets `AuthenticationError`. `MeDeveloper.companies` omits companies whose access was revoked.
+
 ---
 
 ## GlobalAdminService

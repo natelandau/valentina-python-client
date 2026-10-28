@@ -5,6 +5,7 @@ import json
 import pytest
 import respx
 
+from vclient.constants import API_KEY_HEADER
 from vclient.endpoints import Endpoints
 from vclient.exceptions import AuthenticationError
 from vclient.models import MeDeveloper, MeDeveloperWithApiKey
@@ -200,6 +201,47 @@ class TestDeveloperServiceRegenerateApiKey:
         assert isinstance(result, MeDeveloperWithApiKey)
         assert result.api_key == "vapi_newkey123"
         assert result.username == "testuser"
+
+    @respx.mock
+    async def test_regenerate_api_key_switches_client_key(
+        self, vclient, base_url, me_developer_response_data
+    ):
+        """Verify requests after a rotation send the new API key."""
+        # Given: Mocked rotation and get-me endpoints
+        respx.post(f"{base_url}{Endpoints.DEVELOPER_ME_NEW_KEY}").respond(
+            201, json={**me_developer_response_data, "api_key": "rotated"}
+        )
+        me_route = respx.get(f"{base_url}{Endpoints.DEVELOPER_ME}").respond(
+            200, json=me_developer_response_data
+        )
+
+        # When: Rotating the key, then making another request
+        await vclient.developer.regenerate_api_key()
+        await vclient.developer.get_me()
+
+        # Then: The follow-up request carries the new key
+        assert me_route.calls.last.request.headers[API_KEY_HEADER] == "rotated"
+
+    @respx.mock
+    async def test_regenerate_api_key_updates_existing_services(
+        self, vclient, base_url, me_developer_response_data
+    ):
+        """Verify a service created before the rotation sends the new API key."""
+        # Given: A users service created before the rotation
+        users = vclient.users("on-behalf-of-user", company_id="company123")
+        respx.post(f"{base_url}{Endpoints.DEVELOPER_ME_NEW_KEY}").respond(
+            201, json={**me_developer_response_data, "api_key": "rotated"}
+        )
+        users_route = respx.get(
+            f"{base_url}{Endpoints.USERS.format(company_id='company123')}"
+        ).respond(200, json={"items": [], "limit": 10, "offset": 0, "total": 0})
+
+        # When: Rotating the key, then calling the existing service
+        await vclient.developer.regenerate_api_key()
+        await users.get_page()
+
+        # Then: The existing service sends the new key
+        assert users_route.calls.last.request.headers[API_KEY_HEADER] == "rotated"
 
     @respx.mock
     async def test_regenerate_api_key_unauthenticated(self, vclient, base_url):
