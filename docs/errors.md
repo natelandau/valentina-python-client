@@ -20,7 +20,7 @@ Every API error maps to a specific exception class based on the HTTP status code
 | `RequestValidationError`   | -           | Client-side validation failed                                    |
 | `ConflictError`            | 409         | Resource conflict (e.g., duplicate ID, concurrent trait value change) |
 | `UnprocessableEntityError` | 422         | Well-formed request that cannot be processed (has `.code`)       |
-| `RateLimitError`           | 429         | Rate limit exceeded                                              |
+| `RateLimitError`           | 429         | Rate limit exceeded, or too many failed authentication attempts  |
 | `ServerError`              | 5xx         | Server-side error                                                |
 
 ## The `code` Property
@@ -101,3 +101,7 @@ except APIError as e:
 !!! tip
 
     Catch `APIError` as a fallback to handle any unexpected API error. Place it last in your `except` chain so more specific exceptions are matched first.
+
+!!! warning "Repeated authentication failures"
+
+    After 20 requests with an invalid API key from one address within 5 minutes, the API answers requests from that address with 429 until the 5-minute window ends. A key that authenticated within the last minute keeps working. The client waits out the `Retry-After` time once, and the next attempt then fails with `AuthenticationError`. Fix the API key instead of retrying an `AuthenticationError` in a loop.

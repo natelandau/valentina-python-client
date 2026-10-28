@@ -84,13 +84,15 @@ client = VClient(
 
 ## Retry Behavior
 
-When `auto_retry_rate_limit` is enabled (the default), the client automatically retries requests that encounter transient failures. Retries use exponential backoff with jitter.
+When `auto_retry_rate_limit` is enabled (the default), the client automatically retries requests that encounter transient failures. A rate-limited request waits the time the server gives in its `RateLimit` or `Retry-After` header. Other retries use exponential backoff that starts at `retry_delay` and doubles each attempt. All waits add up to 25% random jitter.
+
+Rate limits apply per developer account, not per API key, so rotating your key does not reset them.
 
 The following table summarizes which conditions trigger retries:
 
 | Condition          | Retried?                | Notes                                                               |
 | ------------------ | ----------------------- | ------------------------------------------------------------------- |
-| Rate limit (429)   | Always                  | Respects `Retry-After` / `RateLimit` headers                        |
+| Rate limit (429)   | Always                  | Waits the `Retry-After` / `RateLimit` time from the server          |
 | Server error (5xx) | Idempotent methods only | GET, PUT, DELETE always retry; POST/PATCH only with idempotency key |
 | Network error      | Idempotent methods only | `ConnectError`, `TimeoutException` from httpx2                       |
 | Client error (4xx) | Never                   | 400, 401, 403, 404, 409 are not transient                           |

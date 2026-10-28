@@ -91,21 +91,22 @@ class SyncBaseService:
     def _calculate_backoff_delay(self, attempt: int, retry_after: int | None) -> float:
         """Calculate the delay before the next retry attempt.
 
-        Uses exponential backoff with jitter: base_delay * (2 ** attempt) + random jitter.
-        If retry_after is provided from the RateLimit header, uses that as the base.
+        Wait the server's ``retry_after`` when it gives one, since the server knows
+        when capacity returns. Otherwise use exponential backoff:
+        ``retry_delay * 2 ** attempt``. Either way, add up to 25% random jitter so
+        clients that were limited together do not retry together.
 
         Args:
             attempt: The current attempt number (0-indexed).
-            retry_after: Seconds to wait from the RateLimit header, or None.
+            retry_after: Seconds to wait from the RateLimit or Retry-After header, or None.
 
         Returns:
             Number of seconds to wait before retrying.
         """
-        config = self._client._config
-        base_delay = config.retry_delay
         if retry_after is not None and retry_after > 0:
-            base_delay = max(base_delay, float(retry_after))
-        delay = base_delay * 2**attempt
+            delay = float(retry_after)
+        else:
+            delay = self._client._config.retry_delay * 2**attempt
         jitter = random.uniform(0, delay * 0.25)
         return delay + jitter
 

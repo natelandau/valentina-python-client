@@ -152,7 +152,7 @@ Use this to short-circuit bad input in forms before paying for a round trip.
 
 ### `RateLimitError` (429)
 
-Only raised when `auto_retry_rate_limit=False` or retries are exhausted. Read rate limit headers through:
+Only raised when `auto_retry_rate_limit=False` or retries are exhausted. Rate limits apply per developer account, not per key. The API also returns 429 to an address that sent 20 invalid-key requests within 5 minutes; after that wait the next attempt fails with `AuthenticationError`, so fix the key rather than retrying. Read rate limit headers through:
 
 | Property | Purpose |
 |----------|---------|
@@ -173,14 +173,14 @@ Transient server failures. These are included in the default `retry_statuses`, s
 
 ## Retry Behavior
 
-The client performs automatic retries with exponential backoff. Retries are invisible to your code — you only see the final exception (or the eventual success).
+The client performs automatic retries. A 429 waits the server's `retry_after` time, plus up to 25% jitter, on every attempt. Other retries use exponential backoff. Retries are invisible to your code — you only see the final exception (or the eventual success).
 
 Configuration (all constructor args):
 
 | Arg | Default | Meaning |
 |-----|---------|---------|
 | `max_retries` | 3 | Retry attempts for transient failures |
-| `retry_delay` | 1.0s | Base delay, multiplied by attempt number |
+| `retry_delay` | 1.0s | Base delay when the server gives no `retry_after`, doubled each attempt |
 | `retry_statuses` | `{429, 500, 502, 503, 504}` | Status codes that trigger retries |
 | `auto_retry_rate_limit` | `True` | Honor `Retry-After` / RateLimit headers on 429 |
 | `auto_idempotency_keys` | `False` | Auto-generate `Idempotency-Key` for POST/PUT/PATCH |

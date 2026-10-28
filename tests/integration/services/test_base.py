@@ -753,6 +753,33 @@ class TestBaseServiceRateLimitRetry:
         assert call_args >= 5.0
 
     @respx.mock
+    async def test_auto_retry_does_not_double_retry_after(self, vclient, base_url, mocker):
+        """Verify every retry waits the server's Retry-After plus jitter, without doubling."""
+        # Given: An endpoint that returns 429 with Retry-After: 5 three times then succeeds
+        rate_limited = httpx.Response(
+            429, json={"detail": "Rate limited"}, headers={"Retry-After": "5"}
+        )
+        respx.get(f"{base_url}/test").mock(
+            side_effect=[
+                rate_limited,
+                rate_limited,
+                rate_limited,
+                httpx.Response(200, json={"success": True}),
+            ]
+        )
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # When: Making a request
+        from vclient.services.base import BaseService
+
+        await BaseService(vclient)._get("/test")
+
+        # Then: Each wait is 5s plus at most 25% jitter
+        delays = [call[0][0] for call in mock_sleep.call_args_list]
+        assert len(delays) == 3
+        assert all(5.0 <= delay <= 6.25 for delay in delays)
+
+    @respx.mock
     async def test_auto_retry_exponential_backoff(self, vclient, base_url, mocker):
         """Verify retry delay increases exponentially."""
         # Given: An endpoint that returns 429 three times then succeeds
