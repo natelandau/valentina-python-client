@@ -1,3 +1,9 @@
+## v3.5.0 (2026-10-28)
+
+### Feat
+
+- **trackers**: simplify health and trait trackers (#92)
+
 ## v3.4.0 (2026-10-24)
 
 ### Feat
