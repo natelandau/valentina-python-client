@@ -1,3 +1,9 @@
+## v3.5.1 (2026-10-28)
+
+### Fix
+
+- **client**: adapt to the API's stricter key and access rules (#93)
+
 ## v3.5.0 (2026-10-28)
 
 ### Feat
