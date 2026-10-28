@@ -70,7 +70,6 @@ CONSTANT_MAP: dict[str, ConstantMapping] = {
     "CharacterInventoryType": ConstantMapping("characters", "InventoryItemType"),
     "CharacterStatus": ConstantMapping("characters", "CharacterStatus"),
     "CharacterType": ConstantMapping("characters", "CharacterType"),
-    "DamageType": ConstantMapping("characters", "DamageType"),
     "DiceSize": ConstantMapping("gameplay", "DiceSize"),
     "FreeTraitChangesPermission": ConstantMapping("companies", "PermissionsFreeTraitChanges"),
     "GameVersion": ConstantMapping("characters", "GameVersion"),

@@ -195,7 +195,7 @@ assert exc_info.value.code == "TOKEN_VERIFICATION_FAILED"
 
 Every API endpoint has a named constant on the `Routes` class, exported from `vclient.testing`. Constants follow the naming convention `{SERVICE}_{OPERATION}` -- for example, `USERS_LIST`, `BOOKS_RENUMBER`, `CHAPTERS_NOTES_CREATE`. Nested resources include the parent in the name (e.g., `CHARACTERS_INVENTORY_LIST`, `CHAPTERS_ASSETS_UPLOAD`).
 
-The trait tracker routes (`CHARACTER_TRAITS_TRACKER_GET`, `CHARACTER_TRAITS_TRACKER_SET`, `CHARACTER_TRAITS_TRACKER_ACTION`) return a `DamageTracker` by default. To test a counter or stains tracker, override the route with a model from `CounterTrackerFactory` or `StainsTrackerFactory`.
+The trait tracker routes (`CHARACTER_TRAITS_TRACKER_GET`, `CHARACTER_TRAITS_TRACKER_SET`, `CHARACTER_TRAITS_TRACKER_ACTION`) return a `CounterTracker` by default. To test a stains tracker, override the route with a model from `StainsTrackerFactory`.
 
 ### Advanced: Low-Level Route Overrides
 
@@ -263,7 +263,6 @@ Every public response model (and the nested models they contain, such as the aut
 | `CompanyFactory`                            | `Company`                            |
 | `CompanyPermissionsFactory`                 | `CompanyPermissions`                 |
 | `CounterTrackerFactory`                     | `CounterTracker`                     |
-| `DamageTrackerFactory`                      | `DamageTracker`                      |
 | `DeveloperFactory`                          | `Developer`                          |
 | `DeveloperWithApiKeyFactory`                | `DeveloperWithApiKey`                |
 | `DicerollFactory`                           | `Diceroll`                           |

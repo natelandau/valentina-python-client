@@ -33,7 +33,6 @@ from vclient.models import (
     Company,
     CompanyPermissions,
     CounterTracker,
-    DamageTracker,
     Developer,
     DeveloperWithApiKey,
     Diceroll,
@@ -87,7 +86,6 @@ from vclient.testing._factories import (
     CompanyFactory,
     CompanyPermissionsFactory,
     CounterTrackerFactory,
-    DamageTrackerFactory,
     DeveloperFactory,
     DeveloperWithApiKeyFactory,
     DicerollFactory,
@@ -121,7 +119,6 @@ from vclient.testing._routes import BYTES, LIST, NO_CONTENT, PAGINATED, RAW_JSON
 
 _FACTORY_MAP: dict[type, type[ModelFactory]] = {
     CounterTracker: CounterTrackerFactory,
-    DamageTracker: DamageTrackerFactory,
     Health: HealthFactory,
     HealthLevel: HealthLevelFactory,
     StainsTracker: StainsTrackerFactory,

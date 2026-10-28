@@ -6,7 +6,7 @@ from vclient.exceptions import ConflictError, NotFoundError, UnprocessableEntity
 from vclient.models import (
     Campaign,
     Company,
-    DamageTracker,
+    CounterTracker,
     Health,
     IdentityResolution,
     PaginatedResponse,
@@ -310,15 +310,15 @@ class TestTrackerAndHealthRoutes:
     """FakeVClient should serve tracker and health routes."""
 
     async def test_tracker_default_route(self):
-        """Verify the default tracker route returns a DamageTracker."""
+        """Verify the default tracker route returns a CounterTracker."""
         async with FakeVClient() as client:
             # When getting a tracker with no override
             result = await client.character_traits("ch1", "user1", company_id="co1").get_tracker(
                 "ct1"
             )
 
-            # Then a DamageTracker is returned
-            assert isinstance(result, DamageTracker)
+            # Then a CounterTracker is returned
+            assert isinstance(result, CounterTracker)
 
     async def test_tracker_override_with_other_variant(self):
         """Verify any tracker variant can override a tracker route."""

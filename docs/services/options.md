@@ -45,28 +45,27 @@ Character-related enumerations:
 | `CharacterClass`         | Available character classes (Vampire, Werewolf, etc.)            |
 | `CharacterStatus`        | Character status values (ALIVE, DEAD, ARCHIVED)                  |
 | `CharacterType`          | Character visibility types (PLAYER, NPC, STORYTELLER)            |
-| `DamageType`             | Damage types for damage tracks and health                        |
 | `GameVersion`            | Supported World of Darkness versions                             |
 | `HunterEdgeType`         | Hunter edge categories                                           |
 | `InventoryItemType`      | Types of inventory items                                         |
 | `TraitModifyCurrency`    | Currency types for trait modifications                           |
 | `TrackerAction`          | Actions for trait trackers and health                            |
-| `TrackerRules`           | Valid tracker actions and damage types per game version (a nested dictionary, see below) |
+| `TrackerRules`           | Valid tracker and health actions per game version (a nested dictionary, see below) |
 | `TrackerType`            | Tracker types for traits (COUNTER, DAMAGE, STAINS)               |
 | `WerewolfRenown`         | Werewolf renown types                                            |
 | `_related`               | URLs to related blueprint endpoints                              |
 
 #### TrackerRules
 
-`TrackerRules` is a nested dictionary, not a list. Its shape is `{game_version: {tracker_key: {"actions": [...], "damage_types": [...]}}}`. Each `tracker_key` is a tracker type or `HEALTH`. Use it to choose which action controls to show for a tracker or for health, so that a rule change on the server needs no client release. An empty `damage_types` list means that the actions take no `damage_type`.
+`TrackerRules` is a nested dictionary, not a list. Its shape is `{game_version: {tracker_type: {"actions": [...]}}}`. V4 has the keys `COUNTER` and `DAMAGE`. V5 has the keys `COUNTER`, `STAINS`, and `DAMAGE`. Health uses the `DAMAGE` key, which is its `type`. Look up the actions for a trait tracker or for health with `rules[game_version][tracker.type]`. A rule change on the server then needs no client release.
 
 ```python
 options = await options_service().get_options()
 rules = options["characters"]["TrackerRules"]
 
-rules["V5"]["DAMAGE"]["damage_types"]
-# Output: ["SUPERFICIAL", "AGGRAVATED"]
-rules["V4"]["HEALTH"]["actions"]
+rules["V5"]["STAINS"]["actions"]
+# Output: ["add_stain", "remove_stain", "reset"]
+rules[character.game_version][character.health.type]["actions"]
 # Output: ["damage", "heal", "reset"]
 ```
 

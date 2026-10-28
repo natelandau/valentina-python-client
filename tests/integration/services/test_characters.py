@@ -1664,30 +1664,13 @@ class TestCharactersServiceInventory:
         assert route.called
 
 
-V5_HEALTH = {
-    "type": "DAMAGE",
-    "size": 5,
-    "superficial": 2,
-    "aggravated": 0,
-    "boxes": ["SUPERFICIAL", "SUPERFICIAL", None, None, None],
-    "is_impaired": False,
-    "extra_levels": 0,
-}
+V5_HEALTH = {"type": "DAMAGE", "size": 5, "damage": 2, "extra_levels": 0}
 V4_HEALTH = {
     "type": "DAMAGE",
     "size": 7,
-    "superficial": 0,
-    "aggravated": 0,
-    "boxes": ["LETHAL", "BASHING", "BASHING", None, None, None, None],
-    "is_impaired": False,
-    "bashing": 2,
-    "lethal": 1,
-    "levels": [
-        {"name": "Bruised", "penalty": 0, "mark": "LETHAL"},
-        {"name": "Hurt", "penalty": -1, "mark": "BASHING"},
-    ],
-    "current_penalty": -1,
+    "damage": 1,
     "extra_levels": 0,
+    "levels": [{"name": "Bruised", "marked": True}, {"name": "Hurt", "marked": False}],
 }
 
 
@@ -1706,7 +1689,7 @@ class TestCharactersServiceHealth:
 
     @respx.mock
     async def test_get_health(self, service, base_url) -> None:
-        """Verify get_health returns V5 health with V4 fields unset."""
+        """Verify get_health returns V5 health with no levels."""
         # Given: A mocked health endpoint
         respx.get(_health_url(base_url, Endpoints.CHARACTER_HEALTH)).mock(
             return_value=Response(200, json=V5_HEALTH)
@@ -1717,8 +1700,8 @@ class TestCharactersServiceHealth:
 
         # Then: A Health object is returned
         assert isinstance(result, Health)
-        assert result.superficial == 2
-        assert result.bashing is None
+        assert result.damage == 2
+        assert result.levels is None
 
     @respx.mock
     async def test_get_health_not_found(self, service, base_url) -> None:
@@ -1743,17 +1726,11 @@ class TestCharactersServiceHealth:
             return_value=Response(200, json=V5_HEALTH)
         )
 
-        # When: Setting only superficial damage
-        await service.set_health("char123", superficial=2)
+        # When: Setting only damage
+        await service.set_health("char123", damage=2)
 
         # Then: All fields are sent
-        assert json.loads(route.calls.last.request.content) == {
-            "extra_levels": 0,
-            "superficial": 2,
-            "aggravated": 0,
-            "bashing": 0,
-            "lethal": 0,
-        }
+        assert json.loads(route.calls.last.request.content) == {"extra_levels": 0, "damage": 2}
 
     @respx.mock
     async def test_set_health_request_model(self, service, base_url) -> None:
@@ -1763,53 +1740,45 @@ class TestCharactersServiceHealth:
             return_value=Response(200, json=V4_HEALTH)
         )
 
-        # When: Setting V4 marks with a request model
-        result = await service.set_health("char123", HealthStateSet(lethal=1, bashing=2))
+        # When: Setting damage with a request model
+        result = await service.set_health("char123", HealthStateSet(damage=1, extra_levels=1))
 
-        # Then: The marks are sent and V4 levels are parsed
-        body = json.loads(route.calls.last.request.content)
-        assert body["lethal"] == 1
-        assert body["bashing"] == 2
-        assert result.levels[1].penalty == -1
+        # Then: The state is sent and V4 levels are parsed
+        assert json.loads(route.calls.last.request.content) == {"extra_levels": 1, "damage": 1}
+        assert result.levels[0].marked is True
 
     async def test_set_health_negative_rejected(self, service) -> None:
         """Verify a negative value fails before any request."""
         # When/Then: Setting negative damage raises
         with pytest.raises(RequestValidationError):
-            await service.set_health("char123", aggravated=-1)
+            await service.set_health("char123", damage=-1)
+
+    async def test_set_health_typed_mark_rejected(self, service) -> None:
+        """Verify a removed typed damage field fails instead of resetting health."""
+        # When/Then: Setting superficial damage raises
+        with pytest.raises(RequestValidationError):
+            await service.set_health("char123", superficial=2)
 
     @respx.mock
     async def test_apply_health_action_damage(self, service, base_url) -> None:
-        """Verify a damage action sends its damage type."""
+        """Verify a damage action sends only action and amount."""
         # Given: A mocked health action endpoint
         route = respx.post(_health_url(base_url, Endpoints.CHARACTER_HEALTH_ACTIONS)).mock(
             return_value=Response(200, json=V5_HEALTH)
         )
 
-        # When: Applying one aggravated damage
-        result = await service.apply_health_action("char123", "damage", damage_type="AGGRAVATED")
+        # When: Applying two damage
+        result = await service.apply_health_action("char123", "damage", amount=2)
 
-        # Then: The full action body is sent
-        assert json.loads(route.calls.last.request.content) == {
-            "action": "damage",
-            "amount": 1,
-            "damage_type": "AGGRAVATED",
-        }
+        # Then: Only action and amount are sent
+        assert json.loads(route.calls.last.request.content) == {"action": "damage", "amount": 2}
         assert isinstance(result, Health)
 
-    @respx.mock
-    async def test_apply_health_action_reset(self, service, base_url) -> None:
-        """Verify a reset sends no damage type."""
-        # Given: A mocked health action endpoint
-        route = respx.post(_health_url(base_url, Endpoints.CHARACTER_HEALTH_ACTIONS)).mock(
-            return_value=Response(200, json=V5_HEALTH)
-        )
-
-        # When: Resetting health
-        await service.apply_health_action("char123", "reset")
-
-        # Then: damage_type is absent
-        assert "damage_type" not in json.loads(route.calls.last.request.content)
+    async def test_apply_health_action_no_damage_type(self, service) -> None:
+        """Verify apply_health_action no longer accepts a damage type."""
+        # When/Then: Passing damage_type raises
+        with pytest.raises(TypeError):
+            await service.apply_health_action("char123", "damage", damage_type="AGGRAVATED")
 
     @respx.mock
     async def test_apply_health_action_validation_error(self, service, base_url) -> None:
@@ -1817,10 +1786,10 @@ class TestCharactersServiceHealth:
         # Given: The endpoint rejects the action
         respx.post(_health_url(base_url, Endpoints.CHARACTER_HEALTH_ACTIONS)).mock(
             return_value=Response(
-                400, json={"status": 400, "title": "Bad Request", "detail": "Invalid damage type"}
+                400, json={"status": 400, "title": "Bad Request", "detail": "Invalid action"}
             )
         )
 
         # When/Then: Applying the action raises
         with pytest.raises(ValidationError):
-            await service.apply_health_action("char123", "damage", damage_type="BASHING")
+            await service.apply_health_action("char123", "spend")

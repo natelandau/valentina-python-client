@@ -506,7 +506,7 @@ All fields optional. Same constraints as CampaignCreate. Pass `in_game_date=None
 | concept_id | str \| None | — |
 | user_player_id | str \| None | — |
 | traits | list[CharacterCreateTraitAssign] \| None | — |
-| health | HealthStateSet \| None | starting health marks |
+| health | HealthStateSet \| None | starting health damage |
 | vampire_attributes | VampireAttributesCreate \| None | — |
 | werewolf_attributes | WerewolfAttributesCreate \| None | — |
 | hunter_attributes | HunterAttributesCreate \| None | — |
@@ -563,9 +563,11 @@ All fields optional. Same field set as CharacterCreate plus `status`, `date_kill
 
 ### Tracker
 
-`Tracker = Annotated[CounterTracker | DamageTracker | StainsTracker, Field(discriminator="type")]`. Switch on `type` or use `isinstance`.
+`Tracker = Annotated[CounterTracker | StainsTracker, Field(discriminator="type")]`. Switch on `type` or use `isinstance`. Health is not a `Tracker`.
 
 ### CounterTracker
+
+Willpower (V4 and V5), Blood Pool, Rage, Gnosis, Conviction, and Humanity for every character except a V5 vampire.
 
 | Field | Type | Required |
 |-------|------|----------|
@@ -573,70 +575,53 @@ All fields optional. Same field set as CharacterCreate plus `status`, `date_kill
 | size | int | yes (equals trait value) |
 | current | int | yes |
 
-### DamageTracker
-
-Used by V5 Willpower; `Health` extends it. V4-only fields are `None` on V5.
-
-| Field | Type | Required |
-|-------|------|----------|
-| type | Literal["DAMAGE"] | yes |
-| size | int | yes |
-| superficial | int | yes |
-| aggravated | int | yes |
-| boxes | list[DamageType \| None] | no (most severe first, empty boxes `None`) |
-| is_impaired | bool | yes (every box marked) |
-| bashing | int \| None | no (V4) |
-| lethal | int \| None | no (V4) |
-| levels | list[HealthLevel] \| None | no (V4) |
-| current_penalty | int \| None | no (V4; also None when Incapacitated is marked) |
-
-### HealthLevel
-
-| Field | Type | Required |
-|-------|------|----------|
-| name | str | yes |
-| penalty | int \| None | no (None for Incapacitated) |
-| mark | DamageType \| None | no |
-
 ### StainsTracker
+
+Humanity on a V5 vampire only.
 
 | Field | Type | Required |
 |-------|------|----------|
 | type | Literal["STAINS"] | yes |
 | humanity | int | yes |
 | stain_capacity | int | yes (10 - humanity) |
-| stains | int | yes |
-| is_impaired | bool | yes (stains > stain_capacity) |
-| willpower_damage_applied | int \| None | no (set on action responses) |
+| stains | int | yes (stains past stain_capacity have no effect) |
 
-### Health (extends DamageTracker)
+### Health
+
+One damage count. No damage types, penalties, impairment, or health state.
 
 | Field | Type | Required |
 |-------|------|----------|
+| type | Literal["DAMAGE"] | no (default "DAMAGE"; the health key in TrackerRules) |
+| size | int | yes |
+| damage | int \| None | no (None only from API v0.29.0 and older) |
 | extra_levels | int | no (default=0) |
+| levels | list[HealthLevel] \| None | no (V4 only, one per box in track order; None on V5) |
+
+### HealthLevel
+
+| Field | Type | Required |
+|-------|------|----------|
+| name | str | yes |
+| marked | bool \| None | no (None only from API v0.29.0 and older) |
 
 ### TrackerStateSet
 
-Body for `set_tracker()` and `CharacterCreateTraitAssign.tracker`. Sent with `exclude_none`; a field that does not fit the tracker type is a 400 even when 0.
+Body for `set_tracker()` and `CharacterCreateTraitAssign.tracker`. Sent with `exclude_none`; a field that does not fit the tracker type is a 400 even when 0. Unknown fields (`extra="forbid"`) raise `RequestValidationError`.
 
 | Field | Type | Constraints |
 |-------|------|------------|
 | current | int \| None | >= 0, required for COUNTER |
-| superficial | int \| None | >= 0, DAMAGE |
-| aggravated | int \| None | >= 0, DAMAGE |
 | stains | int \| None | >= 0, STAINS |
 
 ### HealthStateSet
 
-Body for `set_health()` and `CharacterCreate.health`. Every field is sent; omitted fields reset to 0. V4: bashing, lethal, aggravated. V5: superficial, aggravated. Both: extra_levels.
+Body for `set_health()` and `CharacterCreate.health`. Every field is sent; omitted fields reset to 0. Unknown fields (`extra="forbid"`) raise `RequestValidationError`.
 
 | Field | Type | Constraints |
 |-------|------|------------|
 | extra_levels | int | >= 0, default 0 |
-| superficial | int | >= 0, default 0 |
-| aggravated | int | >= 0, default 0 |
-| bashing | int | >= 0, default 0 |
-| lethal | int | >= 0, default 0 |
+| damage | int | >= 0, default 0 |
 
 ### CharacterTraitSpecialty
 

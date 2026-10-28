@@ -2,6 +2,7 @@
 
 import pytest
 
+from vclient import constants
 from vclient.validate_constants import (
     CONSTANT_MAP,
     ConstantMapping,
@@ -150,7 +151,6 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
-                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
                 "TrackerAction": [
                     "spend",
                     "gain",
@@ -245,7 +245,6 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
-                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
                 "TrackerAction": [
                     "spend",
                     "gain",
@@ -342,7 +341,6 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
-                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
                 "TrackerAction": [
                     "spend",
                     "gain",
@@ -440,7 +438,6 @@ class TestValidate:
                 "NewOptionType": ["FOO", "BAR"],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
-                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
                 "TrackerAction": [
                     "spend",
                     "gain",
@@ -550,7 +547,6 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
-                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
                 "TrackerAction": [
                     "spend",
                     "gain",
@@ -645,7 +641,6 @@ class TestValidate:
                 ],
                 "SpecialtyType": ["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"],
                 "TraitModifyCurrency": ["NO_COST", "XP", "STARTING_POINTS"],
-                "DamageType": ["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"],
                 "TrackerAction": [
                     "spend",
                     "gain",
@@ -702,7 +697,7 @@ class TestPrintReport:
 
         # Then: Output contains success message
         captured = capsys.readouterr()
-        assert "30/30 constants in sync" in captured.out
+        assert "29/29 constants in sync" in captured.out
 
     def test_mismatch_report_output(self, capsys):
         """Verify print_report shows mismatch details."""
@@ -750,7 +745,7 @@ class TestPrintReport:
 class TestTrackerConstants:
     """Tests for the tracker constants added with trait trackers and health."""
 
-    @pytest.mark.parametrize("name", ["TrackerType", "TrackerAction", "DamageType"])
+    @pytest.mark.parametrize("name", ["TrackerType", "TrackerAction"])
     def test_tracker_constants_mapped(self, name: str) -> None:
         """Verify tracker constants map to the characters options category."""
         assert CONSTANT_MAP[name] == ConstantMapping("characters", name)
@@ -759,7 +754,12 @@ class TestTrackerConstants:
         """Verify the nested TrackerRules dict is not flagged as an unmapped option."""
         options = {
             "characters": {
-                "TrackerRules": {"V5": {"DAMAGE": {"actions": ["damage"], "damage_types": []}}}
+                "TrackerRules": {"V5": {"DAMAGE": {"actions": ["damage", "heal", "reset"]}}}
             }
         }
         assert "characters" not in validate(options).unmapped_api_options
+
+    def test_damage_type_removed(self) -> None:
+        """Verify the removed DamageType constant is neither defined nor mapped."""
+        assert "DamageType" not in CONSTANT_MAP
+        assert not hasattr(constants, "DamageType")

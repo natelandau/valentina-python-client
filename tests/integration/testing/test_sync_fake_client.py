@@ -4,7 +4,7 @@ import pytest
 
 from vclient._sync.registry import sync_campaigns_service, sync_companies_service
 from vclient.exceptions import NotFoundError
-from vclient.models import Campaign, Company, DamageTracker, Health, StainsTracker
+from vclient.models import Campaign, Company, CounterTracker, Health, StainsTracker
 from vclient.testing import Routes, StainsTrackerFactory, SyncFakeVClient
 
 
@@ -57,13 +57,13 @@ class TestSyncTrackerAndHealthRoutes:
     """SyncFakeVClient should serve tracker and health routes."""
 
     def test_tracker_default_route(self):
-        """Verify the default tracker route returns a DamageTracker."""
+        """Verify the default tracker route returns a CounterTracker."""
         with SyncFakeVClient() as client:
             # When getting a tracker with no override
             result = client.character_traits("ch1", "user1", company_id="co1").get_tracker("ct1")
 
-            # Then a DamageTracker is returned
-            assert isinstance(result, DamageTracker)
+            # Then a CounterTracker is returned
+            assert isinstance(result, CounterTracker)
 
     def test_tracker_override_with_other_variant(self):
         """Verify any tracker variant can override a tracker route."""

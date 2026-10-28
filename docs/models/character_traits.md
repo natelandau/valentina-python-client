@@ -19,11 +19,11 @@ Models for character traits, trait definitions, and trait value modification opt
 
 ## Tracker
 
-`Tracker` is a type alias for `CounterTracker | DamageTracker | StainsTracker`. The `type` field selects the model. Use `isinstance()` or a `match` statement to read the variant.
+`Tracker` is a type alias for `CounterTracker | StainsTracker`. The `type` field selects the model. Use `isinstance()` or a `match` statement to read the variant. Character health is not a `Tracker`. It is a [`Health`](characters.md#health) model.
 
 ## CounterTracker
 
-A trait whose points are spent and regained in play, such as V4 Willpower or Blood Pool.
+A trait whose points are spent and regained in play, such as Willpower or Blood Pool.
 
 | Field     | Type                 | Description                          |
 | --------- | -------------------- | ------------------------------------ |
@@ -31,56 +31,25 @@ A trait whose points are spent and regained in play, such as V4 Willpower or Blo
 | `size`    | `int`                | Maximum, equal to the trait value    |
 | `current` | `int`                | Points available now                 |
 
-## DamageTracker
-
-A damage track. V5 Willpower uses it, and `Health` extends it.
-
-| Field             | Type                       | Description                                                       |
-| ----------------- | -------------------------- | ----------------------------------------------------------------- |
-| `type`            | `Literal["DAMAGE"]`        | Tracker type                                                      |
-| `size`            | `int`                      | Number of boxes                                                   |
-| `superficial`     | `int`                      | Superficial damage marks                                          |
-| `aggravated`      | `int`                      | Aggravated damage marks                                           |
-| `boxes`           | `list[DamageType \| None]` | One entry per box, most severe first. Empty boxes are `None`     |
-| `is_impaired`     | `bool`                     | True when every box is marked                                     |
-| `bashing`         | `int \| None`              | V4 bashing marks. `None` on V5                                    |
-| `lethal`          | `int \| None`              | V4 lethal marks. `None` on V5                                     |
-| `levels`          | `list[HealthLevel] \| None` | V4 health levels. `None` on V5                                  |
-| `current_penalty` | `int \| None`              | V4 dice penalty from the most severe marked level. `None` on V5, and on V4 when Incapacitated is marked |
-
-## HealthLevel
-
-One V4 health level.
-
-| Field     | Type                 | Description                                         |
-| --------- | -------------------- | --------------------------------------------------- |
-| `name`    | `str`                | Level name, such as "Bruised"                       |
-| `penalty` | `int \| None`        | Dice penalty at this level. `None` for Incapacitated |
-| `mark`    | `DamageType \| None` | Damage marked on this level, or `None`              |
-
 ## StainsTracker
 
-V5 Humanity stains.
+Humanity stains on a V5 vampire.
 
-| Field                      | Type                | Description                                                        |
-| -------------------------- | ------------------- | ------------------------------------------------------------------ |
-| `type`                     | `Literal["STAINS"]` | Tracker type                                                       |
-| `humanity`                 | `int`               | Humanity value                                                     |
-| `stain_capacity`           | `int`               | Boxes available for stains: 10 minus Humanity                      |
-| `stains`                   | `int`               | Stains marked                                                      |
-| `is_impaired`              | `bool`              | True when stains are more than `stain_capacity`                    |
-| `willpower_damage_applied` | `int \| None`       | Stains that overflowed into Willpower damage. Set only by actions  |
+| Field            | Type                | Description                                                        |
+| ---------------- | ------------------- | ------------------------------------------------------------------ |
+| `type`           | `Literal["STAINS"]` | Tracker type                                                       |
+| `humanity`       | `int`               | Humanity value                                                     |
+| `stain_capacity` | `int`               | Boxes available for stains: 10 minus Humanity                      |
+| `stains`         | `int`               | Stains marked. Stains past `stain_capacity` have no effect         |
 
 ## TrackerStateSet
 
-Request body for `set_tracker()`, and the `tracker` field of `CharacterCreateTraitAssign`. Set only the fields for the tracker type. A field of the tracker type that you omit resets to 0. The client does not send fields that are `None`. A field that does not fit the tracker type causes a `ValidationError`, even when its value is 0.
+Request body for `set_tracker()`, and the `tracker` field of `CharacterCreateTraitAssign`. Set only the field for the tracker type. The client does not send fields that are `None`. A field that does not fit the tracker type causes a `ValidationError`, even when its value is 0. Any other field causes a `RequestValidationError` before the client sends the request.
 
-| Field         | Type          | Description                                      |
-| ------------- | ------------- | ------------------------------------------------ |
-| `current`     | `int \| None` | Counter points available. Required for `COUNTER` |
-| `superficial` | `int \| None` | Superficial marks on a damage track              |
-| `aggravated`  | `int \| None` | Aggravated marks on a damage track               |
-| `stains`      | `int \| None` | Humanity stains                                  |
+| Field     | Type          | Description                                      |
+| --------- | ------------- | ------------------------------------------------ |
+| `current` | `int \| None` | Counter points available. Required for `COUNTER` |
+| `stains`  | `int \| None` | Humanity stains for `STAINS`                     |
 
 All values must be 0 or more.
 

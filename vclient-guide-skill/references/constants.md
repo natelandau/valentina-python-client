@@ -41,10 +41,9 @@ SpecialtyType = Literal["ACTION", "OTHER", "PASSIVE", "RITUAL", "SPELL"]
 ```python
 TrackerType = Literal["COUNTER", "DAMAGE", "STAINS"]
 TrackerAction = Literal["spend", "gain", "damage", "heal", "add_stain", "remove_stain", "reset"]
-DamageType = Literal["SUPERFICIAL", "AGGRAVATED", "BASHING", "LETHAL"]
 ```
 
-V4 health uses `BASHING`, `LETHAL`, `AGGRAVATED`; V5 uses `SUPERFICIAL`, `AGGRAVATED`. The valid action and damage type pairs per tracker come from `options.get_options()["characters"]["TrackerRules"]`.
+`DAMAGE` is used only as the `Health.type`; no trait tracker has it. The valid actions per tracker come from `options.get_options()["characters"]["TrackerRules"][game_version][tracker.type]["actions"]` (health uses the `DAMAGE` key).
 
 ### Werewolf
 

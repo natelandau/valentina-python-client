@@ -3,9 +3,9 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
-from vclient.constants import DamageType, TrackerAction, TraitModifyCurrency
+from vclient.constants import TrackerAction, TraitModifyCurrency
 
 from .shared import Trait
 
@@ -20,76 +20,51 @@ class CharacterTraitSpecialty(BaseModel):
 
 
 class HealthLevel(BaseModel):
-    """One V4 health level with its dice penalty and the damage marked on it."""
+    """One V4 health level and whether it is marked."""
 
     name: str
-    penalty: int | None = Field(
-        default=None, description="Dice pool penalty at this level. None for Incapacitated."
-    )
-    mark: DamageType | None = Field(
-        default=None, description="Damage marked on this level, or None when empty."
+    marked: bool | None = Field(
+        default=None, description="Whether the level is marked. None only from older API versions."
     )
 
 
 class CounterTracker(BaseModel):
-    """Tracker for a trait whose current value is spent and regained in play, such as V4 Willpower."""
+    """Tracker for a trait whose current value is spent and regained in play, such as Willpower."""
 
     type: Literal["COUNTER"] = "COUNTER"
     size: int = Field(..., description="Maximum, equal to the trait's value.")
     current: int = Field(..., description="Points currently available.")
 
 
-class DamageTracker(BaseModel):
-    """Damage track used by V5 Willpower and by Health in both game versions.
-
-    The V4-only fields (``bashing``, ``lethal``, ``levels``, ``current_penalty``) are ``None``
-    for V5.
-    """
-
-    type: Literal["DAMAGE"] = "DAMAGE"
-    size: int = Field(..., description="Number of boxes on the track.")
-    superficial: int
-    aggravated: int
-    boxes: list[DamageType | None] = Field(
-        default_factory=list,
-        description="One entry per box in severity order, padded with None for empty boxes.",
-    )
-    is_impaired: bool
-    bashing: int | None = None
-    lethal: int | None = None
-    levels: list[HealthLevel] | None = None
-    current_penalty: int | None = Field(
-        default=None,
-        description="Dice pool penalty from the most severe marked V4 level. None on V5, and on V4 "
-        "when Incapacitated is marked.",
-    )
-
-
 class StainsTracker(BaseModel):
-    """Tracker for V5 Humanity stains."""
+    """Tracker for V5 vampire Humanity stains."""
 
     type: Literal["STAINS"] = "STAINS"
     humanity: int
     stain_capacity: int = Field(..., description="Boxes left for stains, 10 minus Humanity.")
     stains: int
-    is_impaired: bool
-    willpower_damage_applied: int | None = Field(
-        default=None,
-        description="Stains that overflowed into Willpower damage. Set only on action responses.",
-    )
 
 
 # In-play tracker state for a trait; pydantic picks the variant from ``type``.
-Tracker = Annotated[CounterTracker | DamageTracker | StainsTracker, Field(discriminator="type")]
+Tracker = Annotated[CounterTracker | StainsTracker, Field(discriminator="type")]
 
 _TRACKER_ADAPTER: TypeAdapter[Tracker] = TypeAdapter(Tracker)
 
 
-class Health(DamageTracker):
-    """A character's health track: a damage track plus V4 extra health levels."""
+class Health(BaseModel):
+    """A character's health track: one damage count, plus named levels in V4."""
 
+    type: Literal["DAMAGE"] = "DAMAGE"
+    size: int = Field(..., description="Number of boxes on the track.")
+    damage: int | None = Field(
+        default=None,
+        description="Marked boxes. None only from API versions that report typed damage marks.",
+    )
     extra_levels: int = Field(
         default=0, description="Health levels added on top of the base track."
+    )
+    levels: list[HealthLevel] | None = Field(
+        default=None, description="Named V4 health levels in track order. None for V5."
     )
 
 
@@ -114,28 +89,27 @@ class CharacterTrait(BaseModel):
 class TrackerStateSet(BaseModel):
     """Request model for setting a trait tracker's full state.
 
-    Set only the fields for the tracker's type: ``current`` for counters (required),
-    ``superficial`` and ``aggravated`` for damage tracks, ``stains`` for stains.
+    Set only the field for the tracker's type: ``current`` for counters (required) or
+    ``stains`` for stains. Unknown fields raise so a stale key fails instead of being dropped.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     current: int | None = Field(default=None, ge=0)
-    superficial: int | None = Field(default=None, ge=0)
-    aggravated: int | None = Field(default=None, ge=0)
     stains: int | None = Field(default=None, ge=0)
 
 
 class HealthStateSet(BaseModel):
     """Request model for setting a character's full health state.
 
-    V4 uses ``bashing``, ``lethal``, and ``aggravated``; V5 uses ``superficial`` and
-    ``aggravated``. ``extra_levels`` applies to both. Omitted fields reset to 0.
+    Omitted fields reset to 0. Unknown fields raise so a stale key fails instead of
+    silently clearing the track.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     extra_levels: int = Field(default=0, ge=0)
-    superficial: int = Field(default=0, ge=0)
-    aggravated: int = Field(default=0, ge=0)
-    bashing: int = Field(default=0, ge=0)
-    lethal: int = Field(default=0, ge=0)
+    damage: int = Field(default=0, ge=0)
 
 
 class _TrackerAction(BaseModel):
@@ -143,7 +117,6 @@ class _TrackerAction(BaseModel):
 
     action: TrackerAction
     amount: int = Field(default=1, ge=1)
-    damage_type: DamageType | None = None
 
 
 class CharacterCreateTraitAssign(BaseModel):
@@ -273,7 +246,6 @@ __all__ = [
     "CharacterTraitValueOption",
     "CharacterTraitValueOptionsResponse",
     "CounterTracker",
-    "DamageTracker",
     "Health",
     "HealthLevel",
     "HealthStateSet",

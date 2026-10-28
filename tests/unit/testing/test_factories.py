@@ -2,7 +2,8 @@
 
 import pytest
 
-from vclient.models import CounterTracker, DamageTracker, Health, StainsTracker
+import vclient.testing
+from vclient.models import CounterTracker, Health, StainsTracker
 from vclient.testing._factories import (
     AssetFactory,
     CampaignBookFactory,
@@ -18,7 +19,6 @@ from vclient.testing._factories import (
     CompanyFactory,
     CompanyPermissionsFactory,
     CounterTrackerFactory,
-    DamageTrackerFactory,
     DeveloperFactory,
     DeveloperWithApiKeyFactory,
     DicerollFactory,
@@ -108,13 +108,7 @@ class TestTrackerFactories:
 
     @pytest.mark.parametrize(
         "factory_cls",
-        [
-            CounterTrackerFactory,
-            DamageTrackerFactory,
-            StainsTrackerFactory,
-            HealthLevelFactory,
-            HealthFactory,
-        ],
+        [CounterTrackerFactory, StainsTrackerFactory, HealthLevelFactory, HealthFactory],
     )
     def test_tracker_factory_round_trips(self, factory_cls):
         """Verify built instances survive JSON serialization and validation."""
@@ -137,32 +131,57 @@ class TestTrackerFactories:
             assert isinstance(factory_cls.build().health, Health)
 
     def test_character_trait_factory_varies_tracker(self):
-        """Verify fake traits produce more than one tracker variant."""
+        """Verify fake traits produce every tracker variant and no other."""
         kinds = {type(CharacterTraitFactory.build().tracker) for _ in range(200)}
-        assert {CounterTracker, DamageTracker, StainsTracker} <= kinds
+        assert kinds == {CounterTracker, StainsTracker, type(None)}
 
-    @pytest.mark.parametrize("factory_cls", [DamageTrackerFactory, HealthFactory])
-    def test_damage_factory_boxes_match_size(self, factory_cls):
-        """Verify fake damage tracks render one box per point of size."""
-        for _ in range(20):
-            tracker = factory_cls.build()
-            assert len(tracker.boxes) == tracker.size
+    def test_damage_tracker_factory_removed(self):
+        """Verify the testing module no longer exports a damage tracker factory."""
+        assert not hasattr(vclient.testing, "DamageTrackerFactory")
 
-    @pytest.mark.parametrize("factory_cls", [DamageTrackerFactory, HealthFactory])
-    def test_damage_factory_marks_match_counts(self, factory_cls):
-        """Verify fake damage tracks mark boxes that agree with their counts."""
+    def test_health_factory_damage_fits_track(self):
+        """Verify fake health always reports a damage count within its size."""
         for _ in range(50):
-            tracker = factory_cls.build()
-            assert tracker.superficial + tracker.aggravated <= tracker.size
-            assert tracker.boxes.count("AGGRAVATED") == tracker.aggravated
-            assert tracker.boxes.count("SUPERFICIAL") == tracker.superficial
-            assert tracker.is_impaired == (tracker.superficial + tracker.aggravated >= tracker.size)
+            health = HealthFactory.build()
+            assert isinstance(health.damage, int)
+            assert 0 <= health.damage <= health.size
 
-    def test_damage_factory_keeps_overrides(self):
-        """Verify overridden fields are kept and the rest derive from them."""
-        tracker = DamageTrackerFactory.build(size=5, aggravated=2, superficial=1)
-        assert tracker.boxes == ["AGGRAVATED", "AGGRAVATED", "SUPERFICIAL", None, None]
-        assert tracker.is_impaired is False
+    def test_health_factory_levels_match_damage(self):
+        """Verify fake V4 levels mark the first boxes up to the damage count."""
+        seen_levels = False
+        for _ in range(50):
+            health = HealthFactory.build()
+            if health.levels is None:
+                continue
+            seen_levels = True
+            assert len(health.levels) == health.size
+            assert [level.marked for level in health.levels] == (
+                [True] * health.damage + [False] * (health.size - health.damage)
+            )
+        assert seen_levels
+
+    def test_health_factory_produces_v5_shape(self):
+        """Verify fake health sometimes has no levels, as on V5."""
+        assert any(HealthFactory.build().levels is None for _ in range(50))
+
+    def test_health_factory_legacy_damage_none(self):
+        """Verify fake health with no damage count builds levels with unknown marks."""
+        for _ in range(20):
+            health = HealthFactory.build(damage=None)
+            assert health.damage is None
+            assert health.levels is None or all(lvl.marked is None for lvl in health.levels)
+
+    def test_health_level_factory_sets_marked(self):
+        """Verify fake health levels report a marked flag, as the current API does."""
+        assert all(isinstance(HealthLevelFactory.build().marked, bool) for _ in range(20))
+
+    def test_health_factory_keeps_overrides(self):
+        """Verify overridden fields are kept and levels derive from them."""
+        health = HealthFactory.build(size=4, damage=1)
+        assert health.size == 4
+        assert health.damage == 1
+        if health.levels is not None:
+            assert [level.marked for level in health.levels] == [True, False, False, False]
 
     def test_counter_and_stains_factories_stay_in_range(self):
         """Verify fake counters and stains respect their capacity."""
@@ -174,7 +193,7 @@ class TestTrackerFactories:
             assert 0 <= stains.stains <= stains.stain_capacity
 
     @pytest.mark.parametrize(
-        "factory_cls", [CounterTrackerFactory, DamageTrackerFactory, StainsTrackerFactory]
+        "factory_cls", [CounterTrackerFactory, StainsTrackerFactory, HealthFactory]
     )
     def test_tracker_factories_honor_seed(self, factory_cls):
         """Verify seed_random makes tracker factories reproducible."""

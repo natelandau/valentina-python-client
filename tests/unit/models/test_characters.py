@@ -14,6 +14,7 @@ from vclient.models import (
     CharacterDetail,
     CharacterUpdate,
     Health,
+    HealthLevel,
     HealthStateSet,
     HunterAttributes,
     MageAttributes,
@@ -862,7 +863,7 @@ class TestCharacterHealth:
     """Tests for character health response and request models."""
 
     def test_v4_health_parses_levels(self) -> None:
-        """Verify V4 health parses its levels and penalty."""
+        """Verify V4 health parses its damage and marked level names."""
         # When: Parsing a character with V4 health
         character = Character.model_validate(
             _character_data(
@@ -870,46 +871,73 @@ class TestCharacterHealth:
                 health={
                     "type": "DAMAGE",
                     "size": 7,
-                    "superficial": 0,
-                    "aggravated": 0,
-                    "boxes": ["LETHAL", None, None, None, None, None, None],
-                    "is_impaired": False,
-                    "bashing": 0,
-                    "lethal": 1,
-                    "levels": [{"name": "Bruised", "penalty": 0, "mark": "LETHAL"}],
-                    "current_penalty": 0,
+                    "damage": 1,
                     "extra_levels": 0,
+                    "levels": [
+                        {"name": "Bruised", "marked": True},
+                        {"name": "Hurt", "marked": False},
+                    ],
                 },
             )
         )
 
         # Then: Health and its levels are typed
         assert isinstance(character.health, Health)
-        assert character.health.levels[0].mark == "LETHAL"
+        assert character.health.damage == 1
+        assert character.health.levels[0].marked is True
+        assert character.health.levels[1].marked is False
 
-    def test_v5_health_v4_fields_none(self) -> None:
-        """Verify V5 health leaves V4-only fields as None."""
+    def test_v5_health_levels_none(self) -> None:
+        """Verify V5 health has a damage count and no levels."""
         # When: Parsing a character with V5 health
         character = Character.model_validate(
-            _character_data(
-                health={
-                    "type": "DAMAGE",
-                    "size": 5,
-                    "superficial": 1,
-                    "aggravated": 0,
-                    "boxes": ["SUPERFICIAL", None, None, None, None],
-                    "is_impaired": False,
-                    "extra_levels": 0,
-                }
-            )
+            _character_data(health={"type": "DAMAGE", "size": 5, "damage": 2, "extra_levels": 0})
         )
 
-        # Then: V4 fields are None
-        assert character.health.bashing is None
-        assert character.health.lethal is None
+        # Then: Damage is set and levels are None
+        assert character.health.damage == 2
         assert character.health.levels is None
-        assert character.health.current_penalty is None
         assert character.health.extra_levels == 0
+
+    def test_health_has_only_house_rule_fields(self) -> None:
+        """Verify Health carries no typed marks, boxes, impairment, or penalties."""
+        # When/Then: The model fields are exactly the simplified shape
+        assert set(Health.model_fields) == {"type", "size", "damage", "extra_levels", "levels"}
+        assert set(HealthLevel.model_fields) == {"name", "marked"}
+
+    def test_health_without_damage_parses(self) -> None:
+        """Verify a typed-marks health payload from an older API still parses."""
+        # When: Parsing a health payload that has no damage field
+        health = Health.model_validate(
+            {
+                "type": "DAMAGE",
+                "size": 5,
+                "superficial": 1,
+                "aggravated": 0,
+                "boxes": ["SUPERFICIAL", None, None, None, None],
+                "is_impaired": False,
+                "extra_levels": 0,
+            }
+        )
+
+        # Then: Damage is None
+        assert health.damage is None
+
+    def test_v4_health_without_marked_parses(self) -> None:
+        """Verify V4 levels from an older API without marked still parse."""
+        # When: Parsing V4 levels that carry penalty and mark instead of marked
+        health = Health.model_validate(
+            {
+                "type": "DAMAGE",
+                "size": 7,
+                "extra_levels": 0,
+                "levels": [{"name": "Bruised", "penalty": 0, "mark": "LETHAL"}],
+            }
+        )
+
+        # Then: The level parses with marked unset
+        assert health.levels[0].name == "Bruised"
+        assert health.levels[0].marked is None
 
     def test_character_without_health_parses(self) -> None:
         """Verify a payload from an API without health still parses."""
@@ -921,17 +949,18 @@ class TestCharacterHealth:
 
     def test_health_state_set_defaults_zero(self) -> None:
         """Verify unset health fields dump as zero."""
-        # When: Dumping a health state with only superficial set
-        body = HealthStateSet(superficial=2).model_dump()
+        # When: Dumping a health state with only damage set
+        body = HealthStateSet(damage=2).model_dump()
 
         # Then: Every field is present
-        assert body == {
-            "extra_levels": 0,
-            "superficial": 2,
-            "aggravated": 0,
-            "bashing": 0,
-            "lethal": 0,
-        }
+        assert body == {"extra_levels": 0, "damage": 2}
+
+    @pytest.mark.parametrize("field", ["superficial", "aggravated", "bashing", "lethal"])
+    def test_health_state_set_rejects_typed_marks(self, field: str) -> None:
+        """Verify a typed damage field fails client-side instead of resetting health."""
+        # When/Then: Passing a removed field raises
+        with pytest.raises(PydanticValidationError):
+            HealthStateSet(**{field: 1})
 
     def test_character_create_accepts_health_and_tracker(self) -> None:
         """Verify CharacterCreate carries health and per-trait tracker state."""
@@ -942,7 +971,7 @@ class TestCharacterHealth:
             game_version="V5",
             name_first="John",
             name_last="Doe",
-            health=HealthStateSet(superficial=2),
+            health=HealthStateSet(damage=2),
             traits=[
                 CharacterCreateTraitAssign(
                     trait_id="t1", value=3, tracker=TrackerStateSet(current=1)
@@ -952,5 +981,5 @@ class TestCharacterHealth:
         body = request.model_dump(exclude_none=True)
 
         # Then: Both are serialized
-        assert body["health"]["superficial"] == 2
+        assert body["health"]["damage"] == 2
         assert body["traits"][0]["tracker"] == {"current": 1}
