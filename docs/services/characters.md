@@ -109,6 +109,8 @@ Assignment rules are enforced server-side and surface as `ValidationError` (400)
 | `upload_asset(character_id, filename, content)`  | `Asset`                    | Upload an asset        |
 | `delete_asset(character_id, asset_id)`           | `None`                     | Delete an asset        |
 
+`delete_asset` raises `NotFoundError` when the asset belongs to a different character. Delete each asset through its own parent.
+
 ### Notes
 
 | Method                                                     | Returns                   | Description           |

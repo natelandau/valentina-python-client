@@ -5,6 +5,7 @@ import respx
 from httpx import Response
 
 from vclient import SyncVClient, sync_system_service
+from vclient.constants import API_KEY_HEADER
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
 from vclient.models import CharacterFullSheet, FullSheetTraitCategory, SystemHealth
@@ -91,6 +92,31 @@ class TestSyncClientPagination:
 
 class TestSyncClientRetry:
     """Tests for SyncVClient retry behavior."""
+
+    @respx.mock
+    def test_regenerate_api_key_switches_client_key(self, sync_client, base_url):
+        """Verify the sync client sends the new API key after a rotation."""
+        # Given: Mocked rotation and get-me endpoints
+        developer = {
+            "id": "507f1f77bcf86cd799439011",
+            "date_created": "2024-01-15T10:30:00Z",
+            "date_modified": "2024-01-15T10:30:00Z",
+            "username": "testuser",
+            "email": "test@example.com",
+            "key_generated": "2024-01-15T10:30:00Z",
+            "companies": [],
+        }
+        respx.post(f"{base_url}{Endpoints.DEVELOPER_ME_NEW_KEY}").respond(
+            201, json={**developer, "api_key": "rotated"}
+        )
+        me_route = respx.get(f"{base_url}{Endpoints.DEVELOPER_ME}").respond(200, json=developer)
+
+        # When: Rotating the key, then making another request
+        sync_client.developer.regenerate_api_key()
+        sync_client.developer.get_me()
+
+        # Then: The follow-up request carries the new key
+        assert me_route.calls.last.request.headers[API_KEY_HEADER] == "rotated"
 
     @respx.mock
     def test_retry_on_429(self, base_url, api_key, health_response_data):

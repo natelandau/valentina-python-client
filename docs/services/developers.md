@@ -34,6 +34,8 @@ print(f"Username: {me.username}")
 print(f"Companies: {len(me.companies)}")
 ```
 
+`companies` lists only the companies you currently have access to. Companies whose access was revoked are left out.
+
 ### Update Your Profile
 
 Modify your developer account settings. You can pass a model object or use keyword arguments.
@@ -59,7 +61,7 @@ updated = await developer.update_me(
 
 ### Regenerate API Key
 
-Generate a new API key for authentication. The current key becomes invalid immediately.
+Generate a new API key for authentication. The API invalidates the current key immediately, so the client switches to the new key for every later request, including requests from services it already created.
 
 ```python
 result = await developer.regenerate_api_key()
@@ -68,7 +70,7 @@ print(f"New API Key: {result.api_key}")
 
 !!! warning "Save Your API Key"
 
-    Regenerating your API key immediately invalidates the current key. Save the new key from the response - it will not be displayed again.
+    Regenerating your API key immediately invalidates the current key. Save the new key from the response, because it will not be displayed again. Any other process or client that uses the old key gets `AuthenticationError` until you give it the new key.
 
 ## Related Documentation
 

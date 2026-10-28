@@ -26,7 +26,11 @@ if TYPE_CHECKING:
 
 
 class SyncChaptersService(SyncBaseService):
-    """Service for managing campaign book chapters within a campaign book in the Valentina API."""
+    """Service for managing campaign book chapters within a campaign book in the Valentina API.
+
+    Requests return 403 (``AuthorizationError``) when the ``on_behalf_of`` user is
+    UNAPPROVED or DEACTIVATED.
+    """
 
     def __init__(
         self,
@@ -413,7 +417,7 @@ class SyncChaptersService(SyncBaseService):
         Only image files are accepted: PNG, JPEG, GIF, and WEBP. Any other
         upload (documents, audio, video, archives, SVG, or a non-image payload
         mislabeled as an image) is rejected with 400 Bad Request, as are
-        oversized images that trip the decompression-bomb guard. The stored
+        images over 24 megapixels (width x height). The stored
         ``mime_type`` is detected from the file's bytes; the ``content_type``
         argument is ignored server-side and cannot change or bypass the stored
         type. Uploaded assets therefore always have ``asset_type == "image"``.
@@ -450,7 +454,7 @@ class SyncChaptersService(SyncBaseService):
             asset_id: The ID of the asset to delete.
 
         Raises:
-            NotFoundError: If the asset does not exist.
+            NotFoundError: If the asset does not exist or belongs to a different chapter.
             AuthorizationError: If you don't have appropriate access.
         """
         self._delete(

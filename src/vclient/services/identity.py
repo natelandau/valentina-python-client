@@ -17,7 +17,10 @@ class IdentityService(BaseService):
     ID token for apple/google, an OAuth access token for discord/github). The
     API verifies the credential with the provider and resolves the user in
     order: match by provider ID, auto-link by provider-verified email, or
-    create a new UNAPPROVED user.
+    create a new UNAPPROVED user. Auto-link never replaces an identity: when
+    the email's user already holds a different identity from the same
+    provider, a new user is created instead. OIDC ID tokens must carry
+    ``exp`` and ``iat`` claims.
 
     This service does not require an acting user (no On-Behalf-Of header).
     Authentication is via developer API key only.
@@ -53,7 +56,9 @@ class IdentityService(BaseService):
         The returned ``resolution`` field reports which path the API took:
         ``matched`` (an existing user holds this provider identity), ``linked``
         (the identity was auto-linked onto an existing user by provider-verified
-        email), or ``created`` (a new UNAPPROVED user was registered).
+        email), or ``created`` (a new UNAPPROVED user was registered). An email
+        match whose user already holds a different identity from the same
+        provider resolves to ``created``, not ``linked``.
 
         Args:
             request: A UserIdentifyDTO model, OR pass fields as keyword arguments.

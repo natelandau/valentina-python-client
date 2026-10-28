@@ -16,6 +16,8 @@ from vclient import books_service
 books = books_service(campaign_id="CAMPAIGN_ID", on_behalf_of="USER_ID", company_id="COMPANY_ID")
 ```
 
+Requests acting on behalf of an `UNAPPROVED` or `DEACTIVATED` user raise `AuthorizationError` (403).
+
 ## Methods
 
 ### CRUD Operations
@@ -66,6 +68,8 @@ assert book.assets is None  # not requested
 | `get_asset(book_id, asset_id)`                | `Asset`                    | Get an asset           |
 | `upload_asset(book_id, filename, content)`    | `Asset`                    | Upload an asset        |
 | `delete_asset(book_id, asset_id)`             | `None`                     | Delete an asset        |
+
+`delete_asset` raises `NotFoundError` when the asset belongs to a different book. Delete each asset through its own parent.
 
 ### Notes
 

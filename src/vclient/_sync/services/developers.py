@@ -64,8 +64,10 @@ class SyncDeveloperService(SyncBaseService):
     def regenerate_api_key(self) -> MeDeveloperWithApiKey:
         """Generate a new API key for the current developer.
 
-        The current key will be immediately invalidated and all cached
-        authentication data will be cleared.
+        The API invalidates the current key at once, so this client switches to
+        the new key for every later request, including those from services it
+        already created. Other clients that still hold the old key get
+        ``AuthenticationError`` until they are given the new one.
 
         **Be certain to save the API key from the response. It will not be displayed again.**
 
@@ -76,4 +78,6 @@ class SyncDeveloperService(SyncBaseService):
             AuthenticationError: If the current API key is invalid.
         """
         response = self._post(Endpoints.DEVELOPER_ME_NEW_KEY)
-        return MeDeveloperWithApiKey.model_validate(response.json())
+        developer = MeDeveloperWithApiKey.model_validate(response.json())
+        self._client._set_api_key(developer.api_key)
+        return developer

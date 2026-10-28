@@ -91,6 +91,8 @@ assert user.assets is None  # not requested
 | `remove_xp(user_id, campaign_id, amount)`       | `CampaignExperience` | Deduct experience points    |
 | `add_cool_points(user_id, campaign_id, amount)` | `CampaignExperience` | Award cool points           |
 
+`amount` must be 1 or more. A lower value raises `RequestValidationError` before the request is sent.
+
 ### Asset Management
 
 | Method                                         | Returns                    | Description             |
@@ -103,7 +105,9 @@ assert user.assets is None  # not requested
 | `delete_asset(user_id, asset_id)`              | `None`                     | Delete an asset         |
 
 !!! note "Image uploads only"
-    `upload_asset` accepts only image files: PNG, JPEG, GIF, and WEBP. Any other upload (documents, audio, video, archives, SVG, or a non-image payload mislabeled as an image) is rejected with `400 Bad Request`. The stored `mime_type` is detected from the file's bytes; the declared content type is ignored. Newly uploaded assets always have `asset_type == "image"`.
+    `upload_asset` accepts only image files: PNG, JPEG, GIF, and WEBP. Any other upload (documents, audio, video, archives, SVG, or a non-image payload mislabeled as an image) is rejected with `400 Bad Request`. The stored `mime_type` is detected from the file's bytes; the declared content type is ignored. Newly uploaded assets always have `asset_type == "image"`. Images over 24 megapixels (width × height) are also rejected with `400 Bad Request`.
+
+`upload_asset` and `delete_asset` act only for the user themselves or a company admin. Any other `on_behalf_of` user raises `AuthorizationError` (403). `delete_asset` raises `NotFoundError` when the asset belongs to a different user.
 
 ### Avatar Management
 
@@ -114,7 +118,7 @@ assert user.assets is None  # not requested
 
 Both methods require the `On-Behalf-Of` header (permitted for the user themselves or an admin) and return the updated `User` (including the resolved `avatar_url`). `delete_avatar` responds `200 OK` with the updated user body, not `204`.
 
-`upload_avatar` accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB; the server normalizes the image to a 512×512 WebP and it overrides any identity-provider-derived avatar. `delete_avatar` falls the avatar back to the identity-provider avatar, or `null` if none.
+`upload_avatar` accepts PNG, JPEG, WEBP, or GIF (first frame) up to 5 MB and 24 megapixels; the server normalizes the image to a 512×512 WebP and it overrides any identity-provider-derived avatar. `delete_avatar` falls the avatar back to the identity-provider avatar, or `null` if none.
 
 ```python
 user = await client.users("user-123", company_id="company-456").upload_avatar(
@@ -150,6 +154,8 @@ user = await client.users("user-123", company_id="company-456").delete_avatar("u
 | `create_quickroll(user_id, request=None, **kwargs)`               | `Quickroll`                    | Create a new quickroll         |
 | `update_quickroll(user_id, quickroll_id, request=None, **kwargs)` | `Quickroll`                    | Update quickroll configuration |
 | `delete_quickroll(user_id, quickroll_id)`                         | `None`                         | Delete a quickroll             |
+
+`get_quickroll`, `update_quickroll`, and `delete_quickroll` raise `NotFoundError` when `user_id` is not the quickroll's owner. Build these calls with the owner's ID.
 
 ## User Roles
 
