@@ -159,7 +159,7 @@ When `auto_retry_rate_limit=True` (the default), the client transparently waits 
 
 #### Automatic retries
 
-Transient errors in `retry_statuses` (default `{429, 500, 502, 503, 504}`) are retried up to `max_retries` times. A 429 waits the server's `Retry-After` time; other retries use exponential backoff starting at `retry_delay`. The exception you catch is the final failure after retries are exhausted, not the first transient error.
+Transient errors in `retry_statuses` (default `{429, 500, 502, 503, 504}`) are retried up to `max_retries` times. A 409 with code `IDEMPOTENCY_IN_PROGRESS` on a request that carries an idempotency key is also retried. A 429 or an in-progress 409 waits the server's `Retry-After` time; other retries use exponential backoff starting at `retry_delay`. The exception you catch is the final failure after retries are exhausted, not the first transient error.
 
 #### Typical patterns
 

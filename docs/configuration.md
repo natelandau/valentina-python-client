@@ -182,13 +182,13 @@ logging.getLogger("vclient").setLevel(5)
 
 ### Log Levels
 
-| Level   | Events                                                                                 |
-| ------- | ------------------------------------------------------------------------------------- |
-| TRACE   | Request start (in-flight visibility; hidden at DEBUG and above)                        |
-| DEBUG   | Request complete, 404 not found                                                        |
-| INFO    | Client initialization, client close                                                   |
-| WARNING | Retries (rate limit, server error, network), validation errors (400), conflicts (409) |
-| ERROR   | Authentication failures (401), authorization failures (403), retries exhausted        |
+| Level   | Events                                                                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TRACE   | Request start (in-flight visibility; hidden at DEBUG and above)                                                                                         |
+| DEBUG   | Request complete, 404 not found, an in-progress idempotency conflict (409)                                                                              |
+| INFO    | Client initialization, client close                                                                                                                     |
+| WARNING | Retries (rate limit, server error, network, in-progress conflict), validation errors (400), other conflicts (409), a failure with automatic retries off |
+| ERROR   | Authentication failures (401), authorization failures (403), retries exhausted after retrying                                                           |
 
 ## Default Company ID
 
