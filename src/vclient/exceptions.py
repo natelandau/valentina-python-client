@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic_core import ErrorDetails
 
+from vclient.constants import IDEMPOTENCY_IN_PROGRESS_CODE
+
 if TYPE_CHECKING:
     from pydantic import ValidationError as PydanticValidationError
 
@@ -19,7 +21,7 @@ class APIError(Exception):
     - status: HTTP status code
     - title: Short, human-readable summary of the problem type
     - detail: Human-readable explanation specific to this occurrence
-    - instance: URI reference identifying the specific occurrence
+    - instance: request path of the failed call (for example /api/v1/companies/abc123/users)
     """
 
     def __init__(
@@ -47,7 +49,7 @@ class APIError(Exception):
         - status code and title
         - detail message
         - machine-readable code
-        - instance URI
+        - instance (request path)
         - request ID
         """
         parts: list[str] = []
@@ -71,7 +73,7 @@ class APIError(Exception):
         if self.code:
             parts.append(f"Code: {self.code}")
 
-        # Add instance URI for debugging
+        # Add instance path for debugging
         if self.instance:
             parts.append(f"Instance: {self.instance}")
 
@@ -92,7 +94,7 @@ class APIError(Exception):
 
     @property
     def instance(self) -> str | None:
-        """Get the RFC 9457 instance field - URI reference to this occurrence."""
+        """Get the RFC 9457 instance field - request path of the failed call, with no host or query string."""
         return self.response_data.get("instance")
 
     @property
@@ -134,7 +136,50 @@ class ConflictError(APIError):
     Common causes are reusing an idempotency key with a different request body, or
     another request changing a character trait's value first. For the latter, refetch
     the trait and retry.
+
+    When a request with the same idempotency key is still in progress, the client
+    retries automatically while auto retry is enabled, and raises this error once
+    retries are exhausted.
+    Check `is_idempotency_in_progress` to detect that case, and `retry_after` for the
+    seconds the API asked the client to wait.
     """
+
+    def __init__(
+        self,
+        message: str,
+        status_code: int | None = None,
+        response_data: dict[str, Any] | None = None,
+        *,
+        retry_after: int | None = None,
+    ) -> None:
+        """Initialize the conflict error.
+
+        Args:
+            message: Human-readable error message.
+            status_code: HTTP status code from the response.
+            response_data: Raw response data from the API (RFC 9457 Problem Details).
+            retry_after: Number of seconds to wait before retrying (from the Retry-After header).
+        """
+        super().__init__(message, status_code, response_data)
+        self._retry_after = retry_after
+
+    @property
+    def retry_after(self) -> int | None:
+        """Get the number of seconds the API asked the client to wait before retrying.
+
+        Returns:
+            Number of seconds from the Retry-After header, or None if not provided.
+        """
+        return self._retry_after
+
+    @property
+    def is_idempotency_in_progress(self) -> bool:
+        """Check whether a request with the same idempotency key is still in progress.
+
+        Returns:
+            True if the error code is IDEMPOTENCY_IN_PROGRESS.
+        """
+        return self.code == IDEMPOTENCY_IN_PROGRESS_CODE
 
 
 class UnprocessableEntityError(APIError):

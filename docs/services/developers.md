@@ -70,7 +70,7 @@ print(f"New API Key: {result.api_key}")
 
 !!! warning "Save Your API Key"
 
-    Regenerating your API key immediately invalidates the current key. Save the new key from the response, because it will not be displayed again. Any other process or client that uses the old key gets `AuthenticationError` until you give it the new key.
+    Regenerating your API key immediately invalidates the current key. Save the new key from the response, because it will not be displayed again. The client never sends an idempotency key for this call and never retries it after a network or server error, so a failed call may or may not have rotated the key. A 429 is still retried. Any other process or client that uses the old key gets `AuthenticationError` until you give it the new key.
 
 ## Related Documentation
 

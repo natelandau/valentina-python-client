@@ -135,8 +135,18 @@ The sync client in `_sync/` is **auto-generated** from async source via AST tran
 
 - Google-style docstrings
 - Type hints required
-- Pydantic v2 models with field validation
+- Pydantic v2 models typed to the API's request and response shapes (see "Validation belongs to the API")
 - Async/await for async client, synchronous for sync client (both use httpx)
+
+## Validation belongs to the API
+
+vclient stays thin. It does not copy the API's value rules into request models or service methods.
+
+- Do not add client-side checks for ranges, minimum or maximum values, string lengths, list sizes, or permission rules. Send the request and let the API reject it with a 400 `ValidationError` (with `.invalid_parameters`) or a 403.
+- The API owns these rules and can change them without a vclient release. A limit copied into vclient goes stale and rejects requests the API would accept, or hides the API's own error message.
+- Request models still declare field types, required and optional fields, and `Literal` constants (kept in sync by `validate_constants`).
+- Bounds already in the models stay as they are. Do not add new ones or tighten existing ones to match an API change.
+- Do not restate the API's numeric limits in docstrings or the guide skill either. Point to the API docs instead.
 
 ## Exceptions
 
@@ -149,7 +159,7 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details forma
 | `NotFoundError`            | 404         | Resource not found                                            |
 | `ValidationError`          | 400         | Server-side validation failed (has `.invalid_parameters`)     |
 | `RequestValidationError`   | -           | Client-side Pydantic validation (pre-request)                 |
-| `ConflictError`            | 409         | Idempotency key reuse, a concurrent trait value change (refetch and retry), or assigning a trait the character already has |
+| `ConflictError`            | 409         | Idempotency key reuse, an in-flight request with the same key (`IDEMPOTENCY_IN_PROGRESS`, retried automatically, has `.retry_after`), a concurrent trait value change (refetch and retry), assigning a trait the character already has, or restoring an admin user whose provider identity an active user in the company holds |
 | `UnprocessableEntityError` | 422         | Request was well-formed but cannot be processed (has `.code`) |
 | `RateLimitError`           | 429         | Rate limited (has `.retry_after`, `.remaining`)               |
 | `ServerError`              | 5xx         | Server errors                                                 |

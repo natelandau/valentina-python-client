@@ -129,7 +129,7 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details. Impo
 | `NotFoundError` | 404 | Resource not found |
 | `ValidationError` | 400 | Server validation failed (check `.invalid_parameters`) |
 | `RequestValidationError` | - | Client-side Pydantic validation (pre-request) |
-| `ConflictError` | 409 | Idempotency key conflict, a concurrent trait value change (refetch and retry), or assigning a trait the character already has |
+| `ConflictError` | 409 | Idempotency key conflict, an in-flight request with the same key (`IDEMPOTENCY_IN_PROGRESS`, retried automatically, has `.retry_after`), a concurrent trait value change (refetch and retry), assigning a trait the character already has, or restoring an admin user whose provider identity an active user in the company holds |
 | `UnprocessableEntityError` | 422 | Well-formed request that cannot be processed (identity endpoints; check `.code`) |
 | `RateLimitError` | 429 | Rate limited (check `.retry_after`, `.remaining`) |
 | `ServerError` | 5xx | Server error |
@@ -141,7 +141,7 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details. Impo
 | `.status_code` | `int \| None` | HTTP status (None for client-side errors) |
 | `.title` | `str \| None` | RFC 9457 short summary |
 | `.detail` | `str \| None` | RFC 9457 human-readable explanation |
-| `.instance` | `str \| None` | RFC 9457 URI reference to this occurrence |
+| `.instance` | `str \| None` | Request path only, with no host or query string |
 | `.request_id` | `str \| None` | Server-generated ID — include this when reporting bugs |
 | `.response_data` | `dict` | Raw RFC 9457 payload from the server |
 
@@ -155,11 +155,11 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details. Impo
 
 #### Rate limit handling
 
-When `auto_retry_rate_limit=True` (the default), the client transparently waits and retries on 429 up to `max_retries` times. `RateLimitError` is only raised when retries are exhausted or auto-retry is disabled. Read `.retry_after` (seconds) and `.remaining` (tokens left in the bucket) to implement backoff when you handle 429s yourself.
+When `auto_retry_rate_limit=True` (the default), the client transparently waits and retries on 429 up to `max_retries` times. The same flag also governs retries of 5xx, network errors, and the in-progress 409 (`IDEMPOTENCY_IN_PROGRESS`, keyed requests only, waits `Retry-After`). Other 409s raise at once. `RateLimitError` is only raised when retries are exhausted or auto-retry is disabled. Read `.retry_after` (seconds) and `.remaining` (tokens left in the bucket) to implement backoff when you handle 429s yourself.
 
 #### Automatic retries
 
-Transient errors in `retry_statuses` (default `{429, 500, 502, 503, 504}`) are retried up to `max_retries` times. A 429 waits the server's `Retry-After` time; other retries use exponential backoff starting at `retry_delay`. The exception you catch is the final failure after retries are exhausted, not the first transient error.
+Transient errors in `retry_statuses` (default `{429, 500, 502, 503, 504}`) are retried up to `max_retries` times. A 409 with code `IDEMPOTENCY_IN_PROGRESS` on a request that carries an idempotency key is also retried. A 429 or an in-progress 409 waits the server's `Retry-After` time; other retries use exponential backoff starting at `retry_delay`. The exception you catch is the final failure after retries are exhausted, not the first transient error.
 
 #### Typical patterns
 

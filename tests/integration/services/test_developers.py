@@ -2,12 +2,14 @@
 
 import json
 
+import httpx
+import httpx2
 import pytest
 import respx
 
-from vclient.constants import API_KEY_HEADER
+from vclient.constants import API_KEY_HEADER, IDEMPOTENCY_KEY_HEADER
 from vclient.endpoints import Endpoints
-from vclient.exceptions import AuthenticationError
+from vclient.exceptions import AuthenticationError, ServerError
 from vclient.models import MeDeveloper, MeDeveloperWithApiKey
 
 pytestmark = pytest.mark.anyio
@@ -242,6 +244,74 @@ class TestDeveloperServiceRegenerateApiKey:
 
         # Then: The existing service sends the new key
         assert users_route.calls.last.request.headers[API_KEY_HEADER] == "rotated"
+
+    @respx.mock
+    async def test_regenerate_api_key_sends_no_idempotency_key(
+        self, vclient_with_auto_idempotency, base_url, me_developer_response_data
+    ):
+        """Verify regeneration omits the auto idempotency key."""
+        # Given: A client with auto idempotency keys and a mocked endpoint
+        route = respx.post(f"{base_url}{Endpoints.DEVELOPER_ME_NEW_KEY}").respond(
+            200, json={**me_developer_response_data, "api_key": "rotated"}
+        )
+
+        # When: Regenerating the API key
+        await vclient_with_auto_idempotency.developer.regenerate_api_key()
+
+        # Then: No idempotency header was sent
+        assert IDEMPOTENCY_KEY_HEADER not in route.calls.last.request.headers
+
+    @respx.mock
+    async def test_regenerate_api_key_is_not_retried_on_server_error(
+        self, vclient_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify a server error is not retried, so a key is never minted twice."""
+        # Given: A server error response and mocked sleep
+        mocker.patch("vclient.services.base.asyncio.sleep")
+        route = respx.post(f"{base_url}{Endpoints.DEVELOPER_ME_NEW_KEY}").respond(503)
+
+        # When/Then: The error surfaces after a single call
+        with pytest.raises(ServerError):
+            await vclient_with_auto_idempotency.developer.regenerate_api_key()
+        assert route.call_count == 1
+
+    @respx.mock
+    async def test_regenerate_api_key_retries_rate_limit(
+        self, vclient_with_auto_idempotency, base_url, me_developer_response_data, mocker
+    ):
+        """Verify a 429 is retried and the retry still sends no idempotency key."""
+        # Given: A 429 followed by a success, and mocked sleep
+        mocker.patch("vclient.services.base.asyncio.sleep")
+        route = respx.post(f"{base_url}{Endpoints.DEVELOPER_ME_NEW_KEY}").mock(
+            side_effect=[
+                httpx.Response(429, json={"detail": "Rate limited"}, headers={"Retry-After": "1"}),
+                httpx.Response(201, json={**me_developer_response_data, "api_key": "new-key"}),
+            ]
+        )
+
+        # When: Regenerating the key
+        result = await vclient_with_auto_idempotency.developer.regenerate_api_key()
+
+        # Then: The call was retried once and neither attempt carried a key
+        assert result.api_key == "new-key"
+        assert route.call_count == 2
+        assert all(IDEMPOTENCY_KEY_HEADER not in c.request.headers for c in route.calls)
+
+    @respx.mock
+    async def test_regenerate_api_key_is_not_retried_on_network_error(
+        self, vclient_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify a network error is not retried, so a key is never minted twice."""
+        # Given: A connection failure and mocked sleep
+        mocker.patch("vclient.services.base.asyncio.sleep")
+        route = respx.post(f"{base_url}{Endpoints.DEVELOPER_ME_NEW_KEY}").mock(
+            side_effect=httpx2.ConnectError("Connection refused")
+        )
+
+        # When/Then: The error surfaces after a single call
+        with pytest.raises(httpx2.ConnectError):
+            await vclient_with_auto_idempotency.developer.regenerate_api_key()
+        assert route.call_count == 1
 
     @respx.mock
     async def test_regenerate_api_key_unauthenticated(self, vclient, base_url):

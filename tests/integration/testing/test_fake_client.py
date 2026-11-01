@@ -232,6 +232,29 @@ class TestIdentityRoutes:
                 )
             assert exc_info.value.code == "IDENTITY_ALREADY_LINKED"
 
+    async def test_set_error_headers_populate_conflict_retry_after(self):
+        """Verify a faked in-progress 409 carries Retry-After into ConflictError."""
+        async with FakeVClient(auto_retry_rate_limit=False) as client:
+            # Given the link route faked as an in-progress conflict with Retry-After
+            client.set_error(
+                Routes.USERS_IDENTITY_LINK,
+                status_code=409,
+                code="IDEMPOTENCY_IN_PROGRESS",
+                headers={"Retry-After": "1"},
+            )
+
+            # When linking an identity
+            with pytest.raises(ConflictError) as exc_info:
+                await users_service("user123", company_id="company123").link_identity(
+                    "user123",
+                    provider="apple",
+                    token="fake-token",  # noqa: S106
+                )
+
+            # Then the exception exposes retry_after
+            assert exc_info.value.retry_after == 1
+            assert exc_info.value.is_idempotency_in_progress is True
+
     async def test_unlink_identity_default_response(self):
         """Verify the unlink route returns a factory-built User."""
         async with FakeVClient():

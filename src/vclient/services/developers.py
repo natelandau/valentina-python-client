@@ -78,13 +78,17 @@ class DeveloperService(BaseService):
 
         **Be certain to save the API key from the response. It will not be displayed again.**
 
+        The API does not support idempotent replay here, so this call is never retried
+        after a network error or server error. Save the key from the first successful
+        response. A 429 is still retried.
+
         Returns:
             The MeDeveloperWithApiKey object containing the new API key.
 
         Raises:
             AuthenticationError: If the current API key is invalid.
         """
-        response = await self._post(Endpoints.DEVELOPER_ME_NEW_KEY)
+        response = await self._post(Endpoints.DEVELOPER_ME_NEW_KEY, auto_idempotency_key=False)
         developer = MeDeveloperWithApiKey.model_validate(response.json())
         self._client._set_api_key(developer.api_key)  # noqa: SLF001
         return developer

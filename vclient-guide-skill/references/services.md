@@ -517,7 +517,7 @@ Plus standard notes and assets sub-resource methods.
 | `update_me()` | `request: MeDeveloperUpdate \| None, **kwargs` | `MeDeveloper` |
 | `regenerate_api_key()` | — | `MeDeveloperWithApiKey` |
 
-**Key rotation:** the API invalidates the old key at once. `regenerate_api_key()` switches the calling client to the new key, so its later requests keep working. Store `result.api_key`; it is shown only once, and any other client still on the old key gets `AuthenticationError`. `MeDeveloper.companies` omits companies whose access was revoked.
+**Key rotation:** the API invalidates the old key at once. `regenerate_api_key()` switches the calling client to the new key, so its later requests keep working. Store `result.api_key`; it is shown only once, and the call is never retried after a network or server error (429 still is) and sends no idempotency key, and any other client still on the old key gets `AuthenticationError`. `MeDeveloper.companies` omits companies whose access was revoked.
 
 ---
 
@@ -547,7 +547,7 @@ Requires a global-admin API key. No `on_behalf_of` parameter on any method. User
 
 ### User Methods
 
-Cross-company user management. Archived users are included in results and can be restored via `update_user`. Role hierarchy is bypassed (all roles assignable regardless of the acting developer's own role).
+Cross-company user management. Archived users are included in results and can be restored via `update_user`. Role hierarchy is bypassed (all roles assignable regardless of the acting developer's own role). Restoring a user (`is_archived=False`) raises `ConflictError` when another active user in the same company holds one of the user's provider identities; `.detail` names the provider.
 
 | Method | Parameters | Returns |
 |--------|-----------|---------|

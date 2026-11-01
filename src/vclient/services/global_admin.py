@@ -421,6 +421,10 @@ class GlobalAdminService(BaseService):
         Their current key will be immediately invalidated. Be certain to save the
         API key as it will not be displayed again.
 
+        The API does not support idempotent replay here, so this call is never retried
+        after a network error or server error. Save the key from the first successful
+        response. A 429 is still retried.
+
         Args:
             developer_id: The ID of the developer to generate a key for.
 
@@ -432,7 +436,8 @@ class GlobalAdminService(BaseService):
             AuthorizationError: If you don't have global admin privileges.
         """
         response = await self._post(
-            Endpoints.ADMIN_DEVELOPER_NEW_KEY.format(developer_id=developer_id)
+            Endpoints.ADMIN_DEVELOPER_NEW_KEY.format(developer_id=developer_id),
+            auto_idempotency_key=False,
         )
         return DeveloperWithApiKey.model_validate(response.json())
 

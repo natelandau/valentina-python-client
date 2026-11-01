@@ -5,7 +5,7 @@ import respx
 from httpx import Response
 
 from vclient import SyncVClient, sync_system_service
-from vclient.constants import API_KEY_HEADER
+from vclient.constants import API_KEY_HEADER, IDEMPOTENCY_KEY_HEADER
 from vclient.endpoints import Endpoints
 from vclient.exceptions import NotFoundError
 from vclient.models import CharacterFullSheet, FullSheetTraitCategory, SystemHealth
@@ -117,6 +117,42 @@ class TestSyncClientRetry:
 
         # Then: The follow-up request carries the new key
         assert me_route.calls.last.request.headers[API_KEY_HEADER] == "rotated"
+
+    @respx.mock
+    def test_in_progress_conflict_is_retried_with_same_key(self, base_url, api_key):
+        """Verify a keyed request is retried after an in-progress 409 in the sync client."""
+        # Given: A client with fast retry settings and auto idempotency keys
+        client = SyncVClient(
+            base_url=base_url,
+            api_key=api_key,
+            max_retries=1,
+            retry_delay=0.01,
+            auto_idempotency_keys=True,
+        )
+
+        # And: A POST that reports in progress once, then succeeds
+        route = respx.post(f"{base_url}/api/v1/items").mock(
+            side_effect=[
+                Response(
+                    409,
+                    json={"detail": "in progress", "code": "IDEMPOTENCY_IN_PROGRESS"},
+                    headers={"Retry-After": "0"},
+                ),
+                Response(201, json={"id": 1}),
+            ]
+        )
+
+        try:
+            # When: Making a POST request
+            response = client.developer._post("/api/v1/items", json={"name": "x"})
+
+            # Then: The retry reused the same key and succeeded
+            assert response.json() == {"id": 1}
+            assert route.call_count == 2
+            keys = [c.request.headers[IDEMPOTENCY_KEY_HEADER] for c in route.calls]
+            assert keys[0] == keys[1]
+        finally:
+            client.close()
 
     @respx.mock
     def test_retry_on_429(self, base_url, api_key, health_response_data):

@@ -16,7 +16,7 @@ You can call the Valentina Noir API directly with any HTTP library, but this cli
 
 - **Type safety** — Every request and response is validated through Pydantic models, catching errors early and giving you full IDE autocompletion.
 - **Automatic pagination** — Stream through large result sets with `iter_all()` or fetch everything at once with `list_all()`, without writing pagination logic yourself.
-- **Built-in retries** — Rate limits (429) are retried after the wait the server asks for. Server errors (5xx) and network failures are retried with exponential backoff.
+- **Built-in retries** — Rate limits (429) are retried after the wait the server asks for. Server errors (5xx) and network failures are retried with exponential backoff. A request with an idempotency key that the API reports as still in progress (409) is retried after the wait the server asks for.
 - **Async and sync** — Built on httpx2 with both async (`VClient`) and sync (`SyncVClient`) clients, so it fits naturally into any Python application — from async frameworks like FastAPI to traditional sync code in Flask, Django, or scripts.
 - **Idempotency support** — Enable automatic idempotency keys so retried writes don't create duplicate resources.
 - **Structured logging** — Optional Loguru-based logging with a stdlib bridge for debugging and observability.

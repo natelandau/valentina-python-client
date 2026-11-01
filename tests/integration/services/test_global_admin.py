@@ -2,11 +2,13 @@
 
 import json
 
+import httpx2
 import pytest
 import respx
 
+from vclient.constants import IDEMPOTENCY_KEY_HEADER
 from vclient.endpoints import Endpoints
-from vclient.exceptions import AuthorizationError, NotFoundError
+from vclient.exceptions import AuthorizationError, NotFoundError, ServerError
 from vclient.models import AdminUser, Developer, DeveloperWithApiKey, PaginatedResponse
 
 pytestmark = pytest.mark.anyio
@@ -487,6 +489,57 @@ class TestGlobalAdminServiceCreateApiKey:
         assert isinstance(result, DeveloperWithApiKey)
         assert result.api_key == "vapi_newkey123"
         assert result.username == "testuser"
+
+    @respx.mock
+    async def test_create_api_key_sends_no_idempotency_key(
+        self, vclient_with_auto_idempotency, base_url, developer_response_data
+    ):
+        """Verify key creation omits the auto idempotency key."""
+        # Given: A client with auto idempotency keys and a mocked endpoint
+        developer_id = "507f1f77bcf86cd799439011"
+        route = respx.post(
+            f"{base_url}{Endpoints.ADMIN_DEVELOPER_NEW_KEY.format(developer_id=developer_id)}"
+        ).respond(201, json={**developer_response_data, "api_key": "rotated"})
+
+        # When: Creating a new API key
+        await vclient_with_auto_idempotency.global_admin.create_api_key(developer_id)
+
+        # Then: No idempotency header was sent
+        assert IDEMPOTENCY_KEY_HEADER not in route.calls.last.request.headers
+
+    @respx.mock
+    async def test_create_api_key_is_not_retried_on_server_error(
+        self, vclient_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify a server error is not retried, so a key is never minted twice."""
+        # Given: A server error response and mocked sleep
+        mocker.patch("vclient.services.base.asyncio.sleep")
+        developer_id = "507f1f77bcf86cd799439011"
+        route = respx.post(
+            f"{base_url}{Endpoints.ADMIN_DEVELOPER_NEW_KEY.format(developer_id=developer_id)}"
+        ).respond(503)
+
+        # When/Then: The error surfaces after a single call
+        with pytest.raises(ServerError):
+            await vclient_with_auto_idempotency.global_admin.create_api_key(developer_id)
+        assert route.call_count == 1
+
+    @respx.mock
+    async def test_create_api_key_is_not_retried_on_network_error(
+        self, vclient_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify a network error is not retried, so a key is never minted twice."""
+        # Given: A connection failure and mocked sleep
+        mocker.patch("vclient.services.base.asyncio.sleep")
+        developer_id = "507f1f77bcf86cd799439011"
+        route = respx.post(
+            f"{base_url}{Endpoints.ADMIN_DEVELOPER_NEW_KEY.format(developer_id=developer_id)}"
+        ).mock(side_effect=httpx2.ConnectError("Connection refused"))
+
+        # When/Then: The error surfaces after a single call
+        with pytest.raises(httpx2.ConnectError):
+            await vclient_with_auto_idempotency.global_admin.create_api_key(developer_id)
+        assert route.call_count == 1
 
     @respx.mock
     async def test_create_api_key_not_found(self, vclient, base_url):

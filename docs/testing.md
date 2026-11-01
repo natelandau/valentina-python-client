@@ -191,6 +191,19 @@ with pytest.raises(UnprocessableEntityError) as exc_info:
 assert exc_info.value.code == "TOKEN_VERIFICATION_FAILED"
 ```
 
+Use the `headers` parameter to add response headers, for example `Retry-After`. `add_route()` accepts it too:
+
+```python
+client.set_error(
+    Routes.USERS_UPDATE,
+    status_code=409,
+    code="IDEMPOTENCY_IN_PROGRESS",
+    headers={"Retry-After": "1"},
+)
+```
+
+Faked errors go through the client's retry settings. A test that fakes a retryable error, such as a 429, a 5xx, or an in-progress 409, should pass `auto_retry_rate_limit=False` or a zero `retry_delay` to avoid real sleeps.
+
 ### Route Constants
 
 Every API endpoint has a named constant on the `Routes` class, exported from `vclient.testing`. Constants follow the naming convention `{SERVICE}_{OPERATION}` -- for example, `USERS_LIST`, `BOOKS_RENUMBER`, `CHAPTERS_NOTES_CREATE`. Nested resources include the parent in the name (e.g., `CHARACTERS_INVENTORY_LIST`, `CHAPTERS_ASSETS_UPLOAD`).
