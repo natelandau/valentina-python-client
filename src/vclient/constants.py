@@ -1,6 +1,6 @@
 """Constants for the API client."""
 
-from typing import Literal
+from typing import Final, Literal
 
 # Authentication
 API_KEY_HEADER = "X-API-KEY"
@@ -35,6 +35,7 @@ HTTP_600_UPPER_BOUND = 600
 
 # Idempotency
 IDEMPOTENCY_KEY_HEADER = "Idempotency-Key"
+IDEMPOTENCY_IN_PROGRESS_CODE: Final[str] = "IDEMPOTENCY_IN_PROGRESS"
 REQUEST_ID_HEADER = "X-Request-Id"
 ON_BEHALF_OF_HEADER = "On-Behalf-Of"
 

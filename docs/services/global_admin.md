@@ -142,7 +142,7 @@ print(f"New API Key: {dev_with_key.api_key}")
 
 !!! warning "Save API Keys Immediately"
 
-    API keys are only displayed once during creation. Save the key from the response - it cannot be retrieved later.
+    API keys are only displayed once during creation. Save the key from the response - it cannot be retrieved later. The client never sends an idempotency key for `create_api_key` and never retries it after a network or server error, so a failed call may or may not have rotated the key. A 429 is still retried.
 
 ### Audit Logs
 
@@ -277,6 +277,8 @@ await admins.delete_user(user.id)
 # Restore by clearing the archived flag
 restored = await admins.update_user(user.id, is_archived=False)
 ```
+
+The restore raises `ConflictError` (409) when another active user in the same company holds one of the restored user's provider identities. The `detail` names the provider.
 
 ### List and Filter Users
 

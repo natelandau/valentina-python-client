@@ -34,7 +34,7 @@ client = VClient(
 | `timeout`               | `float`                    | `30.0`                      | Request timeout in seconds.                                                                                  |
 | `max_retries`           | `int`                      | `3`                         | Maximum retry attempts for failed requests.                                                                  |
 | `retry_delay`           | `float`                    | `1.0`                       | Base delay between retries in seconds.                                                                       |
-| `auto_retry_rate_limit` | `bool`                     | `True`                      | Automatically retry rate-limited requests.                                                                   |
+| `auto_retry_rate_limit` | `bool`                     | `True`                      | Automatically retry rate limits, server errors, network errors, and the in-progress idempotency conflict.    |
 | `auto_idempotency_keys` | `bool`                     | `False`                     | Auto-generate idempotency keys for POST/PUT/PATCH.                                                           |
 | `retry_statuses`        | `set[int]` or `None`       | `{429, 500, 502, 503, 504}` | HTTP status codes that trigger automatic retries.                                                            |
 | `default_company_id`    | `str` or `None`            | `None`                      | Default company ID for service factory methods. Falls back to `VALENTINA_CLIENT_DEFAULT_COMPANY_ID` env var. |
@@ -66,7 +66,7 @@ client = VClient(base_url="https://staging.valentina-noir.com")
 
 ## Idempotency Keys
 
-Enable automatic idempotency key generation for all mutating requests (POST, PUT, PATCH). The client includes a unique UUID v4 header with each request, ensuring safe retries.
+Enable automatic idempotency key generation for all mutating requests (POST, PUT, PATCH). The client includes a unique UUID v4 header with each request, ensuring safe retries. The two API key regeneration calls (`regenerate_api_key` and `create_api_key`) are excluded: they never send a key.
 
 ```python
 from vclient import VClient
@@ -80,11 +80,11 @@ client = VClient(
 
 !!! tip "Safe Retries"
 
-    When enabled, the client automatically generates and includes an `Idempotency-Key` header for every POST, PUT, and PATCH request. The server detects duplicate requests and returns the same response, making retries safe even for non-idempotent operations.
+    When enabled, the client automatically generates and includes an `Idempotency-Key` header for every POST, PUT, and PATCH request, except the two key regeneration calls. The server detects duplicate requests and returns the same response, making retries safe even for non-idempotent operations.
 
 ## Retry Behavior
 
-When `auto_retry_rate_limit` is enabled (the default), the client automatically retries requests that encounter transient failures. A rate-limited request waits the time the server gives in its `RateLimit` or `Retry-After` header. Other retries use exponential backoff that starts at `retry_delay` and doubles each attempt. All waits add up to 25% random jitter.
+When `auto_retry_rate_limit` is enabled (the default), the client automatically retries requests that encounter transient failures: rate limits, server errors, network errors, and the in-progress idempotency conflict. The `max_retries` limit applies to all of them. A rate-limited request waits the time the server gives in its `RateLimit` or `Retry-After` header. Other retries use exponential backoff that starts at `retry_delay` and doubles each attempt. All waits add up to 25% random jitter.
 
 Rate limits apply per developer account, not per API key, so rotating your key does not reset them.
 
@@ -95,7 +95,8 @@ The following table summarizes which conditions trigger retries:
 | Rate limit (429)   | Always                  | Waits the `Retry-After` / `RateLimit` time from the server          |
 | Server error (5xx) | Idempotent methods only | GET, PUT, DELETE always retry; POST/PATCH only with idempotency key |
 | Network error      | Idempotent methods only | `ConnectError`, `TimeoutException` from httpx2                       |
-| Client error (4xx) | Never                   | 400, 401, 403, 404, 409 are not transient                           |
+| In-progress conflict (409 `IDEMPOTENCY_IN_PROGRESS`) | Keyed requests only | Any method with an `Idempotency-Key`; waits `Retry-After`, else backs off |
+| Client error (4xx) | Never                   | 400, 401, 403, 404 and other 409s are not transient                 |
 
 Non-idempotent methods (POST, PATCH) are only retried on 5xx and network errors when an idempotency key is present — either explicitly provided or auto-generated via `auto_idempotency_keys=True`. This prevents duplicate side effects from retrying unsafe requests.
 

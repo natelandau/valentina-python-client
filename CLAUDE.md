@@ -159,7 +159,7 @@ All exceptions inherit from `APIError` and follow RFC 9457 Problem Details forma
 | `NotFoundError`            | 404         | Resource not found                                            |
 | `ValidationError`          | 400         | Server-side validation failed (has `.invalid_parameters`)     |
 | `RequestValidationError`   | -           | Client-side Pydantic validation (pre-request)                 |
-| `ConflictError`            | 409         | Idempotency key reuse, a concurrent trait value change (refetch and retry), or assigning a trait the character already has |
+| `ConflictError`            | 409         | Idempotency key reuse, an in-flight request with the same key (`IDEMPOTENCY_IN_PROGRESS`, retried automatically, has `.retry_after`), a concurrent trait value change (refetch and retry), assigning a trait the character already has, or restoring an admin user whose provider identity an active user in the company holds |
 | `UnprocessableEntityError` | 422         | Request was well-formed but cannot be processed (has `.code`) |
 | `RateLimitError`           | 429         | Rate limited (has `.retry_after`, `.remaining`)               |
 | `ServerError`              | 5xx         | Server errors                                                 |

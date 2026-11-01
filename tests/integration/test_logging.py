@@ -286,6 +286,48 @@ class TestRequestLogging:
         assert record.extra["error_type"] == "ConnectError"
 
     @respx.mock
+    async def test_log_retry_on_idempotency_in_progress(
+        self, base_url, api_key, caplog, mocker, enable_vclient_logging
+    ):
+        """Verify an in-progress 409 retry logs one WARNING with structured fields."""
+        # Given: Sleep is mocked to avoid delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports the idempotent request in progress, then succeeds
+        respx.post(f"{base_url}/test").mock(
+            side_effect=[
+                httpx.Response(
+                    409,
+                    json={"detail": "In progress", "code": "IDEMPOTENCY_IN_PROGRESS"},
+                    headers={"Retry-After": "1"},
+                ),
+                httpx.Response(201, json={"ok": True}),
+            ]
+        )
+
+        with caplog.at_level(logging.DEBUG, logger="vclient"):
+            # When: Making a POST request with an idempotency key
+            async with VClient(base_url=base_url, api_key=api_key) as client:
+                service = ConcreteService(client)
+                await service._post("/test", json={"data": "value"}, idempotency_key="key-1")
+
+        # Then: The retry warning is present with structured fields
+        record = _find_record(caplog, "Retry after idempotency conflict")
+        assert record is not None
+        assert record.levelno == logging.WARNING
+        assert record.extra["method"] == "POST"
+        assert record.extra["url"] == "/test"
+        assert record.extra["status"] == 409
+        assert record.extra["attempt"] == 1
+        assert record.extra["max_attempts"] == client._config.max_retries + 1
+        assert 1.0 <= record.extra["delay"] <= 1.25
+
+        # Then: The expected conflict itself is logged at DEBUG, not as a second WARNING
+        conflict_record = _find_record(caplog, "Return 409 conflict")
+        assert conflict_record is not None
+        assert conflict_record.levelno == logging.DEBUG
+
+    @respx.mock
     async def test_log_max_retries_exhausted(
         self, base_url, api_key, caplog, mocker, enable_vclient_logging
     ):
@@ -313,6 +355,30 @@ class TestRequestLogging:
         assert record.levelno == logging.ERROR
         assert record.extra["method"] == "GET"
         assert record.extra["url"] == "/test"
+
+    @respx.mock
+    async def test_log_failure_without_retries(
+        self, base_url, api_key, caplog, mocker, enable_vclient_logging
+    ):
+        """Verify a failure with retries off is not reported as exhausted retries."""
+        # Given: Sleep is mocked and an endpoint that always returns 429
+        mocker.patch("vclient.services.base.asyncio.sleep")
+        respx.get(f"{base_url}/test").respond(429, json={"detail": "Rate limited"})
+
+        with caplog.at_level(logging.DEBUG, logger="vclient"):
+            # When: Making a request with automatic retries off
+            async with VClient(
+                base_url=base_url, api_key=api_key, auto_retry_rate_limit=False
+            ) as client:
+                service = ConcreteService(client)
+                with pytest.raises(Exception):  # noqa: B017
+                    await service._get("/test")
+
+        # Then: A single warning is logged and no exhausted-retries error
+        assert _find_record(caplog, "Exhaust retries") is None
+        record = _find_record(caplog, "Fail with automatic retries off")
+        assert record is not None
+        assert record.levelno == logging.WARNING
 
 
 class TestErrorClassificationLogging:

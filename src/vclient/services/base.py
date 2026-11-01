@@ -4,7 +4,7 @@ import asyncio
 import random
 import uuid
 from collections.abc import AsyncIterator
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, NamedTuple, TypeVar
 
 import httpx2
 from loguru import logger
@@ -39,6 +39,14 @@ T = TypeVar("T", bound=BaseModel)
 
 if TYPE_CHECKING:
     from vclient.client import VClient
+
+
+class _RetryPlan(NamedTuple):
+    """How to log and wait before retrying an error response."""
+
+    message: str
+    retry_after: int | None
+    log_fields: dict[str, Any]
 
 
 class BaseService:
@@ -98,7 +106,7 @@ class BaseService:
 
         Args:
             attempt: The current attempt number (0-indexed).
-            retry_after: Seconds to wait from the RateLimit or Retry-After header, or None.
+            retry_after: Seconds the server asked the client to wait, or None.
 
         Returns:
             Number of seconds to wait before retrying.
@@ -129,7 +137,95 @@ class BaseService:
         if method in IDEMPOTENT_HTTP_METHODS:
             return True
 
+        return BaseService._has_idempotency_key(headers)
+
+    @staticmethod
+    def _has_idempotency_key(headers: dict[str, str] | None) -> bool:
+        """Check if the request headers carry an idempotency key.
+
+        Args:
+            headers: The request headers, or None.
+
+        Returns:
+            True if the idempotency key header is present.
+        """
         return IDEMPOTENCY_KEY_HEADER in (headers or {})
+
+    @classmethod
+    def _plan_error_retry(
+        cls,
+        error: RateLimitError | ServerError | ConflictError,
+        method: str,
+        headers: dict[str, str] | None,
+        retry_statuses: frozenset[int],
+    ) -> _RetryPlan | None:
+        """Decide whether an error response is safe to retry, and how to log and wait.
+
+        Rate limits always retry. Server errors retry only for a status in
+        `retry_statuses` on a request that is safe to resend. A 409 retries only when the
+        API reports that a request with the same idempotency key is still in progress and
+        this request carried that key: every other 409 means the request itself
+        conflicts, so resending it cannot succeed.
+
+        Args:
+            error: The error raised for the response.
+            method: The HTTP method (uppercase).
+            headers: The request headers, or None.
+            retry_statuses: The 5xx status codes configured as retryable.
+
+        Returns:
+            The retry plan, or None if the error must be raised without a retry.
+        """
+        if isinstance(error, RateLimitError):
+            return _RetryPlan(
+                message="Retry after rate limit", retry_after=error.retry_after, log_fields={}
+            )
+
+        if isinstance(error, ServerError):
+            if error.status_code in retry_statuses and cls._is_retryable_method(method, headers):
+                return _RetryPlan(
+                    message="Retry after server error",
+                    retry_after=None,
+                    log_fields={"status": error.status_code},
+                )
+            return None
+
+        if error.is_idempotency_in_progress and cls._has_idempotency_key(headers):
+            return _RetryPlan(
+                message="Retry after idempotency conflict",
+                retry_after=error.retry_after,
+                log_fields={"status": error.status_code},
+            )
+        return None
+
+    async def _wait_before_retry(
+        self,
+        request_logger: Any,
+        message: str,
+        *,
+        attempt: int,
+        max_attempts: int,
+        retry_after: int | None,
+        **log_fields: Any,
+    ) -> None:
+        """Log a retry at WARNING and sleep for the backoff delay before the next attempt.
+
+        Args:
+            request_logger: A bound loguru logger to emit the log record on.
+            message: The log message that names the retry cause.
+            attempt: The current attempt number (0-indexed).
+            max_attempts: The total number of attempts allowed.
+            retry_after: Seconds the server asked the client to wait, or None to use backoff.
+            **log_fields: Extra structured fields to bind on the log record.
+        """
+        delay = self._calculate_backoff_delay(attempt, retry_after)
+        request_logger.bind(
+            **log_fields,
+            attempt=attempt + 1,
+            max_attempts=max_attempts,
+            delay=delay,
+        ).warning(message)
+        await asyncio.sleep(delay)
 
     async def _request(
         self,
@@ -148,7 +244,9 @@ class BaseService:
         and network errors (ConnectError, TimeoutException). Non-idempotent
         methods (POST, PATCH) only retry on 5xx/network errors when an
         idempotency key header is present. Rate limit retries (429) always
-        apply regardless of method.
+        apply regardless of method. A 409 is retried only when the API reports
+        that a request with the same idempotency key is still in progress
+        (code IDEMPOTENCY_IN_PROGRESS) and this request carried that key.
 
         Args:
             method: HTTP method (GET, POST, PUT, DELETE, etc.).
@@ -165,6 +263,8 @@ class BaseService:
         Raises:
             RateLimitError: When rate limit is exceeded and max retries are exhausted.
             ServerError: When server error occurs and max retries are exhausted.
+            ConflictError: For a 409 response, or when an idempotent request is
+                still in progress after max retries are exhausted.
             httpx2.ConnectError: When connection fails and max retries are exhausted.
             httpx2.TimeoutException: When request times out and max retries are exhausted.
             APIError: For other API error responses.
@@ -182,7 +282,7 @@ class BaseService:
         # "Request complete" DEBUG line below is the superset record for normal use.
         request_logger.trace("Send request")
 
-        last_error: RateLimitError | ServerError | None = None
+        last_error: RateLimitError | ServerError | ConflictError | None = None
 
         for attempt in range(max_attempts):
             try:
@@ -199,38 +299,25 @@ class BaseService:
                 if not self._is_retryable_method(method, headers) or attempt >= max_attempts - 1:
                     raise
 
-                error_type = type(exc).__name__
-                delay = self._calculate_backoff_delay(attempt, retry_after=None)
-                request_logger.bind(
-                    error_type=error_type,
-                    attempt=attempt + 1,
+                await self._wait_before_retry(
+                    request_logger,
+                    "Retry after network error",
+                    attempt=attempt,
                     max_attempts=max_attempts,
-                    delay=delay,
-                ).warning("Retry after network error")
-                await asyncio.sleep(delay)
+                    retry_after=None,
+                    error_type=type(exc).__name__,
+                )
                 continue
 
             try:
                 self._raise_for_status(response, method, path, params=params)
                 self._log_success_response(response, request_logger)
                 return response  # noqa: TRY300
-            except RateLimitError as e:
-                last_error = e
-
-                if attempt >= max_attempts - 1:
-                    break
-
-                delay = self._calculate_backoff_delay(attempt, e.retry_after)
-                request_logger.bind(
-                    attempt=attempt + 1,
-                    max_attempts=max_attempts,
-                    delay=delay,
-                ).warning("Retry after rate limit")
-                await asyncio.sleep(delay)
-            except ServerError as e:
-                if e.status_code not in retry_statuses or not self._is_retryable_method(
-                    method, headers
-                ):
+            except (RateLimitError, ServerError, ConflictError) as e:
+                retry_plan = self._plan_error_retry(
+                    error=e, method=method, headers=headers, retry_statuses=retry_statuses
+                )
+                if retry_plan is None:
                     raise
 
                 last_error = e
@@ -238,17 +325,20 @@ class BaseService:
                 if attempt >= max_attempts - 1:
                     break
 
-                delay = self._calculate_backoff_delay(attempt, retry_after=None)
-                request_logger.bind(
-                    status=e.status_code,
-                    attempt=attempt + 1,
+                await self._wait_before_retry(
+                    request_logger,
+                    retry_plan.message,
+                    attempt=attempt,
                     max_attempts=max_attempts,
-                    delay=delay,
-                ).warning("Retry after server error")
-                await asyncio.sleep(delay)
+                    retry_after=retry_plan.retry_after,
+                    **retry_plan.log_fields,
+                )
 
         if last_error is not None:
-            request_logger.bind(attempts=max_attempts).error("Exhaust retries")
+            if max_attempts > 1:
+                request_logger.bind(attempts=max_attempts).error("Exhaust retries")
+            else:
+                request_logger.warning("Fail with automatic retries off")
             raise last_error
 
         msg = "Unexpected state: no response or error"
@@ -364,8 +454,19 @@ class BaseService:
             raise ValidationError(message, status_code, response_data)
 
         if status_code == 409:  # noqa: PLR2004
-            error_logger.warning("Return 409 conflict")
-            raise ConflictError(message, status_code, response_data)
+            conflict = ConflictError(
+                message,
+                status_code,
+                response_data,
+                retry_after=self._parse_retry_after_header(response),
+            )
+            # An in-progress conflict is either retried, which logs its own warning, or
+            # reported once _request gives up, so a second warning here is noise
+            log_conflict = (
+                error_logger.debug if conflict.is_idempotency_in_progress else error_logger.warning
+            )
+            log_conflict("Return 409 conflict")
+            raise conflict
 
         if status_code == 422:  # noqa: PLR2004
             error_logger.warning("Reject with unprocessable entity error")
@@ -404,6 +505,28 @@ class BaseService:
             return None
 
     @staticmethod
+    def _parse_retry_after_header(response: httpx2.Response) -> int | None:
+        """Parse the standard Retry-After header as whole seconds.
+
+        Read only Retry-After, because the RateLimit header's "t" parameter describes
+        the rate limit bucket, not when an in-progress request will finish.
+
+        Args:
+            response: The HTTP response to read the header from.
+
+        Returns:
+            Number of seconds to wait, or None if the header is missing or not an integer.
+        """
+        value = response.headers.get("Retry-After")
+        if value is None:
+            return None
+
+        try:
+            return int(value)
+        except ValueError:
+            return None
+
+    @staticmethod
     def _parse_retry_after(response: httpx2.Response) -> int | None:
         """Parse the retry time from response headers.
 
@@ -423,15 +546,7 @@ class BaseService:
             if retry_time is not None:
                 return retry_time
 
-        # Fall back to Retry-After header
-        retry_after = response.headers.get("Retry-After")
-        if retry_after is None:
-            return None
-
-        try:
-            return int(retry_after)
-        except ValueError:
-            return None
+        return BaseService._parse_retry_after_header(response)
 
     @staticmethod
     def _parse_remaining_tokens(response: httpx2.Response) -> int | None:
@@ -525,6 +640,7 @@ class BaseService:
         data: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         idempotency_key: str | None = None,
+        auto_idempotency_key: bool = True,
     ) -> httpx2.Response:
         """Make a POST request.
 
@@ -534,11 +650,19 @@ class BaseService:
             data: Form data.
             params: Query parameters.
             idempotency_key: Optional idempotency key for safe retries.
+            auto_idempotency_key: When False, no key is generated even if
+                ``auto_idempotency_keys`` is on, which disables retries after network
+                and server errors. Rate limit (429) retries still apply. An explicit
+                ``idempotency_key`` is still sent.
 
         Returns:
             The HTTP response.
         """
-        if idempotency_key is None and self._client._config.auto_idempotency_keys:  # noqa: SLF001
+        if (
+            idempotency_key is None
+            and auto_idempotency_key
+            and self._client._config.auto_idempotency_keys  # noqa: SLF001
+        ):
             idempotency_key = self._generate_idempotency_key()
 
         return await self._request(
@@ -652,6 +776,8 @@ class BaseService:
 
         Raises:
             ServerError: When server error occurs and max retries are exhausted.
+            ConflictError: For a 409 response, or when an idempotent request is
+                still in progress after max retries are exhausted.
             RateLimitError: When rate limit is exceeded and max retries are exhausted.
             APIError: For other API error responses.
         """
@@ -685,6 +811,8 @@ class BaseService:
 
         Raises:
             ServerError: When server error occurs and max retries are exhausted.
+            ConflictError: For a 409 response, or when an idempotent request is
+                still in progress after max retries are exhausted.
             RateLimitError: When rate limit is exceeded and max retries are exhausted.
             APIError: For other API error responses.
         """

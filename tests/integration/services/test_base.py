@@ -1155,6 +1155,245 @@ class TestBaseServiceTransientRetry:
         assert delays[2] >= 4.0  # 1 * 2^2 = 4
 
 
+IN_PROGRESS = {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "A request with this idempotency key is still in progress.",
+    "code": "IDEMPOTENCY_IN_PROGRESS",
+}
+
+
+class TestBaseServiceIdempotencyInProgressRetry:
+    """Tests for retrying the 409 the API returns while an idempotent request is in progress."""
+
+    @respx.mock
+    async def test_in_progress_409_is_retried_then_succeeds(
+        self, base_service_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify an in-progress 409 is retried with the same key and waits per Retry-After."""
+        # Given: Mock asyncio.sleep to capture the delay
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports in progress once, then succeeds
+        route = respx.post(f"{base_url}/items").mock(
+            side_effect=[
+                httpx.Response(
+                    409,
+                    json=IN_PROGRESS,
+                    headers={"Retry-After": "1", "RateLimit": '"default";r=5;t=30'},
+                ),
+                httpx.Response(201, json={"id": 1}),
+            ]
+        )
+
+        # When: Making a POST request
+        response = await base_service_with_auto_idempotency._post("/items", json={"name": "x"})
+
+        # Then: The retry succeeded with the same idempotency key
+        assert response.json() == {"id": 1}
+        assert route.call_count == 2
+        keys = [call.request.headers[IDEMPOTENCY_KEY_HEADER] for call in route.calls]
+        assert keys[0] == keys[1]
+
+        # Then: The wait came from Retry-After, not the RateLimit t= value
+        mock_sleep.assert_awaited_once()
+        delay = mock_sleep.call_args[0][0]
+        assert 1.0 <= delay <= 1.25
+
+    @respx.mock
+    async def test_in_progress_409_without_retry_after_uses_backoff(
+        self, base_service_with_auto_idempotency, vclient_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify an in-progress 409 without Retry-After is retried with backoff."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports in progress without Retry-After, then succeeds
+        route = respx.post(f"{base_url}/items").mock(
+            side_effect=[
+                httpx.Response(409, json=IN_PROGRESS, headers={"RateLimit": '"default";r=5;t=30'}),
+                httpx.Response(201, json={"id": 1}),
+            ]
+        )
+
+        # When: Making a POST request
+        await base_service_with_auto_idempotency._post("/items", json={"name": "x"})
+
+        # Then: The request was retried once after a first-attempt backoff, not the RateLimit t=
+        assert route.call_count == 2
+        mock_sleep.assert_called_once()
+        retry_delay = vclient_with_auto_idempotency._config.retry_delay
+        assert retry_delay <= mock_sleep.call_args[0][0] <= retry_delay * 1.25
+
+    @respx.mock
+    async def test_in_progress_409_with_invalid_retry_after_uses_backoff(
+        self, base_service_with_auto_idempotency, vclient_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify a non-integer Retry-After on an in-progress 409 falls back to backoff."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports in progress with a non-integer Retry-After
+        route = respx.post(f"{base_url}/items").mock(
+            side_effect=[
+                httpx.Response(
+                    409,
+                    json=IN_PROGRESS,
+                    headers={"Retry-After": "soon", "RateLimit": '"default";r=5;t=30'},
+                ),
+                httpx.Response(201, json={"id": 1}),
+            ]
+        )
+
+        # When: Making a POST request
+        await base_service_with_auto_idempotency._post("/items", json={"name": "x"})
+
+        # Then: The request was retried once after a first-attempt backoff, not the RateLimit t=
+        assert route.call_count == 2
+        mock_sleep.assert_called_once()
+        retry_delay = vclient_with_auto_idempotency._config.retry_delay
+        assert retry_delay <= mock_sleep.call_args[0][0] <= retry_delay * 1.25
+
+    @respx.mock
+    async def test_in_progress_409_exhausts_retries(
+        self, base_service_with_auto_idempotency, vclient_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify a persistent in-progress 409 raises ConflictError after all retries."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that always reports in progress
+        route = respx.post(f"{base_url}/items").mock(
+            return_value=httpx.Response(409, json=IN_PROGRESS, headers={"Retry-After": "1"})
+        )
+
+        # When: Making a POST request
+        with pytest.raises(ConflictError) as exc_info:
+            await base_service_with_auto_idempotency._post("/items", json={"name": "x"})
+
+        # Then: The error identifies the in-progress conflict and its wait
+        assert exc_info.value.is_idempotency_in_progress
+        assert exc_info.value.retry_after == 1
+
+        # Then: Every attempt was used
+        config = vclient_with_auto_idempotency._config
+        assert route.call_count == config.max_retries + 1
+
+    @respx.mock
+    async def test_other_409_is_not_retried(
+        self, base_service_with_auto_idempotency, base_url, mocker
+    ):
+        """Verify a 409 without the in-progress code is raised immediately."""
+        # Given: Mock asyncio.sleep to detect any retry
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports a reused idempotency key
+        route = respx.post(f"{base_url}/items").mock(
+            return_value=httpx.Response(
+                409, json={"detail": "Idempotency key reused with a different request body"}
+            )
+        )
+
+        # When: Making a POST request
+        with pytest.raises(ConflictError) as exc_info:
+            await base_service_with_auto_idempotency._post("/items", json={"name": "x"})
+
+        # Then: No retry was made
+        assert not exc_info.value.is_idempotency_in_progress
+        assert route.call_count == 1
+        mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_in_progress_409_without_idempotency_key_is_not_retried(
+        self, base_service, base_url, mocker
+    ):
+        """Verify an in-progress 409 is not retried when the request carried no key."""
+        # Given: Mock asyncio.sleep to detect any retry
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports in progress
+        route = respx.post(f"{base_url}/items").mock(
+            return_value=httpx.Response(409, json=IN_PROGRESS, headers={"Retry-After": "1"})
+        )
+
+        # When: Making a POST request without an idempotency key
+        with pytest.raises(ConflictError):
+            await base_service._post("/items", json={"name": "x"})
+
+        # Then: No retry was made
+        assert route.call_count == 1
+        mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_in_progress_409_is_retried_for_keyed_put(self, base_service, base_url, mocker):
+        """Verify an in-progress 409 is retried for a PUT that carries an explicit key."""
+        # Given: Mock asyncio.sleep to avoid actual delays
+        mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports in progress once, then succeeds
+        route = respx.put(f"{base_url}/items/1").mock(
+            side_effect=[
+                httpx.Response(409, json=IN_PROGRESS, headers={"Retry-After": "1"}),
+                httpx.Response(200, json={"id": 1}),
+            ]
+        )
+
+        # When: Making a PUT request with an explicit idempotency key
+        response = await base_service._put("/items/1", json={"name": "x"}, idempotency_key="k-1")
+
+        # Then: The retry succeeded with the same key
+        assert response.json() == {"id": 1}
+        assert route.call_count == 2
+        assert [c.request.headers[IDEMPOTENCY_KEY_HEADER] for c in route.calls] == ["k-1", "k-1"]
+
+    @respx.mock
+    async def test_in_progress_409_is_not_retried_for_unkeyed_delete(
+        self, base_service, base_url, mocker
+    ):
+        """Verify an in-progress 409 is not retried for a DELETE, which carries no key."""
+        # Given: Mock asyncio.sleep to detect any retry
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports in progress
+        route = respx.delete(f"{base_url}/items/1").mock(
+            return_value=httpx.Response(409, json=IN_PROGRESS, headers={"Retry-After": "1"})
+        )
+
+        # When/Then: The conflict surfaces after a single call
+        with pytest.raises(ConflictError):
+            await base_service._delete("/items/1")
+        assert route.call_count == 1
+        mock_sleep.assert_not_called()
+
+    @respx.mock
+    async def test_in_progress_409_not_retried_when_auto_retry_disabled(
+        self, base_url, api_key, mocker
+    ):
+        """Verify an in-progress 409 is not retried when auto retry is disabled."""
+        # Given: Mock asyncio.sleep to detect any retry
+        mock_sleep = mocker.patch("vclient.services.base.asyncio.sleep")
+
+        # Given: An endpoint that reports in progress
+        route = respx.post(f"{base_url}/items").mock(
+            return_value=httpx.Response(409, json=IN_PROGRESS, headers={"Retry-After": "1"})
+        )
+
+        # When: Making a POST request with retries disabled
+        async with VClient(
+            base_url=base_url,
+            api_key=api_key,
+            auto_retry_rate_limit=False,
+            auto_idempotency_keys=True,
+        ) as client:
+            service = BaseService(client)
+            with pytest.raises(ConflictError):
+                await service._post("/items", json={"name": "x"})
+
+        # Then: Only one request was made
+        assert route.call_count == 1
+        mock_sleep.assert_not_called()
+
+
 class TestBaseServiceNetworkErrorRetry:
     """Tests for BaseService network error retry behavior."""
 

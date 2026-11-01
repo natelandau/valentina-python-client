@@ -38,7 +38,7 @@ Every exception exposes these properties. All are nullable because the server ma
 | `.status_code` | `int \| None` | HTTP response | `None` for `RequestValidationError` (no request sent) |
 | `.title` | `str \| None` | `response_data["title"]` | Short problem type label |
 | `.detail` | `str \| None` | `response_data["detail"]` | Human-readable explanation — suitable for display |
-| `.instance` | `str \| None` | `response_data["instance"]` | URI reference to the specific failure occurrence |
+| `.instance` | `str \| None` | `response_data["instance"]` | Request path of the failed call only; no scheme, host, or query string |
 | `.request_id` | `str \| None` | `response_data["request_id"]` | Correlate with server logs — **always log this** |
 | `.code` | `str \| None` | `response_data["code"]` | Machine-readable error code extension; `None` on most errors |
 | `.response_data` | `dict[str, Any]` | raw body | The full RFC 9457 payload |
@@ -54,6 +54,7 @@ Some endpoints set a `code` extension member in the RFC 9457 body to let callers
 | `EMAIL_REQUIRED` | `UnprocessableEntityError` (422) | `IdentityService.identify()` | Creating a new user but provider supplied no email and none was passed in the request |
 | `IDENTITY_ALREADY_LINKED` | `ConflictError` (409) | `UsersService.link_identity()` | The provider identity belongs to a different user, or the target user already has a different identity from this provider |
 | `IDENTITY_NOT_LINKED` | `NotFoundError` (404) | `UsersService.unlink_identity()` | The user has no linked identity from the requested provider |
+| `IDEMPOTENCY_IN_PROGRESS` | `ConflictError` (409) | Any POST, PUT, or PATCH sent with an `Idempotency-Key` | An earlier request with the same key is still running; retried automatically (see `ConflictError` below) |
 | `LAST_IDENTITY` | `ConflictError` (409) | `UsersService.unlink_identity()` | The provider is the user's only linked identity; the last one cannot be removed or the account could not authenticate |
 | `PROVIDER_UNAVAILABLE` | `ServerError` (sent with HTTP 503; `ServerError` covers all 5xx) | `IdentityService.identify()` | The identity provider is unreachable |
 
@@ -91,6 +92,10 @@ except NotFoundError:
 ### `ConflictError` (409)
 
 Most commonly raised when an idempotency key is reused with a different request body. If you see this, regenerate your idempotency key; don't retry with the same key.
+
+`ConflictError` also has `.retry_after` (`int | None`, seconds from the `Retry-After` header) and `.is_idempotency_in_progress` (`bool`, true when `.code == "IDEMPOTENCY_IN_PROGRESS"`). That code means the API is still processing an earlier request with the same key. When a request carries an `Idempotency-Key` (yours, or from `auto_idempotency_keys`) and `auto_retry_rate_limit` is on, the client waits `Retry-After` (else exponential backoff) and retries with the same key, within `max_retries`. If retries run out, it raises the last `ConflictError`. Without an idempotency key, the in-progress 409 raises at once. Any other 409 also raises at once.
+
+The global admin user update raises it when you restore a user (`is_archived=False`) and another active user in the same company holds one of the restored user's provider identities. `.detail` names the provider.
 
 Character trait methods also raise it in two cases. A concurrent change to the trait's value: refetch the trait and retry. An `assign()` or `bulk_assign()` item for a trait the character already has, including V5 Willpower, which every V5 character has: do not retry, use the value methods instead.
 
@@ -173,7 +178,7 @@ Transient server failures. These are included in the default `retry_statuses`, s
 
 ## Retry Behavior
 
-The client performs automatic retries. A 429 waits the server's `retry_after` time, plus up to 25% jitter, on every attempt. Other retries use exponential backoff. Retries are invisible to your code — you only see the final exception (or the eventual success).
+The client performs automatic retries. A 429 waits the server's `retry_after` time, plus up to 25% jitter, on every attempt. Other retries use exponential backoff. Retries are invisible to your code. You only see the final exception (or the eventual success).
 
 Configuration (all constructor args):
 
@@ -182,7 +187,7 @@ Configuration (all constructor args):
 | `max_retries` | 3 | Retry attempts for transient failures |
 | `retry_delay` | 1.0s | Base delay when the server gives no `retry_after`, doubled each attempt |
 | `retry_statuses` | `{429, 500, 502, 503, 504}` | Status codes that trigger retries |
-| `auto_retry_rate_limit` | `True` | Honor `Retry-After` / RateLimit headers on 429 |
+| `auto_retry_rate_limit` | `True` | Turn on automatic retries (429, server errors, network errors, in-progress 409) |
 | `auto_idempotency_keys` | `False` | Auto-generate `Idempotency-Key` for POST/PUT/PATCH |
 
 ### When automatic retries run
@@ -190,16 +195,19 @@ Configuration (all constructor args):
 - Response status is in `retry_statuses` → retried with backoff.
 - 429 with `auto_retry_rate_limit=True` → retried using the server's `retry_after` value.
 - Network-level `httpx2.TransportError` → retried.
+- 409 with `IDEMPOTENCY_IN_PROGRESS` on a request that carries an idempotency key → retried with the same key after `Retry-After`.
 
 ### When they don't
 
-- 4xx other than 429 → raised immediately (retrying a 400 will not help).
+- 4xx other than 429 and the in-progress 409 → raised immediately (retrying a 400 will not help).
 - Retries exhausted → the last exception propagates.
-- `auto_idempotency_keys=False` on unsafe methods — retrying a POST without an idempotency key risks duplicate side effects; either enable the flag or pass your own.
+- `auto_idempotency_keys=False` on unsafe methods: retrying a POST without an idempotency key risks duplicate side effects; either enable the flag or pass your own.
 
 ### Interaction with idempotency
 
-For `create()` calls that use `auto_idempotency_keys=True`, the same key is reused across retries of a single logical request. If the server returns `ConflictError` on retry, it means the original request succeeded — treat as success and refetch the resource.
+For `create()` calls that use `auto_idempotency_keys=True`, the same key is reused across retries of a single logical request. A same-key retry after the original finished replays the original response, so it does not raise. A 409 with `IDEMPOTENCY_IN_PROGRESS` means the original is still running, and the client retries it for you. If a `ConflictError` with `is_idempotency_in_progress` remains after retries run out, the outcome is unknown: the original may still be running or may fail. Refetch the resource to check, or retry later with the same key. Never treat it as success.
+
+`DevelopersService.regenerate_api_key()` and `GlobalAdminService.create_api_key()` never send an idempotency key and are never retried after network or server errors. A 429 is still retried. Save the key from the first successful response.
 
 ## Recipes
 
