@@ -1,3 +1,9 @@
+## v3.6.0 (2026-11-01)
+
+### Feat
+
+- **client**: retry in-progress conflicts, not key regeneration (#95)
+
 ## v3.5.1 (2026-10-28)
 
 ### Fix
