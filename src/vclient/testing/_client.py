@@ -85,6 +85,7 @@ class FakeVClient(VClient):
         *,
         json: dict[str, Any] | list[dict[str, Any]],
         status_code: int = 200,
+        headers: dict[str, str] | None = None,
     ) -> None:
         """Add a custom route override.
 
@@ -96,8 +97,9 @@ class FakeVClient(VClient):
             pattern: Endpoint pattern from vclient.endpoints.Endpoints.
             json: The JSON response body to return.
             status_code: HTTP status code to return (default 200).
+            headers: Optional response headers to return (e.g. ``Retry-After``).
         """
-        self._router.add_route(method, pattern, json=json, status_code=status_code)
+        self._router.add_route(method, pattern, json=json, status_code=status_code, headers=headers)
 
     def set_response(
         self,
@@ -174,6 +176,7 @@ class FakeVClient(VClient):
         detail: str | None = None,
         code: str | None = None,
         params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         """Override a route to return an error response.
 
@@ -187,6 +190,8 @@ class FakeVClient(VClient):
             params: Optional path parameter values to match against. When set,
                 the error override only applies to requests whose URL path segments
                 match all specified values.
+            headers: Optional response headers to return, e.g.
+                ``{"Retry-After": "1"}`` to fake ``ConflictError.retry_after``.
         """
         method, pattern = route.method, route.pattern
         request_id = f"req_{secrets.token_urlsafe(16)}"
@@ -196,4 +201,6 @@ class FakeVClient(VClient):
         }
         if code is not None:
             body["code"] = code
-        self._router.add_route(method, pattern, json=body, status_code=status_code, params=params)
+        self._router.add_route(
+            method, pattern, json=body, status_code=status_code, params=params, headers=headers
+        )

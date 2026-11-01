@@ -202,6 +202,7 @@ class _Route:
         override_json: dict[str, Any] | list[dict[str, Any]] | None = None,
         override_status: int | None = None,
         match_params: dict[str, str] | None = None,
+        override_headers: dict[str, str] | None = None,
     ) -> None:
         self.method = method.upper()
         self.pattern = pattern
@@ -211,6 +212,7 @@ class _Route:
         self.override_json = override_json
         self.override_status = override_status
         self.match_params = match_params
+        self.override_headers = override_headers
 
     def matches(self, method: str, path: str) -> bool:
         """Check if the given HTTP method and URL path match this route."""
@@ -235,6 +237,7 @@ class _Route:
             return httpx2.Response(
                 status_code=self.override_status or 200,
                 json=self.override_json,
+                headers=self.override_headers,
             )
 
         if self.style == NO_CONTENT:
@@ -299,6 +302,7 @@ class _FakeRouter:
         json: dict[str, Any] | list[dict[str, Any]],
         status_code: int = 200,
         params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         """Register a user-defined override that takes precedence over defaults.
 
@@ -310,6 +314,7 @@ class _FakeRouter:
             params: Optional path parameter values to match against. When set,
                 this override only matches requests whose path segments match
                 all specified parameter values.
+            headers: Optional response headers to return.
         """
         self._overrides.append(
             _Route(
@@ -320,6 +325,7 @@ class _FakeRouter:
                 override_json=json,
                 override_status=status_code,
                 match_params=params,
+                override_headers=headers,
             )
         )
 
