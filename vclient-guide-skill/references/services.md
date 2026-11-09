@@ -459,7 +459,7 @@ Plus standard notes and assets sub-resource methods.
 | `iter_all()` | `*, limit, userid=, characterid=, campaignid=, character_type: CharacterType \| None` | `AsyncIterator[Diceroll]` |
 | `get(diceroll_id)` | `diceroll_id: str` | `Diceroll` |
 | `create()` | `request: DicerollCreate \| None, **kwargs` | `Diceroll` |
-| `create_from_quickroll()` | `*, quickroll_id: str, character_id: str, comment: str \| None, difficulty: int = 6, num_desperation_dice: int = 0` | `Diceroll` |
+| `create_from_quickroll()` | `*, quickroll_id: str, character_id: str, comment: str \| None, difficulty: int = 6, num_desperation_dice: int = 0, dice_modifier: int = 0` | `Diceroll` |
 
 ---
 

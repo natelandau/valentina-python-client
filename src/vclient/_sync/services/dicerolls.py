@@ -146,6 +146,7 @@ class SyncDicerollService(SyncBaseService):
             **kwargs: Fields for DicerollCreate if request is not provided.
                 Accepts: dice_size (DiceSize, required), num_dice (int, required),
                 difficulty (int | None), num_desperation_dice (int, default 0),
+                dice_modifier (int, default 0),
                 comment (str | None), trait_ids (list[str]),
                 character_id (str | None), campaign_id (str | None).
         """
@@ -164,6 +165,7 @@ class SyncDicerollService(SyncBaseService):
         comment: str | None = None,
         difficulty: int = 6,
         num_desperation_dice: int = 0,
+        dice_modifier: int = 0,
     ) -> Diceroll:
         """Create a new dice roll using a quickroll template."""
         response = self._post(
@@ -174,6 +176,7 @@ class SyncDicerollService(SyncBaseService):
                 comment=comment,
                 difficulty=difficulty,
                 num_desperation_dice=num_desperation_dice,
+                dice_modifier=dice_modifier,
             ).model_dump(exclude_none=True, exclude_unset=True, mode="json"),
         )
         return Diceroll.model_validate(response.json())

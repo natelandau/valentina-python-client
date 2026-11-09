@@ -946,6 +946,7 @@ For creating custom traits on a character. The trait is always created at a valu
 | difficulty | int \| None | no |
 | num_dice | int | yes |
 | num_desperation_dice | int | no (default=0) |
+| dice_modifier | int | no (default=0) |
 | comment | str \| None | no |
 | trait_ids | list[str] | no (default=[]) |
 | user_id | str \| None | no |
@@ -979,6 +980,7 @@ For creating custom traits on a character. The trait is always created at a valu
 | difficulty | int \| None | — |
 | num_dice | int | required |
 | num_desperation_dice | int | default=0 |
+| dice_modifier | int | default=0 |
 | comment | str \| None | — |
 | trait_ids | list[str] | default=[] |
 | character_id | str \| None | — |

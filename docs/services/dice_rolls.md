@@ -51,6 +51,7 @@ request = DicerollCreate(
     num_dice=5,
     difficulty=6,
     num_desperation_dice=0,
+    dice_modifier=0,
     comment="Strength + Brawl",
     trait_ids=["strength_id", "brawl_id"],
     character_id="character_id",
@@ -77,7 +78,14 @@ roll = await dicerolls.create(
 roll = await dicerolls.create_from_quickroll(
     quickroll_id="quickroll_id", character_id="character_id", comment="Combat roll", difficulty=6
 )
+
+# Add or remove dice from the pool
+roll = await dicerolls.create_from_quickroll(
+    quickroll_id="quickroll_id", character_id="character_id", dice_modifier=-1
+)
 ```
+
+`dice_modifier` adds dice to the pool (positive) or removes them (negative). `num_dice` stays the pool before the modifier. The API enforces the allowed pool size and returns a 400 `ValidationError` when `num_dice + dice_modifier` falls outside it.
 
 ### Query Rolls
 

@@ -348,6 +348,7 @@ class TestDicerollServiceCreate:
             trait_ids=["trait1", "trait2"],
             character_id="character123",
             campaign_id="campaign123",
+            dice_modifier=1,
         )
 
         # Then: Returns Diceroll object
@@ -367,6 +368,7 @@ class TestDicerollServiceCreate:
             "difficulty": 6,
             "num_dice": 1,
             "num_desperation_dice": 0,
+            "dice_modifier": 1,
             "comment": "A test comment",
             "trait_ids": ["trait1", "trait2"],
             "character_id": "character123",
@@ -409,4 +411,23 @@ class TestDicerollServiceCreateQuickroll:
             "comment": "A test comment",
             "difficulty": 6,
             "num_desperation_dice": 0,
+            "dice_modifier": 0,
         }
+
+    @respx.mock
+    async def test_create_from_quickroll_sends_dice_modifier(
+        self, vclient, base_url, diceroll_response_data
+    ):
+        """Verify the quickroll request carries dice_modifier."""
+        # Given: A mocked quickroll endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.DICEROLL_QUICKROLL.format(company_id='company123', user_id='user123')}",
+        ).respond(200, json=diceroll_response_data)
+
+        # When: Creating a quickroll with a negative modifier
+        await vclient.dicerolls("on-behalf-of-user", company_id="company123").create_from_quickroll(
+            quickroll_id="quickroll123", character_id="character123", dice_modifier=-1
+        )
+
+        # Then: The modifier is in the request body
+        assert json.loads(route.calls.last.request.content)["dice_modifier"] == -1
