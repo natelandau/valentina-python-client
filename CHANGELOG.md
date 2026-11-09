@@ -1,3 +1,9 @@
+## v3.7.0 (2026-11-08)
+
+### Feat
+
+- **dicerolls**: support dice_modifier on rolls and quickrolls (#96)
+
 ## v3.6.0 (2026-11-01)
 
 ### Feat
