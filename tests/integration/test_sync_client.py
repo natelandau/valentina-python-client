@@ -1,5 +1,7 @@
 """Smoke tests for the synchronous SyncVClient."""
 
+import json
+
 import pytest
 import respx
 from httpx import Response
@@ -287,3 +289,37 @@ class TestSyncFactoryFunctions:
             assert route.called
             assert isinstance(result, SystemHealth)
             assert result.version == "0.7.0"
+
+
+class TestSyncDicerolls:
+    """Smoke tests for sync dicerolls methods."""
+
+    @respx.mock
+    def test_sync_create_from_quickroll_sends_dice_modifier(self, sync_client, base_url):
+        """Verify the sync quickroll request carries dice_modifier."""
+        # Given: A mocked quickroll endpoint
+        route = respx.post(
+            f"{base_url}{Endpoints.DICEROLL_QUICKROLL.format(company_id='company123', user_id='user123')}",
+        ).respond(
+            200,
+            json={
+                "id": "diceroll123",
+                "date_created": "2024-01-15T10:30:00Z",
+                "date_modified": "2024-01-15T10:30:00Z",
+                "dice_size": 10,
+                "num_dice": 3,
+                "dice_modifier": -1,
+                "company_id": "company123",
+            },
+        )
+
+        # When: Creating a quickroll with a negative modifier
+        result = sync_client.dicerolls(
+            "on-behalf-of-user", company_id="company123"
+        ).create_from_quickroll(
+            quickroll_id="quickroll123", character_id="character123", dice_modifier=-1
+        )
+
+        # Then: The modifier is sent and parsed
+        assert json.loads(route.calls.last.request.content)["dice_modifier"] == -1
+        assert result.dice_modifier == -1

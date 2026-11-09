@@ -57,20 +57,20 @@ Request body for updating a note. Only include fields that need to change.
 
 Aggregated dice roll statistics for a user. Track success rates, critical rolls, botches, and identify patterns in player performance.
 
-| Field                  | Type            | Description                   |
-| ---------------------- | --------------- | ----------------------------- |
-| `botches`              | `int`           | Total botched rolls           |
-| `successes`            | `int`           | Total successful rolls        |
-| `failures`             | `int`           | Total failed rolls            |
-| `criticals`            | `int`           | Total critical successes      |
-| `total_rolls`          | `int`           | Total number of rolls         |
-| `average_difficulty`   | `float \| None` | Average roll difficulty       |
-| `average_pool`         | `float \| None` | Average dice pool size        |
-| `top_traits`           | `list[dict]`    | Most frequently rolled traits |
-| `success_percentage`   | `float`         | Success rate                  |
-| `failure_percentage`   | `float`         | Failure rate                  |
-| `botch_percentage`     | `float`         | Botch rate                    |
-| `criticals_percentage` | `float`         | Critical rate                 |
+| Field                  | Type            | Description                                          |
+| ---------------------- | --------------- | ---------------------------------------------------- |
+| `botches`              | `int`           | Total botched rolls                                  |
+| `successes`            | `int`           | Total successful rolls                               |
+| `failures`             | `int`           | Total failed rolls                                   |
+| `criticals`            | `int`           | Total critical successes                             |
+| `total_rolls`          | `int`           | Total number of rolls                                |
+| `average_difficulty`   | `float \| None` | Average roll difficulty                              |
+| `average_pool`         | `float \| None` | Average pool size per roll, after each dice modifier |
+| `top_traits`           | `list[dict]`    | Most frequently rolled traits                        |
+| `success_percentage`   | `float`         | Success rate                                         |
+| `failure_percentage`   | `float`         | Failure rate                                         |
+| `botch_percentage`     | `float`         | Botch rate                                           |
+| `criticals_percentage` | `float`         | Critical rate                                        |
 
 ## SystemHealth
 

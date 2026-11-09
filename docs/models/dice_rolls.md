@@ -8,20 +8,21 @@ Models for dice rolls and their results, used to record and query gameplay rolls
 
 ## DiceRoll
 
-| Field                  | Type             | Description        |
-| ---------------------- | ---------------- | ------------------ |
-| `id`                   | `str`            | Unique identifier  |
-| `date_created`         | `datetime`       | Creation timestamp |
-| `dice_size`            | `DiceSize`       | Dice size          |
-| `difficulty`           | `int \| None`    | Target difficulty  |
-| `num_dice`             | `int`            | Number of dice     |
-| `num_desperation_dice` | `int`            | Desperation dice   |
-| `comment`              | `str \| None`    | Roll comment       |
-| `trait_ids`            | `list[str]`      | Traits used        |
-| `user_id`              | `str \| None`    | User ID            |
-| `character_id`         | `str \| None`    | Character ID       |
-| `campaign_id`          | `str \| None`    | Campaign ID        |
-| `result`               | `DiceRollResult` | Roll result        |
+| Field                  | Type             | Description                                 |
+| ---------------------- | ---------------- | ------------------------------------------- |
+| `id`                   | `str`            | Unique identifier                           |
+| `date_created`         | `datetime`       | Creation timestamp                          |
+| `dice_size`            | `DiceSize`       | Dice size                                   |
+| `difficulty`           | `int \| None`    | Target difficulty                           |
+| `num_dice`             | `int`            | Pool size before the modifier               |
+| `num_desperation_dice` | `int`            | Desperation dice                            |
+| `dice_modifier`        | `int`            | Dice added (positive) or removed (negative) |
+| `comment`              | `str \| None`    | Roll comment                                |
+| `trait_ids`            | `list[str]`      | Traits used                                 |
+| `user_id`              | `str \| None`    | User ID                                     |
+| `character_id`         | `str \| None`    | Character ID                                |
+| `campaign_id`          | `str \| None`    | Campaign ID                                 |
+| `result`               | `DiceRollResult` | Roll result                                 |
 
 ## DiceRollResult
 

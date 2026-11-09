@@ -91,6 +91,10 @@ class TestFactoriesBuildValidModels:
         assert instance is not None
         assert isinstance(instance, factory_cls.__model__)
 
+    def test_diceroll_factory_dice_modifier_defaults_to_zero(self):
+        """Verify DicerollFactory builds with a zero dice_modifier."""
+        assert DicerollFactory.build().dice_modifier == 0
+
     def test_factory_accepts_overrides(self):
         """Factories should accept field overrides."""
         campaign = CampaignFactory.build(name="Custom Name")
