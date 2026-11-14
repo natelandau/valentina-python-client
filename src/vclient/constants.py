@@ -81,6 +81,7 @@ CharacterInventoryType = Literal[
     "WEAPON",
 ]
 CharacterStatus = Literal["ALIVE", "DEAD"]
+SpecialtyRules = Literal["FLAT", "THRESHOLD"]
 CharacterType = Literal["PLAYER", "NPC", "STORYTELLER"]
 DiceSize = Literal[4, 6, 8, 10, 20, 100]
 FreeTraitChangesPermission = Literal["UNRESTRICTED", "WITHIN_24_HOURS", "STORYTELLER"]
