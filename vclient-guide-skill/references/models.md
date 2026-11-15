@@ -194,6 +194,7 @@ Strict response model — all fields always populated by the server.
 | permission_free_trait_changes | FreeTraitChangesPermission | yes |
 | permission_recoup_xp | RecoupXPPermission | yes |
 | specialty_xp_cost_enabled | bool | no (default False) |
+| specialty_rules | SpecialtyRules | no (default "FLAT"; "FLAT" or "THRESHOLD") |
 
 ### CompanySettingsCreate
 
@@ -210,6 +211,7 @@ Request payload for `POST /companies`. All fields optional.
 | permission_free_trait_changes | FreeTraitChangesPermission \| None | no |
 | permission_recoup_xp | RecoupXPPermission \| None | no |
 | specialty_xp_cost_enabled | bool \| None | no |
+| specialty_rules | SpecialtyRules \| None | no |
 
 ### CompanySettingsUpdate
 
@@ -226,6 +228,7 @@ Request payload for `PATCH /companies/{id}`. All fields optional.
 | permission_free_trait_changes | FreeTraitChangesPermission \| None | no |
 | permission_recoup_xp | RecoupXPPermission \| None | no |
 | specialty_xp_cost_enabled | bool \| None | no |
+| specialty_rules | SpecialtyRules \| None | no |
 
 ### CompanyCreate
 

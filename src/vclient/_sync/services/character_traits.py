@@ -306,15 +306,22 @@ class SyncCharacterTraitsService(SyncBaseService):
     def add_specialty(
         self, character_trait_id: str, name: str, currency: TraitModifyCurrency = "NO_COST"
     ) -> CharacterTrait:
-        """Add a specialty to an ability trait.
+        """Add a specialty to a trait.
 
-        Specialties are only available on abilities with a value of 1 or higher. When the
-        company's ``specialty_xp_cost_enabled`` setting is on, a specialty paid with ``XP``
-        or ``STARTING_POINTS`` costs 3 points, and ``NO_COST`` follows the company's
-        ``permission_free_trait_changes`` setting. When the setting is off, specialties are free.
+        The company's ``specialty_rules`` setting decides which traits accept specialties
+        and what they cost:
+
+        - ``FLAT`` (default): abilities with a value of 1 or higher. Each specialty costs 3.
+        - ``THRESHOLD``: attributes and abilities with a value of 4 or higher, or 3 for
+          abilities the character's concept favors. The first specialty on a trait is free;
+          each further one costs the trait's current value.
+
+        Costs apply only when the company's ``specialty_xp_cost_enabled`` setting is on;
+        otherwise specialties are free. A paid specialty bought with ``NO_COST`` follows
+        the company's ``permission_free_trait_changes`` setting.
 
         Args:
-            character_trait_id: The ID of the ability trait.
+            character_trait_id: The ID of the trait.
             name: The specialty name (3-50 characters), unique on the trait ignoring case.
             currency: The currency to use to pay for the specialty.
 
@@ -325,8 +332,9 @@ class SyncCharacterTraitsService(SyncBaseService):
             NotFoundError: If the trait does not exist.
             AuthorizationError: If you don't have access to the character.
             RequestValidationError: If the input parameters fail client-side validation.
-            ValidationError: If the trait is not an ability, has a value of 0, already has a
-                specialty with this name, the character cannot afford the cost, or an
+            ValidationError: If the trait cannot take a specialty under the company's
+                specialty rules, already has a specialty with this name, the character
+                cannot afford the cost, or an
                 ``NPC`` or ``STORYTELLER`` character pays with anything but ``NO_COST``.
         """
         body = self._validate_request(CharacterTraitSpecialtyCreate, name=name, currency=currency)

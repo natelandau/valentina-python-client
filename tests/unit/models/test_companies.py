@@ -63,6 +63,29 @@ class TestCompanySettings:
         # Then: The setting matches the server default
         assert settings.specialty_xp_cost_enabled is False
 
+    def test_specialty_rules_defaults_flat(self):
+        """Verify specialty_rules defaults to FLAT when the server omits it."""
+        # Given: Full kwargs without specialty_rules
+        kwargs = self._full_settings_kwargs()
+        kwargs.pop("specialty_rules", None)
+
+        # When: Constructing
+        settings = CompanySettings(**kwargs)
+
+        # Then: The setting matches the server default
+        assert settings.specialty_rules == "FLAT"
+
+    def test_specialty_rules_accepts_threshold(self):
+        """Verify specialty_rules keeps THRESHOLD from the server."""
+        # Given: Full kwargs with THRESHOLD rules
+        kwargs = {**self._full_settings_kwargs(), "specialty_rules": "THRESHOLD"}
+
+        # When: Constructing
+        settings = CompanySettings(**kwargs)
+
+        # Then: The rules are THRESHOLD
+        assert settings.specialty_rules == "THRESHOLD"
+
     @pytest.mark.parametrize(
         "missing_field",
         [

@@ -73,20 +73,27 @@ Lowering an ability to `0` with `change_value()`, or deleting the trait with `de
 
 | Method                                                   | Returns          | Description                             |
 | -------------------------------------------------------- | ---------------- | --------------------------------------- |
-| `add_specialty(character_trait_id, name, currency?)`     | `CharacterTrait` | Add a specialty to an ability           |
+| `add_specialty(character_trait_id, name, currency?)`     | `CharacterTrait` | Add a specialty to a trait              |
 | `update_specialty(character_trait_id, specialty_id, name)` | `CharacterTrait` | Rename a specialty                    |
 | `delete_specialty(character_trait_id, specialty_id)`     | `None`           | Remove a specialty and refund its cost  |
 
-Specialties are free-text focuses on ability traits, such as "Knives" on Melee. Only abilities with a value of 1 or higher accept them. The name must be 3 to 50 characters and unique on the trait, ignoring case.
+Specialties are free-text focuses on traits, such as "Knives" on Melee. The name must be 3 to 50 characters and unique on the trait, ignoring case.
 
-The cost depends on the company's `specialty_xp_cost_enabled` setting:
+The company's `specialty_rules` setting decides which traits accept specialties and what each costs:
+
+| Rule | Which traits | Cost |
+| --- | --- | --- |
+| `FLAT` (default) | Abilities with a value of 1 or higher | 3 per specialty |
+| `THRESHOLD` | Attributes and abilities with a value of 4 or higher; abilities the character's concept favors at 3 | First specialty on a trait free, each further one the trait's current value |
+
+The company's `specialty_xp_cost_enabled` setting decides whether that cost is charged:
 
 - **Off** (default): specialties are free, whatever the `currency`.
-- **On**: a specialty paid with `"XP"` or `"STARTING_POINTS"` costs 3 points. `"NO_COST"` follows the company's free trait changes setting.
+- **On**: a specialty paid with `"XP"` or `"STARTING_POINTS"` costs what the rule sets. `"NO_COST"` follows the company's free trait changes setting.
 
 `delete_specialty()` refunds the cost in the currency used to buy it. An `XP` refund follows the company's `permission_recoup_xp` setting. Starting points are always refunded.
 
-`add_specialty()` raises `ValidationError` when the trait is not an ability, has a value of 0, already has a specialty with that name, or the character cannot afford the cost. `update_specialty()` and `delete_specialty()` raise `NotFoundError` for an unknown specialty or one that belongs to a different trait.
+`add_specialty()` raises `ValidationError` when the trait cannot take a specialty under the company's rules, already has a specialty with that name, or the character cannot afford the cost. `update_specialty()` and `delete_specialty()` raise `NotFoundError` for an unknown specialty or one that belongs to a different trait.
 
 ```python
 melee = await traits.add_specialty(trait.id, name="Knives", currency="XP")

@@ -57,7 +57,8 @@ Response model for company configuration. All fields are always populated by the
 | `permission_grant_xp`             | `GrantXPPermission`           | Who may grant XP                                        |
 | `permission_free_trait_changes`   | `FreeTraitChangesPermission`  | When trait changes are free                             |
 | `permission_recoup_xp`            | `RecoupXPPermission`          | When XP may be recouped                                 |
-| `specialty_xp_cost_enabled`       | `bool`                        | Charge 3 points per ability specialty bought with `XP` or `STARTING_POINTS` (default `False`) |
+| `specialty_xp_cost_enabled`       | `bool`                        | Charge for specialties bought with `XP` or `STARTING_POINTS`, at the cost `specialty_rules` sets (default `False`) |
+| `specialty_rules`                 | `SpecialtyRules`              | `FLAT` (default) or `THRESHOLD`; which traits take specialties and what they cost. See [Character Traits](../services/character_traits.md) |
 
 ## CompanySettingsCreate
 
