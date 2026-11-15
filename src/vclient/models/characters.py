@@ -176,9 +176,18 @@ class Character(BaseModel):
     name_full: str = Field(..., description="Character's full name.")
 
     # Biography
-    age: int | None = Field(default=None, description="Character's age.")
+    age: int | None = Field(
+        default=None,
+        description=(
+            "Character's age. Derived from birth_year or date_of_birth on the campaign's "
+            "in-game date when either is set; otherwise the stored age."
+        ),
+    )
     date_of_birth: date | None = Field(
         default=None, description="Character's date of birth (ISO 8601 calendar date)."
+    )
+    birth_year: int | None = Field(
+        default=None, description="Year the character was born. Negative years are BCE."
     )
     biography: Annotated[str, Field(min_length=3)] | None = Field(
         default=None, description="Character biography."
@@ -291,6 +300,9 @@ class CharacterCreate(BaseModel):
     date_of_birth: date | None = Field(
         default=None, description="Character's date of birth (ISO 8601 calendar date)."
     )
+    birth_year: Annotated[int, Field(ge=-9999, le=9999)] | None = Field(
+        default=None, description="Year the character was born. Negative years are BCE."
+    )
     biography: Annotated[str, Field(min_length=3)] | None = Field(
         default=None, description="Character biography."
     )
@@ -349,6 +361,7 @@ class CharacterUpdate(BaseModel):
 
     age: int | None = None
     date_of_birth: date | None = None
+    birth_year: Annotated[int, Field(ge=-9999, le=9999)] | None = None
     biography: Annotated[str, Field(min_length=3)] | None = Field(
         default=None, description="Character biography."
     )

@@ -12,6 +12,7 @@ from vclient.constants import (
     ManageNPCPermission,
     PermissionLevel,
     RecoupXPPermission,
+    SpecialtyRules,
 )
 from vclient.models.users import User
 
@@ -33,6 +34,7 @@ class CompanySettings(BaseModel):
     permission_free_trait_changes: FreeTraitChangesPermission
     permission_recoup_xp: RecoupXPPermission
     specialty_xp_cost_enabled: bool = False
+    specialty_rules: SpecialtyRules = "FLAT"
 
 
 class CompanySettingsCreate(BaseModel):
@@ -50,6 +52,7 @@ class CompanySettingsCreate(BaseModel):
     permission_free_trait_changes: FreeTraitChangesPermission | None = None
     permission_recoup_xp: RecoupXPPermission | None = None
     specialty_xp_cost_enabled: bool | None = None
+    specialty_rules: SpecialtyRules | None = None
 
 
 class CompanySettingsUpdate(BaseModel):
@@ -67,6 +70,7 @@ class CompanySettingsUpdate(BaseModel):
     permission_free_trait_changes: FreeTraitChangesPermission | None = None
     permission_recoup_xp: RecoupXPPermission | None = None
     specialty_xp_cost_enabled: bool | None = None
+    specialty_rules: SpecialtyRules | None = None
 
 
 class Company(BaseModel):

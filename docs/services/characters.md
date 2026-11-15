@@ -229,7 +229,7 @@ request = CharacterCreate(
     game_version="V5",
     name_first="Marcus",
     name_last="Blackwood",
-    date_of_birth=date(1888, 6, 15),  # optional ISO 8601 calendar date
+    birth_year=1888,  # optional; age then follows the campaign's in-game date
     user_player_id="player_user_id",
 )
 character = await characters.create(request)
@@ -250,6 +250,10 @@ updated = await characters.update(character.id, update)
 
 # Clear the date of birth by passing None (omitting the field leaves it unchanged)
 cleared = await characters.update(character.id, CharacterUpdate(date_of_birth=None))
+
+# Record a birth year; the returned age is measured on the campaign's in-game date
+dated = await characters.update(character.id, CharacterUpdate(birth_year=1967))
+print(dated.age)  # 23 while the campaign is set in 1990
 
 # Retrieve roll statistics
 stats = await characters.get_statistics(character.id)

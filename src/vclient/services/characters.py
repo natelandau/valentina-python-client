@@ -257,6 +257,7 @@ class CharactersService(BaseService):
                 game_version (GameVersion), name_first (str), name_last (str).
                 Optional: type (CharacterType), name_nick (str), age (int),
                 date_of_birth (datetime.date | None, ISO 8601 calendar date),
+                birth_year (int | None, -9999 to 9999, negative for BCE),
                 biography (str), demeanor (str), nature (str), concept_id (str),
                 user_player_id (str), traits (list), vampire_attributes, etc.
 
@@ -294,7 +295,8 @@ class CharactersService(BaseService):
             **kwargs: Fields for CharacterUpdate if request is not provided.
                 All fields are optional: character_class, type, game_version, status,
                 name_first, name_last, name_nick, age, date_of_birth (datetime.date | None,
-                ISO 8601 calendar date; pass None to clear it), biography, demeanor, nature,
+                ISO 8601 calendar date; pass None to clear it), birth_year (int | None,
+                -9999 to 9999; pass None to clear it), biography, demeanor, nature,
                 concept_id, user_player_id, vampire_attributes, werewolf_attributes, etc.
 
         Returns:
@@ -309,9 +311,10 @@ class CharactersService(BaseService):
         body = request if request is not None else self._validate_request(CharacterUpdate, **kwargs)
         payload = body.model_dump(exclude_none=True, exclude_unset=True, mode="json")
         # The API distinguishes an omitted key (leave unchanged) from an explicit null (clear).
-        # exclude_none drops None, so re-add date_of_birth when the caller set it to None to clear it.
-        if "date_of_birth" in body.model_fields_set and body.date_of_birth is None:
-            payload["date_of_birth"] = None
+        # exclude_none drops None, so re-add these when the caller set them to None to clear them.
+        for field_name in ("date_of_birth", "birth_year"):
+            if field_name in body.model_fields_set and getattr(body, field_name) is None:
+                payload[field_name] = None
         response = await self._patch(
             self._format_endpoint(Endpoints.CHARACTER, character_id=character_id),
             json=payload,

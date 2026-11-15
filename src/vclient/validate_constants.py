@@ -82,6 +82,7 @@ CONSTANT_MAP: dict[str, ConstantMapping] = {
     "ManageNPCPermission": ConstantMapping("companies", "PermissionManageNPC"),
     "PermissionLevel": ConstantMapping("companies", "CompanyPermission"),
     "RecoupXPPermission": ConstantMapping("companies", "PermissionsRecoupXP"),
+    "SpecialtyRules": ConstantMapping("companies", "SpecialtyRules"),
     "RollResultType": ConstantMapping("gameplay", "RollResultType"),
     "AssetType": ConstantMapping("assets", "AssetType"),
     "SpecialtyType": ConstantMapping("characters", "SpecialtyType"),

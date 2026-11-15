@@ -57,6 +57,7 @@ class TestCharacter:
         assert character.starting_points == 0
         assert character.is_temporary is False
         assert character.date_of_birth is None
+        assert character.birth_year is None
         assert character.asset_ids == []
         assert character.character_trait_ids == []
         assert character.chapter_ids == []
@@ -103,6 +104,7 @@ class TestCharacter:
             "name_full": "Jane Smith",
             "age": 28,
             "date_of_birth": "1888-06-15",
+            "birth_year": 1888,
             "biography": "A fierce warrior of the pack.",
             "demeanor": "Aggressive",
             "nature": "Protector",
@@ -145,6 +147,7 @@ class TestCharacter:
         assert character.name_first == "Jane"
         assert character.age == 28
         assert character.date_of_birth == date(1888, 6, 15)
+        assert character.birth_year == 1888
         assert character.is_temporary is True
         assert character.werewolf_attributes is not None
         assert character.werewolf_attributes.tribe_name == "Glass Walkers"
@@ -454,6 +457,36 @@ class TestCharacterCreate:
                 name_first="John",
                 name_last="Doe",
                 date_of_birth="not-a-date",  # type: ignore[arg-type]
+            )
+
+    @pytest.mark.parametrize("birth_year", [-9999, -1250, 1967, 9999])
+    def test_create_birth_year_accepts_range(self, birth_year: int) -> None:
+        """Verify birth_year accepts years from -9999 (BCE) to 9999."""
+        # When: Creating a request with a birth year in range
+        request = CharacterCreate(
+            campaign_id="campaign123",
+            character_class="MORTAL",
+            game_version="V5",
+            name_first="John",
+            name_last="Doe",
+            birth_year=birth_year,
+        )
+
+        # Then: The year is kept
+        assert request.birth_year == birth_year
+
+    @pytest.mark.parametrize("birth_year", [-10000, 10000])
+    def test_create_birth_year_rejects_out_of_range(self, birth_year: int) -> None:
+        """Verify birth_year rejects years outside -9999 to 9999."""
+        # When/Then: An out-of-range year is rejected
+        with pytest.raises(PydanticValidationError):
+            CharacterCreate(
+                campaign_id="campaign123",
+                character_class="MORTAL",
+                game_version="V5",
+                name_first="John",
+                name_last="Doe",
+                birth_year=birth_year,
             )
 
 
