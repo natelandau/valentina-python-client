@@ -490,6 +490,7 @@ class TestCharactersServiceCreate:
             name_nick="Johnny",
             age=35,
             date_of_birth=date(1888, 6, 15),
+            birth_year=1888,
             biography="A mysterious vampire.",
             demeanor="Friendly",
             nature="Warrior",
@@ -509,6 +510,7 @@ class TestCharactersServiceCreate:
         assert body["name_nick"] == "Johnny"
         assert body["age"] == 35
         assert body["date_of_birth"] == "1888-06-15"
+        assert body["birth_year"] == 1888
         assert body["biography"] == "A mysterious vampire."
 
     @respx.mock
@@ -783,6 +785,53 @@ class TestCharactersServiceUpdate:
         body = json.loads(route.calls.last.request.content)
         assert body == {"date_of_birth": None}
         assert result.date_of_birth is None
+
+    @respx.mock
+    async def test_update_character_birth_year(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify setting birth_year sends it and returns the API's derived age."""
+        # Given: A mocked update endpoint returning a derived age
+        updated = {**character_response_data, "birth_year": 1967, "age": 23}
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=updated))
+
+        # When: Updating the birth_year
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").update(
+            "char123", birth_year=1967
+        )
+
+        # Then: The request carries the year and the response carries the derived age
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"birth_year": 1967}
+        assert result.birth_year == 1967
+        assert result.age == 23
+
+    @respx.mock
+    async def test_update_character_clears_birth_year(
+        self, vclient, base_url, character_response_data
+    ) -> None:
+        """Verify passing birth_year=None sends an explicit null to clear it."""
+        # Given: A mocked update endpoint returning a cleared birth_year
+        cleared_data = {**character_response_data, "birth_year": None}
+        route = respx.patch(
+            f"{base_url}{Endpoints.CHARACTER.format(company_id='company123', user_id='user123', campaign_id='campaign123', character_id='char123')}"
+        ).mock(return_value=Response(200, json=cleared_data))
+
+        # When: Clearing the birth_year with an explicit None
+        result = await vclient.characters("on-behalf-of-user", company_id="company123").update(
+            "char123", birth_year=None
+        )
+
+        # Then: The explicit null survives exclude_none and reaches the server
+        import json
+
+        body = json.loads(route.calls.last.request.content)
+        assert body == {"birth_year": None}
+        assert result.birth_year is None
 
     @respx.mock
     async def test_update_character_not_found(self, vclient, base_url) -> None:

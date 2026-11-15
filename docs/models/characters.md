@@ -23,8 +23,9 @@ Models for player and non-player characters, including class-specific attributes
 | `name_nick`           | `str \| None`                | Nickname                                        |
 | `name`                | `str`                        | First and last name                             |
 | `name_full`           | `str`                        | First, last, and nickname                       |
-| `age`                 | `int \| None`                | Age                                             |
+| `age`                 | `int \| None`                | Age in the campaign's in-game year (see below)  |
 | `date_of_birth`       | `date \| None`               | Date of birth (ISO 8601 `YYYY-MM-DD`)           |
+| `birth_year`          | `int \| None`                | Year of birth, negative for BCE                 |
 | `biography`           | `str \| None`                | Biography                                       |
 | `user_creator_id`     | `str \| None`                | Creator user ID                                 |
 | `user_player_id`      | `str \| None`                | Player user ID                                  |
@@ -47,6 +48,8 @@ Models for player and non-player characters, including class-specific attributes
 | `num_inventory_items` | `int`                        | Active inventory item count (excludes archived) |
 | `num_notes`           | `int`                        | Active note count (excludes archived)           |
 | `num_assets`          | `int`                        | Active asset count (excludes archived)          |
+
+When `birth_year` or `date_of_birth` is set, the API derives `age` on the campaign's `in_game_date` (or today when the campaign has none), so it advances as the campaign does. A character born in 1967 is 23 while the campaign is set in 1990. Without either field, `age` is the stored value.
 
 ## Health
 
