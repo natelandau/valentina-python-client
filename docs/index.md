@@ -4,6 +4,10 @@ icon: lucide/package
 
 # Valentina Noir Python Client
 
+!!! warning "Deprecated"
+
+    This package is not developed anymore. The last version is 3.7.x. It is not maintained against newer versions of the Valentina API. Existing installs keep working, but new API features will not be added.
+
 The `valentina-python-client` package is an async and sync Python client for the [Valentina Noir REST API](https://docs.valentina-noir.com). It wraps the API in type-safe Pydantic models, handles pagination and retries automatically, and lets you focus on building your application instead of managing HTTP requests.
 
 !!! note

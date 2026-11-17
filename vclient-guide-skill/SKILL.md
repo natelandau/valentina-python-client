@@ -12,6 +12,8 @@ description: >-
 
 # vclient Developer Guide
 
+> **Deprecated:** vclient is not developed anymore. The last version is 3.7.x, and it is not maintained against newer versions of the Valentina API.
+
 vclient is an async-first Python client for the Valentina API with a generated sync variant. It provides typed Pydantic v2 models, automatic pagination, retry logic, and a fake client for testing.
 
 ## Quick Start

@@ -1,5 +1,7 @@
 # Valentina Python Client
 
+> **Deprecated:** This package is not developed anymore. The last version is 3.7.x. It is not maintained against newer versions of the Valentina API. Existing installs keep working, but new API features will not be added.
+
 Async and sync Python client library for accessing the Valentina Noir API.
 
 ## Features
