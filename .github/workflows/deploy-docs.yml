@@ -3,13 +3,6 @@ name: "Documentation Build and Deploy"
 
 on:
     workflow_dispatch:
-    push:
-        branches:
-            - main
-        paths:
-            - ".github/workflows/deploy-docs.yml"
-            - "zensical.toml"
-            - "docs/**"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
